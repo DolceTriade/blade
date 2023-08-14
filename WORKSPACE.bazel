@@ -88,7 +88,7 @@ nixpkgs_rust_configure(
     nix_file_deps = ["//:flake.lock"],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rust_repositories", "rust_analyzer_toolchain_repository")
 
 rust_repositories()
 
@@ -100,3 +100,21 @@ crate_universe_dependencies(
     rust_toolchain_cargo_template = "@nix_rust//:bin/{tool}",
     rust_toolchain_rustc_template = "@nix_rust//:bin/{tool}",
 )
+
+load("//third_party/nix:deps.bzl", "third_party_nix_deps")
+third_party_nix_deps()
+
+load("//third_party/rust:deps.bzl", "rust_dependencies")
+rust_dependencies()
+load("@crate//:defs.bzl", "crate_repositories")
+crate_repositories()
+
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
+
+rust_analyzer_dependencies()
+
+register_toolchains(rust_analyzer_toolchain_repository(
+    name = "rust_analyzer_toolchain",
+    # Run rustc --version
+    version = "1.69.0",
+))

@@ -1,3 +1,5 @@
 .direnv
 bazel-*
 .git
+.vscode
+rust-project.json

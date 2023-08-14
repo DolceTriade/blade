@@ -1,6 +1,32 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+rust_library(
+    name = "counter",
+    srcs = ["lib.rs"],
+    deps = ["@crate//:leptos"],
+)
 
 rust_binary(
     name = "blade",
-    srcs = ["main.rs"],
+    srcs = [
+        "lib.rs",
+        "main.rs",
+    ],
+    deps = [
+        ":counter",
+        "@crate//:actix-files",
+        "@crate//:actix-web",
+        "@crate//:broadcaster",
+        "@crate//:cfg-if",
+        "@crate//:console_error_panic_hook",
+        "@crate//:console_log",
+        "@crate//:futures",
+        "@crate//:lazy_static",
+        "@crate//:leptos",
+        "@crate//:leptos_actix",
+        "@crate//:leptos_meta",
+        "@crate//:leptos_router",
+        "@crate//:log",
+        "@crate//:serde",
+    ],
 )
