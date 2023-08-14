@@ -1,0 +1,7 @@
+# Import bazelrc presets
+import %workspace%/.bazel-lib/bazelrc/convenience.bazelrc
+import %workspace%/.bazel-lib/bazelrc/correctness.bazelrc
+import %workspace%/.bazel-lib/bazelrc/performance.bazelrc
+import %workspace%/.bazel-lib/bazelrc/nix-toolchains.bazelrc
+
+try-import %workspace%/user.bazelrc

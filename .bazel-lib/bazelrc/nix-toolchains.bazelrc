@@ -1,0 +1,15 @@
+# Enable rules-nixpkgs toolchain
+build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host
+
+# Use nix-based CC
+build --cxxopt='-std=c++14'
+build --host_cxxopt='-std=c++14'
+build --crosstool_top=@nixpkgs_config_cc//:toolchain
+build --incompatible_enable_cc_toolchain_resolution
+
+# Use nix-based JVM
+build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host
+build --java_runtime_version=nixpkgs_java_11
+build --tool_java_runtime_version=nixpkgs_java_11
+build --java_language_version=11
+build --tool_java_language_version=11
