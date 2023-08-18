@@ -1,0 +1,8 @@
+genrule(
+    name = "wasm-bindgen",
+    srcs = ["bin/wasm-bindgen"],
+    outs = ["wasm-bindgen"],
+    cmd = "cp $< $@",
+    executable = True,
+    visibility = ["//visibility:public"],
+)

@@ -106,8 +106,12 @@ third_party_nix_deps()
 
 load("//third_party/rust:deps.bzl", "rust_dependencies")
 rust_dependencies()
+
 load("@crate//:defs.bzl", "crate_repositories")
 crate_repositories()
+load("@wasm_crate//:defs.bzl", wasm_create_repositories = "crate_repositories")
+wasm_create_repositories()
+
 
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
@@ -118,3 +122,11 @@ register_toolchains(rust_analyzer_toolchain_repository(
     # Run rustc --version
     version = "1.69.0",
 ))
+
+load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories", "rust_wasm_bindgen_dependencies")
+
+rust_wasm_bindgen_repositories()
+
+rust_wasm_bindgen_dependencies()
+
+register_toolchains("//nix/rust:wasm_bindgen_toolchain")

@@ -1,5 +1,7 @@
 .direnv
+.devenv
 bazel-*
 .git
 .vscode
+.bazelenvrc
 rust-project.json

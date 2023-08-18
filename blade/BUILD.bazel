@@ -1,19 +1,16 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
-
-rust_library(
-    name = "counter",
-    srcs = ["lib.rs"],
-    deps = ["@crate//:leptos"],
-)
+load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 
 rust_binary(
     name = "blade",
     srcs = [
+        "counters.rs",
         "lib.rs",
         "main.rs",
     ],
+    crate_features = ["ssr"],
+    edition = "2021",
     deps = [
-        ":counter",
         "@crate//:actix-files",
         "@crate//:actix-web",
         "@crate//:broadcaster",
@@ -29,4 +26,34 @@ rust_binary(
         "@crate//:log",
         "@crate//:serde",
     ],
+)
+
+rust_binary(
+    name = "blade.wasm",
+    srcs = [
+        "counters.rs",
+        "lib.rs",
+        "main.rs",
+    ],
+    tags = ["manual"],
+    crate_features = ["hydrate"],
+    crate_name = "blade",
+    edition = "2021",
+    deps = [
+        "@crate//:cfg-if",
+        "@crate//:futures",
+        "@crate//:log",
+        "@wasm_crate//:futures-util",
+        "@wasm_crate//:gloo-net",
+        "@wasm_crate//:leptos",
+        "@wasm_crate//:leptos_meta",
+        "@wasm_crate//:leptos_router",
+        "@wasm_crate//:serde",
+    ],
+)
+
+rust_wasm_bindgen(
+    name = "blade_wasm",
+    target = "web",
+    wasm_file = ":blade.wasm",
 )

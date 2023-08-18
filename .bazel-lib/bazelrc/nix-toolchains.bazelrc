@@ -4,6 +4,7 @@ build --host_platform=@io_tweag_rules_nixpkgs//nixpkgs/platforms:host
 # Use nix-based CC
 build --cxxopt='-std=c++14'
 build --host_cxxopt='-std=c++14'
+build --host_crosstool_top=@nixpkgs_config_cc//:toolchain
 build --crosstool_top=@nixpkgs_config_cc//:toolchain
 build --incompatible_enable_cc_toolchain_resolution
 

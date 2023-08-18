@@ -1,24 +1,21 @@
-use leptos::*;
+use cfg_if::cfg_if;
+pub mod counters;
 
-/// A simple counter component.
-///
-/// You can use doc comments like this to document your component.
-#[component]
-pub fn SimpleCounter(
-    cx: Scope,
-    /// The starting value for the counter
-    initial_value: i32,
-    /// The change that should be applied each time the button is clicked.
-    step: i32,
-) -> impl IntoView {
-    let (value, set_value) = create_signal(cx, initial_value);
+// Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a lib. I may be wrong.
+cfg_if! {
+    if #[cfg(feature = "hydrate")] {
+        use leptos::*;
+        use wasm_bindgen::prelude::wasm_bindgen;
+        use crate::counters::*;
 
-    view! { cx,
-        <div>
-            <button on:click=move |_| set_value.update(|value| *value = 0)>"Clear"</button>
-            <button on:click=move |_| set_value.update(|value| *value -= step)>"-1"</button>
-            <span>"Value: " {value} "!"</span>
-            <button on:click=move |_| set_value.update(|value| *value += step)>"+1"</button>
-        </div>
+        #[wasm_bindgen]
+        pub fn hydrate() {
+            _ = console_log::init_with_level(log::Level::Debug);
+            console_error_panic_hook::set_once();
+
+            mount_to_body(|cx| {
+                view! { cx,  <Counters/> }
+            });
+        }
     }
 }
