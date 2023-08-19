@@ -1,5 +1,5 @@
 genrule(
-    name = "wasm-bindgen",
+    name = "wasm-bindgen-cli",
     srcs = ["bin/wasm-bindgen"],
     outs = ["wasm-bindgen"],
     cmd = "cp $< $@",

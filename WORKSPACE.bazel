@@ -47,7 +47,7 @@ load("@io_tweag_rules_nixpkgs//nixpkgs:repositories.bzl", "rules_nixpkgs_depende
 
 rules_nixpkgs_dependencies()
 
-load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_local_repository", "nixpkgs_cc_configure")
+load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_cc_configure", "nixpkgs_local_repository")
 
 # It is recommended to keep nixpkgs of nix-shell (which provide Bazel),
 # and nixpkgs of Bazel Workspace in sync - otherwise one may
@@ -58,13 +58,18 @@ nixpkgs_local_repository(
     nix_flake_lock_file = "//:flake.lock",
 )
 
+nixpkgs_local_repository(
+    name = "fenix",
+    nix_file = "//nix/rust:fenix.nix",
+    nix_file_deps = ["//:flake.lock"],
+)
+
 # rules_rust also uses the cc compiler
 nixpkgs_cc_configure(
     name = "nixpkgs_config_cc",
     nix_file = "//nix/cc:cc.nix",
     repository = "@nixpkgs",
 )
-
 
 # load rules_cc
 http_archive(
@@ -81,14 +86,34 @@ rules_cc_toolchains()
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:toolchains/rust.bzl", "nixpkgs_rust_configure")
 
+# Note that default_edition doesn't work.
 nixpkgs_rust_configure(
     name = "nix_rust",
-    default_edition = "2021",
-    repository = "@nixpkgs",
-    nix_file_deps = ["//:flake.lock"],
+    nix_file = "//nix/rust:rust.nix",
+    repositories = {
+        "nixpkgs": "@nixpkgs",
+        "fenix": "@fenix",
+    },
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories", "rust_analyzer_toolchain_repository")
+nixpkgs_rust_configure(
+    name = "nix_rust_wasm",
+    nix_file = "//nix/rust:rust.nix",
+    nixopts = [
+        "--argstr",
+        "target",
+        "wasm32-unknown-unknown",
+    ],
+    repositories = {
+        "nixpkgs": "@nixpkgs",
+        "fenix": "@fenix",
+    },
+    target_constraints = [
+        "@platforms//cpu:wasm32",
+    ],
+)
+
+load("@rules_rust//rust:repositories.bzl", "rust_analyzer_toolchain_repository", "rust_repositories")
 
 rust_repositories()
 
@@ -102,16 +127,20 @@ crate_universe_dependencies(
 )
 
 load("//third_party/nix:deps.bzl", "third_party_nix_deps")
+
 third_party_nix_deps()
 
 load("//third_party/rust:deps.bzl", "rust_dependencies")
+
 rust_dependencies()
 
 load("@crate//:defs.bzl", "crate_repositories")
-crate_repositories()
-load("@wasm_crate//:defs.bzl", wasm_create_repositories = "crate_repositories")
-wasm_create_repositories()
 
+crate_repositories()
+
+load("@wasm_crate//:defs.bzl", wasm_crate_repositories = "crate_repositories")
+
+wasm_crate_repositories()
 
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
@@ -120,13 +149,7 @@ rust_analyzer_dependencies()
 register_toolchains(rust_analyzer_toolchain_repository(
     name = "rust_analyzer_toolchain",
     # Run rustc --version
-    version = "1.69.0",
+    version = "1.71.1",
 ))
-
-load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories", "rust_wasm_bindgen_dependencies")
-
-rust_wasm_bindgen_repositories()
-
-rust_wasm_bindgen_dependencies()
 
 register_toolchains("//nix/rust:wasm_bindgen_toolchain")

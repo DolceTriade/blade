@@ -36,7 +36,7 @@ rust_binary(
         "main.rs",
     ],
     tags = ["manual"],
-    crate_features = ["hydrate"],
+    crate_features = ["hydrate", "js"],
     crate_name = "blade",
     edition = "2021",
     deps = [

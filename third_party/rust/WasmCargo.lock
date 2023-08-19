@@ -305,6 +305,7 @@ dependencies = [
 name = "direct-cargo-bazel-deps"
 version = "0.0.1"
 dependencies = [
+ "ahash",
  "const_format_proc_macros",
  "futures-util",
  "gloo-net 0.4.0",

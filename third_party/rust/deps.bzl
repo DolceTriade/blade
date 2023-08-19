@@ -81,6 +81,13 @@ def rust_dependencies():
         name = "wasm_crate",
         cargo_lockfile = "//third_party/rust:WasmCargo.lock",
         lockfile = "//third_party/rust:WasmCargo.Bazel.lock",
+        annotations = {
+            "getrandom": [
+                crate.annotation(
+                    crate_features = ["js"],
+                ),
+            ],
+        },
         packages = {
             "leptos": crate.spec(
                 version = "0.4.8",
@@ -107,6 +114,11 @@ def rust_dependencies():
             "const_format_proc_macros": crate.spec(
                 version = "0.2.31",
             ),
+            "ahash": crate.spec(
+                version = "0.7.6",
+                default_features = False,
+                features = ["std"],
+            )
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
         # to always use the root package when looking for dependencies or aliases. This should be considered
@@ -114,6 +126,6 @@ def rust_dependencies():
         render_config = render_config(
             default_package_name = "",
         ),
-        rust_toolchain_cargo_template = "@nix_rust//:bin/{tool}",
-        rust_toolchain_rustc_template = "@nix_rust//:bin/{tool}",
+        rust_toolchain_cargo_template = "@nix_rust_wasm//:bin/{tool}",
+        rust_toolchain_rustc_template = "@nix_rust_wasm//:bin/{tool}",
     )

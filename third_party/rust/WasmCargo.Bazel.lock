@@ -1,5 +1,5 @@
 {
-  "checksum": "36060b9e864733ea036ae0cc3c778a403fae43db0ad87ee2d9f5aed8f4813302",
+  "checksum": "5234647f463bd2f4f4f739f21be0b542cc6648fcbf04e0b13a7b610a3f62b6a8",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -104,6 +104,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -1608,6 +1614,10 @@
         ],
         "deps": {
           "common": [
+            {
+              "id": "ahash 0.7.6",
+              "target": "ahash"
+            },
             {
               "id": "futures-util 0.3.28",
               "target": "futures_util"
