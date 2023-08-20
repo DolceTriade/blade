@@ -1,5 +1,5 @@
 {
-  "checksum": "1ae47bfe259717ab083812b1a6a131d6bc0216c0beb4c7e862e425dbfc950601",
+  "checksum": "9c66e3c3b4e12b3a6890a3b03895ef165793f2e77d412789839eab38571ec243",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -8391,6 +8391,12 @@
           "selects": {}
         },
         "edition": "2021",
+        "rustc_env": {
+          "common": {
+            "SERVER_FN_OVERRIDE_KEY": "bazel"
+          },
+          "selects": {}
+        },
         "version": "0.4.8"
       },
       "license": "MIT"

@@ -18,6 +18,13 @@ def rust_dependencies():
                     ],
                 ),
             ],
+            "server_fn_macro": [
+                crate.annotation(
+                    rustc_env = {
+                        "SERVER_FN_OVERRIDE_KEY": "bazel",
+                    },
+                ),
+            ],
         },
         packages = {
             "actix-files": crate.spec(
@@ -84,6 +91,13 @@ def rust_dependencies():
                     crate_features = ["js"],
                 ),
             ],
+            "server_fn_macro": [
+                crate.annotation(
+                    rustc_env = {
+                        "SERVER_FN_OVERRIDE_KEY": "bazel",
+                    },
+                ),
+            ],
         },
         packages = {
             "leptos": crate.spec(
@@ -125,7 +139,7 @@ def rust_dependencies():
             "console_log": crate.spec(
                 version = "1",
             ),
-                        "cfg-if": crate.spec(
+            "cfg-if": crate.spec(
                 version = "1",
             ),
             "console_error_panic_hook": crate.spec(

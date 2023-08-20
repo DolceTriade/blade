@@ -1,5 +1,5 @@
 {
-  "checksum": "41ff085ee6ddf73c57ea6a175ac504ceb7a8940b9d3707f2791df64fa94d926a",
+  "checksum": "75ad9e0baf6a05a9e4c7f7dc100f62287f942421ebde425777eaf60f2c1db561",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -11896,6 +11896,12 @@
           "selects": {}
         },
         "edition": "2021",
+        "rustc_env": {
+          "common": {
+            "SERVER_FN_OVERRIDE_KEY": "bazel"
+          },
+          "selects": {}
+        },
         "version": "0.4.8"
       },
       "license": "MIT"

@@ -22,10 +22,7 @@ pub async fn get_server_count() -> Result<i32, ServerFnError> {
 }
 
 #[server(AdjustServerCount, "/api")]
-pub async fn adjust_server_count(
-    delta: i32,
-    msg: String,
-) -> Result<i32, ServerFnError> {
+pub async fn adjust_server_count(delta: i32, msg: String) -> Result<i32, ServerFnError> {
     let new = COUNT.load(Ordering::Relaxed) + delta;
     COUNT.store(new, Ordering::Relaxed);
     _ = COUNT_CHANNEL.send(&new).await;
@@ -120,7 +117,9 @@ pub fn Counter(cx: Scope) -> impl IntoView {
             <div>
                 <button on:click=move |_| clear.dispatch(())>"Clear"</button>
                 <button on:click=move |_| dec.dispatch(())>"-1"</button>
-                <span>"Value: " {value} "!"</span>
+                <Suspense fallback=move || view! { cx, <p>"Loading (Suspense Fallback)..."</p> }>
+                    <span>"Value: " {value} "!"</span>
+                </Suspense>
                 <button on:click=move |_| inc.dispatch(())>"+1"</button>
             </div>
             {move || {
@@ -186,30 +185,23 @@ pub fn FormCounter(cx: Scope) -> impl IntoView {
 // This is the primitive pattern for live chat, collaborative editing, etc.
 #[component]
 pub fn MultiuserCounter(cx: Scope) -> impl IntoView {
-    let dec =
-        create_action(cx, |_| adjust_server_count(-1, "dec dec goose".into()));
-    let inc =
-        create_action(cx, |_| adjust_server_count(1, "inc inc moose".into()));
+    let dec = create_action(cx, |_| adjust_server_count(-1, "dec dec goose".into()));
+    let inc = create_action(cx, |_| adjust_server_count(1, "inc inc moose".into()));
     let clear = create_action(cx, |_| clear_server_count());
 
     #[cfg(not(feature = "ssr"))]
     let multiplayer_value = {
         use futures_util::StreamExt;
 
-        let mut source =
-            gloo_net::eventsource::futures::EventSource::new("/api/events")
-                .expect("couldn't connect to SSE stream");
+        let mut source = gloo_net::eventsource::futures::EventSource::new("/api/events")
+            .expect("couldn't connect to SSE stream");
         let s = create_signal_from_stream(
             cx,
             source
                 .subscribe("message")
                 .unwrap()
                 .map(|value| match value {
-                    Ok(value) => value
-                        .1
-                        .data()
-                        .as_string()
-                        .expect("expected string value"),
+                    Ok(value) => value.1.data().as_string().expect("expected string value"),
                     Err(_) => "0".to_string(),
                 }),
         );

@@ -32,13 +32,6 @@ cfg_if! {
         #[actix_web::main]
         async fn main() -> std::io::Result<()> {
             pretty_env_logger::init();
-            // Explicit server function registration is no longer required
-            // on the main branch. On 0.3.0 and earlier, uncomment the lines
-            // below to register the server functions.
-            _ = GetServerCount::register_explicit();
-            _ = AdjustServerCount::register_explicit();
-            _ = ClearServerCount::register_explicit();
-
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
