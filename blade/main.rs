@@ -10,6 +10,7 @@ cfg_if! {
         use actix_web::*;
         use crate::counters::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
+        use pretty_env_logger;
 
         #[get("/api/events")]
         async fn counter_events() -> impl Responder {
@@ -30,32 +31,31 @@ cfg_if! {
 
         #[actix_web::main]
         async fn main() -> std::io::Result<()> {
-
+            pretty_env_logger::init();
             // Explicit server function registration is no longer required
             // on the main branch. On 0.3.0 and earlier, uncomment the lines
             // below to register the server functions.
-            // _ = GetServerCount::register();
-            // _ = AdjustServerCount::register();
-            // _ = ClearServerCount::register();
+            _ = GetServerCount::register_explicit();
+            _ = AdjustServerCount::register_explicit();
+            _ = ClearServerCount::register_explicit();
 
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
-            let conf = get_configuration(None).await.unwrap();
+            let conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
 
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(|cx| view! { cx, <Counters/> });
-
+            log::info!("Starting blade server at: {}", addr.to_string());
             HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
                 let site_root = &leptos_options.site_root;
-
                 App::new()
                     .service(counter_events)
                     .route("/api/{tail:.*}", leptos_actix::handle_server_fns())
                     // serve JS/WASM/CSS from `pkg`
-                    .service(Files::new("/pkg", format!("{site_root}/pkg")))
+                    .service(Files::new("/pkg", site_root))
                     // serve other assets from the `assets` directory
-                    .service(Files::new("/assets", site_root))
+                    .service(Files::new("/assets", format!("{site_root}/static")))
                     // serve the favicon from /favicon.ico
                     .service(favicon)
                     .leptos_routes(
@@ -64,7 +64,7 @@ cfg_if! {
                         Counters,
                     )
                     .app_data(web::Data::new(leptos_options.to_owned()))
-                    //.wrap(middleware::Compress::default())
+                    .wrap(middleware::Logger::new("%t -- %a %s %U"))
             })
             .bind(&addr)?
             .run()
@@ -78,7 +78,7 @@ cfg_if! {
             let leptos_options = leptos_options.into_inner();
             let site_root = &leptos_options.site_root;
             Ok(actix_files::NamedFile::open(format!(
-                "{site_root}/favicon.ico"
+                "{site_root}/static/favicon.ico"
             ))?)
         }
     }

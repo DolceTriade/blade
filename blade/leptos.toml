@@ -1,0 +1,3 @@
+[package.metadata.leptos]
+output-name = "blade_wasm"
+site-root = "./blade"

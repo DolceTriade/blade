@@ -30,12 +30,6 @@ def rust_dependencies():
             "broadcaster": crate.spec(
                 version = "1",
             ),
-            "console_log": crate.spec(
-                version = "1",
-            ),
-            "console_error_panic_hook": crate.spec(
-                version = "0.1",
-            ),
             "futures": crate.spec(
                 version = "0.3",
             ),
@@ -62,6 +56,9 @@ def rust_dependencies():
             ),
             "log": crate.spec(
                 version = "0.4",
+            ),
+            "pretty_env_logger": crate.spec(
+                version = "0.5.0",
             ),
             "serde": crate.spec(
                 version = "1",
@@ -108,6 +105,9 @@ def rust_dependencies():
                 version = "1",
                 features = ["derive"],
             ),
+            "log": crate.spec(
+                version = "0.4",
+            ),
             "futures-util": crate.spec(
                 version = "0.3",
             ),
@@ -118,7 +118,22 @@ def rust_dependencies():
                 version = "0.7.6",
                 default_features = False,
                 features = ["std"],
-            )
+            ),
+            "wasm-bindgen": crate.spec(
+                version = "0.2.87",
+            ),
+            "console_log": crate.spec(
+                version = "1",
+            ),
+                        "cfg-if": crate.spec(
+                version = "1",
+            ),
+            "console_error_panic_hook": crate.spec(
+                version = "0.1",
+            ),
+            "futures": crate.spec(
+                version = "0.3",
+            ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
         # to always use the root package when looking for dependencies or aliases. This should be considered

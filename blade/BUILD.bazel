@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
 load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 
 rust_binary(
@@ -9,14 +9,15 @@ rust_binary(
         "main.rs",
     ],
     crate_features = ["ssr"],
-    edition = "2021",
+    data = [
+        "leptos.toml",
+        ":blade_wasm",
+    ] + glob(["static/**"]),
     deps = [
         "@crate//:actix-files",
         "@crate//:actix-web",
         "@crate//:broadcaster",
         "@crate//:cfg-if",
-        "@crate//:console_error_panic_hook",
-        "@crate//:console_log",
         "@crate//:futures",
         "@crate//:lazy_static",
         "@crate//:leptos",
@@ -24,31 +25,34 @@ rust_binary(
         "@crate//:leptos_meta",
         "@crate//:leptos_router",
         "@crate//:log",
+        "@crate//:pretty_env_logger",
         "@crate//:serde",
     ],
 )
 
-rust_binary(
+rust_shared_library(
     name = "blade.wasm",
     srcs = [
         "counters.rs",
         "lib.rs",
         "main.rs",
     ],
-    tags = ["manual"],
-    crate_features = ["hydrate", "js"],
+    crate_features = ["hydrate"],
     crate_name = "blade",
-    edition = "2021",
+    tags = ["manual"],
     deps = [
-        "@crate//:cfg-if",
-        "@crate//:futures",
-        "@crate//:log",
+        "@wasm_crate//:cfg-if",
+        "@wasm_crate//:console_error_panic_hook",
+        "@wasm_crate//:console_log",
+        "@wasm_crate//:futures",
         "@wasm_crate//:futures-util",
         "@wasm_crate//:gloo-net",
         "@wasm_crate//:leptos",
         "@wasm_crate//:leptos_meta",
         "@wasm_crate//:leptos_router",
+        "@wasm_crate//:log",
         "@wasm_crate//:serde",
+        "@wasm_crate//:wasm-bindgen",
     ],
 )
 

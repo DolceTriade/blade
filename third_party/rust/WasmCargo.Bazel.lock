@@ -1,5 +1,5 @@
 {
-  "checksum": "5234647f463bd2f4f4f739f21be0b542cc6648fcbf04e0b13a7b610a3f62b6a8",
+  "checksum": "1ae47bfe259717ab083812b1a6a131d6bc0216c0beb4c7e862e425dbfc950601",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1261,6 +1261,98 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "console_error_panic_hook 0.1.7": {
+      "name": "console_error_panic_hook",
+      "version": "0.1.7",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/console_error_panic_hook/0.1.7/download",
+          "sha256": "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "console_error_panic_hook",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "console_error_panic_hook",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "wasm-bindgen 0.2.87",
+              "target": "wasm_bindgen"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.1.7"
+      },
+      "license": "Apache-2.0/MIT"
+    },
+    "console_log 1.0.0": {
+      "name": "console_log",
+      "version": "1.0.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/console_log/1.0.0/download",
+          "sha256": "be8aed40e4edbf4d3b4431ab260b63fdc40f5780a4766824329ea0f1eefe3c0f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "console_log",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "console_log",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "log 0.4.20",
+              "target": "log"
+            },
+            {
+              "id": "web-sys 0.3.64",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.0"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "const_format 0.2.31": {
       "name": "const_format",
       "version": "0.2.31",
@@ -1619,6 +1711,22 @@
               "target": "ahash"
             },
             {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "console_error_panic_hook 0.1.7",
+              "target": "console_error_panic_hook"
+            },
+            {
+              "id": "console_log 1.0.0",
+              "target": "console_log"
+            },
+            {
+              "id": "futures 0.3.28",
+              "target": "futures"
+            },
+            {
               "id": "futures-util 0.3.28",
               "target": "futures_util"
             },
@@ -1639,8 +1747,16 @@
               "target": "leptos_router"
             },
             {
+              "id": "log 0.4.20",
+              "target": "log"
+            },
+            {
               "id": "serde 1.0.183",
               "target": "serde"
+            },
+            {
+              "id": "wasm-bindgen 0.2.87",
+              "target": "wasm_bindgen"
             }
           ],
           "selects": {}

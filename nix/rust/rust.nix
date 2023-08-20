@@ -19,6 +19,10 @@
       rustfmt
       targets.wasm32-unknown-unknown.stable.rust-std
     ];
+  wasm =
+    if target == "wasm32-unknown-unknown"
+    then true
+    else false;
   ogRust = pkgs.rust;
   os = ogRust.toTargetOs pkgs.stdenv.targetPlatform;
   build-triple = ogRust.toRustTargetSpec pkgs.stdenv.buildPlatform;
@@ -26,10 +30,15 @@
     if target != ""
     then target
     else ogRust.toRustTargetSpec pkgs.stdenv.targetPlatform;
-  binary-ext = "";
+  binary-ext =
+    if wasm
+    then ".wasm"
+    else "";
   staticlib-ext = ".a";
   dylib-ext =
-    if os == "macos"
+    if wasm
+    then ".wasm"
+    else if os == "macos"
     then ".dylib"
     else ".so";
 in
