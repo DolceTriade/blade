@@ -9,12 +9,31 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 ################################################
 http_archive(
     name = "bazel_skylib",
-    sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
+    sha256 = "66ffd9315665bfaafc96b52278f57c7e2dd09f5ede279ea6d39b2be471e7e3aa",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
     ],
 )
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
+    strip_prefix = "rules_proto-5.3.0-21.7",
+    urls = [
+        "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
+    ],
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
+
+rules_proto_dependencies()
+
+rules_proto_toolchains()
 
 http_archive(
     name = "io_tweag_rules_nixpkgs",
@@ -153,3 +172,35 @@ register_toolchains(rust_analyzer_toolchain_repository(
 ))
 
 register_toolchains("//nix/rust:wasm_bindgen_toolchain")
+
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "0930b1a6eb840a2295dfcb13bb5736d1292c3e0d61a90391181399327be7d8f1",
+    strip_prefix = "protobuf-24.1",
+    urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v24.1/protobuf-24.1.tar.gz"],
+)
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
+http_archive(
+    name = "googleapis",
+    sha256 = "ece654f71ca2cf96df77e598378d87d932edc325f20dd8d6bdad31bb9eeed3b7",
+    strip_prefix = "googleapis-1769846666fbeb0f9ece6ad929ddc0d563cccd8d",
+    urls = ["https://github.com/googleapis/googleapis/archive/1769846666fbeb0f9ece6ad929ddc0d563cccd8d.tar.gz"],
+)
+
+load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language("com_google_googleapis_imports")
+
+load("@rules_rust//proto/prost:repositories.bzl", "rust_prost_dependencies")
+
+rust_prost_dependencies()
+
+load("@rules_rust//proto/prost:transitive_repositories.bzl", "rust_prost_transitive_repositories")
+
+rust_prost_transitive_repositories()
+
+register_toolchains("//prost:prost_toolchain")

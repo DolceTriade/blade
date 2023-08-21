@@ -5,3 +5,4 @@ bazel-*
 .vscode
 .bazelenvrc
 rust-project.json
+user.bazelrc

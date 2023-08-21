@@ -48,6 +48,8 @@
                 bazel-watcher
                 pkg-config
                 rust
+                grpcurl
+                rnix-lsp
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
             enterShell = ''

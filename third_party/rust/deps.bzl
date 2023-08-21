@@ -25,6 +25,12 @@ def rust_dependencies():
                     },
                 ),
             ],
+            "protoc-gen-prost": [crate.annotation(
+                gen_binaries = ["protoc-gen-prost"],
+            )],
+            "protoc-gen-tonic": [crate.annotation(
+                gen_binaries = ["protoc-gen-tonic"],
+            )],
         },
         packages = {
             "actix-files": crate.spec(
@@ -33,6 +39,9 @@ def rust_dependencies():
             "actix-web": crate.spec(
                 version = "4",
                 features = ["macros"],
+            ),
+            "async-stream": crate.spec(
+                version = "0.3",
             ),
             "broadcaster": crate.spec(
                 version = "1",
@@ -70,6 +79,31 @@ def rust_dependencies():
             "serde": crate.spec(
                 version = "1",
                 features = ["derive"],
+            ),
+            "prost": crate.spec(
+                version = "0.11.9",
+            ),
+            "prost-types": crate.spec(
+                version = "0.11.9",
+            ),
+            "protoc-gen-prost": crate.spec(
+                version = "0.2.3",
+            ),
+            "protoc-gen-tonic": crate.spec(
+                version = "0.3.0",
+            ),
+            "tokio": crate.spec(
+                version = "1.32.0",
+                features = ["full"],
+            ),
+            "tokio-stream": crate.spec(
+                version = "0.1",
+            ),
+            "tonic": crate.spec(
+                version = "0.9.2",
+            ),
+            "tonic-reflection": crate.spec(
+                version = "0.9.2",
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository

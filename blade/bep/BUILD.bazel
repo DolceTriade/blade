@@ -1,0 +1,22 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "test",
+    srcs = [
+        "server.rs",
+    ],
+    data = ["@googleapis//google/devtools/build/v1:build_proto"],
+    deps = [
+        "//blade/bep/protos:bep_proto",
+        "@crate//:async-stream",
+        "@crate//:log",
+        "@crate//:pretty_env_logger",
+        "@crate//:prost",
+        "@crate//:prost-types",
+        "@crate//:tokio",
+        "@crate//:tokio-stream",
+        "@crate//:tonic",
+        "@crate//:tonic-reflection",
+        "@rules_rust//tools/runfiles",
+    ],
+)
