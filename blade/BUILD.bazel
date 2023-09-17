@@ -13,6 +13,9 @@ rust_binary(
         "leptos.toml",
         ":blade_wasm",
     ] + glob(["static/**"]),
+    rustc_env = {
+        "SERVER_FN_OVERRIDE_KEY": "bazel",
+    },
     deps = [
         "@crate//:actix-files",
         "@crate//:actix-web",
@@ -39,6 +42,9 @@ rust_shared_library(
     ],
     crate_features = ["hydrate"],
     crate_name = "blade",
+    rustc_env = {
+        "SERVER_FN_OVERRIDE_KEY": "bazel",
+    },
     tags = ["manual"],
     deps = [
         "@wasm_crate//:cfg-if",

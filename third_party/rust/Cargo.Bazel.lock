@@ -1,5 +1,5 @@
 {
-  "checksum": "1aab880867369b56164cb5a07a522a6a132fa1681db6096680e67a07fab12b7c",
+  "checksum": "77eed95fcea8f3a9e6dc30ed4be5006654980f173f49551d78937694537e9ff2",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -446,7 +446,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -815,7 +815,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -1829,7 +1829,7 @@
               "target": "pin_project_lite"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -2919,7 +2919,7 @@
               "target": "ciborium_ll"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -3178,7 +3178,7 @@
               "target": "ini"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -4098,7 +4098,7 @@
               "target": "protoc_gen_tonic"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -5623,7 +5623,7 @@
               "target": "pin_project"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -5692,7 +5692,7 @@
               "target": "js_sys"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -7065,7 +7065,7 @@
               "target": "pest"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -7345,7 +7345,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -7563,7 +7563,7 @@
               "target": "rstml"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -7869,7 +7869,7 @@
               "target": "self_cell"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -7991,7 +7991,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -8080,7 +8080,7 @@
               "target": "leptos_reactive"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -8209,7 +8209,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -11776,7 +11776,7 @@
               "target": "http"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -11910,7 +11910,7 @@
               "target": "bitflags"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -12486,13 +12486,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde 1.0.183": {
+    "serde 1.0.186": {
       "name": "serde",
-      "version": "1.0.183",
+      "version": "1.0.186",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde/1.0.183/download",
-          "sha256": "32ac8da02677876d532745a130fc9d8e6edfa81a269b107c5b00829b91d8eb3c"
+          "url": "https://crates.io/api/v1/crates/serde/1.0.186/download",
+          "sha256": "9f5db24220c009de9bd45e69fb2938f4b6d2df856aa9304ce377b3180f83b7c1"
         }
       },
       "targets": [
@@ -12533,7 +12533,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "build_script_build"
             }
           ],
@@ -12543,13 +12543,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.183",
+              "id": "serde_derive 1.0.186",
               "target": "serde_derive"
             }
           ],
           "selects": {}
         },
-        "version": "1.0.183"
+        "version": "1.0.186"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -12590,7 +12590,7 @@
               "target": "js_sys"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -12605,13 +12605,13 @@
       },
       "license": "MIT"
     },
-    "serde_derive 1.0.183": {
+    "serde_derive 1.0.186": {
       "name": "serde_derive",
-      "version": "1.0.183",
+      "version": "1.0.186",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.183/download",
-          "sha256": "aafe972d60b0b9bee71a91b92fee2d4fb3c9d7e8f6b179aa99f27203d99a4816"
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.186/download",
+          "sha256": "5ad697f7e0b65af4983a4ce8f56ed5b357e8d3c36651bf6a7e13639c17b8e670"
         }
       },
       "targets": [
@@ -12637,26 +12637,24 @@
           "selects": {}
         },
         "deps": {
-          "common": [],
-          "selects": {
-            "cfg(not(all(target_arch = \"x86_64\", target_os = \"linux\", target_env = \"gnu\")))": [
-              {
-                "id": "proc-macro2 1.0.66",
-                "target": "proc_macro2"
-              },
-              {
-                "id": "quote 1.0.32",
-                "target": "quote"
-              },
-              {
-                "id": "syn 2.0.28",
-                "target": "syn"
-              }
-            ]
-          }
+          "common": [
+            {
+              "id": "proc-macro2 1.0.66",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.32",
+              "target": "quote"
+            },
+            {
+              "id": "syn 2.0.28",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
         },
         "edition": "2015",
-        "version": "1.0.183"
+        "version": "1.0.186"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -12712,7 +12710,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -12770,7 +12768,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -12813,7 +12811,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -12864,7 +12862,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -12934,7 +12932,7 @@
               "target": "quote"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -13045,7 +13043,7 @@
               "target": "quote"
             },
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -13373,7 +13371,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             },
             {
@@ -14595,7 +14593,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.183",
+              "id": "serde 1.0.186",
               "target": "serde"
             }
           ],
@@ -17600,18 +17598,6 @@
           ],
           "selects": {}
         },
-        "build_script_env": {
-          "common": {
-            "AR": "external/cctools/bin/ar"
-          },
-          "selects": {}
-        },
-        "tools": {
-          "common": [
-            "@cctools//:bin/ar"
-          ],
-          "selects": {}
-        },
         "links": "zstd"
       },
       "license": "MIT/Apache-2.0"
@@ -17819,38 +17805,6 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-none"
-    ],
-    "cfg(not(all(target_arch = \"x86_64\", target_os = \"linux\", target_env = \"gnu\")))": [
-      "aarch64-apple-darwin",
-      "aarch64-apple-ios",
-      "aarch64-apple-ios-sim",
-      "aarch64-fuchsia",
-      "aarch64-linux-android",
-      "aarch64-pc-windows-msvc",
-      "aarch64-unknown-linux-gnu",
-      "arm-unknown-linux-gnueabi",
-      "armv7-linux-androideabi",
-      "armv7-unknown-linux-gnueabi",
-      "i686-apple-darwin",
-      "i686-linux-android",
-      "i686-pc-windows-msvc",
-      "i686-unknown-freebsd",
-      "i686-unknown-linux-gnu",
-      "powerpc-unknown-linux-gnu",
-      "riscv32imc-unknown-none-elf",
-      "riscv64gc-unknown-none-elf",
-      "s390x-unknown-linux-gnu",
-      "thumbv7em-none-eabi",
-      "thumbv8m.main-none-eabi",
-      "wasm32-unknown-unknown",
-      "wasm32-wasi",
-      "x86_64-apple-darwin",
-      "x86_64-apple-ios",
-      "x86_64-fuchsia",
-      "x86_64-linux-android",
-      "x86_64-pc-windows-msvc",
-      "x86_64-unknown-freebsd",
       "x86_64-unknown-none"
     ],
     "cfg(not(any(windows, target_os = \"hermit\", target_os = \"unknown\")))": [

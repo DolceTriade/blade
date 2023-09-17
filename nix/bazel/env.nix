@@ -18,7 +18,7 @@
     (
       if pkgs.stdenv.isDarwin
       then pkgs.darwin.cctools
-      else pkgs.cctools
+      else pkgs.bintools
     )
   ];
 in

@@ -8,16 +8,6 @@ def rust_dependencies():
         cargo_lockfile = "//third_party/rust:Cargo.lock",
         lockfile = "//third_party/rust:Cargo.Bazel.lock",
         annotations = {
-            "zstd-sys": [
-                crate.annotation(
-                    build_script_env = {
-                        "AR": "external/cctools/bin/ar",
-                    },
-                    build_script_tools = [
-                        "@cctools//:bin/ar",
-                    ],
-                ),
-            ],
             "server_fn_macro": [
                 crate.annotation(
                     rustc_env = {
@@ -77,7 +67,7 @@ def rust_dependencies():
                 version = "0.5.0",
             ),
             "serde": crate.spec(
-                version = "1",
+                version = "1.0.186",
                 features = ["derive"],
             ),
             "prost": crate.spec(
@@ -150,7 +140,7 @@ def rust_dependencies():
                 version = "0.4.0",
             ),
             "serde": crate.spec(
-                version = "1",
+                version = "1.0.186",
                 features = ["derive"],
             ),
             "log": crate.spec(
