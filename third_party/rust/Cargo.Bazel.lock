@@ -1,5 +1,5 @@
 {
-  "checksum": "77eed95fcea8f3a9e6dc30ed4be5006654980f173f49551d78937694537e9ff2",
+  "checksum": "eed71486bc81bbd84aba3012f97a31480f4cc8bc37247799f876d4bb28061375",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -17595,6 +17595,18 @@
               "id": "pkg-config 0.3.27",
               "target": "pkg_config"
             }
+          ],
+          "selects": {}
+        },
+        "build_script_env": {
+          "common": {
+            "AR": "external/bintools/bin/ar"
+          },
+          "selects": {}
+        },
+        "tools": {
+          "common": [
+            "@bintools//:bin/ar"
           ],
           "selects": {}
         },

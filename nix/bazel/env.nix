@@ -15,11 +15,7 @@
     unzip
     which
     zip
-    (
-      if pkgs.stdenv.isDarwin
-      then pkgs.darwin.cctools
-      else pkgs.bintools
-    )
+    bintools
   ];
 in
   pkgs.buildEnv {

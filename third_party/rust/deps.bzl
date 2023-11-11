@@ -8,6 +8,16 @@ def rust_dependencies():
         cargo_lockfile = "//third_party/rust:Cargo.lock",
         lockfile = "//third_party/rust:Cargo.Bazel.lock",
         annotations = {
+            "zstd-sys": [
+                crate.annotation(
+                    build_script_env = {
+                        "AR": "external/bintools/bin/ar",
+                    },
+                    build_script_tools = [
+                        "@bintools//:bin/ar",
+                    ],
+                ),
+            ],
             "server_fn_macro": [
                 crate.annotation(
                     rustc_env = {

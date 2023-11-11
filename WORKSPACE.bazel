@@ -58,8 +58,8 @@ http_archive(
     patches = [
         "//third_party/rust/patches/rules_rust:001-rules-rust-crate-universe.patch",
     ],
-    sha256 = "9d04e658878d23f4b00163a72da3db03ddb451273eb347df7d7c50838d698f49",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.26.0/rules_rust-v0.26.0.tar.gz"],
+    strip_prefix = "rules_rust-54bef51d8e3458ec60ea2b6a27e15b62502c673d",
+    urls = ["https://github.com/bazelbuild/rules_rust/archive/54bef51d8e3458ec60ea2b6a27e15b62502c673d.tar.gz"],
 )
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:repositories.bzl", "rules_nixpkgs_dependencies")
