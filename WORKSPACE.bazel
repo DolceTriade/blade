@@ -36,13 +36,6 @@ rules_proto_dependencies()
 rules_proto_toolchains()
 
 http_archive(
-    name = "io_tweag_rules_nixpkgs",
-    sha256 = "3cd7a8fa957b58a64e4b5a1c15c072ff672747d32b120e12e4e9534ad8650c5c",
-    strip_prefix = "rules_nixpkgs-98daf39280f21ce0ee8086543b00a65a1a4bf621",
-    urls = ["https://github.com/tweag/rules_nixpkgs/archive/98daf39280f21ce0ee8086543b00a65a1a4bf621.tar.gz"],
-)
-
-http_archive(
     name = "rules_rust",
     # rules_rust 0.22.0 does not yet support direct
     # overriding toolchain used for build of cargo-bazel
@@ -58,8 +51,16 @@ http_archive(
     patches = [
         "//third_party/rust/patches/rules_rust:001-rules-rust-crate-universe.patch",
     ],
+    sha256 = "",
     strip_prefix = "rules_rust-54bef51d8e3458ec60ea2b6a27e15b62502c673d",
     urls = ["https://github.com/bazelbuild/rules_rust/archive/54bef51d8e3458ec60ea2b6a27e15b62502c673d.tar.gz"],
+)
+
+http_archive(
+    name = "io_tweag_rules_nixpkgs",
+    sha256 = "3cd7a8fa957b58a64e4b5a1c15c072ff672747d32b120e12e4e9534ad8650c5c",
+    strip_prefix = "rules_nixpkgs-98daf39280f21ce0ee8086543b00a65a1a4bf621",
+    urls = ["https://github.com/tweag/rules_nixpkgs/archive/98daf39280f21ce0ee8086543b00a65a1a4bf621.tar.gz"],
 )
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:repositories.bzl", "rules_nixpkgs_dependencies")
@@ -73,8 +74,11 @@ load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_cc_configure", "ni
 # got hit with nasty glibc mismatch errors.
 nixpkgs_local_repository(
     name = "nixpkgs",
-    nix_file_deps = ["//:flake.lock"],
-    nix_flake_lock_file = "//:flake.lock",
+    nix_file = "//nix/bazel:nixpkgs.nix",
+    nix_file_deps = [
+        "//:flake.lock",
+        "//nix/bazel:nixpkgs.nix",
+    ],
 )
 
 nixpkgs_local_repository(

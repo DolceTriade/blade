@@ -1,5 +1,5 @@
 {
-  "checksum": "c20d6b57e9996ca9a2a9b8d092f727f2dc54bcb508dfd0744e82c2924fab4de5",
+  "checksum": "ac3ff65106df45943120dc4e25c004c78b55768eb1d3531f85f5c94df8b2af8b",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -2815,11 +2815,18 @@
         ],
         "crate_features": {
           "common": [
-            "js",
-            "js-sys",
-            "wasm-bindgen"
+            "js"
           ],
-          "selects": {}
+          "selects": {
+            "wasm32-unknown-unknown": [
+              "js-sys",
+              "wasm-bindgen"
+            ],
+            "wasm32-wasi": [
+              "js-sys",
+              "wasm-bindgen"
+            ]
+          }
         },
         "deps": {
           "common": [
@@ -3350,10 +3357,97 @@
           "common": [
             "ahash",
             "default",
-            "inline-more",
-            "raw"
+            "inline-more"
           ],
-          "selects": {}
+          "selects": {
+            "aarch64-apple-darwin": [
+              "raw"
+            ],
+            "aarch64-apple-ios": [
+              "raw"
+            ],
+            "aarch64-apple-ios-sim": [
+              "raw"
+            ],
+            "aarch64-fuchsia": [
+              "raw"
+            ],
+            "aarch64-linux-android": [
+              "raw"
+            ],
+            "aarch64-pc-windows-msvc": [
+              "raw"
+            ],
+            "aarch64-unknown-linux-gnu": [
+              "raw"
+            ],
+            "arm-unknown-linux-gnueabi": [
+              "raw"
+            ],
+            "armv7-linux-androideabi": [
+              "raw"
+            ],
+            "armv7-unknown-linux-gnueabi": [
+              "raw"
+            ],
+            "i686-apple-darwin": [
+              "raw"
+            ],
+            "i686-linux-android": [
+              "raw"
+            ],
+            "i686-pc-windows-msvc": [
+              "raw"
+            ],
+            "i686-unknown-freebsd": [
+              "raw"
+            ],
+            "i686-unknown-linux-gnu": [
+              "raw"
+            ],
+            "powerpc-unknown-linux-gnu": [
+              "raw"
+            ],
+            "riscv32imc-unknown-none-elf": [
+              "raw"
+            ],
+            "riscv64gc-unknown-none-elf": [
+              "raw"
+            ],
+            "s390x-unknown-linux-gnu": [
+              "raw"
+            ],
+            "thumbv7em-none-eabi": [
+              "raw"
+            ],
+            "thumbv8m.main-none-eabi": [
+              "raw"
+            ],
+            "x86_64-apple-darwin": [
+              "raw"
+            ],
+            "x86_64-apple-ios": [
+              "raw"
+            ],
+            "x86_64-fuchsia": [
+              "raw"
+            ],
+            "x86_64-linux-android": [
+              "raw"
+            ],
+            "x86_64-pc-windows-msvc": [
+              "raw"
+            ],
+            "x86_64-unknown-freebsd": [
+              "raw"
+            ],
+            "x86_64-unknown-linux-gnu": [
+              "raw"
+            ],
+            "x86_64-unknown-none": [
+              "raw"
+            ]
+          }
         },
         "deps": {
           "common": [
@@ -9192,10 +9286,19 @@
             "rt",
             "socket2",
             "sync",
-            "time",
-            "windows-sys"
+            "time"
           ],
-          "selects": {}
+          "selects": {
+            "aarch64-pc-windows-msvc": [
+              "windows-sys"
+            ],
+            "i686-pc-windows-msvc": [
+              "windows-sys"
+            ],
+            "x86_64-pc-windows-msvc": [
+              "windows-sys"
+            ]
+          }
         },
         "deps": {
           "common": [
@@ -10160,13 +10263,6 @@
         "compile_data_glob": [
           "**"
         ],
-        "crate_features": {
-          "common": [
-            "default",
-            "std"
-          ],
-          "selects": {}
-        },
         "edition": "2018",
         "version": "0.11.0+wasi-snapshot-preview1"
       },
@@ -10561,14 +10657,12 @@
         ],
         "crate_features": {
           "common": [
-            "AbortController",
             "AbortSignal",
             "AddEventListenerOptions",
             "AnimationEvent",
             "BeforeUnloadEvent",
             "BinaryType",
             "Blob",
-            "BlobPropertyBag",
             "CharacterData",
             "ClipboardEvent",
             "CloseEvent",
@@ -10588,7 +10682,6 @@
             "Event",
             "EventSource",
             "EventTarget",
-            "File",
             "FileReader",
             "FocusEvent",
             "FormData",
@@ -10688,7 +10781,6 @@
             "ResponseInit",
             "ResponseType",
             "SecurityPolicyViolationEvent",
-            "ServiceWorkerGlobalScope",
             "ShadowRoot",
             "StorageEvent",
             "SubmitEvent",
@@ -10703,7 +10795,6 @@
             "WebSocket",
             "WheelEvent",
             "Window",
-            "Worker",
             "WorkerGlobalScope",
             "console"
           ],
@@ -10763,19 +10854,12 @@
         ],
         "crate_features": {
           "common": [
-            "consoleapi",
-            "errhandlingapi",
-            "fileapi",
             "handleapi",
             "impl-debug",
             "impl-default",
             "minwinbase",
             "minwindef",
-            "processenv",
-            "std",
             "timezoneapi",
-            "winbase",
-            "wincon",
             "winerror",
             "winnt",
             "winreg",
@@ -11645,10 +11729,37 @@
     "direct-cargo-bazel-deps 0.0.1": ""
   },
   "conditions": {
+    "aarch64-apple-darwin": [
+      "aarch64-apple-darwin"
+    ],
+    "aarch64-apple-ios": [
+      "aarch64-apple-ios"
+    ],
+    "aarch64-apple-ios-sim": [
+      "aarch64-apple-ios-sim"
+    ],
+    "aarch64-fuchsia": [
+      "aarch64-fuchsia"
+    ],
     "aarch64-linux-android": [
       "aarch64-linux-android"
     ],
     "aarch64-pc-windows-gnullvm": [],
+    "aarch64-pc-windows-msvc": [
+      "aarch64-pc-windows-msvc"
+    ],
+    "aarch64-unknown-linux-gnu": [
+      "aarch64-unknown-linux-gnu"
+    ],
+    "arm-unknown-linux-gnueabi": [
+      "arm-unknown-linux-gnueabi"
+    ],
+    "armv7-linux-androideabi": [
+      "armv7-linux-androideabi"
+    ],
+    "armv7-unknown-linux-gnueabi": [
+      "armv7-unknown-linux-gnueabi"
+    ],
     "cfg(all(any(target_arch = \"wasm32\", target_arch = \"wasm64\"), target_os = \"unknown\"))": [
       "wasm32-unknown-unknown"
     ],
@@ -11855,8 +11966,71 @@
       "i686-pc-windows-msvc",
       "x86_64-pc-windows-msvc"
     ],
+    "i686-apple-darwin": [
+      "i686-apple-darwin"
+    ],
+    "i686-linux-android": [
+      "i686-linux-android"
+    ],
     "i686-pc-windows-gnu": [],
+    "i686-pc-windows-msvc": [
+      "i686-pc-windows-msvc"
+    ],
+    "i686-unknown-freebsd": [
+      "i686-unknown-freebsd"
+    ],
+    "i686-unknown-linux-gnu": [
+      "i686-unknown-linux-gnu"
+    ],
+    "powerpc-unknown-linux-gnu": [
+      "powerpc-unknown-linux-gnu"
+    ],
+    "riscv32imc-unknown-none-elf": [
+      "riscv32imc-unknown-none-elf"
+    ],
+    "riscv64gc-unknown-none-elf": [
+      "riscv64gc-unknown-none-elf"
+    ],
+    "s390x-unknown-linux-gnu": [
+      "s390x-unknown-linux-gnu"
+    ],
+    "thumbv7em-none-eabi": [
+      "thumbv7em-none-eabi"
+    ],
+    "thumbv8m.main-none-eabi": [
+      "thumbv8m.main-none-eabi"
+    ],
+    "wasm32-unknown-unknown": [
+      "wasm32-unknown-unknown"
+    ],
+    "wasm32-wasi": [
+      "wasm32-wasi"
+    ],
+    "x86_64-apple-darwin": [
+      "x86_64-apple-darwin"
+    ],
+    "x86_64-apple-ios": [
+      "x86_64-apple-ios"
+    ],
+    "x86_64-fuchsia": [
+      "x86_64-fuchsia"
+    ],
+    "x86_64-linux-android": [
+      "x86_64-linux-android"
+    ],
     "x86_64-pc-windows-gnu": [],
-    "x86_64-pc-windows-gnullvm": []
+    "x86_64-pc-windows-gnullvm": [],
+    "x86_64-pc-windows-msvc": [
+      "x86_64-pc-windows-msvc"
+    ],
+    "x86_64-unknown-freebsd": [
+      "x86_64-unknown-freebsd"
+    ],
+    "x86_64-unknown-linux-gnu": [
+      "x86_64-unknown-linux-gnu"
+    ],
+    "x86_64-unknown-none": [
+      "x86_64-unknown-none"
+    ]
   }
 }

@@ -50,11 +50,13 @@
                 rust
                 grpcurl
                 rnix-lsp
+                (import ./nix/cc/cc.nix)
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
             enterShell = ''
               echo "BLADE Shell"
-              echo "build --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
+              echo "common --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
+              echo "common --host_action_env=PATH=${bazelEnv}/bin" >> .bazelenvrc
             '';
           })
         ];

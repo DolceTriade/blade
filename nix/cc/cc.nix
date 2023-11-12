@@ -46,7 +46,7 @@ in let
     bintools = pkgs.stdenv.cc.bintools;
     extraPackages = [pkgs.glibc.static];
     extraBuildCommands = ''
-      echo "-isystem ${pkgs.llvmPackages_11.clang-unwrapped.lib}/lib/clang/${cc.version}/include" >> $out/nix-support/cc-cflags
+      echo "-isystem ${pkgs.llvmPackages.clang-unwrapped.lib}/lib/clang/${cc.version}/include" >> $out/nix-support/cc-cflags
       echo "-L ${pkgs.glibc.static}/lib" >> $out/nix-support/cc-ldflags
       echo "-resource-dir=${cc}/resource-root" >> $out/nix-support/cc-cflags
     '';

@@ -114,6 +114,7 @@ def rust_dependencies():
         ),
         rust_toolchain_cargo_template = "@nix_rust//:bin/{tool}",
         rust_toolchain_rustc_template = "@nix_rust//:bin/{tool}",
+        generator = "@cargo_bazel_bootstrap//:cargo-bazel",
     )
     crates_repository(
         name = "wasm_crate",
@@ -191,4 +192,5 @@ def rust_dependencies():
         ),
         rust_toolchain_cargo_template = "@nix_rust_wasm//:bin/{tool}",
         rust_toolchain_rustc_template = "@nix_rust_wasm//:bin/{tool}",
+        generator = "@cargo_bazel_bootstrap//:cargo-bazel",
     )

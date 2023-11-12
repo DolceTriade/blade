@@ -16,6 +16,7 @@
     which
     zip
     bintools
+    (import ../cc/cc.nix)
   ];
 in
   pkgs.buildEnv {
