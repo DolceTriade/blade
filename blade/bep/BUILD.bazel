@@ -8,6 +8,7 @@ rust_binary(
     data = ["@googleapis//google/devtools/build/v1:build_proto"],
     deps = [
         "//blade/bep/protos:bep_proto",
+        "//blade/bep/protos:build_event_stream_rust_proto",
         "@crate//:async-stream",
         "@crate//:log",
         "@crate//:pretty_env_logger",

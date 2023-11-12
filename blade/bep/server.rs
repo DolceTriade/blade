@@ -1,8 +1,10 @@
 use build_proto::google::devtools::build::v1::*;
+use build_event_stream_proto::*;
 use log;
 use pretty_env_logger;
+use prost::Message;
 use runfiles::Runfiles;
-use std::{error::Error, net::ToSocketAddrs, fs};
+use std::{default, error::Error, fs, net::ToSocketAddrs};
 use tokio::sync::mpsc;
 use tokio_stream::{wrappers::ReceiverStream, Stream};
 use tonic::{transport::Server, Request, Response, Status, Streaming};
@@ -37,14 +39,34 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                 match maybe_message {
                     Ok(res) => {
                         if let Some(v) = res {
-                            log::info!("Got stream {:#?}", v);
                             if let Some(obe) = &v.ordered_build_event.as_ref() {
-                                let buildEnded = if let build_event::Event::ComponentStreamFinished(_) = &v.ordered_build_event.as_ref().unwrap().event.as_ref().unwrap().event.as_ref().unwrap() {
-                                    true
-                                } else {
-                                    false
-                                };
-                                log::error!("Sending ack for {:#?} {}", obe.stream_id, obe.sequence_number);
+                                let mut buildEnded = false;
+                                let event = &v
+                                    .ordered_build_event
+                                    .as_ref()
+                                    .unwrap()
+                                    .event
+                                    .as_ref()
+                                    .unwrap()
+                                    .event
+                                    .as_ref().unwrap();
+                                match event {
+                                    build_event::Event::BazelEvent(any) => {
+                                        let be = build_event_stream::BuildEvent::decode(&any.value[..]).unwrap();
+                                        log::info!("Got BuildEvent {:#?}", &be);
+                                    }
+                                    build_event::Event::ComponentStreamFinished(end) => {
+                                        buildEnded = true;
+                                    }
+                                    _ => {
+                                        log::info!("Got other event: {:#?}", event)
+                                    }
+                                }
+                                log::error!(
+                                    "Sending ack for {:#?} {}",
+                                    obe.stream_id,
+                                    obe.sequence_number
+                                );
                                 tx.send(Ok(PublishBuildToolEventStreamResponse {
                                     sequence_number: obe.sequence_number,
                                     stream_id: obe.stream_id.clone(),
@@ -54,7 +76,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                 if buildEnded {
                                     log::error!("BUILD OVER");
                                     drop(tx);
-                                    return;                                    
+                                    return;
                                 }
                             } else {
                                 log::info!("Party over");
@@ -79,10 +101,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     pretty_env_logger::init();
     log::info!("Starting!");
     let r = Runfiles::create()?;
-    let path = r.rlocation("googleapis/google/devtools/build/v1/build_proto-descriptor-set.proto.bin");
+    let path =
+        r.rlocation("googleapis/google/devtools/build/v1/build_proto-descriptor-set.proto.bin");
     let desc = fs::read(path)?;
     let server = BuildEventService {};
-    let reflect = tonic_reflection::server::Builder::configure().register_encoded_file_descriptor_set(&desc).build()?;
+    let reflect = tonic_reflection::server::Builder::configure()
+        .register_encoded_file_descriptor_set(&desc)
+        .build()?;
 
     Server::builder()
         .add_service(publish_build_event_server::PublishBuildEventServer::new(
