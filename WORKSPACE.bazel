@@ -37,6 +37,7 @@ rules_proto_toolchains()
 
 http_archive(
     name = "rules_rust",
+    patch_args = ["-p1"],
     # rules_rust 0.22.0 does not yet support direct
     # overriding toolchain used for build of cargo-bazel
     # binary.
@@ -51,7 +52,7 @@ http_archive(
     patches = [
         "//third_party/rust/patches/rules_rust:001-rules-rust-crate-universe.patch",
     ],
-    sha256 = "",
+    sha256 = "4a5589faa8a87340364352d25db5df8d27a0ac24e654f738e6dde9c447f04f5b",
     strip_prefix = "rules_rust-54bef51d8e3458ec60ea2b6a27e15b62502c673d",
     urls = ["https://github.com/bazelbuild/rules_rust/archive/54bef51d8e3458ec60ea2b6a27e15b62502c673d.tar.gz"],
 )
