@@ -44,6 +44,9 @@ pub fn init_global_descriptor_pool() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use build_event_stream_proto::*;
+    use prost_reflect::ReflectMessage;
+    use serde_json;
 
     #[test]
     fn test_load() {
@@ -51,6 +54,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     fn test_reflect_global_pool_default() {
         let global = DescriptorPool::global();
         let mut num_wkt = 0;
@@ -64,6 +68,11 @@ mod tests {
         });
         assert!(num_wkt > 0);
         assert_eq!(num_bep, 0);
+        let be = build_event_stream::EnvironmentVariable {
+            name: "PATH".into(),
+            value: "/usr/bin".into(),
+        };
+        be.transcode_to_dynamic();
     }
 
     #[test]
@@ -73,7 +82,6 @@ mod tests {
         let mut num_wkt = 0;
         let mut num_bep = 0;
         global.all_messages().for_each(|m| {
-            println!("{}", m.full_name());
             if m.full_name().starts_with("google.protobuf.") {
                 num_wkt += 1;
             } else {
@@ -82,5 +90,13 @@ mod tests {
         });
         assert!(num_wkt > 0);
         assert!(num_bep > 0);
+
+        let be = build_event_stream::EnvironmentVariable {
+            name: "PATH".into(),
+            value: "/usr/bin".into(),
+        };
+        let d = be.transcode_to_dynamic();
+        let j = serde_json::ser::to_string(&d).unwrap();
+        assert_eq!(j, r#"{"name":"UEFUSA==","value":"L3Vzci9iaW4="}"#);
     }
 }

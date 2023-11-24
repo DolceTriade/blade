@@ -1,5 +1,5 @@
 {
-  "checksum": "4c76b892fa17c4ec2df8f3906b1ab6251144d21db4d8f751ef60c50d7d8b5240",
+  "checksum": "79cf9dd2b987c5cfbea2166a8558f55f59402c57a13049a8e2f19dbd105fb0fa",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -11381,7 +11381,13 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/prost-build/0.11.9/download",
-          "sha256": "119533552c9a7ffacc21e099c24a0ac8bb19c2a2a3f363de84cd9b844feab270"
+          "sha256": "119533552c9a7ffacc21e099c24a0ac8bb19c2a2a3f363de84cd9b844feab270",
+          "patch_args": [
+            "-p1"
+          ],
+          "patches": [
+            "@//third_party/rust/patches/prost-build:0001-Allow-substitution-for-the-message-type-in-type-attr.patch"
+          ]
         }
       },
       "targets": [

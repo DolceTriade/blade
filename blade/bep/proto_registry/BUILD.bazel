@@ -23,5 +23,10 @@ rust_library(
 
 rust_test(
     name = "proto_registry_test",
+    size = "small",
     crate = ":proto_registry",
+    deps = [
+        "//blade/bep/protos:build_event_stream_rust_proto",
+        "@crate//:serde_json",
+    ],
 )

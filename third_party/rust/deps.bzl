@@ -31,6 +31,10 @@ def rust_dependencies():
             "protoc-gen-tonic": [crate.annotation(
                 gen_binaries = ["protoc-gen-tonic"],
             )],
+            "prost-build": [crate.annotation(
+                patches = ["@//third_party/rust/patches/prost-build:0001-Allow-substitution-for-the-message-type-in-type-attr.patch"],
+                patch_args = ["-p1"],
+            )],
         },
         packages = {
             "actix-files": crate.spec(
@@ -88,7 +92,7 @@ def rust_dependencies():
             ),
             "serde_json": crate.spec(
                 version = "1.0.108",
-            ),            
+            ),
             "prost": crate.spec(
                 version = "0.12.3",
             ),
