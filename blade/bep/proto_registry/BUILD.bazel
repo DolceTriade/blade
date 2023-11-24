@@ -1,0 +1,27 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "proto_registry",
+    srcs = [
+        "lib.rs",
+    ],
+    data = [
+        "//blade/bep/protos:bep_descriptors",
+        "//blade/bep/protos:bes_descriptors",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crate//:anyhow",
+        "@crate//:lazy_static",
+        "@crate//:prost",
+        "@crate//:prost-reflect",
+        "@crate//:prost-types",
+        "@crate//:walkdir",
+        "@rules_rust//tools/runfiles",
+    ],
+)
+
+rust_test(
+    name = "proto_registry_test",
+    crate = ":proto_registry",
+)

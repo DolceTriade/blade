@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Result};
 use build_event_stream_proto::{build_event_stream::File, *};
 use build_proto::google::devtools::build::v1::*;
 use log;
@@ -6,6 +6,7 @@ use pretty_env_logger;
 use prost::Message;
 use prost_reflect::{DescriptorPool, DynamicMessage};
 use prost_types::FileDescriptorSet;
+use proto_registry;
 use runfiles::Runfiles;
 use serde_json;
 use std::{default, error::Error, fs, net::ToSocketAddrs, path::{Path, PathBuf}};
@@ -142,41 +143,15 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     }
 }
 
-fn all_descriptors() -> Result<Vec<PathBuf>> {
-    let mut hs = HashMap::new();
-    let r = Runfiles::create()?;
-    let root = r.rlocation("");
-    for entry in WalkDir::new(root).follow_links(true) {
-        let p = entry?;
-        if p.path().to_string_lossy().ends_with("proto.bin") {
-            hs.insert(p.path().file_name().unwrap().to_string_lossy().to_string(), p.path().to_path_buf());
-        }
-    }
-    Ok(hs.into_iter().map(|v| v.1).collect())
-}
-
-fn proto_descriptor() -> Result<FileDescriptorSet> {
-    let mut fds: FileDescriptorSet = FileDescriptorSet::default();
-    let r = Runfiles::create()?;
-    let paths = all_descriptors()?;
-    for p in &paths {
-        let desc = fs::read(r.rlocation(p))?;
-        log::info!("Loading {}", p.file_name().unwrap().to_string_lossy());
-        fds.merge(&desc[..])?;
-    }
-    let b = fds.encode_to_vec();
-    DescriptorPool::decode_global_file_descriptor_set(&b[..])?;
-    
-    Ok(fds)
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     pretty_env_logger::init();
     log::info!("Starting!");
     let reflect = tonic_reflection::server::Builder::configure()
-        .register_file_descriptor_set(proto_descriptor()?)
+        .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
+
+    proto_registry::init_global_descriptor_pool()?;
 
     log::info!("Loaded messages: {:#?}", DescriptorPool::global().all_messages().map(|x| x.full_name().to_string()).collect::<Vec<String>>());
 

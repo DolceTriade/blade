@@ -27,5 +27,6 @@ rust_binary(
         "@crate//:tonic-reflection",
         "@crate//:walkdir",
         "@rules_rust//tools/runfiles",
+        "//blade/bep/proto_registry",
     ],
 )
