@@ -5,6 +5,7 @@ rust_library_group(
     name = "prost_runtime",
     deps = [
         "@crate//:prost",
+        "@crate//:prost-reflect",
     ],
 )
 
@@ -13,6 +14,7 @@ rust_library_group(
     deps = [
         ":prost_runtime",
         "@crate//:tonic",
+        "@crate//:futures-core",
     ],
 )
 

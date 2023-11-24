@@ -1,7 +1,20 @@
 load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
+load("//blade/bep/protos:descriptors.bzl", "transitive_proto_descriptors")
 
 rust_prost_library(
     name = "bep_proto",
+    proto = "@googleapis//google/devtools/build/v1:build_proto",
+    visibility = ["//visibility:public"],
+)
+
+transitive_proto_descriptors(
+    name = "bep_descriptors",
+    proto = ":build_event_stream_proto",
+    visibility = ["//visibility:public"],
+)
+
+transitive_proto_descriptors(
+    name = "bes_descriptors",
     proto = "@googleapis//google/devtools/build/v1:build_proto",
     visibility = ["//visibility:public"],
 )
@@ -20,6 +33,7 @@ proto_library(
 proto_library(
     name = "build_event_stream_proto",
     srcs = ["build_event_stream.proto"],
+    visibility = ["//visibility:public"],
     deps = [
         ":action_cache_proto",
         ":command_line_proto",

@@ -45,7 +45,6 @@
               [
                 bazel_6
                 bazel-buildtools
-                bazel-watcher
                 pkg-config
                 rust
                 grpcurl
@@ -55,8 +54,8 @@
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
             enterShell = ''
               echo "BLADE Shell"
-              echo "common --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
-              echo "common --host_action_env=PATH=${bazelEnv}/bin" >> .bazelenvrc
+              echo "build --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
+              echo "build --host_action_env=PATH=${bazelEnv}/bin" >> .bazelenvrc
             '';
           })
         ];

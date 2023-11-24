@@ -5,19 +5,27 @@ rust_binary(
     srcs = [
         "server.rs",
     ],
-    data = ["@googleapis//google/devtools/build/v1:build_proto"],
+    data = [
+        "//blade/bep/protos:bes_descriptors",
+        "//blade/bep/protos:bep_descriptors",
+    ],
     deps = [
         "//blade/bep/protos:bep_proto",
         "//blade/bep/protos:build_event_stream_rust_proto",
+        "@crate//:anyhow",
         "@crate//:async-stream",
+        "@crate//:lazy_static",
         "@crate//:log",
         "@crate//:pretty_env_logger",
         "@crate//:prost",
+        "@crate//:prost-reflect",
         "@crate//:prost-types",
+        "@crate//:serde_json",
         "@crate//:tokio",
         "@crate//:tokio-stream",
         "@crate//:tonic",
         "@crate//:tonic-reflection",
+        "@crate//:walkdir",
         "@rules_rust//tools/runfiles",
     ],
 )

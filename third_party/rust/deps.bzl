@@ -40,6 +40,9 @@ def rust_dependencies():
                 version = "4",
                 features = ["macros"],
             ),
+            "anyhow": crate.spec(
+                version = "1.0.75",
+            ),
             "async-stream": crate.spec(
                 version = "0.3",
             ),
@@ -47,7 +50,10 @@ def rust_dependencies():
                 version = "1",
             ),
             "futures": crate.spec(
-                version = "0.3",
+                version = "0.3.29",
+            ),
+            "futures-core": crate.spec(
+                version = "0.3.29",
             ),
             "cfg-if": crate.spec(
                 version = "1",
@@ -80,17 +86,24 @@ def rust_dependencies():
                 version = "1.0.186",
                 features = ["derive"],
             ),
+            "serde_json": crate.spec(
+                version = "1.0.108",
+            ),            
             "prost": crate.spec(
-                version = "0.11.9",
+                version = "0.12.3",
             ),
             "prost-types": crate.spec(
-                version = "0.11.9",
+                version = "0.12.3",
             ),
             "protoc-gen-prost": crate.spec(
                 version = "0.2.3",
             ),
             "protoc-gen-tonic": crate.spec(
                 version = "0.3.0",
+            ),
+            "prost-reflect": crate.spec(
+                version = "0.12.0",
+                features = ["derive", "serde", "text-format"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",
@@ -100,10 +113,13 @@ def rust_dependencies():
                 version = "0.1",
             ),
             "tonic": crate.spec(
-                version = "0.9.2",
+                version = "0.10.2",
             ),
             "tonic-reflection": crate.spec(
-                version = "0.9.2",
+                version = "0.10.2",
+            ),
+            "walkdir": crate.spec(
+                version = "2.4.0",
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
@@ -158,7 +174,7 @@ def rust_dependencies():
                 version = "0.4",
             ),
             "futures-util": crate.spec(
-                version = "0.3",
+                version = "0.3.29",
             ),
             "const_format_proc_macros": crate.spec(
                 version = "0.2.31",
@@ -181,7 +197,10 @@ def rust_dependencies():
                 version = "0.1",
             ),
             "futures": crate.spec(
-                version = "0.3",
+                version = "0.3.29",
+            ),
+            "futures-core": crate.spec(
+                version = "0.3.29",
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
