@@ -1,0 +1,13 @@
+load("//tailwindcss:tailwindcss.bzl", "tailwindcss")
+
+tailwindcss(
+    name = "style",
+    src = "tailwind.css",
+    target = "//blade:blade.wasm",
+)
+
+filegroup(
+    name = "static",
+    srcs = glob(["*"]) + [":style"],
+    visibility = ["//visibility:public"],
+)

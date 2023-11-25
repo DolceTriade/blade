@@ -12,7 +12,8 @@ rust_binary(
     data = [
         "leptos.toml",
         ":blade_wasm",
-    ] + glob(["static/**"]),
+        "//blade/static",
+    ],
     rustc_env = {
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
@@ -46,6 +47,7 @@ rust_shared_library(
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
     tags = ["manual"],
+    visibility = ["//visibility:public"],
     deps = [
         "@wasm_crate//:cfg-if",
         "@wasm_crate//:console_error_panic_hook",
