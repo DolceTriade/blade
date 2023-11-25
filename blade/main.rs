@@ -20,7 +20,7 @@ cfg_if! {
             let conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
 
             let addr = conf.leptos_options.site_addr;
-            let routes = generate_route_list(|cx| view! { cx, <App/> });
+            let routes = generate_route_list(App);
             log::info!("Starting blade server at: {}", addr.to_string());
             HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;

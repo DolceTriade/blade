@@ -34,6 +34,12 @@
           targets.wasm32-unknown-unknown.stable.rust-std
           rust-analyzer
         ];
+
+      rustPlatform = pkgs.makeRustPlatform {
+        cargo = rust;
+        rustc = rust;
+      };
+      leptosfmt = pkgs.callPackage ./third_party/nix/leptosfmt/default.nix {inherit rustPlatform;};
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;
@@ -43,12 +49,13 @@
           ({pkgs, ...}: {
             packages = with pkgs;
               [
+                alejandra
                 bazel_6
                 bazel-buildtools
                 pkg-config
                 rust
                 grpcurl
-                rnix-lsp
+                leptosfmt
                 (import ./nix/cc/cc.nix)
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;

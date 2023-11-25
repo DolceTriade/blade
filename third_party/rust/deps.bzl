@@ -66,18 +66,18 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["ssr"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
             ),
             "leptos_meta": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["ssr"],
             ),
             "log": crate.spec(
@@ -156,15 +156,15 @@ def rust_dependencies():
         },
         packages = {
             "leptos": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["hydrate"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["hydrate"],
             ),
             "leptos_router": crate.spec(
-                version = "0.4.8",
+                version = "0.5.2",
                 features = ["hydrate"],
             ),
             "gloo-net": crate.spec(
