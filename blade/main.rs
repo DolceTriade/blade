@@ -1,5 +1,6 @@
 use cfg_if::cfg_if;
 pub mod routes;
+pub mod components;
 
 // boilerplate to run in different modes
 cfg_if! {
@@ -10,7 +11,7 @@ cfg_if! {
         use actix_web::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use pretty_env_logger;
-        use crate::routes::basic::App;
+        use crate::routes::app::App;
 
         #[actix_web::main]
         async fn main() -> std::io::Result<()> {
