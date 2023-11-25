@@ -4,10 +4,10 @@ load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 rust_binary(
     name = "blade",
     srcs = [
-        "counters.rs",
         "lib.rs",
         "main.rs",
-    ],
+        "routes.rs",
+    ] + glob(["routes/**/*.rs"]),
     crate_features = ["ssr"],
     data = [
         "leptos.toml",
@@ -36,10 +36,10 @@ rust_binary(
 rust_shared_library(
     name = "blade.wasm",
     srcs = [
-        "counters.rs",
         "lib.rs",
         "main.rs",
-    ],
+        "routes.rs",
+    ] + glob(["routes/**/*.rs"]),
     crate_features = ["hydrate"],
     crate_name = "blade",
     rustc_env = {
