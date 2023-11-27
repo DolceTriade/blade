@@ -275,6 +275,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0942ffc6dcaadf03badf6e6a2d0228460359d5e34b57ccdc720b7382dfbd5ec5"
 
 [[package]]
+name = "ansi-to-html"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7bd918cc0ff933f0e6cf48a8f74584818ea43e07d1fba1f9251bb3df2a37ca2"
+dependencies = [
+ "regex",
+ "thiserror",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -790,6 +800,7 @@ version = "0.0.1"
 dependencies = [
  "actix-files",
  "actix-web",
+ "ansi-to-html",
  "anyhow",
  "async-stream",
  "broadcaster",
@@ -808,6 +819,7 @@ dependencies = [
  "prost-types 0.12.3",
  "protoc-gen-prost",
  "protoc-gen-tonic",
+ "scopeguard",
  "serde",
  "serde_json",
  "tokio",

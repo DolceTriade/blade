@@ -4,16 +4,18 @@ use std::string::ToString;
 
 #[component]
 pub fn Nav(
-    name: String,
-    logo: String,
+    #[prop(into)]
+    name: MaybeSignal<String>,
+    #[prop(into)]
+    logo: MaybeSignal<String>,
 ) -> impl IntoView {
     view! {
         <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-wrap items-center justify-between mx-auto p-4">
                 <a href="#" class="flex items-center rtl:space-x-reverse">
-                    <img src={move|| logo.to_string()} class="w-14" alt="Logo"/>
+                    <img src=move || logo.get() class="w-14" alt="Logo"/>
                     <span class="self-center text-4xl font-semibold whitespace-nowrap dark:text-white">
-                        {move || name.to_string()}
+                        {move || name.get()}
                     </span>
                 </a>
                 <button

@@ -1,26 +1,31 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
-rust_binary(
-    name = "test",
+rust_library(
+    name = "bep",
     srcs = [
-        "server.rs",
+        "lib.rs",
     ],
     data = [
         "//blade/bep/protos:bep_descriptors",
         "//blade/bep/protos:bes_descriptors",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//blade/bep/proto_registry",
         "//blade/bep/protos:bep_proto",
         "//blade/bep/protos:build_event_stream_rust_proto",
+        "//blade/state",
         "@crate//:anyhow",
         "@crate//:async-stream",
+        "@crate//:futures",
         "@crate//:lazy_static",
         "@crate//:log",
         "@crate//:pretty_env_logger",
         "@crate//:prost",
         "@crate//:prost-reflect",
         "@crate//:prost-types",
+        "@crate//:scopeguard",
+        "@crate//:serde",
         "@crate//:serde_json",
         "@crate//:tokio",
         "@crate//:tokio-stream",

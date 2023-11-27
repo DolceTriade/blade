@@ -37,6 +37,9 @@ def rust_dependencies():
             )],
         },
         packages = {
+            "ansi-to-html": crate.spec(
+                version = "0.1.3",
+            ),            
             "actix-files": crate.spec(
                 version = "0.6",
             ),
@@ -109,6 +112,9 @@ def rust_dependencies():
                 version = "0.12.0",
                 features = ["derive", "serde", "text-format"],
             ),
+            "scopeguard": crate.spec(
+                version = "1.2.0",
+            ),
             "tokio": crate.spec(
                 version = "1.32.0",
                 features = ["full"],
@@ -155,6 +161,9 @@ def rust_dependencies():
             ],
         },
         packages = {
+            "ansi-to-html": crate.spec(
+                version = "0.1.3",
+            ),
             "leptos": crate.spec(
                 version = "0.5.2",
                 features = ["hydrate"],
@@ -205,6 +214,13 @@ def rust_dependencies():
             ),
             "futures-core": crate.spec(
                 version = "0.3.29",
+            ),
+            "tokio": crate.spec(
+                version = "1.32.0",
+                features = ["full"],
+            ),
+            "tokio-stream": crate.spec(
+                version = "0.1",
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository

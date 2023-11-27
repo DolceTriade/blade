@@ -22,8 +22,12 @@ rust_binary(
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
     deps = [
+        "//blade/bep",
+        "//blade/state",
         "@crate//:actix-files",
         "@crate//:actix-web",
+        "@crate//:ansi-to-html",
+        "@crate//:anyhow",
         "@crate//:broadcaster",
         "@crate//:cfg-if",
         "@crate//:futures",
@@ -35,6 +39,8 @@ rust_binary(
         "@crate//:log",
         "@crate//:pretty_env_logger",
         "@crate//:serde",
+        "@crate//:tokio",
+        "@crate//:tokio-stream",
     ],
 )
 
@@ -57,6 +63,8 @@ rust_shared_library(
     tags = ["manual"],
     visibility = ["//visibility:public"],
     deps = [
+        "//blade/state",
+        "@wasm_crate//:ansi-to-html",
         "@wasm_crate//:cfg-if",
         "@wasm_crate//:console_error_panic_hook",
         "@wasm_crate//:console_log",
