@@ -35,18 +35,20 @@ cfg_if! {
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
                 let site_root = &leptos_options.site_root;
-                let cloned_state = actix_state.clone();
+                let fn_state = actix_state.clone();
+                let rt_state = actix_state.clone();
                 App::new()
-                    .route("/api/{tail:.*}", leptos_actix::handle_server_fns_with_context(move|| provide_context(cloned_state.clone())))
+                    .route("/api/{tail:.*}", leptos_actix::handle_server_fns_with_context(move|| provide_context(fn_state.clone())))
                     // serve JS/WASM/CSS from `pkg`
                     .service(Files::new("/pkg", site_root))
                     // serve other assets from the `assets` directory
                     .service(Files::new("/assets", format!("{site_root}/static")))
                     // serve the favicon from /favicon.ico
                     .service(favicon)
-                    .leptos_routes(
+                    .leptos_routes_with_context(
                         leptos_options.to_owned(),
                         routes.to_owned(),
+                        move|| provide_context(rt_state.clone()),
                         App,
                     )
                     .app_data(web::Data::new(leptos_options.to_owned()))

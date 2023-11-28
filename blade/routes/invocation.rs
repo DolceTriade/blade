@@ -1,8 +1,8 @@
-use crate::components::nav::Nav;
 use crate::components::card::Card;
-use crate::components::statusicon::StatusIcon;
 use crate::components::list::*;
+use crate::components::nav::Nav;
 use crate::components::shellout::ShellOut;
+use crate::components::statusicon::StatusIcon;
 use ansi_to_html;
 use leptos::*;
 use leptos_router::*;
@@ -10,15 +10,15 @@ use log;
 use state;
 use std::sync::Arc;
 
-
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
     let mut map = global.sessions.lock().await;
     if let Some(invocation) = map.get(&uuid) {
+        log::info!("Sending {:#?}", invocation);
         return Ok(invocation.lock().await.results.clone());
     }
-    return Err(ServerFnError::ServerError("mistake".into()))
+    return Err(ServerFnError::ServerError("mistake".into()));
 }
 
 #[derive(PartialEq, Params)]
@@ -29,26 +29,24 @@ struct InvocationParams {
 #[component]
 pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
-    let (invocation, set_invocation) = create_signal(None);
-    spawn_local(async move {
-        let id =  params.with(|params| {
-            params
-                .as_ref()
-                .map(|params| params.id.clone())
-                .unwrap_or_default()
-                .unwrap_or_default()
-        });
-
-       if let Ok(i) = get_invocation(id).await {
-            set_invocation.set(Some(i));
-       }
-    });
+    let res = create_resource(
+        move || {
+            params.with(|p| {
+                p.as_ref()
+                    .map(|p| p.id.clone())
+                    .unwrap_or_default()
+                    .unwrap_or_default()
+            })
+        },
+        move |id| async move { get_invocation(id).await.ok() },
+    );
 
     view! {
-        {move || match invocation.get() {
-            None => view! { <div>"Not found"</div> },
-            Some(i) => {
-                view! {
+        <Transition fallback=move || view! { <p>"Loading..."</p> }>
+        {move || match res.get() {
+            None => view! { <div>"Not found"</div> }.into_view(),
+            Some(i_or) => match i_or {
+        Some(i) =>                 view! {
                     <div>
                         <Card>{i.success}</Card>
                         <Card>
@@ -71,8 +69,10 @@ pub fn Invocation() -> impl IntoView {
                         </Card>
                         <div><Card><ShellOut text={i.output.into()}/></Card></div>
                     </div>
-                }
+                }.into_view(),
+                None => view! { <div>"Not found"</div> }.into_view(),
             }
         }}
+    </Transition>
     }
 }
