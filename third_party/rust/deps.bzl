@@ -35,6 +35,26 @@ def rust_dependencies():
                 patches = ["@//third_party/rust/patches/prost-build:0001-Allow-substitution-for-the-message-type-in-type-attr.patch"],
                 patch_args = ["-p1"],
             )],
+            "pq-sys": [
+                crate.annotation(
+                    build_script_env = {
+                        "AR": "external/bintools/bin/ar",
+                    },
+                    build_script_tools = [
+                        "@bintools//:bin/ar",
+                    ],
+                ),
+            ],
+            "libsqlite3-sys": [
+                crate.annotation(
+                    build_script_env = {
+                        "AR": "external/bintools/bin/ar",
+                    },
+                    build_script_tools = [
+                        "@bintools//:bin/ar",
+                    ],
+                ),
+            ],            
         },
         packages = {
             "ansi-to-html": crate.spec(
@@ -59,6 +79,10 @@ def rust_dependencies():
             "clap": crate.spec(
                 version = "4.4.10",
                 features = ["derive", "wrap_help"],
+            ),
+            "diesel": crate.spec(
+                version = "2.1.4",
+                features = ["extras", "sqlite", "postgres"],
             ),
             "futures": crate.spec(
                 version = "0.3.29",

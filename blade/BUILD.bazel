@@ -31,6 +31,7 @@ rust_binary(
         "@crate//:broadcaster",
         "@crate//:cfg-if",
         "@crate//:clap",
+        "@crate//:diesel",
         "@crate//:futures",
         "@crate//:lazy_static",
         "@crate//:leptos",

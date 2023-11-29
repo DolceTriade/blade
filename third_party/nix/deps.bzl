@@ -26,3 +26,15 @@ def third_party_nix_deps():
         repository = "@nixpkgs",
         build_file = "//third_party/nix:BUILD.tailwindcss",
     )
+    nixpkgs_package(
+        name = "diesel",
+        repositories = {
+            "nixpkgs": "@nixpkgs",
+            "fenix": "@fenix",
+        },
+        nix_file = "//third_party/nix/diesel_cli:bazel.nix",
+        nix_file_deps = [
+            "//third_party/nix/diesel_cli:default.nix",
+            "//nix/rust:rust_platform.nix",
+        ],
+    )

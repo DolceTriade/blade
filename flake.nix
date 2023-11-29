@@ -39,7 +39,8 @@
         cargo = rust;
         rustc = rust;
       };
-      leptosfmt = pkgs.callPackage ./third_party/nix/leptosfmt/default.nix {inherit rustPlatform;};
+      leptosfmt = pkgs.callPackage ./third_party/nix/leptosfmt {inherit rustPlatform;};
+      diesel-cli' = pkgs.callPackage ./third_party/nix/diesel_cli {inherit rustPlatform;};
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;
@@ -56,6 +57,7 @@
                 rust
                 grpcurl
                 leptosfmt
+                diesel-cli'
                 (import ./nix/cc/cc.nix)
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
