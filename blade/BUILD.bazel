@@ -30,6 +30,7 @@ rust_binary(
         "@crate//:anyhow",
         "@crate//:broadcaster",
         "@crate//:cfg-if",
+        "@crate//:clap",
         "@crate//:futures",
         "@crate//:lazy_static",
         "@crate//:leptos",

@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use cfg_if::cfg_if;
 pub mod components;
 pub mod routes;
@@ -10,6 +12,7 @@ cfg_if! {
         use actix_files::Files;
         use actix_web::*;
         use bep;
+        use clap::*;
         use futures::join;
         use leptos::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
@@ -20,13 +23,30 @@ cfg_if! {
 
         use crate::routes::app::App;
 
+        #[derive(Parser)]
+        #[command(name = "Blade")]
+        #[command(about = "Bazel Build Event Service app")]
+        struct Args {
+            #[arg(short='g', long="grpc_host", value_name = "GRPC_HOST", default_value="[::]:50332")]
+            grpc_host: SocketAddr,
+            #[arg(short='H', long="http_host", value_name = "HTTP_HOST", default_value="[::]:3000")]
+            http_host: SocketAddr,
+        }
+
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
+            match std::env::var("RUST_LOG") {
+                Err(_) => std::env::set_var("RUST_LOG", "info"),
+                _ => {}
+            }
             pretty_env_logger::init();
+
+            let args = Args::parse();
+
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
-            let conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
-
+            let mut conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
+            conf.leptos_options.site_addr = args.http_host.clone();
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(App);
             let state = Arc::new(state::Global::new());
@@ -57,7 +77,7 @@ cfg_if! {
             .disable_signals()
             .bind(&addr)?
             .run();
-            let fut2 = bep::run_bes_grpc("[::]:50332".into(), state);
+            let fut2 = bep::run_bes_grpc(args.grpc_host, state);
             let res = join!(fut1, fut2);
             if res.0.is_ok() && res.1.is_ok() {
                 return Ok(());

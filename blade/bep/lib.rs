@@ -8,6 +8,7 @@ use futures::lock::Mutex;
 use log;
 use pretty_env_logger;
 use prost::Message;
+use prost_reflect::ReflectMessage;
 use prost_reflect::{DescriptorPool, DynamicMessage};
 use prost_types::FileDescriptorSet;
 use proto_registry;
@@ -17,6 +18,7 @@ use scopeguard::defer;
 use serde_json;
 use state;
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::{
     default,
     error::Error,
@@ -134,7 +136,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             return;
                                         }
                                         let be = be_or.unwrap();
-                                        match be.payload.unwrap() {
+                                        match be.payload.clone().unwrap() {
     build_event_stream::build_event::Payload::Progress(p) => {
         let mut s = session.lock().await;
         s.results.output.push_str(&p.stdout.replace("\n\r", "\n"));
@@ -194,7 +196,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         s.results.success = Some(success);
         s.tx.send(()).await;
     },
-    _ => {},
+    _ => {
+        let dm = be.transcode_to_dynamic();
+        let j = serde_json::ser::to_string_pretty(&dm).unwrap();
+        log::info!("{}", j);
+    },
 }
                                     }
                                     build_event::Event::ComponentStreamFinished(end) => {
@@ -236,7 +242,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     }
 }
 
-pub async fn run_bes_grpc(host: String, state: Arc<state::Global>) -> Result<()> {
+pub async fn run_bes_grpc(host: SocketAddr, state: Arc<state::Global>) -> Result<()> {
     let reflect = tonic_reflection::server::Builder::configure()
         .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
@@ -248,7 +254,7 @@ pub async fn run_bes_grpc(host: String, state: Arc<state::Global>) -> Result<()>
             server,
         ))
         .add_service(reflect)
-        .serve(host.to_socket_addrs().unwrap().next().unwrap())
+        .serve(host)
         .await
         .context("error starting grpc server")
 }

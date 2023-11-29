@@ -39,7 +39,7 @@ def rust_dependencies():
         packages = {
             "ansi-to-html": crate.spec(
                 version = "0.1.3",
-            ),            
+            ),
             "actix-files": crate.spec(
                 version = "0.6",
             ),
@@ -55,6 +55,10 @@ def rust_dependencies():
             ),
             "broadcaster": crate.spec(
                 version = "1",
+            ),
+            "clap": crate.spec(
+                version = "4.4.10",
+                features = ["derive", "wrap_help"],
             ),
             "futures": crate.spec(
                 version = "0.3.29",
