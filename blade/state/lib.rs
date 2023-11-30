@@ -7,9 +7,19 @@ use std::option::Option;
 use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Status {
+    Unknown,
+    InProgress,
+    Success,
+    Fail
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Target {
     pub name: String,
-    pub success: bool,
+    pub status: Status,
+    pub start: std::time::SystemTime,
+    pub end: Option<std::time::SystemTime>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -20,8 +30,8 @@ pub struct Test {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct InvocationResults {
-    pub targets: Vec<Target>,
-    pub tests: Vec<Test>,
+    pub targets: HashMap<String, Target>,
+    pub tests: HashMap<String, Test>,
     pub success: Option<bool>,
     pub output: String,
 }
@@ -29,8 +39,8 @@ pub struct InvocationResults {
 impl Default for InvocationResults {
     fn default() -> Self {
         Self {
-            targets: vec![],
-            tests: vec![],
+            targets: HashMap::new(),
+            tests: HashMap::new(),
             success: None,
             output: "".into(),
         }

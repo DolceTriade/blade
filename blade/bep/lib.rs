@@ -5,6 +5,7 @@ use build_proto::build;
 use build_proto::google::devtools::build::v1::*;
 use futures;
 use futures::lock::Mutex;
+use lazy_static::lazy_static;
 use log;
 use pretty_env_logger;
 use prost::Message;
@@ -32,8 +33,24 @@ use tokio::sync::mpsc::Sender;
 use tokio_stream::{wrappers::ReceiverStream, Stream};
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
+mod progress;
+mod target;
+
+lazy_static! {
+    static ref HANDLERS: Vec<Box<dyn EventHandler + Sync + Send>> = vec![Box::new(progress::Handler {}), Box::new(target::Handler {})];
+}
+
+trait EventHandler {
+    fn handle_event(
+        &self,
+        invocation: &mut state::InvocationResults,
+        event: &build_event_stream::BuildEvent,
+    ) -> anyhow::Result<()>;
+}
+
 pub struct BuildEventService {
     state: Arc<state::Global>,
+    
 }
 
 fn proto_name(s: &str) -> &str {
@@ -136,72 +153,25 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             return;
                                         }
                                         let be = be_or.unwrap();
-                                        match be.payload.clone().unwrap() {
-    build_event_stream::build_event::Payload::Progress(p) => {
-        let mut s = session.lock().await;
-        s.results.output.push_str(&p.stdout.replace("\n\r", "\n"));
-        let stderr = p.stderr.split("\n\r").into_iter().filter(|e| !s.results.output.contains(e)).collect::<Vec<_>>().join("\n");
-        s.results.output.push_str(&stderr);
-        s.tx.send(()).await;
-    },
-    build_event_stream::build_event::Payload::Completed(target) => {
-        let mut s = session.lock().await;
-        let outer_id_or = be.id;
-        if outer_id_or.is_none() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        let id_or = outer_id_or.unwrap().id;
-        if id_or.is_none() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        let label = match id_or.unwrap() {
-    build_event_stream::build_event_id::Id::TargetCompleted(t) => t.label,
-    _ => "".into(),
-};
-        if label.is_empty() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        s.results.targets.push(state::Target { name: label, success: target.success });
-        s.tx.send(()).await;
-    },
-    build_event_stream::build_event::Payload::TestSummary(summary) => {
-        let mut s = session.lock().await;
-        let outer_id_or = be.id;
-        if outer_id_or.is_none() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        let id_or = outer_id_or.unwrap().id;
-        if id_or.is_none() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        let label = match id_or.unwrap() {
-    build_event_stream::build_event_id::Id::TestSummary(t) => t.label,
-    _ => "".into(),
-};
-        if label.is_empty() {
-            unexpected_cleanup_session(&mut s);
-            return;
-        }
-        s.results.tests.push(state::Test { name: label, success: summary.overall_status == build_event_stream::TestStatus::Passed as i32 });
-        s.tx.send(()).await;
-    },
-    build_event_stream::build_event::Payload::Finished(f) => {
-        let mut s = session.lock().await;
-        let success = f.exit_code.unwrap_or(build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
-        s.results.success = Some(success);
-        s.tx.send(()).await;
-    },
-    _ => {
-        let dm = be.transcode_to_dynamic();
-        let j = serde_json::ser::to_string_pretty(&dm).unwrap();
-        log::info!("{}", j);
-    },
-}
+                                        match be.payload.as_ref().unwrap() {
+                                            build_event_stream::build_event::Payload::Finished(
+                                                f,
+                                            ) => {
+                                                let mut s = session.lock().await;
+                                                let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
+                                                s.results.success = Some(success);
+                                                s.tx.send(()).await;
+                                            }
+                                            _ => {
+                                                for v in &*HANDLERS {
+                                                    let mut s = session.lock().await;
+                                                    match v.handle_event(&mut s.results, &be) {
+                                                        Err(e) => log::warn!("{:#?}", e),
+                                                        _ => {}
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                     build_event::Event::ComponentStreamFinished(end) => {
                                         buildEnded = true;
@@ -248,7 +218,9 @@ pub async fn run_bes_grpc(host: SocketAddr, state: Arc<state::Global>) -> Result
         .build()?;
 
     proto_registry::init_global_descriptor_pool()?;
-    let server = BuildEventService { state };
+    let server = BuildEventService {
+        state,
+    };
     Server::builder()
         .add_service(publish_build_event_server::PublishBuildEventServer::new(
             server,

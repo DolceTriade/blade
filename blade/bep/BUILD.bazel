@@ -4,6 +4,8 @@ rust_library(
     name = "bep",
     srcs = [
         "lib.rs",
+        "progress.rs",
+        "target.rs",
     ],
     data = [
         "//blade/bep/protos:bep_descriptors",

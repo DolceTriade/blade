@@ -7,7 +7,6 @@ use std::string::ToString;
 pub fn ShellOut(
     text: MaybeSignal<String>,
 ) -> impl IntoView {
-    log::info!("{:#?}", text);
     view! {
         <div class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto">
             {move || match ansi_to_html::convert_escaped(&text.get()) {

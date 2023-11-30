@@ -58,7 +58,7 @@ pub fn Invocation() -> impl IntoView {
                                         .map(|t| {
                                             view! {
                                                 <ListItem>
-                                                    <div class="flex items-center justify-start"><span><StatusIcon class="h-4" success=t.success/></span><span class="pl-4">{t.name.clone()}</span></div>
+                                                    <div class="flex items-center justify-start"><span><StatusIcon class="h-4" success={match t.1.status {state::Status::Success => true, _ => false}}/></span><span class="pl-4">{t.1.name.clone()}</span><span class="text-gray-400 text-xs pl-2 ml-auto">{format!("{:#?}", (t.1.end.unwrap().duration_since(t.1.start).unwrap()))}</span></div>
                                                 </ListItem>
                                             }
                                         })
