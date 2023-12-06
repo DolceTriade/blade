@@ -31,6 +31,8 @@ cfg_if! {
             grpc_host: SocketAddr,
             #[arg(short='H', long="http_host", value_name = "HTTP_HOST", default_value="[::]:3000")]
             http_host: SocketAddr,
+            #[arg(short='d', long="print_message", value_name = "PATTERN", default_value="")]
+            debug_message_pattern: String,
         }
 
         #[actix_web::main]
@@ -77,7 +79,7 @@ cfg_if! {
             .disable_signals()
             .bind(&addr)?
             .run();
-            let fut2 = bep::run_bes_grpc(args.grpc_host, state);
+            let fut2 = bep::run_bes_grpc(args.grpc_host, state, &args.debug_message_pattern);
             let res = join!(fut1, fut2);
             if res.0.is_ok() && res.1.is_ok() {
                 return Ok(());

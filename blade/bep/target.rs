@@ -31,6 +31,7 @@ impl crate::EventHandler for Handler {
                     state::Target {
                         name: label.to_string(),
                         status: state::Status::InProgress,
+                        kind: target.target_kind.to_string(),
                         start: std::time::SystemTime::now(),
                         end: None,
                     },

@@ -4,6 +4,7 @@ rust_library(
     name = "bep",
     srcs = [
         "lib.rs",
+        "print_event.rs",
         "progress.rs",
         "target.rs",
     ],
@@ -34,6 +35,7 @@ rust_library(
         "@crate//:tonic",
         "@crate//:tonic-reflection",
         "@crate//:walkdir",
+        "@crate__regex-1.9.3//:regex",
         "@rules_rust//tools/runfiles",
     ],
 )

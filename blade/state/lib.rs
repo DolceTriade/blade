@@ -18,6 +18,7 @@ pub enum Status {
 pub struct Target {
     pub name: String,
     pub status: Status,
+    pub kind: String,
     pub start: std::time::SystemTime,
     pub end: Option<std::time::SystemTime>,
 }
@@ -32,7 +33,7 @@ pub struct Test {
 pub struct InvocationResults {
     pub targets: HashMap<String, Target>,
     pub tests: HashMap<String, Test>,
-    pub success: Option<bool>,
+    pub status: Status,
     pub output: String,
 }
 
@@ -41,7 +42,7 @@ impl Default for InvocationResults {
         Self {
             targets: HashMap::new(),
             tests: HashMap::new(),
-            success: None,
+            status: Status::Unknown,
             output: "".into(),
         }
     }

@@ -6,7 +6,6 @@ use build_proto::google::devtools::build::v1::*;
 use futures;
 use futures::lock::Mutex;
 use lazy_static::lazy_static;
-use log;
 use pretty_env_logger;
 use prost::Message;
 use prost_reflect::ReflectMessage;
@@ -33,12 +32,9 @@ use tokio::sync::mpsc::Sender;
 use tokio_stream::{wrappers::ReceiverStream, Stream};
 use tonic::{transport::Server, Request, Response, Status, Streaming};
 
+mod print_event;
 mod progress;
 mod target;
-
-lazy_static! {
-    static ref HANDLERS: Vec<Box<dyn EventHandler + Sync + Send>> = vec![Box::new(progress::Handler {}), Box::new(target::Handler {})];
-}
 
 trait EventHandler {
     fn handle_event(
@@ -50,7 +46,7 @@ trait EventHandler {
 
 pub struct BuildEventService {
     state: Arc<state::Global>,
-    
+    handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
 fn proto_name(s: &str) -> &str {
@@ -82,8 +78,11 @@ fn build_aborted() -> build_event_stream::BuildEvent {
 }
 
 fn unexpected_cleanup_session(invocation: &mut state::Invocation) {
-    if invocation.results.success.is_none() {
-        invocation.results.success = Some(false);
+    match invocation.results.status {
+        state::Status::Unknown | state::Status::InProgress => {
+            invocation.results.status = state::Status::Fail;
+        },
+        _ => {},
     }
     drop(&invocation.tx);
 }
@@ -121,6 +120,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         let mut in_stream = request.into_inner();
         let (tx, rx) = mpsc::channel(128);
         let global = self.state.clone();
+        let handlers = self.handlers.clone();
         tokio::spawn(async move {
             while let maybe_message = in_stream.message().await {
                 match maybe_message {
@@ -159,11 +159,14 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             ) => {
                                                 let mut s = session.lock().await;
                                                 let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
-                                                s.results.success = Some(success);
+                                                s.results.status = match success {
+                                                    true => state::Status::Success,
+                                                    false => state::Status::Fail,
+                                                };
                                                 s.tx.send(()).await;
                                             }
                                             _ => {
-                                                for v in &*HANDLERS {
+                                                for v in &*handlers {
                                                     let mut s = session.lock().await;
                                                     match v.handle_event(&mut s.results, &be) {
                                                         Err(e) => log::warn!("{:#?}", e),
@@ -212,15 +215,23 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     }
 }
 
-pub async fn run_bes_grpc(host: SocketAddr, state: Arc<state::Global>) -> Result<()> {
+pub async fn run_bes_grpc(
+    host: SocketAddr,
+    state: Arc<state::Global>,
+    print_message_re: &str,
+) -> Result<()> {
     let reflect = tonic_reflection::server::Builder::configure()
         .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
-
+    let mut handlers: Vec<Box<dyn EventHandler + Sync + Send>> =
+        vec![Box::new(progress::Handler {}), Box::new(target::Handler {})];
+    if !print_message_re.is_empty() {
+        handlers.push(Box::new(print_event::Handler {
+            message_re: regex::Regex::new(print_message_re).unwrap(),
+        }));
+    }
     proto_registry::init_global_descriptor_pool()?;
-    let server = BuildEventService {
-        state,
-    };
+    let server = BuildEventService { state, handlers: Arc::new(handlers) };
     Server::builder()
         .add_service(publish_build_event_server::PublishBuildEventServer::new(
             server,

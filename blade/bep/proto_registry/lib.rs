@@ -91,6 +91,8 @@ mod tests {
         assert!(num_wkt > 0);
         assert!(num_bep > 0);
 
+        std::thread::sleep(std::time::Duration::from_secs(10));
+
         let be = build_event_stream::EnvironmentVariable {
             name: "PATH".into(),
             value: "/usr/bin".into(),
@@ -98,5 +100,8 @@ mod tests {
         let d = be.transcode_to_dynamic();
         let j = serde_json::ser::to_string(&d).unwrap();
         assert_eq!(j, r#"{"name":"UEFUSA==","value":"L3Vzci9iaW4="}"#);
+        let mut udo: std::path::PathBuf = std::env::var("TEST_UNDECLARED_OUTPUTS_DIR").unwrap().into();
+        udo.push("random.txt");
+        std::fs::write(udo, "random file").unwrap();
     }
 }
