@@ -24,6 +24,7 @@ rust_binary(
     deps = [
         "//blade/bep",
         "//blade/state",
+        "//blade/tailwindmerge",
         "@crate//:actix-files",
         "@crate//:actix-web",
         "@crate//:ansi-to-html",
@@ -66,6 +67,7 @@ rust_shared_library(
     visibility = ["//visibility:public"],
     deps = [
         "//blade/state",
+        "//blade/tailwindmerge",
         "@wasm_crate//:ansi-to-html",
         "@wasm_crate//:cfg-if",
         "@wasm_crate//:console_error_panic_hook",

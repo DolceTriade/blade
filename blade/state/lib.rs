@@ -27,6 +27,7 @@ pub struct Target {
 pub struct Test {
     pub name: String,
     pub success: bool,
+    pub duration: std::time::Duration,    
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

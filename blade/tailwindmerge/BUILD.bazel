@@ -1,0 +1,15 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "tailwindmerge",
+    srcs = [
+        "lib.rs",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+rust_test(
+    name = "tailwindmerge_test",
+    size = "small",
+    crate = ":tailwindmerge",
+)

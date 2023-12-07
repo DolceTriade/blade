@@ -4,46 +4,94 @@ use state::InvocationResults;
 use std::string::ToString;
 use std::rc::Rc;
 use state;
+use crate::components::accordion::*;
 use crate::components::statusicon::StatusIcon;
 use crate::components::list::*;
 
-pub fn TargetList(
-) -> impl IntoView
+fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {
+    if end.is_none() {
+        return "".to_string();
+    }
+    let e = end.unwrap();
+    e.duration_since(*start).and_then(|d|Ok(format!("{:#?}", d))).unwrap_or_default()
+}
+
+pub fn TargetList() -> impl IntoView
 {
-    let i = use_context::<Rc<state::InvocationResults>>();
-    i.map(move |i| {
+    let invocation = use_context::<Rc<state::InvocationResults>>();
+    invocation.map(move |inv| {
+        let tests = inv.clone();
+        let targets = inv.clone();
         view! {
             <div>
-                <List>
+                <Accordion>
+                    <AccordionItem header=move || view! { <h3>Tests</h3> }>
+                        <List>
 
-                    {{
-                        i.targets
-                            .clone()
-                            .into_iter()
-                            .map(|t| {
-                                view! {
-                                    <ListItem>
-                                        <div class="flex items-center justify-start">
-                                            <span>
-                                                <StatusIcon class="h-4" status=t.1.status.clone().into()/>
+                            {(!tests.tests.is_empty())
+                                .then(move || {
+                                    tests
+                                        .tests
+                                        .clone()
+                                        .into_iter()
+                                        .map(|t| {
+                                            view! {
+                                                <ListItem>
+                                                    <div class="flex items-center justify-start overflow-x-auto">
+                                                        <span>
+                                                            <StatusIcon
+                                                                class="h-4"
+                                                                status=if t.1.success {
+                                                                    state::Status::Success.into()
+                                                                } else {
+                                                                    state::Status::Fail.into()
+                                                                }
+                                                            />
 
-                                            </span>
-                                            <span class="pl-4">{t.1.name.clone()}</span>
-                                            <span class="text-gray-400 text-xs pl-2 ml-auto">
-                                                {format!(
-                                                    "{:#?}",
-                                                    (t.1.end.unwrap().duration_since(t.1.start).unwrap()),
-                                                )}
+                                                        </span>
+                                                        <span class="pl-4">{t.1.name.clone()}</span>
+                                                        <span class="text-gray-400 text-xs pl-2 ml-auto">
+                                                            {format!("{:#?}", t.1.duration)}
+                                                        </span>
+                                                    </div>
+                                                </ListItem>
+                                            }
+                                        })
+                                        .collect::<Vec<_>>()
+                                })}
 
-                                            </span>
-                                        </div>
-                                    </ListItem>
-                                }
-                            })
-                            .collect::<Vec<_>>()
-                    }}
+                        </List>
+                    </AccordionItem>
 
-                </List>
+                    <AccordionItem header=move || view! { <h3>Targets</h3> }>
+                        <List>
+
+                            {targets
+                                .targets
+                                .clone()
+                                .into_iter()
+                                .map(|t| {
+                                    view! {
+                                        <ListItem>
+                                            <div class="flex items-center justify-start overflow-x-auto">
+                                                <span>
+                                                    <StatusIcon class="h-4" status=t.1.status.clone().into()/>
+
+                                                </span>
+                                                <span class="pl-4">{t.1.name.clone()}</span>
+                                                <span class="text-gray-400 text-xs pl-2 ml-auto">
+                                                    {format_time(&t.1.start, t.1.end.as_ref())}
+
+                                                </span>
+                                            </div>
+                                        </ListItem>
+                                    }
+                                })
+                                .collect::<Vec<_>>()}
+
+                        </List>
+                    </AccordionItem>
+                </Accordion>
             </div>
         }}).unwrap_or(view! { <div></div> })
 }
