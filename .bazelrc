@@ -3,6 +3,7 @@ import %workspace%/.bazel-lib/bazelrc/convenience.bazelrc
 import %workspace%/.bazel-lib/bazelrc/correctness.bazelrc
 import %workspace%/.bazel-lib/bazelrc/performance.bazelrc
 import %workspace%/.bazel-lib/bazelrc/nix-toolchains.bazelrc
+import %workspace%/.bazel-lib/bazelrc/clippy.bazelrc
 
 try-import %workspace%/.bazelenvrc
 try-import %workspace%/user.bazelrc

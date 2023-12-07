@@ -1,7 +1,4 @@
 use leptos::*;
-use leptos_meta::*;
-use log;
-use crate::components::nav::Nav;
 
 #[component]
 pub fn Empty() -> impl IntoView {

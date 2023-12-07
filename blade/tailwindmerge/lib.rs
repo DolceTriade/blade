@@ -3,22 +3,20 @@ use std::collections::BTreeMap;
 pub fn tailwind_merge(orig: &str, add: &str) -> String {
     let mut m = BTreeMap::new();
 
-    orig.split_ascii_whitespace().into_iter().for_each(|f| {
-        f.rsplit_once("-")
-            .and_then(|(prefix, _)| {
+    orig.split_ascii_whitespace().for_each(|f| {
+        f.rsplit_once('-')
+            .map(|(prefix, _)| {
                 m.insert(prefix, f);
-                Some(())
             })
             .or_else(|| {
                 m.insert(f, f);
                 Some(())
             });
     });
-    add.split_ascii_whitespace().into_iter().for_each(|f| {
-        f.rsplit_once("-")
-            .and_then(|(prefix, _)| {
+    add.split_ascii_whitespace().for_each(|f| {
+        f.rsplit_once('-')
+            .map(|(prefix, _)| {
                 m.insert(prefix, f);
-                Some(())
             })
             .or_else(|| {
                 m.insert(f, f);

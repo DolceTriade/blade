@@ -1,36 +1,14 @@
 use anyhow::Context;
 use anyhow::Result;
-use build_event_stream_proto::{build_event_stream::File, *};
-use build_proto::build;
+use build_event_stream_proto::*;
 use build_proto::google::devtools::build::v1::*;
-use futures;
 use futures::lock::Mutex;
-use lazy_static::lazy_static;
-use pretty_env_logger;
 use prost::Message;
-use prost_reflect::ReflectMessage;
-use prost_reflect::{DescriptorPool, DynamicMessage};
-use prost_types::FileDescriptorSet;
-use proto_registry;
-use runfiles::Runfiles;
-use scopeguard;
-use scopeguard::defer;
-use serde_json;
-use state;
-use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::{
-    default,
-    error::Error,
-    fs,
-    net::ToSocketAddrs,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::sync::Arc;
 use tokio::sync::mpsc;
-use tokio::sync::mpsc::Sender;
-use tokio_stream::{wrappers::ReceiverStream, Stream};
-use tonic::{transport::Server, Request, Response, Status, Streaming};
+use tokio_stream::wrappers::ReceiverStream;
+use tonic::{transport::Server,  Response, Status};
 
 mod print_event;
 mod progress;
@@ -49,34 +27,6 @@ pub struct BuildEventService {
     handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
-fn proto_name(s: &str) -> &str {
-    if let Some(idx) = s.find("/") {
-        return &s[idx + 1..];
-    }
-    s
-}
-
-fn build_over() -> build_event_stream::BuildEvent {
-    let mut be: build_event_stream::BuildEvent = build_event_stream::BuildEvent::default();
-    be.payload = Some(build_event_stream::build_event::Payload::Finished(
-        build_event_stream::BuildFinished {
-            ..Default::default()
-        },
-    ));
-    be
-}
-
-fn build_aborted() -> build_event_stream::BuildEvent {
-    let mut be: build_event_stream::BuildEvent = build_event_stream::BuildEvent::default();
-    be.payload = Some(build_event_stream::build_event::Payload::Aborted(
-        build_event_stream::Aborted {
-            reason: 0,
-            description: "idk".into(),
-        },
-    ));
-    be
-}
-
 fn unexpected_cleanup_session(invocation: &mut state::Invocation) {
     match invocation.results.status {
         state::Status::Unknown | state::Status::InProgress => {
@@ -84,7 +34,6 @@ fn unexpected_cleanup_session(invocation: &mut state::Invocation) {
         },
         _ => {},
     }
-    drop(&invocation.tx);
 }
 
 async fn get_session(global: Arc<state::Global>, uuid: String) -> Arc<Mutex<state::Invocation>> {
@@ -101,7 +50,7 @@ async fn get_session(global: Arc<state::Global>, uuid: String) -> Arc<Mutex<stat
 impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     async fn publish_lifecycle_event(
         &self,
-        request: tonic::Request<
+        _request: tonic::Request<
             build_proto::google::devtools::build::v1::PublishLifecycleEventRequest,
         >,
     ) -> std::result::Result<tonic::Response<empty_proto::google::protobuf::Empty>, tonic::Status>
@@ -122,12 +71,13 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         let global = self.state.clone();
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
-            while let maybe_message = in_stream.message().await {
+            loop {
+                let maybe_message = in_stream.message().await;
                 match maybe_message {
                     Ok(res) => {
                         if let Some(v) = res {
                             if let Some(obe) = &v.ordered_build_event {
-                                let mut buildEnded = false;
+                                let mut build_ended = false;
                                 let stream_id_or = obe.stream_id.as_ref();
                                 if stream_id_or.is_none() {
                                     log::warn!("missing stream id");
@@ -163,36 +113,34 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                     true => state::Status::Success,
                                                     false => state::Status::Fail,
                                                 };
-                                                s.tx.send(()).await;
                                             }
                                             _ => {
                                                 for v in &*handlers {
                                                     let mut s = session.lock().await;
-                                                    match v.handle_event(&mut s.results, &be) {
-                                                        Err(e) => log::warn!("{:#?}", e),
-                                                        _ => {}
+                                                    if let Err(e) =  v.handle_event(&mut s.results, &be) {
+                                                        log::warn!("{:#?}", e);
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                    build_event::Event::ComponentStreamFinished(end) => {
-                                        buildEnded = true;
+                                    build_event::Event::ComponentStreamFinished(_) => {
+                                        build_ended = true;
                                     }
                                     _ => {
                                         //log::info!("Got other event: {:#?}", event)
                                     }
                                 }
-                                tx.send(Ok(PublishBuildToolEventStreamResponse {
+                                let _ = tx.send(Ok(PublishBuildToolEventStreamResponse {
                                     sequence_number: obe.sequence_number,
                                     stream_id: obe.stream_id.clone(),
                                 }))
                                 .await
-                                .or_else(|_| {
-                                    buildEnded = true;
-                                    Err(())
+                                .map_err(|e| {
+                                    log::warn!("failed to send message: {:#?}", e);
+                                    build_ended = true;
                                 });
-                                if buildEnded {
+                                if build_ended {
                                     log::error!("BUILD OVER");
                                     drop(tx);
                                     return;

@@ -1,17 +1,15 @@
 use cfg_if::cfg_if;
-use futures::lock::Mutex;
 use serde::*;
 use std::collections::HashMap;
 use std::default::Default;
 use std::option::Option;
-use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Status {
     Unknown,
     InProgress,
     Success,
-    Fail
+    Fail,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -27,7 +25,7 @@ pub struct Target {
 pub struct Test {
     pub name: String,
     pub success: bool,
-    pub duration: std::time::Duration,    
+    pub duration: std::time::Duration,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -51,12 +49,12 @@ impl Default for InvocationResults {
 
 cfg_if! {
 if #[cfg(feature = "ssr")] {
-    use tokio::sync::mpsc;
-#[derive(Debug)]
+use futures::lock::Mutex;
+use std::sync::Arc;
+
+#[derive(Debug, Default)]
 pub struct Invocation {
     pub results: InvocationResults,
-    pub rx: mpsc::Receiver<()>,
-    pub tx: mpsc::Sender<()>,
 }
 
 pub struct Global {
@@ -71,15 +69,10 @@ impl Global {
     }
 }
 
-impl Default for Invocation {
-    fn default() -> Self {
-        let (tx, rx) = mpsc::channel(128);
-        Invocation {
-            results: Default::default(),
-            rx,
-            tx,
-        }
-    }
-}
+impl Default for Global {
+         fn default() -> Self {
+             Self::new()
+}}
+
 }
 }

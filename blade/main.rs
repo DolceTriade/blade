@@ -11,15 +11,11 @@ cfg_if! {
         use anyhow::Context;
         use actix_files::Files;
         use actix_web::*;
-        use bep;
         use clap::*;
         use futures::join;
         use leptos::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
-        use pretty_env_logger;
         use std::sync::Arc;
-        use state;
-        use tokio::sync::mpsc;
 
         use crate::routes::app::App;
 
@@ -37,9 +33,8 @@ cfg_if! {
 
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
-            match std::env::var("RUST_LOG") {
-                Err(_) => std::env::set_var("RUST_LOG", "info"),
-                _ => {}
+            if std::env::var("RUST_LOG").is_err() {
+                std::env::set_var("RUST_LOG", "info");
             }
             pretty_env_logger::init();
 
@@ -48,7 +43,7 @@ cfg_if! {
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let mut conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
-            conf.leptos_options.site_addr = args.http_host.clone();
+            conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(App);
             let state = Arc::new(state::Global::new());

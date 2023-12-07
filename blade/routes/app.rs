@@ -1,7 +1,6 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use log;
 use crate::components::nav::Nav;
 use crate::routes::empty::Empty;
 use crate::routes::invocation::Invocation;

@@ -1,0 +1,6 @@
+build --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
+build --output_groups=+clippy_checks
+build --output_groups=+default
+build --show_result=0
+# Nix passes this in for us?
+build --@rules_rust//rust/settings:experimental_toolchain_generated_sysroot=false

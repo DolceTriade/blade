@@ -1,27 +1,26 @@
 use crate::components::card::Card;
-use crate::components::list::*;
-use crate::components::nav::Nav;
 use crate::components::shellout::ShellOut;
 use crate::components::statusicon::StatusIcon;
 use crate::components::targetlist::TargetList;
-use ansi_to_html;
 use leptos::*;
-use leptos_dom::helpers::IntervalHandle;
 use leptos_router::*;
-use log;
 use state;
-use std::sync::Arc;
 use std::rc::Rc;
+
+#[cfg(feature = "ssr")]
+use std::sync::Arc;
 
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
-    let mut map = global.sessions.lock().await;
+    let map = global.sessions.lock().await;
     if let Some(invocation) = map.get(&uuid) {
         log::info!("Sending {:#?}", invocation);
         return Ok(invocation.lock().await.results.clone());
     }
-    return Err(ServerFnError::ServerError(format!("Invocation {uuid} not found").into()));
+    return Err(ServerFnError::ServerError(
+        format!("Invocation {uuid} not found"),
+    ));
 }
 
 #[derive(PartialEq, Params)]
@@ -41,14 +40,21 @@ pub fn Invocation() -> impl IntoView {
                     .unwrap_or_default()
             })
         },
-        move |id| async move { 
-            get_invocation(id).await
-         },
+        move |id| async move { get_invocation(id).await },
     );
-    
-    let cancel_or = create_local_resource(move||(), move|_| async move { 
-        set_interval_with_handle(move||{res.refetch();}, std::time::Duration::from_secs(15)).ok()
-    });
+
+    let cancel_or = create_local_resource(
+        move || (),
+        move |_| async move {
+            set_interval_with_handle(
+                move || {
+                    res.refetch();
+                },
+                std::time::Duration::from_secs(15),
+            )
+            .ok()
+        },
+    );
 
     view! {
         <Transition fallback=move || {

@@ -2,13 +2,12 @@ use leptos::*;
 use state;
 use tailwindmerge::tailwind_merge;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn StatusIcon(
     status: MaybeSignal<state::Status>,
     #[prop(into, default = "".into())] class: MaybeSignal<String>,
 ) -> impl IntoView {
-    let c1 = class.clone();
-    let c2 = class.clone();
     view! {
         {move || match status.get() {
             state::Status::Success => {
@@ -17,7 +16,7 @@ pub fn StatusIcon(
             state::Status::Fail => {
                 view! { <img class=class.get() src="/pkg/static/fail.svg"/> }.into_view()
             }
-            state::Status::InProgress | _ => {
+            _ => {
                 view! {
                     <span class=format!("relative flex {}", class.get())>
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-75"></span>

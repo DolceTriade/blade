@@ -1,8 +1,7 @@
 use ansi_to_html;
 use leptos::*;
-use leptos_meta::*;
-use std::string::ToString;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn ShellOut(
     text: MaybeSignal<String>,
@@ -10,7 +9,7 @@ pub fn ShellOut(
     view! {
         <div class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto">
             {move || match ansi_to_html::convert_escaped(&text.get()) {
-                Err(e) => view! { <div>format!("mistake: {:#?}", e)</div> },
+                Err(err) => view! { <div>{format!("mistake: {:#?}", err)}</div> },
                 Ok(t) => view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> },
             }}
 

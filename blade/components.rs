@@ -4,6 +4,5 @@ pub mod list;
 pub mod statusicon;
 pub mod shellout;
 pub mod summaryheader;
-pub mod context;
 pub mod targetlist;
 pub mod accordion;

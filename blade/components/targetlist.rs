@@ -1,6 +1,4 @@
 use leptos::*;
-use leptos_meta::*;
-use state::InvocationResults;
 use std::string::ToString;
 use std::rc::Rc;
 use state;
@@ -13,9 +11,10 @@ fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime
         return "".to_string();
     }
     let e = end.unwrap();
-    e.duration_since(*start).and_then(|d|Ok(format!("{:#?}", d))).unwrap_or_default()
+    e.duration_since(*start).map(|d| format!("{:#?}", d)).unwrap_or_default()
 }
 
+#[allow(non_snake_case)]
 pub fn TargetList() -> impl IntoView
 {
     let invocation = use_context::<Rc<state::InvocationResults>>();

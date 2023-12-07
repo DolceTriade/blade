@@ -7,16 +7,10 @@ impl crate::EventHandler for Handler {
         invocation: &mut state::InvocationResults,
         event: &build_event_stream_proto::build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
-        match event.payload.as_ref() {
-            Some(build_event_stream::build_event::Payload::Progress(p)) => {
-                invocation
-                    .output
-                    .push_str(&p.stdout.replace("\n\r", "\n"));
-                invocation
-                    .output
-                    .push_str(&p.stderr.replace("\n\r", "\n"));
-            }
-            _ => {}
+        if let Some(build_event_stream::build_event::Payload::Progress(p)) = event.payload.as_ref()
+        {
+            invocation.output.push_str(&p.stdout.replace("\n\r", "\n"));
+            invocation.output.push_str(&p.stderr.replace("\n\r", "\n"));
         }
         Ok(())
     }

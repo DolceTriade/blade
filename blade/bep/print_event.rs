@@ -1,6 +1,4 @@
-use build_event_stream_proto::build_event_stream;
-use log;
-use prost_reflect::{DynamicMessage, ReflectMessage};
+use prost_reflect::ReflectMessage;
 use regex::Regex;
 pub(crate) struct Handler {
     pub message_re: Regex,
@@ -9,7 +7,7 @@ pub(crate) struct Handler {
 impl crate::EventHandler for Handler {
     fn handle_event(
         &self,
-        invocation: &mut state::InvocationResults,
+        _invocation: &mut state::InvocationResults,
         event: &build_event_stream_proto::build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
         let desc = event.descriptor();
@@ -20,7 +18,7 @@ impl crate::EventHandler for Handler {
             }
             Some(o) => o,
         };
-        oneof.fields().into_iter().try_for_each(|f| {
+        let _ = oneof.fields().try_for_each(|f| {
             if dm.has_field(&f)
                 && self
                     .message_re
@@ -30,7 +28,7 @@ impl crate::EventHandler for Handler {
                 log::info!("{}", j);
                 return Err(());
             }
-            return Ok(());
+            Ok(())
         });
         Ok(())
     }

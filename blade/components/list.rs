@@ -1,7 +1,6 @@
 use leptos::*;
-use leptos_meta::*;
-use std::string::ToString;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn ListItem(
     children: Children

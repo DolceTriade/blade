@@ -1,8 +1,7 @@
 use leptos::*;
-use leptos_meta::*;
-use std::string::ToString;
 use crate::components::statusicon::StatusIcon;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn SummaryHeader(
 ) -> impl IntoView

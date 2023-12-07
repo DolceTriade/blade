@@ -26,7 +26,7 @@ fn load() -> FileDescriptorSet {
         }
     }
     let mut fds: FileDescriptorSet = FileDescriptorSet::default();
-    for (_, v) in &hs {
+    for v in hs.values() {
         let desc = fs::read(v).expect("failed to read descriptor");
         fds.merge(&desc[..]).expect("failed to merge descriptor");
     }
@@ -38,7 +38,7 @@ pub fn init_global_descriptor_pool() -> Result<()> {
     DescriptorPool::decode_global_file_descriptor_set(b)
         .context("failed to load global descriptor pool")?;
 
-    return Ok(());
+    Ok(())
 }
 
 #[cfg(test)]
@@ -46,7 +46,6 @@ mod tests {
     use super::*;
     use build_event_stream_proto::*;
     use prost_reflect::ReflectMessage;
-    use serde_json;
 
     #[test]
     fn test_load() {
@@ -89,7 +88,7 @@ mod tests {
             }
         });
         assert!(num_wkt > 0);
-        assert!(num_bep > 0);
+        assert!(num_bep > 0); 
 
         std::thread::sleep(std::time::Duration::from_secs(5));
 

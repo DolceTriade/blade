@@ -1,6 +1,4 @@
 use leptos::*;
-use leptos_meta::*;
-use std::string::ToString;
 
 #[component]
 pub fn AccordionItem<F, IV>(header: F, children: Children) -> impl IntoView

@@ -32,7 +32,7 @@ fn to_duration(
     };
     let s = start.map(convert).unwrap_or_default();
     let e = end.map(convert).unwrap_or_default();
-    return e - s;
+    e - s
 }
 
 impl crate::EventHandler for Handler {
