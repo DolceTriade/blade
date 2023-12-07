@@ -6,6 +6,7 @@ use crate::components::statusicon::StatusIcon;
 use crate::components::targetlist::TargetList;
 use ansi_to_html;
 use leptos::*;
+use leptos_dom::helpers::IntervalHandle;
 use leptos_router::*;
 use log;
 use state;
@@ -44,6 +45,10 @@ pub fn Invocation() -> impl IntoView {
             get_invocation(id).await
          },
     );
+    
+    let cancel_or = create_local_resource(move||(), move|_| async move { 
+        set_interval_with_handle(move||{res.refetch();}, std::time::Duration::from_secs(15)).ok()
+    });
 
     view! {
         <Transition fallback=move || {
@@ -55,14 +60,23 @@ pub fn Invocation() -> impl IntoView {
                     match i_or {
                         Ok(i) => {
                             provide_context(Rc::new(i.clone()));
+                            match i.status {
+                                state::Status::Success | state::Status::Fail => {
+                                    cancel_or
+                                        .map(|c| {
+                                            if let Some(cancel) = c {
+                                                cancel.clear()
+                                            }
+                                        });
+                                }
+                                _ => {}
+                            }
                             view! {
                                 <div>
                                     <Card>
                                         <StatusIcon status=i.status.into() class="h-4 w-4"/>
                                     </Card>
-                                    <Card>
-                                        {TargetList()}
-                                    </Card>
+                                    <Card>{TargetList()}</Card>
                                     <div>
                                         <Card>
                                             <ShellOut text=i.output.into()/>
