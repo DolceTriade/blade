@@ -3,12 +3,14 @@ use crate::components::list::*;
 use crate::components::nav::Nav;
 use crate::components::shellout::ShellOut;
 use crate::components::statusicon::StatusIcon;
+use crate::components::targetlist::TargetList;
 use ansi_to_html;
 use leptos::*;
 use leptos_router::*;
 use log;
 use state;
 use std::sync::Arc;
+use std::rc::Rc;
 
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
@@ -52,41 +54,14 @@ pub fn Invocation() -> impl IntoView {
                 Some(i_or) => {
                     match i_or {
                         Ok(i) => {
+                            provide_context(Rc::new(i.clone()));
                             view! {
                                 <div>
                                     <Card>
                                         <StatusIcon status=i.status.into() class="h-4 w-4"/>
                                     </Card>
                                     <Card>
-                                        <List>
-
-                                            {{
-                                                i.targets
-                                                    .into_iter()
-                                                    .map(|t| {
-                                                        view! {
-                                                            <ListItem>
-                                                                <div class="flex items-center justify-start">
-                                                                    <span>
-                                                                        <StatusIcon class="h-4" status=t.1.status.into()/>
-
-                                                                    </span>
-                                                                    <span class="pl-4">{t.1.name.clone()}</span>
-                                                                    <span class="text-gray-400 text-xs pl-2 ml-auto">
-                                                                        {format!(
-                                                                            "{:#?}",
-                                                                            (t.1.end.unwrap().duration_since(t.1.start).unwrap()),
-                                                                        )}
-
-                                                                    </span>
-                                                                </div>
-                                                            </ListItem>
-                                                        }
-                                                    })
-                                                    .collect::<Vec<_>>()
-                                            }}
-
-                                        </List>
+                                        {TargetList()}
                                     </Card>
                                     <div>
                                         <Card>
