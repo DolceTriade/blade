@@ -24,44 +24,45 @@ pub fn TargetList() -> impl IntoView
         view! {
             <div>
                 <Accordion>
-                    <AccordionItem header=move || view! { <h3>Tests</h3> }>
-                        <List>
 
-                            {(!tests.tests.is_empty())
-                                .then(move || {
-                                    tests
-                                        .tests
-                                        .clone()
-                                        .into_iter()
-                                        .map(|t| {
-                                            view! {
-                                                <ListItem>
-                                                    <div class="flex items-center justify-start overflow-x-auto">
-                                                        <span>
-                                                            <StatusIcon
-                                                                class="h-4"
-                                                                status=if t.1.success {
-                                                                    state::Status::Success.into()
-                                                                } else {
-                                                                    state::Status::Fail.into()
-                                                                }
-                                                            />
+                    {(!tests.tests.is_empty())
+                        .then(move || {
+                            view! {
+                                <AccordionItem header=move || view! { <h3>Tests</h3> }>
+                                    <List>
 
-                                                        </span>
-                                                        <span class="pl-4">{t.1.name.clone()}</span>
-                                                        <span class="text-gray-400 text-xs pl-2 ml-auto">
-                                                            {format!("{:#?}", t.1.duration)}
-                                                        </span>
-                                                    </div>
-                                                </ListItem>
-                                            }
-                                        })
-                                        .collect::<Vec<_>>()
-                                })}
+                                        {tests
+                                            .tests
+                                            .clone()
+                                            .into_iter()
+                                            .map(|t| {
+                                                view! {
+                                                    <ListItem>
+                                                        <div class="flex items-center justify-start overflow-x-auto">
+                                                            <span>
+                                                                <StatusIcon
+                                                                    class="h-4"
+                                                                    status=if t.1.success {
+                                                                        state::Status::Success.into()
+                                                                    } else {
+                                                                        state::Status::Fail.into()
+                                                                    }
+                                                                />
 
-                        </List>
-                    </AccordionItem>
-
+                                                            </span>
+                                                            <span class="pl-4">{t.1.name.clone()}</span>
+                                                            <span class="text-gray-400 text-xs pl-2 ml-auto">
+                                                                {format!("{:#?}", t.1.duration)}
+                                                            </span>
+                                                        </div>
+                                                    </ListItem>
+                                                }
+                                            })
+                                            .collect::<Vec<_>>()}
+                                    </List>
+                                </AccordionItem>
+                            }
+                        })}
                     <AccordionItem header=move || view! { <h3>Targets</h3> }>
                         <List>
 
