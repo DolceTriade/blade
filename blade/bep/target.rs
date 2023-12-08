@@ -68,6 +68,15 @@ impl crate::EventHandler for Handler {
                     state::Status::Fail
                 };
             }
+            Some(build_event_stream::build_event::Payload::Aborted(_)) => {
+                let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
+                let target = invocation
+                    .targets
+                    .get_mut(&label)
+                    .ok_or(anyhow::anyhow!("failed to find target {}", label))?;
+                target.end = Some(std::time::SystemTime::now());
+                target.status = state::Status::Fail;
+            }
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
                 invocation.tests.insert(

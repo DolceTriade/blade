@@ -18,7 +18,7 @@ pub fn StatusIcon(
             }
             _ => {
                 view! {
-                    <span class=format!("relative flex {}", class.get())>
+                    <span class=tailwind_merge("relative flex", &class.get())>
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-75"></span>
                         <span class=tailwind_merge(
                             "relative inline-flex rounded-full bg-yellow-300",

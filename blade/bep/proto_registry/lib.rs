@@ -90,7 +90,7 @@ mod tests {
         assert!(num_wkt > 0);
         assert!(num_bep > 0); 
 
-        std::thread::sleep(std::time::Duration::from_secs(5));
+        std::thread::sleep(std::time::Duration::from_secs(30));
 
         let be = build_event_stream::EnvironmentVariable {
             name: "PATH".into(),

@@ -50,7 +50,7 @@ pub fn Invocation() -> impl IntoView {
                 move || {
                     res.refetch();
                 },
-                std::time::Duration::from_secs(15),
+                std::time::Duration::from_secs(5),
             )
             .ok()
         },
@@ -78,16 +78,16 @@ pub fn Invocation() -> impl IntoView {
                                 _ => {}
                             }
                             view! {
-                                <div>
+                                <div class="flex flex-col grow">
                                     <Card>
                                         <StatusIcon status=i.status.into() class="h-4 w-4"/>
                                     </Card>
 
-                                    <div class="flex items-start justify-start justify-items-center">
-                                        <Card class="overflow-auto overflow-x-auto p-0 m-0 text-ellipsis">
+                                    <div class="flex items-start justify-start justify-items-center shrink-0">
+                                        <Card class="h-screen w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
                                             {TargetList()}
                                         </Card>
-                                        <Card class="overflow-auto overflow-x-auto grow">
+                                        <Card class="h-screen w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                                             <ShellOut text=i.output.into()/>
                                         </Card>
                                     </div>
