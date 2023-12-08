@@ -1,5 +1,5 @@
 {
-  "checksum": "06926c3e2ca0e1e4cd60925a106f8ffda43036167b5f5d52a41985442f65e723",
+  "checksum": "e7d4876030b3bd6cba2b01bf21e2c527a115516c79ce44449ada9163803c0e45",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -9818,6 +9818,10 @@
             "DeviceOrientationEvent",
             "Document",
             "DocumentFragment",
+            "DomQuad",
+            "DomRect",
+            "DomRectList",
+            "DomRectReadOnly",
             "DomStringMap",
             "DomTokenList",
             "DragEvent",

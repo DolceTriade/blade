@@ -1,5 +1,5 @@
 {
-  "checksum": "cb811059780d1d66ff1018f25e453ce77e3219f034fffaa1547dbe0627c4c276",
+  "checksum": "a11615fe7498736df432200a5f3b3948851ef4befec46e6ca36e9e7481cac7f4",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -18437,6 +18437,10 @@
             "DeviceOrientationEvent",
             "Document",
             "DocumentFragment",
+            "DomQuad",
+            "DomRect",
+            "DomRectList",
+            "DomRectReadOnly",
             "DomStringMap",
             "DomTokenList",
             "DragEvent",

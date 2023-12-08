@@ -2,7 +2,7 @@ use crate::components::accordion::*;
 use crate::components::list::*;
 use crate::components::statusicon::StatusIcon;
 use leptos::*;
-use leptos_dom::helpers::event_target;
+use leptos_dom::{document, helpers::event_target};
 use state;
 use std::rc::Rc;
 use std::string::ToString;
@@ -28,8 +28,9 @@ pub fn TargetList() -> impl IntoView {
             let el = event_target::<web_sys::HtmlSpanElement>(&e);
             el.next_element_sibling()
                 .map(|s|{
+                    let body = document().body().unwrap().get_bounding_client_rect();
                     let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
-                    span.offset_top() - span.scroll_top()
+                    span.get_bounding_client_rect().y() - body.y()
                 })
                 .map(|t|{ 
                     el.set_attribute("style", &format!("top: {}px", t)).ok()

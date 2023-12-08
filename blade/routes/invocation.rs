@@ -15,7 +15,6 @@ pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, Se
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
     let map = global.sessions.lock().await;
     if let Some(invocation) = map.get(&uuid) {
-        log::info!("Sending {:#?}", invocation);
         return Ok(invocation.lock().await.results.clone());
     }
     return Err(ServerFnError::ServerError(

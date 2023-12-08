@@ -54,7 +54,12 @@ def rust_dependencies():
                         "@bintools//:bin/ar",
                     ],
                 ),
-            ],            
+            ],
+            "web-sys": [
+                crate.annotation(
+                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(
@@ -185,6 +190,11 @@ def rust_dependencies():
                     rustc_env = {
                         "SERVER_FN_OVERRIDE_KEY": "bazel",
                     },
+                ),
+            ],
+            "web-sys": [
+                crate.annotation(
+                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
                 ),
             ],
         },
