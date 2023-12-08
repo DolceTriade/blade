@@ -40,7 +40,7 @@ where
             </svg>
         </button>
         <div class=move || {
-            format!("transition {}", if hide.get() { "invisible absolute" } else { "" })
+            format!("w-fit transition {}", if hide.get() { "invisible absolute" } else { "" })
         }>
             <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-700 dark:bg-gray-900">
                 {children()}

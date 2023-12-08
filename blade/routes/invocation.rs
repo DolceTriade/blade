@@ -83,11 +83,11 @@ pub fn Invocation() -> impl IntoView {
                                         <StatusIcon status=i.status.into() class="h-4 w-4"/>
                                     </Card>
 
-                                    <div class="h-screen flex items-start justify-start justify-items-center">
-                                        <Card class="h-full w-max max-w-max overflow-auto p-0 m-0 text-ellipsis">
+                                    <div class="flex items-start justify-start justify-items-center">
+                                        <Card class="overflow-auto overflow-x-auto p-0 m-0 text-ellipsis">
                                             {TargetList()}
                                         </Card>
-                                        <Card class="h-full w-max max-w-max overflow-auto overflow-x-auto grow">
+                                        <Card class="overflow-auto overflow-x-auto grow">
                                             <ShellOut text=i.output.into()/>
                                         </Card>
                                     </div>

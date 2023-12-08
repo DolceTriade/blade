@@ -10,7 +10,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
     view! {
         <Stylesheet id="leptos" href="/pkg/static/style.css"/>
-        <div id="root" class="h-full w-full max-h-full max-w-full">
+        <div id="root">
             <Router>
                 <Nav name="Blade" logo="/pkg/static/logo.svg"/>
                 <main>
