@@ -52,6 +52,7 @@ where
     }
 }
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Accordion(children: Children) -> impl IntoView {
     view! { <div class="m-0 p-0">{children()}</div> }

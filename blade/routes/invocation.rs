@@ -1,7 +1,7 @@
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
-use crate::components::statusicon::StatusIcon;
 use crate::components::targetlist::TargetList;
+use crate::components::summaryheader::SummaryHeader;
 use leptos::*;
 use leptos_router::*;
 use state;
@@ -79,14 +79,14 @@ pub fn Invocation() -> impl IntoView {
                             view! {
                                 <div class="flex flex-col grow">
                                     <Card>
-                                        <StatusIcon status=i.status.into() class="h-4 w-4"/>
+                                        <SummaryHeader/>
                                     </Card>
 
                                     <div class="flex items-start justify-start justify-items-center shrink-0">
-                                        <Card class="h-screen w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
+                                        <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
                                             {TargetList()}
                                         </Card>
-                                        <Card class="h-screen w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                                        <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                                             <ShellOut text=i.output.into()/>
                                         </Card>
                                     </div>

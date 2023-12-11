@@ -183,7 +183,7 @@ pub async fn run_bes_grpc(
     Server::builder()
         .add_service(publish_build_event_server::PublishBuildEventServer::new(
             server,
-        ))
+        ).max_decoding_message_size(10*1024*1024))
         .add_service(reflect)
         .serve(host)
         .await
