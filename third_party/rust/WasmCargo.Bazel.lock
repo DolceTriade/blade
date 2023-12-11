@@ -1,5 +1,5 @@
 {
-  "checksum": "e7d4876030b3bd6cba2b01bf21e2c527a115516c79ce44449ada9163803c0e45",
+  "checksum": "013e65266bbe4f59ecfd2a7a6aeec2923fd4601afbea6f53c8f27e05295aa7e0",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1097,36 +1097,6 @@
       },
       "license": "MIT"
     },
-    "common_macros 0.1.1": {
-      "name": "common_macros",
-      "version": "0.1.1",
-      "repository": {
-        "Http": {
-          "url": "https://crates.io/api/v1/crates/common_macros/0.1.1/download",
-          "sha256": "f3f6d59c71e7dc3af60f0af9db32364d96a16e9310f3f5db2b55ed642162dd35"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "common_macros",
-            "crate_root": "src/lib.rs",
-            "srcs": [
-              "**/*.rs"
-            ]
-          }
-        }
-      ],
-      "library_target_name": "common_macros",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "edition": "2018",
-        "version": "0.1.1"
-      },
-      "license": "MIT OR Apache-2.0"
-    },
     "config 0.13.3": {
       "name": "config",
       "version": "0.13.3",
@@ -1532,15 +1502,15 @@
               "target": "gloo_net"
             },
             {
-              "id": "leptos 0.5.2",
+              "id": "leptos 0.5.4",
               "target": "leptos"
             },
             {
-              "id": "leptos_meta 0.5.2",
+              "id": "leptos_meta 0.5.4",
               "target": "leptos_meta"
             },
             {
-              "id": "leptos_router 0.5.2",
+              "id": "leptos_router 0.5.4",
               "target": "leptos_router"
             },
             {
@@ -3815,13 +3785,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "leptos 0.5.2": {
+    "leptos 0.5.4": {
       "name": "leptos",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos/0.5.2/download",
-          "sha256": "f98f0fe11faa66358ff8c2ee48881c54f8f216ecddabfc5b69cdc2e90c8e337b"
+          "url": "https://crates.io/api/v1/crates/leptos/0.5.4/download",
+          "sha256": "9d02b78d6e38acf8199426058a0d8c4030835d84a4ee16147df25be7fed707e0"
         }
       },
       "targets": [
@@ -3856,23 +3826,23 @@
               "target": "cfg_if"
             },
             {
-              "id": "leptos_config 0.5.2",
+              "id": "leptos_config 0.5.4",
               "target": "leptos_config"
             },
             {
-              "id": "leptos_dom 0.5.2",
+              "id": "leptos_dom 0.5.4",
               "target": "leptos_dom"
             },
             {
-              "id": "leptos_reactive 0.5.2",
+              "id": "leptos_reactive 0.5.4",
               "target": "leptos_reactive"
             },
             {
-              "id": "leptos_server 0.5.2",
+              "id": "leptos_server 0.5.4",
               "target": "leptos_server"
             },
             {
-              "id": "server_fn 0.5.2",
+              "id": "server_fn 0.5.4",
               "target": "server_fn"
             },
             {
@@ -3880,7 +3850,7 @@
               "target": "tracing"
             },
             {
-              "id": "typed-builder 0.16.2",
+              "id": "typed-builder 0.18.0",
               "target": "typed_builder"
             },
             {
@@ -3898,27 +3868,27 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "leptos_macro 0.5.2",
+              "id": "leptos_macro 0.5.4",
               "target": "leptos_macro"
             },
             {
-              "id": "typed-builder-macro 0.16.2",
+              "id": "typed-builder-macro 0.18.0",
               "target": "typed_builder_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_config 0.5.2": {
+    "leptos_config 0.5.4": {
       "name": "leptos_config",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_config/0.5.2/download",
-          "sha256": "e0f0e1a9a583d943b19c740c82a3ec69224c979af90f40738d93ec59ee1475bb"
+          "url": "https://crates.io/api/v1/crates/leptos_config/0.5.4/download",
+          "sha256": "afcaa5db5b22b794b624e14ffe2aefae215b2d21c60a230ae2d06fe21ae5da64"
         }
       },
       "targets": [
@@ -3956,24 +3926,24 @@
               "target": "thiserror"
             },
             {
-              "id": "typed-builder 0.16.2",
+              "id": "typed-builder 0.18.0",
               "target": "typed_builder"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_dom 0.5.2": {
+    "leptos_dom 0.5.4": {
       "name": "leptos_dom",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_dom/0.5.2/download",
-          "sha256": "111391d1ccbc3355344f90f0893f4137db13a7f98d53fede0a3613c522ebaf19"
+          "url": "https://crates.io/api/v1/crates/leptos_dom/0.5.4/download",
+          "sha256": "af459b63567e8e9c921ecbe7863732dc8dcb7874eaad6826b7d3778a53ec0ea6"
         }
       },
       "targets": [
@@ -4031,7 +4001,7 @@
               "target": "js_sys"
             },
             {
-              "id": "leptos_reactive 0.5.2",
+              "id": "leptos_reactive 0.5.4",
               "target": "leptos_reactive"
             },
             {
@@ -4055,7 +4025,7 @@
               "target": "serde_json"
             },
             {
-              "id": "server_fn 0.5.2",
+              "id": "server_fn 0.5.4",
               "target": "server_fn"
             },
             {
@@ -4102,17 +4072,17 @@
           ],
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_hot_reload 0.5.2": {
+    "leptos_hot_reload 0.5.4": {
       "name": "leptos_hot_reload",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_hot_reload/0.5.2/download",
-          "sha256": "a6902fabee84955a85a6cdebf8ddfbfb134091087b172e32ebb26e571d4640ca"
+          "url": "https://crates.io/api/v1/crates/leptos_hot_reload/0.5.4/download",
+          "sha256": "4ea60376eb80a24b3ab082612d62211e3ea0fc4dee132f7ff34d5fa5a5108cd2"
         }
       },
       "targets": [
@@ -4177,17 +4147,17 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_macro 0.5.2": {
+    "leptos_macro 0.5.4": {
       "name": "leptos_macro",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_macro/0.5.2/download",
-          "sha256": "e68201041cc5af68f7eb35015336827a36c543d87dcf2403117d7244db1f14a0"
+          "url": "https://crates.io/api/v1/crates/leptos_macro/0.5.4/download",
+          "sha256": "a7e96f4c450f4b5e2ccb135c2b1328890f911ca4ee89da9ed6d582df929e6cb5"
         }
       },
       "targets": [
@@ -4236,7 +4206,7 @@
               "target": "itertools"
             },
             {
-              "id": "leptos_hot_reload 0.5.2",
+              "id": "leptos_hot_reload 0.5.4",
               "target": "leptos_hot_reload"
             },
             {
@@ -4260,7 +4230,7 @@
               "target": "rstml"
             },
             {
-              "id": "server_fn_macro 0.5.2",
+              "id": "server_fn_macro 0.5.4",
               "target": "server_fn_macro"
             },
             {
@@ -4279,17 +4249,17 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_meta 0.5.2": {
+    "leptos_meta 0.5.4": {
       "name": "leptos_meta",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_meta/0.5.2/download",
-          "sha256": "b64d2b4bd0ab25a4897179ee603f2fa8178da6c9f97ef3efd4fa46580fd7efc1"
+          "url": "https://crates.io/api/v1/crates/leptos_meta/0.5.4/download",
+          "sha256": "983bbf829598d275b01e96bd9fca71e4739dd7b9fdf69cb8898b30ebfb124332"
         }
       },
       "targets": [
@@ -4326,7 +4296,7 @@
               "target": "indexmap"
             },
             {
-              "id": "leptos 0.5.2",
+              "id": "leptos 0.5.4",
               "target": "leptos"
             },
             {
@@ -4345,17 +4315,17 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_reactive 0.5.2": {
+    "leptos_reactive 0.5.4": {
       "name": "leptos_reactive",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_reactive/0.5.2/download",
-          "sha256": "282e84ae3e3eb30ab1eb1c881bfeea8a3cb6d6c683dc99f26f2f69ee240b148d"
+          "url": "https://crates.io/api/v1/crates/leptos_reactive/0.5.4/download",
+          "sha256": "22207568e096ac153ba8da68635e3136c1ec614ea9012736fa861c05bfb2eeff"
         }
       },
       "targets": [
@@ -4465,17 +4435,17 @@
           ],
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_router 0.5.2": {
+    "leptos_router 0.5.4": {
       "name": "leptos_router",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_router/0.5.2/download",
-          "sha256": "d5ca4422fdfba8af03d347d346f9364a4393ad36e227a018567192395285cf65"
+          "url": "https://crates.io/api/v1/crates/leptos_router/0.5.4/download",
+          "sha256": "c1a2ff8b8e8ae8b17efd8be2a407f7f83ed57c5243f70f2d03e6635f9ff61848"
         }
       },
       "targets": [
@@ -4508,10 +4478,6 @@
               "target": "cfg_if"
             },
             {
-              "id": "common_macros 0.1.1",
-              "target": "common_macros"
-            },
-            {
               "id": "gloo-net 0.2.6",
               "target": "gloo_net"
             },
@@ -4528,7 +4494,7 @@
               "target": "lazy_static"
             },
             {
-              "id": "leptos 0.5.2",
+              "id": "leptos 0.5.4",
               "target": "leptos"
             },
             {
@@ -4579,17 +4545,17 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "leptos_server 0.5.2": {
+    "leptos_server 0.5.4": {
       "name": "leptos_server",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/leptos_server/0.5.2/download",
-          "sha256": "e67f3810352bab860bcfa85f1760de4bd6e82cd72b14a97779d9168d37661bbf"
+          "url": "https://crates.io/api/v1/crates/leptos_server/0.5.4/download",
+          "sha256": "272d018a5adf33d10ee57e6f0f83dccc305c68613cd207e8a653aeebd4cd5b4f"
         }
       },
       "targets": [
@@ -4625,7 +4591,7 @@
               "target": "lazy_static"
             },
             {
-              "id": "leptos_reactive 0.5.2",
+              "id": "leptos_reactive 0.5.4",
               "target": "leptos_reactive"
             },
             {
@@ -4633,7 +4599,7 @@
               "target": "serde"
             },
             {
-              "id": "server_fn 0.5.2",
+              "id": "server_fn 0.5.4",
               "target": "server_fn"
             },
             {
@@ -4651,13 +4617,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "leptos_macro 0.5.2",
+              "id": "leptos_macro 0.5.4",
               "target": "leptos_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
@@ -7397,13 +7363,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "server_fn 0.5.2": {
+    "server_fn 0.5.4": {
       "name": "server_fn",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/server_fn/0.5.2/download",
-          "sha256": "0186f969a1f9572af27159b8273252abf9a6a38934130fe6f3ae0e439d48cf14"
+          "url": "https://crates.io/api/v1/crates/server_fn/0.5.4/download",
+          "sha256": "cfed18dfcc8d9004579c40482c3419c07f60ffb9c5b250542edca99f508b0ce9"
         }
       },
       "targets": [
@@ -7496,23 +7462,23 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "server_fn_macro_default 0.5.2",
+              "id": "server_fn_macro_default 0.5.4",
               "target": "server_fn_macro_default"
             }
           ],
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "server_fn_macro 0.5.2": {
+    "server_fn_macro 0.5.4": {
       "name": "server_fn_macro",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/server_fn_macro/0.5.2/download",
-          "sha256": "1dbc70e4f185ff2b5c11f02a91baf830f33e456e0571d0680d1d76999ed242ed"
+          "url": "https://crates.io/api/v1/crates/server_fn_macro/0.5.4/download",
+          "sha256": "0b70ae8e22546ba85500391b36c08e3fba64871be8a26557a3663a8e08acb56f"
         }
       },
       "targets": [
@@ -7571,17 +7537,17 @@
           },
           "selects": {}
         },
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
-    "server_fn_macro_default 0.5.2": {
+    "server_fn_macro_default 0.5.4": {
       "name": "server_fn_macro_default",
-      "version": "0.5.2",
+      "version": "0.5.4",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/server_fn_macro_default/0.5.2/download",
-          "sha256": "d8aaf8cf1f5dde82d3f37548732a4852f65d5279b4ae40add5a2a3c9e559f662"
+          "url": "https://crates.io/api/v1/crates/server_fn_macro_default/0.5.4/download",
+          "sha256": "7256ba61dfadb220598db418376e7bc2a34b96df36c4dc48f24ffe161810fc0b"
         }
       },
       "targets": [
@@ -7603,7 +7569,7 @@
         "deps": {
           "common": [
             {
-              "id": "server_fn_macro 0.5.2",
+              "id": "server_fn_macro 0.5.4",
               "target": "server_fn_macro"
             },
             {
@@ -7614,7 +7580,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.5.2"
+        "version": "0.5.4"
       },
       "license": "MIT"
     },
@@ -8863,13 +8829,13 @@
       },
       "license": "MIT"
     },
-    "typed-builder 0.16.2": {
+    "typed-builder 0.18.0": {
       "name": "typed-builder",
-      "version": "0.16.2",
+      "version": "0.18.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/typed-builder/0.16.2/download",
-          "sha256": "34085c17941e36627a879208083e25d357243812c30e7d7387c3b954f30ade16"
+          "url": "https://crates.io/api/v1/crates/typed-builder/0.18.0/download",
+          "sha256": "e47c0496149861b7c95198088cbf36645016b1a0734cf350c50e2a38e070f38a"
         }
       },
       "targets": [
@@ -8892,23 +8858,23 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "typed-builder-macro 0.16.2",
+              "id": "typed-builder-macro 0.18.0",
               "target": "typed_builder_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.16.2"
+        "version": "0.18.0"
       },
       "license": "MIT/Apache-2.0"
     },
-    "typed-builder-macro 0.16.2": {
+    "typed-builder-macro 0.18.0": {
       "name": "typed-builder-macro",
-      "version": "0.16.2",
+      "version": "0.18.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/typed-builder-macro/0.16.2/download",
-          "sha256": "f03ca4cb38206e2bef0700092660bb74d696f808514dae47fa1467cbfe26e96e"
+          "url": "https://crates.io/api/v1/crates/typed-builder-macro/0.18.0/download",
+          "sha256": "982ee4197351b5c9782847ef5ec1fdcaf50503fb19d68f9771adae314e72b492"
         }
       },
       "targets": [
@@ -8945,7 +8911,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.16.2"
+        "version": "0.18.0"
       },
       "license": "MIT/Apache-2.0"
     },
