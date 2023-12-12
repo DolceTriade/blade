@@ -4,6 +4,7 @@ use crate::components::statusicon::StatusIcon;
 use leptos::*;
 use leptos_dom::{document, helpers::event_target};
 use state;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::string::ToString;
 use wasm_bindgen::JsCast;
@@ -16,6 +17,43 @@ fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime
     e.duration_since(*start)
         .map(|d| format!("{:#?}", d))
         .unwrap_or_default()
+}
+
+fn status_weight(s: &state::Status) -> u8 {
+    match s {
+        state::Status::InProgress => 0,
+        state::Status::Fail => 1,
+        state::Status::Skip => 2,
+        state::Status::Success => 3,
+        state::Status::Unknown => 4,
+    }
+}
+
+fn sorted_targets(targets: &HashMap<String, state::Target>) -> Vec<state::Target> {
+    let mut vec = targets.values().collect::<Vec<_>>();
+    vec.sort_unstable_by(|a, b| {
+        let a_status = status_weight(&a.status);
+        let b_status = status_weight(&b.status);
+        if a_status != b_status {
+            return a_status.partial_cmp(&b_status).unwrap();
+        }
+        a.name.partial_cmp(&b.name).unwrap()
+    });
+    vec.into_iter().cloned().collect::<Vec<_>>()
+}
+
+fn sorted_tests(tests: &HashMap<String, state::Test>) -> Vec<state::Test> {
+    let mut vec = tests.values().collect::<Vec<_>>();
+    vec.sort_unstable_by(|a, b| {
+        if a.success == b.success {
+            return a.name.partial_cmp(&b.name).unwrap()
+        }
+        match a.success {
+            true => std::cmp::Ordering::Greater,
+            false => std::cmp::Ordering::Less,
+        }
+    });
+    vec.into_iter().cloned().collect::<Vec<_>>()
 }
 
 #[allow(non_snake_case)]
@@ -46,8 +84,8 @@ pub fn TargetList() -> impl IntoView {
                                 <AccordionItem header=move || view! { <h3>Tests</h3> }>
                                     <List>
                                         <For
-                                            each=move || tests.tests.clone()
-                                            key=|t| t.0.to_string()
+                                            each=move || sorted_tests(&tests.tests)
+                                            key=|t| t.name.to_string()
                                             children=move |t| {
                                                 view! {
                                                     <ListItem>
@@ -55,7 +93,7 @@ pub fn TargetList() -> impl IntoView {
                                                             <span class="float-left">
                                                                 <StatusIcon
                                                                     class="h-4 w-4 max-w-fit"
-                                                                    status=if t.1.success {
+                                                                    status=if t.success {
                                                                         state::Status::Success.into()
                                                                     } else {
                                                                         state::Status::Fail.into()
@@ -67,10 +105,10 @@ pub fn TargetList() -> impl IntoView {
                                                                 class="pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
                                                                 on:mouseenter=hover
                                                             >
-                                                                {t.1.name.clone()}
+                                                                {t.name.clone()}
                                                             </span>
                                                             <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                                {format!("{:#?}", t.1.duration)}
+                                                                {format!("{:#?}", t.duration)}
                                                             </span>
                                                         </div>
                                                     </ListItem>
@@ -85,8 +123,8 @@ pub fn TargetList() -> impl IntoView {
                     <AccordionItem header=move || view! { <h3>Targets</h3> }>
                         <List>
                             <For
-                                each=move || targets.targets.clone()
-                                key=|t| t.0.to_string()
+                                each=move || sorted_targets(&targets.targets)
+                                key=|t| t.name.to_string()
                                 children=move |t| {
                                     view! {
                                         <ListItem>
@@ -94,7 +132,7 @@ pub fn TargetList() -> impl IntoView {
                                                 <span class="float-left">
                                                     <StatusIcon
                                                         class="h-4 w-4 max-w-fit"
-                                                        status=t.1.status.clone().into()
+                                                        status=t.status.clone().into()
                                                     />
 
                                                 </span>
@@ -102,10 +140,10 @@ pub fn TargetList() -> impl IntoView {
                                                     class="pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
                                                     on:mouseenter=hover
                                                 >
-                                                    {t.1.name.clone()}
+                                                    {t.name.clone()}
                                                 </span>
                                                 <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                    {format_time(&t.1.start, t.1.end.as_ref())}
+                                                    {format_time(&t.start, t.end.as_ref())}
 
                                                 </span>
                                             </div>
