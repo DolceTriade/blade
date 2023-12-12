@@ -15,6 +15,9 @@ pub fn StatusIcon(
             state::Status::Fail => {
                view! { <img class=class.get() src="/pkg/static/fail.svg"/> }.into_any()
             }
+            state::Status::Skip => {
+                view! { <img class=class.get() src="/pkg/static/skip.svg"/> }.into_any()
+             } 
             _ => {
                  view! {
                     <div role="status">

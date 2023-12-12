@@ -32,6 +32,10 @@ fn cleanup(orig: &str, stdout: &str, stderr: &str) -> String {
     }
 
     for i in to_remove {
+        if i >= lines.len() {
+            log::warn!("Tried to delete a line out of range: {} >= {}", i, lines.len());
+            continue;
+        }
         lines[i] = "";
     }
     lines

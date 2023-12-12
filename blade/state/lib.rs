@@ -10,6 +10,7 @@ pub enum Status {
     InProgress,
     Success,
     Fail,
+    Skip,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
