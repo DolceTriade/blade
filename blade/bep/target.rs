@@ -1,5 +1,5 @@
 use build_event_stream_proto::build_event_stream;
-use std::{option::Option, time::Duration};
+use std::{collections::HashMap, option::Option, time::Duration};
 
 pub(crate) struct Handler {}
 
@@ -19,6 +19,27 @@ fn target_label(
     Some(label.to_string())
 }
 
+fn test_run_info(
+    event: &build_event_stream_proto::build_event_stream::BuildEvent,
+) -> Option<(String, state::Run)> {
+    let outer_id = event.id.as_ref()?;
+    let id = outer_id.id.as_ref();
+    let label = match id {
+        Some(build_event_stream::build_event_id::Id::TestResult(t)) => (
+            t.label.to_string(),
+            state::Run {
+                attempt: t.attempt,
+                run: t.run,
+                shard: t.shard,
+            },
+        ),
+        _ => {
+            return None;
+        }
+    };
+    Some(label)
+}
+
 fn to_duration(
     start: Option<&::timestamp_proto::google::protobuf::Timestamp>,
     end: Option<&::timestamp_proto::google::protobuf::Timestamp>,
@@ -33,6 +54,19 @@ fn to_duration(
     let s = start.map(convert).unwrap_or_default();
     let e = end.map(convert).unwrap_or_default();
     e - s
+}
+
+fn proto_to_rust_duration(
+    d: Option<&duration_proto::google::protobuf::Duration>,
+) -> std::time::Duration {
+    let convert = |d: &duration_proto::google::protobuf::Duration| {
+        if d.seconds < 0 || d.nanos < 0 {
+            return Default::default();
+        }
+        let nanos: u64 = d.nanos as u64;
+        Duration::from_secs(d.seconds as u64) + Duration::from_nanos(nanos)
+    };
+    d.map(convert).unwrap_or_default()
 }
 
 impl crate::EventHandler for Handler {
@@ -92,6 +126,30 @@ impl crate::EventHandler for Handler {
                             summary.first_start_time.as_ref(),
                             summary.last_stop_time.as_ref(),
                         ),
+                        runs: Default::default(),
+                    },
+                );
+            }
+            Some(build_event_stream::build_event::Payload::TestResult(r)) => {
+                let info = test_run_info(event).ok_or(anyhow::anyhow!("failed to find test id"))?;
+                let test = invocation
+                    .tests
+                    .get_mut(&info.0)
+                    .ok_or(anyhow::anyhow!("failed to find test {}", &info.0))?;
+                let mut files = HashMap::new();
+                r.test_action_output.iter().for_each(|f| {
+                    if let Some(build_event_stream_proto::build_event_stream::file::File::Uri(
+                        uri,
+                    )) = &f.file
+                    {
+                        files.insert(f.name.clone(), uri.clone());
+                    }
+                });
+                test.runs.insert(
+                    info.1,
+                    state::TestRun {
+                        duration: proto_to_rust_duration(r.test_attempt_duration.as_ref()),
+                        files,
                     },
                 );
             }

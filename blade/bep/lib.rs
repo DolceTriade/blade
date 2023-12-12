@@ -8,7 +8,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{transport::Server,  Response, Status};
+use tonic::{transport::Server, Response, Status};
 
 mod print_event;
 mod progress;
@@ -31,8 +31,8 @@ fn unexpected_cleanup_session(invocation: &mut state::Invocation) {
     match invocation.results.status {
         state::Status::Unknown | state::Status::InProgress => {
             invocation.results.status = state::Status::Fail;
-        },
-        _ => {},
+        }
+        _ => {}
     }
 }
 
@@ -117,7 +117,9 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             _ => {
                                                 for v in &*handlers {
                                                     let mut s = session.lock().await;
-                                                    if let Err(e) =  v.handle_event(&mut s.results, &be) {
+                                                    if let Err(e) =
+                                                        v.handle_event(&mut s.results, &be)
+                                                    {
                                                         log::warn!("{:#?}", e);
                                                     }
                                                 }
@@ -131,15 +133,16 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                         //log::info!("Got other event: {:#?}", event)
                                     }
                                 }
-                                let _ = tx.send(Ok(PublishBuildToolEventStreamResponse {
-                                    sequence_number: obe.sequence_number,
-                                    stream_id: obe.stream_id.clone(),
-                                }))
-                                .await
-                                .map_err(|e| {
-                                    log::warn!("failed to send message: {:#?}", e);
-                                    build_ended = true;
-                                });
+                                let _ = tx
+                                    .send(Ok(PublishBuildToolEventStreamResponse {
+                                        sequence_number: obe.sequence_number,
+                                        stream_id: obe.stream_id.clone(),
+                                    }))
+                                    .await
+                                    .map_err(|e| {
+                                        log::warn!("failed to send message: {:#?}", e);
+                                        build_ended = true;
+                                    });
                                 if build_ended {
                                     log::error!("BUILD OVER");
                                     drop(tx);
@@ -179,11 +182,15 @@ pub async fn run_bes_grpc(
         }));
     }
     proto_registry::init_global_descriptor_pool()?;
-    let server = BuildEventService { state, handlers: Arc::new(handlers) };
+    let server = BuildEventService {
+        state,
+        handlers: Arc::new(handlers),
+    };
     Server::builder()
-        .add_service(publish_build_event_server::PublishBuildEventServer::new(
-            server,
-        ).max_decoding_message_size(10*1024*1024))
+        .add_service(
+            publish_build_event_server::PublishBuildEventServer::new(server)
+                .max_decoding_message_size(10 * 1024 * 1024),
+        )
         .add_service(reflect)
         .serve(host)
         .await

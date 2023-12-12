@@ -46,7 +46,7 @@ fn sorted_tests(tests: &HashMap<String, state::Test>) -> Vec<state::Test> {
     let mut vec = tests.values().collect::<Vec<_>>();
     vec.sort_unstable_by(|a, b| {
         if a.success == b.success {
-            return a.name.partial_cmp(&b.name).unwrap()
+            return a.name.partial_cmp(&b.name).unwrap();
         }
         match a.success {
             true => std::cmp::Ordering::Greater,
@@ -70,7 +70,7 @@ pub fn TargetList() -> impl IntoView {
                     let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
                     span.get_bounding_client_rect().y() - body.y()
                 })
-                .map(|t|{ 
+                .map(|t|{
                     el.set_attribute("style", &format!("top: {}px", t)).ok()
                 });
         };

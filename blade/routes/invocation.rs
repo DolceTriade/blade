@@ -1,7 +1,7 @@
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
-use crate::components::targetlist::TargetList;
 use crate::components::summaryheader::SummaryHeader;
+use crate::components::targetlist::TargetList;
 use leptos::*;
 use leptos_router::*;
 use state;
@@ -17,9 +17,9 @@ pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, Se
     if let Some(invocation) = map.get(&uuid) {
         return Ok(invocation.lock().await.results.clone());
     }
-    return Err(ServerFnError::ServerError(
-        format!("Invocation {uuid} not found"),
-    ));
+    return Err(ServerFnError::ServerError(format!(
+        "Invocation {uuid} not found"
+    )));
 }
 
 #[derive(PartialEq, Params)]

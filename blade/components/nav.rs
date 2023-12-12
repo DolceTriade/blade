@@ -2,10 +2,8 @@ use leptos::*;
 
 #[component]
 pub fn Nav(
-    #[prop(into)]
-    name: MaybeSignal<String>,
-    #[prop(into)]
-    logo: MaybeSignal<String>,
+    #[prop(into)] name: MaybeSignal<String>,
+    #[prop(into)] logo: MaybeSignal<String>,
 ) -> impl IntoView {
     view! {
         <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">

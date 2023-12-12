@@ -1,8 +1,8 @@
-pub mod nav;
+pub mod accordion;
 pub mod card;
 pub mod list;
-pub mod statusicon;
+pub mod nav;
 pub mod shellout;
+pub mod statusicon;
 pub mod summaryheader;
 pub mod targetlist;
-pub mod accordion;

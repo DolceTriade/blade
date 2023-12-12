@@ -17,7 +17,7 @@ pub fn StatusIcon(
             }
             state::Status::Skip => {
                 view! { <img class=class.get() src="/pkg/static/skip.svg"/> }.into_any()
-             } 
+             }
             _ => {
                  view! {
                      <div role="status">

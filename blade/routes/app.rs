@@ -1,9 +1,9 @@
-use leptos::*;
-use leptos_meta::*;
-use leptos_router::*;
 use crate::components::nav::Nav;
 use crate::routes::empty::Empty;
 use crate::routes::invocation::Invocation;
+use leptos::*;
+use leptos_meta::*;
+use leptos_router::*;
 
 #[component]
 pub fn App() -> impl IntoView {
