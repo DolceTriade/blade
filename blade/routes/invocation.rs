@@ -6,6 +6,7 @@ use crate::routes::summary::Summary;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
+use std::time::Duration;
 
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
@@ -29,11 +30,7 @@ pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
     let invocation = create_rw_signal(state::InvocationResults::default());
     provide_context(invocation);
-    let load_invocation = move|id: String| async move {
-        get_invocation(id).await.map(|i| {
-            invocation.set(i);
-        })
-    };
+    let load_invocation = move |id: String| async move { get_invocation(id).await };
     let res = create_resource(
         move || {
             params.with(|p| {
@@ -45,6 +42,7 @@ pub fn Invocation() -> impl IntoView {
         },
         load_invocation,
     );
+
     let local = create_local_resource(
         move || {
             params.with(|p| {
@@ -57,31 +55,34 @@ pub fn Invocation() -> impl IntoView {
         load_invocation,
     );
 
-    let cancel_or = create_local_resource(
+    let refetch = create_local_resource(
         move || (),
         move |_| async move {
             set_interval_with_handle(
                 move || {
                     local.refetch();
                 },
-                std::time::Duration::from_secs(5),
+                Duration::from_secs(5),
             )
             .ok()
         },
     );
-    create_render_effect(move|_| {
-        with!(|invocation| {
-            match invocation.status {
-                state::Status::Success | state::Status::Fail => {
-                    cancel_or
-                        .map(|c| {
-                            if let Some(cancel) = c {
-                                cancel.clear()
-                            }
-                        });
-                }
-                _ => {}
+
+    create_effect(move |_| {
+        local.with(move|i| {
+            if let Some(Ok(i)) = i {
+                invocation.set(i.clone());
             }
+        });
+        invocation.with_untracked(move |i| match i.status {
+            state::Status::Success | state::Status::Fail => {
+                refetch.map(|refetch| {
+                    if let Some(refetch) = refetch {
+                        refetch.clear();
+                    }
+                });
+            }
+            _ => {}
         });
     });
 
@@ -89,19 +90,16 @@ pub fn Invocation() -> impl IntoView {
         <Transition fallback=move || {
             view! { <p>"Loading..."</p> }
         }>
-            {move || match res.get() {
+            {move || res.with(|i| match i {
                 None => view! { <div>"Loading..."</div> }.into_view(),
-                Some(i_or) => {
-                    match i_or {
-                        Ok(_) => {
-                            view! {
-                                <Summary />
-                            }
-                        }
-                        Err(e) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
+                Some(Ok(i)) => {
+                    invocation.set(i.clone());
+                    view! {
+                        <Summary />
                     }
-                }
-            }}
+                },
+                Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
+            })}
 
         </Transition>
     }

@@ -8,22 +8,23 @@ pub fn StatusIcon(
     status: MaybeSignal<state::Status>,
     #[prop(into, default = "".into())] class: MaybeSignal<String>,
 ) -> impl IntoView {
-    match status.get() {
+    view! {
+    {match status.get() {
             state::Status::Success => {
-                 view! { <img class=class.get() src="/pkg/static/success.svg"/> }.into_any()
+                 view! { <img class=move||class.get() src="/pkg/static/success.svg"/> }.into_any()
             }
             state::Status::Fail => {
-               view! { <img class=class.get() src="/pkg/static/fail.svg"/> }.into_any()
+               view! { <img class=move||class.get() src="/pkg/static/fail.svg"/> }.into_any()
             }
             state::Status::Skip => {
-                view! { <img class=class.get() src="/pkg/static/skip.svg"/> }.into_any()
+                view! { <img class=move||class.get() src="/pkg/static/skip.svg"/> }.into_any()
              }
             _ => {
                  view! {
                      <div role="status">
                          <svg
                              aria-hidden="true"
-                             class=tailwind_merge(
+                             class=move||tailwind_merge(
                                  "text-gray-200 animate-spin dark:text-gray-600 fill-blue-600",
                                  &class.get(),
                              )
@@ -46,4 +47,5 @@ pub fn StatusIcon(
                  }.into_any()
             }
         }
+    }}
 }

@@ -111,7 +111,7 @@ pub fn TargetList() -> impl IntoView {
             </div>
             <Accordion>
 
-                {move||with!(|tests| tests.is_empty())
+                {move||with!(|tests| !tests.is_empty())
                     .then(move || {
                         view! {
                             <AccordionItem header=move || view! { <h3>Tests</h3> }>
