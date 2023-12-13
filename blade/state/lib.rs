@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::default::Default;
 use std::option::Option;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
 pub enum Status {
     Unknown,
     InProgress,
@@ -13,7 +13,7 @@ pub enum Status {
     Skip,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Target {
     pub name: String,
     pub status: Status,
@@ -35,7 +35,7 @@ pub struct Run {
     pub attempt: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Test {
     pub name: String,
     pub success: bool,
@@ -43,7 +43,7 @@ pub struct Test {
     pub runs: HashMap<Run, TestRun>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct InvocationResults {
     pub targets: HashMap<String, Target>,
     pub tests: HashMap<String, Test>,

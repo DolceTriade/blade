@@ -1,11 +1,8 @@
-use crate::components::card::Card;
-use crate::components::shellout::ShellOut;
-use crate::components::summaryheader::SummaryHeader;
-use crate::components::targetlist::TargetList;
 use leptos::*;
 use leptos_router::*;
 use state;
-use std::rc::Rc;
+
+use crate::routes::summary::Summary;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -30,6 +27,13 @@ struct InvocationParams {
 #[component]
 pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
+    let invocation = create_rw_signal(state::InvocationResults::default());
+    provide_context(invocation);
+    let load_invocation = move|id: String| async move {
+        get_invocation(id).await.map(|i| {
+            invocation.set(i);
+        })
+    };
     let res = create_resource(
         move || {
             params.with(|p| {
@@ -39,7 +43,18 @@ pub fn Invocation() -> impl IntoView {
                     .unwrap_or_default()
             })
         },
-        move |id| async move { get_invocation(id).await },
+        load_invocation,
+    );
+    let local = create_local_resource(
+        move || {
+            params.with(|p| {
+                p.as_ref()
+                    .map(|p| p.id.clone())
+                    .unwrap_or_default()
+                    .unwrap_or_default()
+            })
+        },
+        load_invocation,
     );
 
     let cancel_or = create_local_resource(
@@ -47,13 +62,28 @@ pub fn Invocation() -> impl IntoView {
         move |_| async move {
             set_interval_with_handle(
                 move || {
-                    res.refetch();
+                    local.refetch();
                 },
                 std::time::Duration::from_secs(5),
             )
             .ok()
         },
     );
+    create_render_effect(move|_| {
+        with!(|invocation| {
+            match invocation.status {
+                state::Status::Success | state::Status::Fail => {
+                    cancel_or
+                        .map(|c| {
+                            if let Some(cancel) = c {
+                                cancel.clear()
+                            }
+                        });
+                }
+                _ => {}
+            }
+        });
+    });
 
     view! {
         <Transition fallback=move || {
@@ -63,36 +93,10 @@ pub fn Invocation() -> impl IntoView {
                 None => view! { <div>"Loading..."</div> }.into_view(),
                 Some(i_or) => {
                     match i_or {
-                        Ok(i) => {
-                            provide_context(Rc::new(i.clone()));
-                            match i.status {
-                                state::Status::Success | state::Status::Fail => {
-                                    cancel_or
-                                        .map(|c| {
-                                            if let Some(cancel) = c {
-                                                cancel.clear()
-                                            }
-                                        });
-                                }
-                                _ => {}
-                            }
+                        Ok(_) => {
                             view! {
-                                <div class="flex flex-col">
-                                    <Card>
-                                        <SummaryHeader/>
-                                    </Card>
-
-                                    <div class="h-[80vh] flex items-start justify-start justify-items-center">
-                                        <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
-                                            {TargetList()}
-                                        </Card>
-                                        <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                            <ShellOut text=i.output.into()/>
-                                        </Card>
-                                    </div>
-                                </div>
+                                <Summary />
                             }
-                                .into_view()
                         }
                         Err(e) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
                     }

@@ -11,7 +11,10 @@ pub fn scroll_bottom(el: HtmlElement<AnyElement>) {
 
 #[allow(non_snake_case)]
 #[component]
-pub fn ShellOut(text: MaybeSignal<String>) -> impl IntoView {
+pub fn ShellOut(
+    #[prop(into)]
+    text: MaybeSignal<String>
+) -> impl IntoView {
     view! {
         <div
             use:scroll_bottom
