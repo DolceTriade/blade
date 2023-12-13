@@ -125,7 +125,9 @@ pub fn TargetList() -> impl IntoView {
                                             children=move |t| {
                                                 let label = t.name.clone();
                                                 view! {
-                                                    <ListItem hide={Signal::derive(move||!filter.get().is_empty() && !label.contains(&filter.get()))}>
+                                                    <ListItem hide=Signal::derive(move || {
+                                                        !filter.get().is_empty() && !label.contains(&filter.get())
+                                                    })>
                                                         <div class="group flex items-center justify-start w-full">
                                                             <span class="float-left">
                                                                 <StatusIcon
@@ -165,10 +167,10 @@ pub fn TargetList() -> impl IntoView {
                                 children=move |t| {
                                     let label = t.name.clone();
                                     view! {
-                                        <ListItem hide={Signal::derive(move||!filter.get().is_empty() && !label.contains(&filter.get()))}>
-                                            <div
-                                                class="group flex items-center justify-start w-full"
-                                            >
+                                        <ListItem hide=Signal::derive(move || {
+                                            !filter.get().is_empty() && !label.contains(&filter.get())
+                                        })>
+                                            <div class="group flex items-center justify-start w-full">
                                                 <span class="float-left">
                                                     <StatusIcon
                                                         class="h-4 w-4 max-w-fit"
