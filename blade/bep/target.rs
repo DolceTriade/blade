@@ -1,5 +1,5 @@
 use build_event_stream_proto::build_event_stream;
-use std::{collections::HashMap, option::Option, time::Duration};
+use std::{option::Option, time::Duration};
 
 pub(crate) struct Handler {}
 
@@ -21,16 +21,18 @@ fn target_label(
 
 fn test_run_info(
     event: &build_event_stream_proto::build_event_stream::BuildEvent,
-) -> Option<(String, state::Run)> {
+) -> Option<(String, state::TestRun)> {
     let outer_id = event.id.as_ref()?;
     let id = outer_id.id.as_ref();
     let label = match id {
         Some(build_event_stream::build_event_id::Id::TestResult(t)) => (
             t.label.to_string(),
-            state::Run {
+            state::TestRun {
                 attempt: t.attempt,
                 run: t.run,
                 shard: t.shard,
+                duration: Default::default(),
+                files: Default::default(),
             },
         ),
         _ => {
@@ -116,42 +118,53 @@ impl crate::EventHandler for Handler {
             }
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
-                invocation.tests.insert(
-                    label.to_string(),
-                    state::Test {
-                        name: label.to_string(),
-                        success: summary.overall_status
-                            == build_event_stream::TestStatus::Passed as i32,
-                        duration: to_duration(
-                            summary.first_start_time.as_ref(),
-                            summary.last_stop_time.as_ref(),
-                        ),
+                let test = invocation
+                    .tests
+                    .entry(label.clone())
+                    .or_insert_with(|| state::Test {
+                        name: label.clone(),
+                        status: state::Status::InProgress,
+                        duration: Duration::default(),
                         runs: Default::default(),
-                    },
+                    });
+                test.status =
+                    match build_event_stream::TestStatus::try_from(summary.overall_status)? {
+                        build_event_stream::TestStatus::Passed => state::Status::Success,
+                        _ => state::Status::Fail,
+                    };
+                test.duration = to_duration(
+                    summary.first_start_time.as_ref(),
+                    summary.last_stop_time.as_ref(),
                 );
             }
             Some(build_event_stream::build_event::Payload::TestResult(r)) => {
-                let info = test_run_info(event).ok_or(anyhow::anyhow!("failed to find test id"))?;
+                let mut info =
+                    test_run_info(event).ok_or(anyhow::anyhow!("failed to find test id"))?;
                 let test = invocation
                     .tests
-                    .get_mut(&info.0)
-                    .ok_or(anyhow::anyhow!("failed to find test {}", &info.0))?;
-                let mut files = HashMap::new();
+                    .entry(info.0.clone())
+                    .or_insert_with(|| state::Test {
+                        name: info.0.clone(),
+                        status: state::Status::InProgress,
+                        duration: Duration::default(),
+                        runs: Default::default(),
+                    });
                 r.test_action_output.iter().for_each(|f| {
                     if let Some(build_event_stream_proto::build_event_stream::file::File::Uri(
                         uri,
                     )) = &f.file
                     {
-                        files.insert(f.name.clone(), uri.clone());
+                        info.1.files.insert(
+                            f.name.clone(),
+                            state::Artifact {
+                                size: f.length as usize,
+                                uri: uri.clone(),
+                            },
+                        );
                     }
                 });
-                test.runs.insert(
-                    info.1,
-                    state::TestRun {
-                        duration: proto_to_rust_duration(r.test_attempt_duration.as_ref()),
-                        files,
-                    },
-                );
+                info.1.duration = proto_to_rust_duration(r.test_attempt_duration.as_ref());
+                test.runs.push(info.1);
             }
             _ => {}
         }

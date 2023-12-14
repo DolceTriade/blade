@@ -71,6 +71,7 @@ rust_shared_library(
         "//blade/state",
         "//blade/tailwindmerge",
         "@wasm_crate//:ansi-to-html",
+        "@wasm_crate//:anyhow",
         "@wasm_crate//:cfg-if",
         "@wasm_crate//:console_error_panic_hook",
         "@wasm_crate//:console_log",

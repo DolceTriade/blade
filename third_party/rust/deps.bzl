@@ -202,6 +202,9 @@ def rust_dependencies():
             "ansi-to-html": crate.spec(
                 version = "0.1.3",
             ),
+            "anyhow": crate.spec(
+                version = "1.0.75",
+            ),
             "leptos": crate.spec(
                 version = "0.5.4",
                 features = ["hydrate"],

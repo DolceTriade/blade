@@ -1,5 +1,5 @@
 {
-  "checksum": "013e65266bbe4f59ecfd2a7a6aeec2923fd4601afbea6f53c8f27e05295aa7e0",
+  "checksum": "0f7fbff803e8d18ccb49ffe2d9e1b5767fe389a9f2e796b19c58840e6013f803",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1472,6 +1472,10 @@
             {
               "id": "ansi-to-html 0.1.3",
               "target": "ansi_to_html"
+            },
+            {
+              "id": "anyhow 1.0.75",
+              "target": "anyhow"
             },
             {
               "id": "cfg-if 1.0.0",

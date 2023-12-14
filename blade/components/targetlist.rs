@@ -45,13 +45,12 @@ fn sorted_targets(targets: &HashMap<String, state::Target>) -> Vec<state::Target
 fn sorted_tests(tests: &HashMap<String, state::Test>) -> Vec<state::Test> {
     let mut vec = tests.values().collect::<Vec<_>>();
     vec.sort_unstable_by(|a, b| {
-        if a.success == b.success {
-            return a.name.partial_cmp(&b.name).unwrap();
+        let a_status = status_weight(&a.status);
+        let b_status = status_weight(&b.status);
+        if a_status != b_status {
+            return a_status.partial_cmp(&b_status).unwrap();
         }
-        match a.success {
-            true => std::cmp::Ordering::Greater,
-            false => std::cmp::Ordering::Less,
-        }
+        a.name.partial_cmp(&b.name).unwrap()
     });
     vec.into_iter().cloned().collect::<Vec<_>>()
 }
@@ -118,7 +117,7 @@ pub fn TargetList() -> impl IntoView {
                                 <List>
                                     <For
                                         each=move || with!(|tests| sorted_tests(tests))
-                                        key=|t| (t.name.to_string(), t.success)
+                                        key=|t| (t.name.to_string(), t.status)
                                         children=move |t| {
                                             let label = t.name.clone();
                                             view! {
@@ -129,11 +128,7 @@ pub fn TargetList() -> impl IntoView {
                                                         <span class="float-left">
                                                             <StatusIcon
                                                                 class="h-4 w-4 max-w-fit"
-                                                                status=if t.success {
-                                                                    state::Status::Success.into()
-                                                                } else {
-                                                                    state::Status::Fail.into()
-                                                                }
+                                                                status=t.status.into()
                                                             />
 
                                                         </span>

@@ -23,24 +23,26 @@ pub struct Target {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub struct TestRun {
-    pub duration: std::time::Duration,
-    pub files: HashMap<String, String>,
+pub struct Artifact {
+    pub size: usize,
+    pub uri: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
-pub struct Run {
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct TestRun {
     pub run: i32,
     pub shard: i32,
     pub attempt: i32,
+    pub duration: std::time::Duration,
+    pub files: HashMap<String, Artifact>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Test {
     pub name: String,
-    pub success: bool,
+    pub status: Status,
     pub duration: std::time::Duration,
-    pub runs: HashMap<Run, TestRun>,
+    pub runs: Vec<TestRun>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

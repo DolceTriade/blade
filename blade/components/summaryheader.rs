@@ -41,8 +41,14 @@ pub fn SummaryHeader() -> impl IntoView {
             _ => {}
         });
         let num_tests = invocation.tests.len();
-        let passing_tests = invocation.tests.values().filter(|v| v.success).count();
-        let failing_tests = num_tests - passing_tests;
+        let mut passing_tests: usize = 0;
+        let mut failing_tests: usize = 0;
+        invocation.tests.values().for_each(|t| match t.status {
+            state::Status::Success => passing_tests += 1,
+            state::Status::InProgress => {},
+            _ => failing_tests += 1,
+        });
+
         Counts {
             num_targets,
             passing_targets,

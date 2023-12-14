@@ -282,6 +282,7 @@ version = "0.0.1"
 dependencies = [
  "ahash",
  "ansi-to-html",
+ "anyhow",
  "cfg-if",
  "console_error_panic_hook",
  "console_log",

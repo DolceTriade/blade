@@ -2,7 +2,7 @@ use leptos::*;
 use leptos_router::*;
 use state;
 
-use crate::routes::summary::Summary;
+//use crate::routes::test::Test;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -95,7 +95,7 @@ pub fn Invocation() -> impl IntoView {
                 Some(Ok(i)) => {
                     invocation.set(i.clone());
                     view! {
-                        <Summary />
+                        <Outlet/>
                     }
                 },
                 Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
