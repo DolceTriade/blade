@@ -160,7 +160,7 @@ pub fn TargetList() -> impl IntoView {
                     <List>
                         <For
                             each=move || with!(|targets| sorted_targets(targets))
-                            key=|t| (t.name.to_string(), t.status.clone())
+                            key=|t| (t.name.to_string(), t.status)
                             children=move |t| {
                                 let label = t.name.clone();
                                 view! {
@@ -171,7 +171,7 @@ pub fn TargetList() -> impl IntoView {
                                             <span class="float-left">
                                                 <StatusIcon
                                                     class="h-4 w-4 max-w-fit"
-                                                    status=t.status.clone().into()
+                                                    status=t.status.into()
                                                 />
 
                                             </span>

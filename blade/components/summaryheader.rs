@@ -23,6 +23,7 @@ struct Counts {
     num_tests: usize,
     passing_tests: usize,
     failing_tests: usize,
+    status: state::Status,
 }
 
 #[allow(non_snake_case)]
@@ -49,6 +50,7 @@ pub fn SummaryHeader() -> impl IntoView {
             num_tests,
             passing_tests,
             failing_tests,
+            status: invocation.status,
         }})
     });
     move|| {
@@ -58,7 +60,7 @@ pub fn SummaryHeader() -> impl IntoView {
     let num_tests = Signal::derive(move||with!(|counts| counts.num_tests));
     let passing_tests = Signal::derive(move||with!(|counts| counts.passing_tests));
     let failing_tests = Signal::derive(move||with!(|counts| counts.failing_tests));
-    let status = Signal::derive(move||with!(|invocation| invocation.status.clone()));
+    let status = Signal::derive(move||with!(|counts| counts.status));
     view! {
         <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
             <div>

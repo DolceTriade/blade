@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::default::Default;
 use std::option::Option;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Status {
     Unknown,
     InProgress,
