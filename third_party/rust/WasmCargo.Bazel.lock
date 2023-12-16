@@ -1,5 +1,5 @@
 {
-  "checksum": "0f7fbff803e8d18ccb49ffe2d9e1b5767fe389a9f2e796b19c58840e6013f803",
+  "checksum": "fe474cf9f66cb7d7cf4ce8e8a64b879a69e4a3475d32ab0134e88dee5b80e8ea",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1506,6 +1506,10 @@
               "target": "gloo_net"
             },
             {
+              "id": "junit-parser 1.0.0",
+              "target": "junit_parser"
+            },
+            {
               "id": "leptos 0.5.4",
               "target": "leptos"
             },
@@ -1532,6 +1536,10 @@
             {
               "id": "tokio-stream 0.1.14",
               "target": "tokio_stream"
+            },
+            {
+              "id": "url-escape 0.1.1",
+              "target": "url_escape"
             },
             {
               "id": "wasm-bindgen 0.2.87",
@@ -3758,6 +3766,57 @@
         "version": "0.3.64"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "junit-parser 1.0.0": {
+      "name": "junit-parser",
+      "version": "1.0.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/junit-parser/1.0.0/download",
+          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "junit_parser",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "junit_parser",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "properties_as_hashmap",
+            "properties_as_vector"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "quick-xml 0.30.0",
+              "target": "quick_xml"
+            },
+            {
+              "id": "thiserror 1.0.47",
+              "target": "thiserror"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "1.0.0"
+      },
+      "license": "BSD-2-Clause"
     },
     "lazy_static 1.4.0": {
       "name": "lazy_static",
@@ -6221,6 +6280,52 @@
         }
       },
       "license": "MIT/Apache-2.0"
+    },
+    "quick-xml 0.30.0": {
+      "name": "quick-xml",
+      "version": "0.30.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/quick-xml/0.30.0/download",
+          "sha256": "eff6510e86862b57b210fd8cbe8ed3f0d7d600b9c2863cd4549a2e033c66e956"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "quick_xml",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "quick_xml",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "escape-html"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "memchr 2.5.0",
+              "target": "memchr"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.30.0"
+      },
+      "license": "MIT"
     },
     "quote 1.0.33": {
       "name": "quote",
@@ -9149,6 +9254,45 @@
         "version": "2.4.0"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "url-escape 0.1.1": {
+      "name": "url-escape",
+      "version": "0.1.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/url-escape/0.1.1/download",
+          "sha256": "44e0ce4d1246d075ca5abec4b41d33e87a6054d08e2366b63205665e950db218"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "url_escape",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "url_escape",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "percent-encoding 2.3.0",
+              "target": "percent_encoding"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.1.1"
+      },
+      "license": "MIT"
     },
     "utf8-width 0.1.6": {
       "name": "utf8-width",

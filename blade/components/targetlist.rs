@@ -3,11 +3,13 @@ use crate::components::list::*;
 use crate::components::statusicon::StatusIcon;
 use leptos::*;
 use leptos_dom::{document, helpers::event_target};
+use leptos_router::A;
 use state;
 use std::collections::HashMap;
 use std::string::ToString;
 use wasm_bindgen::JsCast;
 use web_sys::KeyboardEvent;
+use url_escape;
 
 fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {
     if end.is_none() {
@@ -120,10 +122,13 @@ pub fn TargetList() -> impl IntoView {
                                         key=|t| (t.name.to_string(), t.status)
                                         children=move |t| {
                                             let label = t.name.clone();
+                                            let query = format!("test?target={}", label);
+                                            let link = url_escape::encode_query(&query).to_string();
                                             view! {
                                                 <ListItem hide=Signal::derive(move || {
                                                     !filter.get().is_empty() && !label.contains(&filter.get())
                                                 })>
+                                                    <A href=link>
                                                     <div class="group flex items-center justify-start w-full">
                                                         <span class="float-left">
                                                             <StatusIcon
@@ -142,6 +147,7 @@ pub fn TargetList() -> impl IntoView {
                                                             {format!("{:#?}", t.duration)}
                                                         </span>
                                                     </div>
+                                                    </A>
                                                 </ListItem>
                                             }
                                         }

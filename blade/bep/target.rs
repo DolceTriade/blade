@@ -33,6 +33,8 @@ fn test_run_info(
                 shard: t.shard,
                 duration: Default::default(),
                 files: Default::default(),
+                details: Default::default(),
+                status: state::Status::Unknown,
             },
         ),
         _ => {
@@ -164,6 +166,11 @@ impl crate::EventHandler for Handler {
                     }
                 });
                 info.1.duration = proto_to_rust_duration(r.test_attempt_duration.as_ref());
+                info.1.status = match build_event_stream::TestStatus::try_from(r.status)? {
+                    build_event_stream::TestStatus::Passed => state::Status::Success,
+                    _ => state::Status::Fail,
+                };
+                info.1.details = r.status_details.clone();
                 test.runs.push(info.1);
             }
             _ => {}

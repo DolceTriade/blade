@@ -33,6 +33,8 @@ pub struct TestRun {
     pub run: i32,
     pub shard: i32,
     pub attempt: i32,
+    pub status: Status,
+    pub details: String,
     pub duration: std::time::Duration,
     pub files: HashMap<String, Artifact>,
 }

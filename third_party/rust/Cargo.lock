@@ -996,6 +996,7 @@ dependencies = [
  "diesel",
  "futures",
  "futures-core",
+ "junit-parser",
  "lazy_static",
  "leptos",
  "leptos_actix",
@@ -1015,6 +1016,7 @@ dependencies = [
  "tokio-stream",
  "tonic",
  "tonic-reflection",
+ "url-escape",
  "walkdir",
 ]
 
@@ -1563,6 +1565,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5f195fe497f702db0f318b07fdd68edb16955aed830df8363d837542f8f935a"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "junit-parser"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112"
+dependencies = [
+ "quick-xml",
+ "thiserror",
 ]
 
 [[package]]
@@ -2444,6 +2456,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "quick-xml"
+version = "0.30.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eff6510e86862b57b210fd8cbe8ed3f0d7d600b9c2863cd4549a2e033c66e956"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3299,6 +3320,15 @@ checksum = "50bff7831e19200a85b17131d085c25d7811bc4e186efdaf54bbd132994a88cb"
 dependencies = [
  "form_urlencoded",
  "idna",
+ "percent-encoding",
+]
+
+[[package]]
+name = "url-escape"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "44e0ce4d1246d075ca5abec4b41d33e87a6054d08e2366b63205665e950db218"
+dependencies = [
  "percent-encoding",
 ]
 

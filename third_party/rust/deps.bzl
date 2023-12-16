@@ -98,6 +98,9 @@ def rust_dependencies():
             "cfg-if": crate.spec(
                 version = "1",
             ),
+            "junit-parser": crate.spec(
+                version = "1.0.0",
+            ),
             "lazy_static": crate.spec(
                 version = "1",
             ),
@@ -160,6 +163,9 @@ def rust_dependencies():
             ),
             "tonic-reflection": crate.spec(
                 version = "0.10.2",
+            ),
+            "url-escape": crate.spec(
+                version = "0.1.1",
             ),
             "walkdir": crate.spec(
                 version = "2.4.0",
@@ -256,12 +262,18 @@ def rust_dependencies():
             "futures-core": crate.spec(
                 version = "0.3.29",
             ),
+            "junit-parser": crate.spec(
+                version = "1.0.0",
+            ),
             "tokio": crate.spec(
                 version = "1.32.0",
                 features = ["full"],
             ),
             "tokio-stream": crate.spec(
                 version = "0.1",
+            ),
+            "url-escape": crate.spec(
+                version = "0.1.1",
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
