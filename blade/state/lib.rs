@@ -45,6 +45,7 @@ pub struct Test {
     pub status: Status,
     pub duration: std::time::Duration,
     pub runs: Vec<TestRun>,
+    pub num_runs: usize,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]

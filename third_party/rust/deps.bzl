@@ -60,6 +60,12 @@ def rust_dependencies():
                     crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
                 ),
             ],
+            "junit-parser": [
+                crate.annotation(
+                    patches = ["@//third_party/rust/patches/junit-parser:cdata_parse.patch"],
+                    patch_args = ["-p1"],
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(
@@ -100,6 +106,7 @@ def rust_dependencies():
             ),
             "junit-parser": crate.spec(
                 version = "1.0.0",
+                features = ["serde"],
             ),
             "lazy_static": crate.spec(
                 version = "1",
@@ -206,6 +213,17 @@ def rust_dependencies():
                     crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
                 ),
             ],
+            "quick-xml": [
+                crate.annotation(
+                    rustc_flags = ["-O"],
+                ),
+            ],
+            "junit-parser": [
+                crate.annotation(
+                    patches = ["@//third_party/rust/patches/junit-parser:cdata_parse.patch"],
+                    patch_args = ["-p1"],
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(
@@ -267,6 +285,7 @@ def rust_dependencies():
             ),
             "junit-parser": crate.spec(
                 version = "1.0.0",
+                features = ["serde"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",

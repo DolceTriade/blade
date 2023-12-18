@@ -1,5 +1,5 @@
 {
-  "checksum": "0042b97349ab94ae7dca6a0bf1b44cec7b56bf0973785b1a99307aaddf3a65e0",
+  "checksum": "823ca85a8289f491cbedd1731189a03d991ca69d69f101a57d84f58b0d496481",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -3777,7 +3777,13 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/junit-parser/1.0.0/download",
-          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112"
+          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112",
+          "patch_args": [
+            "-p1"
+          ],
+          "patches": [
+            "@//third_party/rust/patches/junit-parser:cdata_parse.patch"
+          ]
         }
       },
       "targets": [
@@ -3800,7 +3806,8 @@
           "common": [
             "default",
             "properties_as_hashmap",
-            "properties_as_vector"
+            "properties_as_vector",
+            "serde"
           ],
           "selects": {}
         },
@@ -3809,6 +3816,10 @@
             {
               "id": "quick-xml 0.30.0",
               "target": "quick_xml"
+            },
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
             },
             {
               "id": "thiserror 1.0.47",
@@ -6327,6 +6338,9 @@
           "selects": {}
         },
         "edition": "2018",
+        "rustc_flags": [
+          "-O"
+        ],
         "version": "0.30.0"
       },
       "license": "MIT"

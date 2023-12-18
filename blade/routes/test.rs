@@ -4,6 +4,7 @@ use leptos_router::*;
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
 use crate::components::testsummary::TestSummary;
+use crate::components::testrunlist::TestRunList;
 
 #[server]
 pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
@@ -17,7 +18,6 @@ pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
     Err(ServerFnError::ServerError("not implemented".to_string()))
 }
 
-#[allow(dead_code)]
 fn get_run(
     run: &Option<i32>,
     shard: &Option<i32>,
@@ -130,7 +130,10 @@ pub fn Test() -> impl IntoView {
         move |uri| async move {
             match uri {
                 None => None,
-                Some(uri) => get_artifact(uri.to_string()).await.ok(),
+                Some(uri) => get_artifact(uri.to_string()).await.ok().as_ref().and_then(|v| {
+                    let c = std::io::Cursor::new(v);
+                    junit_parser::from_reader(c).ok()
+                }),
             }
         },
     );
@@ -159,15 +162,15 @@ pub fn Test() -> impl IntoView {
     {
         move || {
             with!(|test_run| match test_run {
-                Some(_test_run) => view! {
+                Some(_) => view! {
                     <div class="flex flex-col">
-                    <Card>
+                    <Card class="p-0 m-0">
                         <TestSummary/>
                     </Card>
 
                     <div class="h-[80vh] flex items-start justify-start justify-items-center">
                         <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
-                            List
+                            <TestRunList />
                         </Card>
                         <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                         <Suspense

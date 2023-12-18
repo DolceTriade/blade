@@ -139,7 +139,7 @@ pub fn TargetList() -> impl IntoView {
 
                                                                 </span>
                                                                 <span
-                                                                    class="label-name pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                                                                    class="label-name pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
                                                                     on:mouseenter=hover
                                                                 >
                                                                     {t.name.clone()}
@@ -179,7 +179,7 @@ pub fn TargetList() -> impl IntoView {
 
                                             </span>
                                             <span
-                                                class="label-name pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                                                class="label-name pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
                                                 on:mouseenter=hover
                                             >
                                                 {t.name.clone()}

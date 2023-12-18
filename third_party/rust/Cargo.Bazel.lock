@@ -1,5 +1,5 @@
 {
-  "checksum": "3b8c8ac9396339a2016f76a9e990bbc4b54219423db7957d1eedbcb9e44d1ca2",
+  "checksum": "f34960dc7e424ef97c96fc571741972359019faf1d74e4f47225fd9ed6c3526f",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -8264,7 +8264,13 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/junit-parser/1.0.0/download",
-          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112"
+          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112",
+          "patch_args": [
+            "-p1"
+          ],
+          "patches": [
+            "@//third_party/rust/patches/junit-parser:cdata_parse.patch"
+          ]
         }
       },
       "targets": [
@@ -8287,7 +8293,8 @@
           "common": [
             "default",
             "properties_as_hashmap",
-            "properties_as_vector"
+            "properties_as_vector",
+            "serde"
           ],
           "selects": {}
         },
@@ -8296,6 +8303,10 @@
             {
               "id": "quick-xml 0.30.0",
               "target": "quick_xml"
+            },
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
             },
             {
               "id": "thiserror 1.0.44",

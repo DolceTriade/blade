@@ -128,6 +128,7 @@ impl crate::EventHandler for Handler {
                         status: state::Status::InProgress,
                         duration: Duration::default(),
                         runs: Default::default(),
+                        num_runs: 0,
                     });
                 test.status =
                     match build_event_stream::TestStatus::try_from(summary.overall_status)? {
@@ -138,6 +139,7 @@ impl crate::EventHandler for Handler {
                     summary.first_start_time.as_ref(),
                     summary.last_stop_time.as_ref(),
                 );
+                test.num_runs = summary.run_count as usize;
             }
             Some(build_event_stream::build_event::Payload::TestResult(r)) => {
                 let mut info =
@@ -150,6 +152,7 @@ impl crate::EventHandler for Handler {
                         status: state::Status::InProgress,
                         duration: Duration::default(),
                         runs: Default::default(),
+                        num_runs: 0,
                     });
                 r.test_action_output.iter().for_each(|f| {
                     if let Some(build_event_stream_proto::build_event_stream::file::File::Uri(
@@ -171,6 +174,7 @@ impl crate::EventHandler for Handler {
                     _ => state::Status::Fail,
                 };
                 info.1.details = r.status_details.clone();
+                test.num_runs = std::cmp::max(test.num_runs, info.1.run as usize);
                 test.runs.push(info.1);
             }
             _ => {}
