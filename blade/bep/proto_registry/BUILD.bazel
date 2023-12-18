@@ -8,6 +8,7 @@ rust_library(
     data = [
         "//blade/bep/protos:bep_descriptors",
         "//blade/bep/protos:bes_descriptors",
+        "@googleapis//google/bytestream:bytestream_proto",
     ],
     visibility = ["//visibility:public"],
     deps = [

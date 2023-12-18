@@ -26,7 +26,7 @@ pub fn StatusIcon(
                      <div role="status">
                          <svg
                              aria-hidden="true"
-                             class=move||tailwind_merge(
+                             class=move || tailwind_merge(
                                  "text-gray-200 animate-spin dark:text-gray-600 fill-blue-600",
                                  &c(),
                              )

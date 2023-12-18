@@ -21,7 +21,7 @@ pub fn Summary() -> impl IntoView {
                     {TargetList()}
                 </Card>
                 <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                    <ShellOut text=output />
+                    <ShellOut text=output/>
                 </Card>
             </div>
         </div>

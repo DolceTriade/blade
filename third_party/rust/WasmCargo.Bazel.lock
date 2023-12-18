@@ -1,5 +1,5 @@
 {
-  "checksum": "fe474cf9f66cb7d7cf4ce8e8a64b879a69e4a3475d32ab0134e88dee5b80e8ea",
+  "checksum": "0042b97349ab94ae7dca6a0bf1b44cec7b56bf0973785b1a99307aaddf3a65e0",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1538,6 +1538,10 @@
               "target": "tokio_stream"
             },
             {
+              "id": "url 2.5.0",
+              "target": "url"
+            },
+            {
               "id": "url-escape 0.1.1",
               "target": "url_escape"
             },
@@ -1741,13 +1745,13 @@
       },
       "license": "Apache-2.0 / MIT"
     },
-    "form_urlencoded 1.2.0": {
+    "form_urlencoded 1.2.1": {
       "name": "form_urlencoded",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/form_urlencoded/1.2.0/download",
-          "sha256": "a62bc1cf6f830c2ec14a513a9fb124d0a213a629668a4186f329db21fe045652"
+          "url": "https://crates.io/api/v1/crates/form_urlencoded/1.2.1/download",
+          "sha256": "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
         }
       },
       "targets": [
@@ -1777,14 +1781,14 @@
         "deps": {
           "common": [
             {
-              "id": "percent-encoding 2.3.0",
+              "id": "percent-encoding 2.3.1",
               "target": "percent_encoding"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.2.0"
+        "version": "1.2.1"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -3328,13 +3332,13 @@
       },
       "license": "MIT"
     },
-    "idna 0.4.0": {
+    "idna 0.5.0": {
       "name": "idna",
-      "version": "0.4.0",
+      "version": "0.5.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/idna/0.4.0/download",
-          "sha256": "7d20d6b07bfbc108882d88ed8e37d39636dcc260e15e30c45e6ba089610b917c"
+          "url": "https://crates.io/api/v1/crates/idna/0.5.0/download",
+          "sha256": "634d9b1461af396cad843f47fdba5597a4f9e6ddd4bfb6ff5d85028c25cb12f6"
         }
       },
       "targets": [
@@ -3375,7 +3379,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.4.0"
+        "version": "0.5.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -4569,7 +4573,7 @@
               "target": "once_cell"
             },
             {
-              "id": "percent-encoding 2.3.0",
+              "id": "percent-encoding 2.3.1",
               "target": "percent_encoding"
             },
             {
@@ -5665,13 +5669,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "percent-encoding 2.3.0": {
+    "percent-encoding 2.3.1": {
       "name": "percent-encoding",
-      "version": "2.3.0",
+      "version": "2.3.1",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/percent-encoding/2.3.0/download",
-          "sha256": "9b2a4787296e9989611394c33f193f676704af1686e70b8f8033ab5ba9a35a94"
+          "url": "https://crates.io/api/v1/crates/percent-encoding/2.3.1/download",
+          "sha256": "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
         }
       },
       "targets": [
@@ -5699,7 +5703,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "2.3.0"
+        "version": "2.3.1"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -6730,7 +6734,7 @@
               "target": "tower_service"
             },
             {
-              "id": "url 2.4.0",
+              "id": "url 2.5.0",
               "target": "url"
             }
           ],
@@ -6769,7 +6773,7 @@
                 "target": "once_cell"
               },
               {
-                "id": "percent-encoding 2.3.0",
+                "id": "percent-encoding 2.3.1",
                 "target": "percent_encoding"
               },
               {
@@ -7363,7 +7367,7 @@
         "deps": {
           "common": [
             {
-              "id": "percent-encoding 2.3.0",
+              "id": "percent-encoding 2.3.1",
               "target": "percent_encoding"
             },
             {
@@ -7449,7 +7453,7 @@
         "deps": {
           "common": [
             {
-              "id": "form_urlencoded 1.2.0",
+              "id": "form_urlencoded 1.2.1",
               "target": "form_urlencoded"
             },
             {
@@ -9202,13 +9206,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "url 2.4.0": {
+    "url 2.5.0": {
       "name": "url",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/url/2.4.0/download",
-          "sha256": "50bff7831e19200a85b17131d085c25d7811bc4e186efdaf54bbd132994a88cb"
+          "url": "https://crates.io/api/v1/crates/url/2.5.0/download",
+          "sha256": "31e6302e3bb753d46e83516cae55ae196fc0c309407cf11ab35cc51a4c2a4633"
         }
       },
       "targets": [
@@ -9236,22 +9240,22 @@
         "deps": {
           "common": [
             {
-              "id": "form_urlencoded 1.2.0",
+              "id": "form_urlencoded 1.2.1",
               "target": "form_urlencoded"
             },
             {
-              "id": "idna 0.4.0",
+              "id": "idna 0.5.0",
               "target": "idna"
             },
             {
-              "id": "percent-encoding 2.3.0",
+              "id": "percent-encoding 2.3.1",
               "target": "percent_encoding"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "2.4.0"
+        "version": "2.5.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -9283,7 +9287,7 @@
         "deps": {
           "common": [
             {
-              "id": "percent-encoding 2.3.0",
+              "id": "percent-encoding 2.3.1",
               "target": "percent_encoding"
             }
           ],

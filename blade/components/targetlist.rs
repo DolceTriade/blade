@@ -112,55 +112,57 @@ pub fn TargetList() -> impl IntoView {
             </div>
             <Accordion>
 
-                {move||with!(|tests| !tests.is_empty())
-                    .then(move || {
-                        view! {
-                            <AccordionItem header=move || view! { <h3>Tests</h3> }>
-                                <List>
-                                    <For
-                                        each=move || with!(|tests| sorted_tests(tests))
-                                        key=|t| (t.name.to_string(), t.status)
-                                        children=move |t| {
-                                            let label = t.name.clone();
-                                            let query = format!("test?target={}", label);
-                                            let link = url_escape::encode_query(&query).to_string();
-                                            view! {
-                                                <ListItem hide=Signal::derive(move || {
-                                                    !filter.get().is_empty() && !label.contains(&filter.get())
-                                                })>
-                                                    <A href=link>
-                                                    <div class="group flex items-center justify-start w-full">
-                                                        <span class="float-left">
-                                                            <StatusIcon
-                                                                class="h-4 w-4 max-w-fit"
-                                                                status=t.status.into()
-                                                            />
+                {move || {
+                    with!(| tests | ! tests.is_empty())
+                        .then(move || {
+                            view! {
+                                <AccordionItem header=move || view! { <h3>Tests</h3> }>
+                                    <List>
+                                        <For
+                                            each=move || with!(| tests | sorted_tests(tests))
+                                            key=|t| (t.name.to_string(), t.status)
+                                            children=move |t| {
+                                                let label = t.name.clone();
+                                                let query = format!("test?target={}", label);
+                                                let link = url_escape::encode_query(&query).to_string();
+                                                view! {
+                                                    <ListItem hide=Signal::derive(move || {
+                                                        !filter.get().is_empty() && !label.contains(&filter.get())
+                                                    })>
+                                                        <A href=link>
+                                                            <div class="group flex items-center justify-start w-full">
+                                                                <span class="float-left">
+                                                                    <StatusIcon
+                                                                        class="h-4 w-4 max-w-fit"
+                                                                        status=t.status.into()
+                                                                    />
 
-                                                        </span>
-                                                        <span
-                                                            class="label-name pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
-                                                            on:mouseenter=hover
-                                                        >
-                                                            {t.name.clone()}
-                                                        </span>
-                                                        <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                            {format!("{:#?}", t.duration)}
-                                                        </span>
-                                                    </div>
-                                                    </A>
-                                                </ListItem>
+                                                                </span>
+                                                                <span
+                                                                    class="label-name pl-4 max-w-3/4 float-left text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                                                                    on:mouseenter=hover
+                                                                >
+                                                                    {t.name.clone()}
+                                                                </span>
+                                                                <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
+                                                                    {format!("{:#?}", t.duration)}
+                                                                </span>
+                                                            </div>
+                                                        </A>
+                                                    </ListItem>
+                                                }
                                             }
-                                        }
-                                    />
+                                        />
 
-                                </List>
-                            </AccordionItem>
-                        }
-                    })}
+                                    </List>
+                                </AccordionItem>
+                            }
+                        })
+                }}
                 <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
-                            each=move || with!(|targets| sorted_targets(targets))
+                            each=move || with!(| targets | sorted_targets(targets))
                             key=|t| (t.name.to_string(), t.status)
                             children=move |t| {
                                 let label = t.name.clone();

@@ -175,9 +175,9 @@ protobuf_deps()
 
 http_archive(
     name = "googleapis",
-    sha256 = "ece654f71ca2cf96df77e598378d87d932edc325f20dd8d6bdad31bb9eeed3b7",
-    strip_prefix = "googleapis-1769846666fbeb0f9ece6ad929ddc0d563cccd8d",
-    urls = ["https://github.com/googleapis/googleapis/archive/1769846666fbeb0f9ece6ad929ddc0d563cccd8d.tar.gz"],
+    sha256 = "9094b43a8a8b6f05dd4868cb509fa934012725107995865b5c8eb9c67fbea35d",
+    strip_prefix = "googleapis-db5ce67d735d2ceb6fe925f3e317a3f30835cfd6",
+    urls = ["https://github.com/googleapis/googleapis/archive/db5ce67d735d2ceb6fe925f3e317a3f30835cfd6.tar.gz"],
 )
 
 load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")

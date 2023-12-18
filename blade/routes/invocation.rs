@@ -90,16 +90,16 @@ pub fn Invocation() -> impl IntoView {
         <Transition fallback=move || {
             view! { <p>"Loading..."</p> }
         }>
-            {move || res.with(|i| match i {
-                None => view! { <div>"Loading..."</div> }.into_view(),
-                Some(Ok(i)) => {
-                    invocation.set(i.clone());
-                    view! {
-                        <Outlet/>
+            {move || {
+                res.with(|i| match i {
+                    None => view! { <div>"Loading..."</div> }.into_view(),
+                    Some(Ok(i)) => {
+                        invocation.set(i.clone());
+                        view! { <Outlet/> }
                     }
-                },
-                Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
-            })}
+                    Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
+                })
+            }}
 
         </Transition>
     }

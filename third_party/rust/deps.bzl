@@ -164,6 +164,9 @@ def rust_dependencies():
             "tonic-reflection": crate.spec(
                 version = "0.10.2",
             ),
+            "url": crate.spec(
+                version = "2.5.0",
+            ),
             "url-escape": crate.spec(
                 version = "0.1.1",
             ),
@@ -271,6 +274,9 @@ def rust_dependencies():
             ),
             "tokio-stream": crate.spec(
                 version = "0.1",
+            ),
+            "url": crate.spec(
+                version = "2.5.0",
             ),
             "url-escape": crate.spec(
                 version = "0.1.1",

@@ -9,8 +9,10 @@ where
 {
     view! {
         <div class="pl-4 pr-4">
-            <span class="text-m">{move||num.get().to_string()}</span>
-            <span class="text-xs">{move||format!("{}{}", suffix, if num.get() != 1 { "s" } else { "" })}</span>
+            <span class="text-m">{move || num.get().to_string()}</span>
+            <span class="text-xs">
+                {move || format!("{}{}", suffix, if num.get() != 1 { "s" } else { "" })}
+            </span>
         </div>
     }
 }

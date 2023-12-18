@@ -2,11 +2,19 @@ use leptos::*;
 use leptos_router::*;
 
 use crate::components::card::Card;
+use crate::components::shellout::ShellOut;
 use crate::components::testsummary::TestSummary;
 
 #[server]
-pub async fn get_artifact(_uri: String) -> Result<Vec<u8>, ServerFnError> {
-    Ok(vec![])
+pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
+    let uri = url::Url::parse(&uri).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
+    if uri.scheme() == "file" {
+        let path = uri
+            .to_file_path()
+            .map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
+        return std::fs::read(path).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")));
+    }
+    Err(ServerFnError::ServerError("not implemented".to_string()))
 }
 
 #[allow(dead_code)]
@@ -113,13 +121,45 @@ pub fn Test() -> impl IntoView {
         })
     });
 
+    let test_xml = create_resource(
+        move || {
+            with!(|test_run| test_run
+                .as_ref()
+                .and_then(|test_run| test_run.files.get("test.xml").map(|a| a.uri.clone())))
+        },
+        move |uri| async move {
+            match uri {
+                None => None,
+                Some(uri) => get_artifact(uri.to_string()).await.ok(),
+            }
+        },
+    );
+    let test_out = create_resource(
+        move || {
+            with!(|test_run| test_run
+                .as_ref()
+                .and_then(|test_run| test_run.files.get("test.log").map(|a| a.uri.clone())))
+        },
+        move |uri| async move {
+            match uri {
+                None => None,
+                Some(uri) => get_artifact(uri.to_string())
+                    .await
+                    .ok()
+                    .as_ref()
+                    .map(|v| String::from_utf8_lossy(v).to_string()),
+            }
+        },
+    );
+
     provide_context(test);
     provide_context(test_run);
+    provide_context(test_xml);
 
     {
         move || {
-            with!(|test| match test {
-                Ok(_test) => view! {
+            with!(|test_run| match test_run {
+                Some(_test_run) => view! {
                     <div class="flex flex-col">
                     <Card>
                         <TestSummary/>
@@ -130,14 +170,35 @@ pub fn Test() -> impl IntoView {
                             List
                         </Card>
                         <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            Output
+                        <Suspense
+                        fallback=move||view!{<div>Loading...</div>}>
+                            {move||match test_out.get() {
+                                Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> },
+                                _ => view!{ <div>No test output</div> },
+                            }}
+                        </Suspense>
                         </Card>
                     </div>
                     </div>
                 },
-                Err(e) => view! {
+                None => view! {
                     <div>
-                        {format!("{e:#?}")}
+                        {move||with!(|test, run, shard, attempt| if let Ok(test) = test {
+                            let (r, s, a) = get_run(run, shard, attempt, &test.runs);
+                            let mut q = use_location().query.get();
+                            let path = use_location().pathname;
+                            with!(move|path| {
+                                let run = q.0.entry("run".to_string()).or_insert("".to_string());
+                                *run = r.to_string();
+                                let shard = q.0.entry("shard".to_string()).or_insert("".to_string());
+                                *shard = s.to_string();
+                                let attempt = q.0.entry("attempt".to_string()).or_insert("".to_string());
+                                *attempt = a.to_string();
+                                view!{<Redirect path=format!("{}{}", path, q.to_query_string()) options={NavigateOptions {replace: true, ..Default::default()}}/>}
+                            })
+                        } else {
+                            view!{<div> RIP </div>}.into_view()
+                        })}
                     </div>
                 },
             })

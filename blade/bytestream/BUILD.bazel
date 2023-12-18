@@ -1,0 +1,28 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "bytestream",
+    srcs = [
+        "lib.rs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//blade/bytestream/proto:bytestream_proto",
+        "@crate//:anyhow",
+        "@crate//:async-stream",
+        "@crate//:futures",
+        "@crate//:log",
+        "@crate//:prost",
+        "@crate//:prost-types",
+        "@crate//:tokio",
+        "@crate//:tokio-stream",
+        "@crate//:tonic",
+        "@crate//:url",
+    ],
+)
+
+rust_test(
+    name = "bytestream_test",
+    size = "small",
+    crate = ":bytestream",
+)

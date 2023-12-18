@@ -10,8 +10,10 @@ where
 {
     view! {
         <div class="pl-4 pr-4">
-            <span class="text-m">{move||num.get().to_string()}</span>
-            <span class="text-xs">{move||format!("{}{}", suffix, if num.get() != 1 { "s" } else { "" })}</span>
+            <span class="text-m">{move || num.get().to_string()}</span>
+            <span class="text-xs">
+                {move || format!("{}{}", suffix, if num.get() != 1 { "s" } else { "" })}
+            </span>
         </div>
     }
 }
@@ -25,12 +27,14 @@ where
     let _run = expect_context::<Memo<Option<state::TestRun>>>();
     view! {
         <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-        {move|| {
-            with!(|test| test.as_ref().map(|test| view! {
-                <div><StatusIcon class="h-8 w-8" status=test.status.into() /></div>
-                <div class="pl-4"><b>{test.name.clone()}</b></div>
-            }.into_view()).ok().unwrap_or_default())
-        }}
+            {move || {
+                with!(
+                    | test | test.as_ref().map(| test | view! { < div >< StatusIcon class =
+                    "h-8 w-8" status = test.status.into() /></ div > < div class = "pl-4" >< b > {
+                    test.name.clone() } </ b ></ div > } .into_view()).ok().unwrap_or_default()
+                )
+            }}
+
         </div>
     }
 }
