@@ -1,6 +1,7 @@
 use leptos::*;
 use tailwindmerge::tailwind_merge;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Card(
     children: Children,

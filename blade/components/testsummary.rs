@@ -5,25 +5,45 @@ use crate::components::statusicon::StatusIcon;
 
 #[allow(non_snake_case)]
 #[component]
-fn SummaryItem<S>(num: Signal<usize>, suffix: S) -> impl IntoView
+fn SummaryItem<S>(num: usize, suffix: S) -> impl IntoView
 where
-    S: AsRef<str> + std::fmt::Display + std::cmp::Eq + std::hash::Hash + 'static,
+    S: std::fmt::Display + 'static,
 {
     view! {
         <div class="pl-4 pr-4">
-            <span class="text-m">{move || num.get().to_string()}</span>
+            <span class="text-m">{move || num.to_string()}</span>
             <span class="text-xs">
-                {move || format!("{}{}", suffix, if num.get() != 1 { "s" } else { "" })}
+                {move || format!("{}", suffix)}
             </span>
         </div>
     }
+}
+
+#[derive(Debug, Default, Clone)]
+struct TestCounts {
+    passing: usize,
+    failing: usize,
+    skipped: usize,
+}
+
+fn get_test_counts(cases: &[junit_parser::TestCase]) -> TestCounts {
+    let mut tc = TestCounts::default();
+    cases.iter().for_each(|c| {
+        match c.status {
+            junit_parser::TestStatus::Success => tc.passing += 1,
+            junit_parser::TestStatus::Error(_) => tc.failing += 1,
+            junit_parser::TestStatus::Failure(_) => tc.failing += 1,
+            junit_parser::TestStatus::Skipped(_) => tc.skipped += 1,
+        }
+    });
+    tc
 }
 
 #[allow(non_snake_case)]
 #[component]
 fn RunSummary() -> impl IntoView {
     let run = expect_context::<Memo<Option<state::TestRun>>>();
-    let _xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
     view! {
         {move||with!(|run| run.as_ref().map(|run| view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
@@ -44,6 +64,12 @@ fn RunSummary() -> impl IntoView {
                 <div class="pl-1 text-s">
                     {format!("in {:#?}", run.duration)}
                 </div>
+                {move||xml.with(|ts| ts.clone().flatten().and_then(|ts| ts.suites.get(0).map(|s|get_test_counts(&s.cases))).map(|tc| view!{
+                    {(tc.passing > 0).then(||view!{ <span><SummaryItem num=tc.passing suffix="Passing" /></span> })}
+                    {(tc.failing > 0).then(||view!{ <span><SummaryItem num=tc.failing suffix="Failing" /></span> })}
+                    {(tc.skipped > 0).then(||view!{ <span><SummaryItem num=tc.skipped suffix="Skipped" /></span> })}
+                }.into_view()).unwrap_or_default())
+                }
             </div>
         }.into_view()).unwrap_or_default())
     }}
