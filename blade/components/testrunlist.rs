@@ -1,5 +1,6 @@
 use leptos::*;
 use leptos_router::*;
+use wasm_bindgen::JsCast;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
@@ -19,6 +20,17 @@ fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
 pub fn TestRunList() -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let hover = move |e: leptos::ev::MouseEvent| {
+        let el = event_target::<web_sys::HtmlSpanElement>(&e);
+        el.next_element_sibling()
+            .map(|s| {
+                let body = document().body().unwrap().get_bounding_client_rect();
+                let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
+                span.get_bounding_client_rect().y() - body.y()
+            })
+            .map(|t| el.set_attribute("style", &format!("top: {}px", t)).ok());
+    };
+
     view! {
             <Accordion>
                 {move||with!(|test|test.as_ref().map(|test|test.runs.len() > 1).unwrap_or(false)).then(move||view! {
@@ -52,7 +64,8 @@ pub fn TestRunList() -> impl IntoView {
 
                                 </span>
                                 <div
-                                    class="label-name pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs"
+                                    class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
+                                    on:hover=hover
                                 >
                                     <span class="pl-4">
                                         {format!("Run #{}", run.run)}
@@ -84,7 +97,7 @@ pub fn TestRunList() -> impl IntoView {
 
                     view! {
                     <ListItem hide=Signal::derive(||false)>
-                        <div class="group flex items-center justify-start w-full">
+                        <div class="flex items-center justify-start w-full">
                         <span class="float-left">
                             <StatusIcon
                                 class="h-4 w-4 max-w-fit"
@@ -93,7 +106,8 @@ pub fn TestRunList() -> impl IntoView {
 
                         </span>
                         <span
-                            class="label-name pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                            class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
+                            on:hover=hover
                         >
                             {c.1.clone()}
                         </span>

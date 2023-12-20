@@ -130,7 +130,7 @@ pub fn TargetList() -> impl IntoView {
                                                         !filter.get().is_empty() && !label.contains(&filter.get())
                                                     })>
                                                         <A href=link>
-                                                            <div class="group flex items-center justify-start w-full">
+                                                            <div class="flex items-center justify-start w-full">
                                                                 <span class="float-left">
                                                                     <StatusIcon
                                                                         class="h-4 w-4 max-w-fit"
@@ -139,7 +139,7 @@ pub fn TargetList() -> impl IntoView {
 
                                                                 </span>
                                                                 <span
-                                                                    class="label-name pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                                                                    class="pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
                                                                     on:mouseenter=hover
                                                                 >
                                                                     {t.name.clone()}
@@ -170,7 +170,7 @@ pub fn TargetList() -> impl IntoView {
                                     <ListItem hide=Signal::derive(move || {
                                         !filter.get().is_empty() && !label.contains(&filter.get())
                                     })>
-                                        <div class="group flex items-center justify-start w-full">
+                                        <div class="flex items-center justify-start w-full">
                                             <span class="float-left">
                                                 <StatusIcon
                                                     class="h-4 w-4 max-w-fit"
@@ -179,7 +179,7 @@ pub fn TargetList() -> impl IntoView {
 
                                             </span>
                                             <span
-                                                class="label-name pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden group-hover:overflow-visible group-hover:absolute group-hover:bg-slate-200 group-hover:w-fit group-hover:rounded-md"
+                                                class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
                                                 on:mouseenter=hover
                                             >
                                                 {t.name.clone()}
