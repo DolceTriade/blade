@@ -1,13 +1,12 @@
 use crate::components::accordion::*;
 use crate::components::list::*;
 use crate::components::statusicon::StatusIcon;
+use crate::components::tooltip::Tooltip;
 use leptos::*;
-use leptos_dom::{document, helpers::event_target};
 use leptos_router::A;
 use state;
 use std::collections::HashMap;
 use std::string::ToString;
-use wasm_bindgen::JsCast;
 use web_sys::KeyboardEvent;
 use url_escape;
 
@@ -63,17 +62,6 @@ pub fn TargetList() -> impl IntoView {
     let (tests, _) = slice!(invocation.tests);
     let (targets, _) = slice!(invocation.targets);
 
-    let hover = move |e: leptos::ev::MouseEvent| {
-        let el = event_target::<web_sys::HtmlSpanElement>(&e);
-        el.parent_element()
-            .map(|s| {
-                let body = document().body().unwrap().get_bounding_client_rect();
-                let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
-                span.get_bounding_client_rect().y() - body.y()
-            })
-            .map(|t| el.set_attribute("style", &format!("top: {}px", t)).ok());
-    };
-
     let (filter, set_filter) = create_signal("".to_string());
     let search_changed = move |e: KeyboardEvent| {
         let value = event_target_value(&e);
@@ -123,6 +111,7 @@ pub fn TargetList() -> impl IntoView {
                                             key=|t| (t.name.to_string(), t.status)
                                             children=move |t| {
                                                 let label = t.name.clone();
+                                                let tooltip = t.name.clone();
                                                 let query = format!("test?target={}", label);
                                                 let link = url_escape::encode_query(&query).to_string();
                                                 view! {
@@ -138,11 +127,14 @@ pub fn TargetList() -> impl IntoView {
                                                                     />
 
                                                                 </span>
-                                                                <span
-                                                                    class="pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                                    on:mouseenter=hover
-                                                                >
-                                                                    {t.name.clone()}
+                                                                <span class="pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden">
+                                                                    <Tooltip tooltip=move || {
+                                                                        view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                                    }>
+                                                                        <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                            {t.name.clone()}
+                                                                        </span>
+                                                                    </Tooltip>
                                                                 </span>
                                                                 <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
                                                                     {format!("{:#?}", t.duration)}
@@ -166,6 +158,7 @@ pub fn TargetList() -> impl IntoView {
                             key=|t| (t.name.to_string(), t.status)
                             children=move |t| {
                                 let label = t.name.clone();
+                                let tooltip = t.name.clone();
                                 view! {
                                     <ListItem hide=Signal::derive(move || {
                                         !filter.get().is_empty() && !label.contains(&filter.get())
@@ -178,11 +171,14 @@ pub fn TargetList() -> impl IntoView {
                                                 />
 
                                             </span>
-                                            <span
-                                                class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                on:mouseenter=hover
-                                            >
-                                                {t.name.clone()}
+                                            <span class="pl-4 max-w-3/4 float-left">
+                                                <Tooltip tooltip=move || {
+                                                    view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                }>
+                                                    <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                        {t.name.clone()}
+                                                    </span>
+                                                </Tooltip>
                                             </span>
                                             <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
                                                 {format_time(&t.start, t.end.as_ref())}

@@ -1,10 +1,10 @@
 use leptos::*;
 use leptos_router::*;
-use wasm_bindgen::JsCast;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
 use crate::components::statusicon::StatusIcon;
+use crate::components::tooltip::Tooltip;
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {
@@ -58,16 +58,6 @@ fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
 pub fn TestRunList() -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
-    let hover = move |e: leptos::ev::MouseEvent| {
-        let el = event_target::<web_sys::HtmlSpanElement>(&e);
-        el.parent_element()
-            .map(|s| {
-                let body = document().body().unwrap().get_bounding_client_rect();
-                let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
-                span.get_bounding_client_rect().y() - body.y()
-            })
-            .map(|t| el.set_attribute("style", &format!("top: {}px", t)).ok());
-    };
 
     view! {
         <Accordion>
@@ -97,10 +87,16 @@ pub fn TestRunList() -> impl IntoView {
                                                 .to_string()); * attempt = run.attempt.to_string();
                                                 format!("{}{}", path, q.to_query_string()) }
                                             );
+                                            let tooltip = format!(
+                                                "Run #{} Shard #{} Attempt #{}",
+                                                run.run,
+                                                run.shard,
+                                                run.attempt,
+                                            );
                                             view! {
                                                 <ListItem hide=Signal::derive(|| false)>
                                                     <A href=link>
-                                                        <div class="flex items-center justify-start w-full hover:bg-slate-100">
+                                                        <div class="flex items-center justify-start w-full">
                                                             <span class="float-left">
                                                                 <StatusIcon
                                                                     class="h-4 w-4 max-w-fit"
@@ -108,15 +104,18 @@ pub fn TestRunList() -> impl IntoView {
                                                                 />
 
                                                             </span>
-                                                            <div
-                                                                class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                                on:mouseenter=hover
-                                                            >
-                                                                <span class="pl-4">{format!("Run #{}", run.run)}</span>
-                                                                <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
-                                                                <span class="pl-4">
-                                                                    {format!("Attempt #{}", run.attempt)}
-                                                                </span>
+                                                            <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs">
+                                                                <Tooltip tooltip=move || {
+                                                                    view! { <span class="p-1">{tooltip.clone()}</span> }
+                                                                }>
+                                                                    <div class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                        <span class="pl-4">{format!("Run #{}", run.run)}</span>
+                                                                        <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
+                                                                        <span class="pl-4">
+                                                                            {format!("Attempt #{}", run.attempt)}
+                                                                        </span>
+                                                                    </div>
+                                                                </Tooltip>
                                                             </div>
                                                         </div>
                                                     </A>
@@ -164,6 +163,7 @@ pub fn TestRunList() -> impl IntoView {
 
                                             key=move |c| (c.0.clone(), c.1.clone())
                                             children=move |c| {
+                                                let tooltip = c.1.clone();
                                                 view! {
                                                     <ListItem hide=Signal::derive(|| false)>
                                                         <div class="flex items-center justify-start w-full">
@@ -174,11 +174,14 @@ pub fn TestRunList() -> impl IntoView {
                                                                 />
 
                                                             </span>
-                                                            <span
-                                                                class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                                on:mouseenter=hover
-                                                            >
-                                                                {c.1.clone()}
+                                                            <span class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                <Tooltip tooltip=move || {
+                                                                    view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                                }>
+                                                                    <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                        {c.1.clone()}
+                                                                    </span>
+                                                                </Tooltip>
                                                             </span>
                                                             <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
                                                                 {format!("{:.2}s", c.3)}
