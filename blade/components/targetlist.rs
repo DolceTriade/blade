@@ -65,7 +65,7 @@ pub fn TargetList() -> impl IntoView {
 
     let hover = move |e: leptos::ev::MouseEvent| {
         let el = event_target::<web_sys::HtmlSpanElement>(&e);
-        el.next_element_sibling()
+        el.parent_element()
             .map(|s| {
                 let body = document().body().unwrap().get_bounding_client_rect();
                 let span = s.unchecked_into::<web_sys::HtmlSpanElement>();

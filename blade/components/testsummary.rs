@@ -44,74 +44,68 @@ fn RunSummary() -> impl IntoView {
     let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
     view! {
         {move || {
-            run
-                .with(|run| {
-                    run
-                        .as_ref()
-                        .map(|run| {
-                            view! {
-                                <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
-                                    <div>
-                                        <StatusIcon class="h-5 w-5" status=run.status.into()/>
-                                    </div>
-                                    <div class="w-fit h-fit grid grid-rows-1 grid-flow-col items-center justify-center text-s">
-                                        <span class="pl-4">{format!("Run #{}", run.run)}</span>
-                                        <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
-                                        <span class="pl-4">
-                                            {format!("Attempt #{}", run.attempt)}
-                                        </span>
-                                    </div>
-                                    <div class="pl-1 text-s">
-                                        {format!("in {:#?}", run.duration)}
-                                    </div>
-                                    {move || {
-                                        xml
-                                            .with(|ts| {
-                                                ts
-                                                    .clone()
-                                                    .flatten()
-                                                    .and_then(|ts| {
-                                                        ts.suites.get(0).map(|s| get_test_counts(&s.cases))
-                                                    })
-                                                    .map(|tc| {
-                                                        view! {
-                                                            {(tc.passing > 0)
-                                                                .then(|| {
-                                                                    view! {
-                                                                        <span>
-                                                                            <SummaryItem num=tc.passing suffix="Passing"/>
-                                                                        </span>
-                                                                    }
-                                                                })}
-                                                            {(tc.failing > 0)
-                                                                .then(|| {
-                                                                    view! {
-                                                                        <span>
-                                                                            <SummaryItem num=tc.failing suffix="Failing"/>
-                                                                        </span>
-                                                                    }
-                                                                })}
-                                                            {(tc.skipped > 0)
-                                                                .then(|| {
-                                                                    view! {
-                                                                        <span>
-                                                                            <SummaryItem num=tc.skipped suffix="Skipped"/>
-                                                                        </span>
-                                                                    }
-                                                                })}
-                                                        }
-                                                            .into_view()
-                                                    })
-                                                    .unwrap_or_default()
-                                            })
-                                    }}
-
+            run.with(|run| {
+                run.as_ref()
+                    .map(|run| {
+                        view! {
+                            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
+                                <div>
+                                    <StatusIcon class="h-5 w-5" status=run.status.into()/>
                                 </div>
-                            }
-                                .into_view()
-                        })
-                        .unwrap_or_default()
-                })
+                                <div class="w-fit h-fit grid grid-rows-1 grid-flow-col items-center justify-center text-s">
+                                    <span class="pl-4">{format!("Run #{}", run.run)}</span>
+                                    <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
+                                    <span class="pl-4">{format!("Attempt #{}", run.attempt)}</span>
+                                </div>
+                                <div class="pl-1 text-s">{format!("in {:#?}", run.duration)}</div>
+                                {move || {
+                                    xml.with(|ts| {
+                                        ts.clone()
+                                            .flatten()
+                                            .and_then(|ts| {
+                                                ts.suites.get(0).map(|s| get_test_counts(&s.cases))
+                                            })
+                                            .map(|tc| {
+                                                view! {
+                                                    {(tc.passing > 0)
+                                                        .then(|| {
+                                                            view! {
+                                                                <span>
+                                                                    <SummaryItem num=tc.passing suffix="Passing"/>
+                                                                </span>
+                                                            }
+                                                        })}
+
+                                                    {(tc.failing > 0)
+                                                        .then(|| {
+                                                            view! {
+                                                                <span>
+                                                                    <SummaryItem num=tc.failing suffix="Failing"/>
+                                                                </span>
+                                                            }
+                                                        })}
+
+                                                    {(tc.skipped > 0)
+                                                        .then(|| {
+                                                            view! {
+                                                                <span>
+                                                                    <SummaryItem num=tc.skipped suffix="Skipped"/>
+                                                                </span>
+                                                            }
+                                                        })}
+                                                }
+                                                    .into_view()
+                                            })
+                                            .unwrap_or_default()
+                                    })
+                                }}
+
+                            </div>
+                        }
+                            .into_view()
+                    })
+                    .unwrap_or_default()
+            })
         }}
     }
 }
@@ -133,8 +127,7 @@ where
         <div class="w-screen h-fit grid grid-rows-2 grid-flow-col items-center justify-center divide-y">
             {move || {
                 test.with(|test| {
-                    test
-                        .as_ref()
+                    test.as_ref()
                         .ok()
                         .map(|test| {
                             view! {

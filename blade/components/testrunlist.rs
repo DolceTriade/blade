@@ -15,6 +15,44 @@ fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     }
 }
 
+fn sort_runs(runs: &[state::TestRun]) -> Vec<state::TestRun> {
+    let mut runs = runs.to_owned();
+    runs.sort_unstable_by(|a, b| {
+        if a.run != b.run {
+            return a.run.cmp(&b.run);
+        }
+        if a.shard != b.shard {
+            return a.shard.cmp(&b.shard);
+        }
+        a.attempt.cmp(&b.attempt)
+    });
+    runs
+}
+
+type TestListItem = (String, String, junit_parser::TestStatus, f64);
+
+fn status_weight(s: &junit_parser::TestStatus) -> u8 {
+    match s {
+        junit_parser::TestStatus::Error(_) => 1,
+        junit_parser::TestStatus::Failure(_) => 1,
+        junit_parser::TestStatus::Skipped(_) => 2,
+        junit_parser::TestStatus::Success => 3,
+    }
+}
+
+fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
+    let mut cases = cases.to_owned();
+    cases.sort_unstable_by(|a, b| {
+        let a_s = status_weight(&a.2);
+        let b_s = status_weight(&b.2);
+        if a_s != b_s {
+            return a_s.cmp(&b_s);
+        }
+        a.1.cmp(&b.1)
+    });
+    cases
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn TestRunList() -> impl IntoView {
@@ -22,7 +60,7 @@ pub fn TestRunList() -> impl IntoView {
     let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
     let hover = move |e: leptos::ev::MouseEvent| {
         let el = event_target::<web_sys::HtmlSpanElement>(&e);
-        el.next_element_sibling()
+        el.parent_element()
             .map(|s| {
                 let body = document().body().unwrap().get_bounding_client_rect();
                 let span = s.unchecked_into::<web_sys::HtmlSpanElement>();
@@ -34,16 +72,18 @@ pub fn TestRunList() -> impl IntoView {
     view! {
         <Accordion>
             {move || {
-                test
-                    .with(|test| test.as_ref().map(|test| test.runs.len() > 1).unwrap_or(false))
+                test.with(|test| test.as_ref().map(|test| test.runs.len() > 1).unwrap_or(false))
                     .then(move || {
                         view! {
                             <AccordionItem header=move || view! { <h3>Runs</h3> }>
                                 <List>
                                     <For
                                         each=move || {
-                                            with!(move | test | test.as_ref().unwrap().runs.clone())
+                                            with!(
+                                                move | test | sort_runs(& test.as_ref().unwrap().runs)
+                                            )
                                         }
+
                                         key=move |r| (r.run, r.shard, r.attempt)
                                         children=move |run| {
                                             let mut q = use_location().query.get();
@@ -70,7 +110,7 @@ pub fn TestRunList() -> impl IntoView {
                                                             </span>
                                                             <div
                                                                 class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                                on:hover=hover
+                                                                on:mouseenter=hover
                                                             >
                                                                 <span class="pl-4">{format!("Run #{}", run.run)}</span>
                                                                 <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
@@ -84,6 +124,7 @@ pub fn TestRunList() -> impl IntoView {
                                             }
                                         }
                                     />
+
                                 </List>
                             </AccordionItem>
                         }
@@ -94,67 +135,67 @@ pub fn TestRunList() -> impl IntoView {
                     view! { <div>Loading...</div> }
                 }>
                     {move || {
-                        xml
-                            .with(|x| match x.as_ref() {
-                                Some(Some(_)) => {
-                                    view! {
-                                        <List>
-                                            <For
-                                                each=move || {
-                                                    xml.with(|x| {
-                                                        x
-                                                            .clone()
-                                                            .flatten()
-                                                            .as_ref()
-                                                            .and_then(|x| x.suites.get(0))
-                                                            .map(|c| {
-                                                                c
-                                                                    .cases
-                                                                    .iter()
-                                                                    .map(|i| (
-                                                                        c.name.clone(),
-                                                                        i.name.clone(),
-                                                                        i.status.clone(),
-                                                                        i.time,
-                                                                    ))
-                                                                    .collect::<Vec<_>>()
-                                                            })
-                                                            .unwrap_or_default()
-                                                    })
-                                                }
-                                                key=move |c| (c.0.clone(), c.1.clone())
-                                                children=move |c| {
-                                                    view! {
-                                                        <ListItem hide=Signal::derive(|| false)>
-                                                            <div class="flex items-center justify-start w-full">
-                                                                <span class="float-left">
-                                                                    <StatusIcon
-                                                                        class="h-4 w-4 max-w-fit"
-                                                                        status=junit_status_to_status(c.2).into()
-                                                                    />
+                        xml.with(|x| match x.as_ref() {
+                            Some(Some(_)) => {
+                                view! {
+                                    <List>
+                                        <For
+                                            each=move || {
+                                                xml.with(|x| {
+                                                    x.clone()
+                                                        .flatten()
+                                                        .as_ref()
+                                                        .and_then(|x| x.suites.get(0))
+                                                        .map(|c| {
+                                                            c.cases
+                                                                .iter()
+                                                                .map(|i| (
+                                                                    c.name.clone(),
+                                                                    i.name.clone(),
+                                                                    i.status.clone(),
+                                                                    i.time,
+                                                                ))
+                                                                .collect::<Vec<_>>()
+                                                        })
+                                                        .map(|c| sort_tests(&c))
+                                                        .unwrap_or_default()
+                                                })
+                                            }
 
-                                                                </span>
-                                                                <span
-                                                                    class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
-                                                                    on:hover=hover
-                                                                >
-                                                                    {c.1.clone()}
-                                                                </span>
-                                                                <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                                    {format!("{:.2}s", c.3)}
-                                                                </span>
-                                                            </div>
+                                            key=move |c| (c.0.clone(), c.1.clone())
+                                            children=move |c| {
+                                                view! {
+                                                    <ListItem hide=Signal::derive(|| false)>
+                                                        <div class="flex items-center justify-start w-full">
+                                                            <span class="float-left">
+                                                                <StatusIcon
+                                                                    class="h-4 w-4 max-w-fit"
+                                                                    status=junit_status_to_status(c.2).into()
+                                                                />
 
-                                                        </ListItem>
-                                                    }
+                                                            </span>
+                                                            <span
+                                                                class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden hover:overflow-visible hover:absolute hover:bg-slate-200 hover:w-fit hover:rounded-md"
+                                                                on:mouseenter=hover
+                                                            >
+                                                                {c.1.clone()}
+                                                            </span>
+                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
+                                                                {format!("{:.2}s", c.3)}
+                                                            </span>
+                                                        </div>
+
+                                                    </ListItem>
                                                 }
-                                            />
-                                        </List>
-                                    }
-                                        .into_view()
+                                            }
+                                        />
+
+                                    </List>
                                 }
-                                _ => view! { <div>Loading...</div> }.into_view(),
-                            })
+                                    .into_view()
+                            }
+                            _ => view! { <div>Loading...</div> }.into_view(),
+                        })
                     }}
 
                 </Suspense>
