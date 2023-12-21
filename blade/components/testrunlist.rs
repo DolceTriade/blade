@@ -69,24 +69,34 @@ pub fn TestRunList() -> impl IntoView {
                                 <List>
                                     <For
                                         each=move || {
-                                            with!(
-                                                move | test | sort_runs(& test.as_ref().unwrap().runs)
-                                            )
+                                            test.with(move |test| sort_runs(
+                                                &test.as_ref().unwrap().runs,
+                                            ))
                                         }
 
                                         key=move |r| (r.run, r.shard, r.attempt)
                                         children=move |run| {
                                             let mut q = use_location().query.get();
                                             let path = use_location().pathname;
-                                            let link = with!(
-                                                move | path | { let runq = q.0.entry("run".to_string())
-                                                .or_insert("".to_string()); * runq = run.run.to_string();
-                                                let shard = q.0.entry("shard".to_string()).or_insert(""
-                                                .to_string()); * shard = run.shard.to_string(); let attempt
-                                                = q.0.entry("attempt".to_string()).or_insert(""
-                                                .to_string()); * attempt = run.attempt.to_string();
-                                                format!("{}{}", path, q.to_query_string()) }
-                                            );
+                                            let link = path
+                                                .with(move |path| {
+                                                    let runq = q
+                                                        .0
+                                                        .entry("run".to_string())
+                                                        .or_insert("".to_string());
+                                                    *runq = run.run.to_string();
+                                                    let shard = q
+                                                        .0
+                                                        .entry("shard".to_string())
+                                                        .or_insert("".to_string());
+                                                    *shard = run.shard.to_string();
+                                                    let attempt = q
+                                                        .0
+                                                        .entry("attempt".to_string())
+                                                        .or_insert("".to_string());
+                                                    *attempt = run.attempt.to_string();
+                                                    format!("{}{}", path, q.to_query_string())
+                                                });
                                             let tooltip = format!(
                                                 "Run #{} Shard #{} Attempt #{}",
                                                 run.run,

@@ -101,13 +101,14 @@ pub fn TargetList() -> impl IntoView {
             <Accordion>
 
                 {move || {
-                    with!(| tests | ! tests.is_empty())
+                    tests
+                        .with(|tests| !tests.is_empty())
                         .then(move || {
                             view! {
                                 <AccordionItem header=move || view! { <h3>Tests</h3> }>
                                     <List>
                                         <For
-                                            each=move || with!(| tests | sorted_tests(tests))
+                                            each=move || tests.with(sorted_tests)
                                             key=|t| (t.name.to_string(), t.status)
                                             children=move |t| {
                                                 let label = t.name.clone();
@@ -154,7 +155,7 @@ pub fn TargetList() -> impl IntoView {
                 <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
-                            each=move || with!(| targets | sorted_targets(targets))
+                            each=move || targets.with(sorted_targets)
                             key=|t| (t.name.to_string(), t.status)
                             children=move |t| {
                                 let label = t.name.clone();
