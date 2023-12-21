@@ -21,7 +21,7 @@ where
         <div on:mouseenter=hover class="group">
             <span
                 _ref=tel
-                class="pointer-events-none absolute top-0 left-auto w-max bg-black text-white rounded-lg opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
+                class="pointer-events-none absolute top-0 left-auto w-max bg-black text-white rounded-lg opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-hover:z-50"
             >
                 {tooltip()}
             </span>
