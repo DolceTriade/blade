@@ -116,6 +116,7 @@ pub fn TestResults() -> impl IntoView {
                                     let status = junit_status_to_status(c.status.clone());
                                     let header = c.name.clone();
                                     let duration = c.time;
+                                    let id = c.name.clone();
                                     let mut message = match c.status {
                                         junit_parser::TestStatus::Error(e) => merge_error(&e),
                                         junit_parser::TestStatus::Failure(e) => merge_fail(&e),
@@ -130,7 +131,10 @@ pub fn TestResults() -> impl IntoView {
                                             hide=true
                                             header=move || {
                                                 view! {
-                                                    <div class="flex justify-between items-center">
+                                                    <div
+                                                        id=id.clone()
+                                                        class="flex justify-between items-center"
+                                                    >
                                                         <span class="flex items-center">
                                                             <StatusIcon class="h-4 w-4" status=status.into()/>
                                                             <h3 class="p-2">{header.clone()}</h3>
@@ -150,6 +154,7 @@ pub fn TestResults() -> impl IntoView {
                                     }
                                 }
                             />
+
                         </Accordion>
                     }
                         .into_view()

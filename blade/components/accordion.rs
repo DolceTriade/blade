@@ -1,19 +1,25 @@
 use leptos::*;
 
 #[component]
-pub fn AccordionItem<F, IV>(header: F, children: Children) -> impl IntoView
+pub fn AccordionItem<F, IV>(
+    header: F,
+    children: Children,
+    #[prop(optional, into)] header_class: String,
+    #[prop(optional, default = false)]
+    hide: bool,
+) -> impl IntoView
 where
     F: Fn() -> IV,
     IV: IntoView,
 {
-    let (hide, set_hide) = create_signal(false);
+    let (hide, set_hide) = create_signal(hide);
     view! {
         <button
             type="button"
             on:click=move |_| set_hide.set(!hide.get())
             class="flex w-full grow items-center justify-between p-5 font-medium rtl:text-right text-gray-500 border first:border-t-0 border-gray-200 first:rounded-t-xl last:rounded-b-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
         >
-            <span>{header()}</span>
+            <span class=header_class>{header()}</span>
             <span>
                 <svg
                     data-accordion-icon

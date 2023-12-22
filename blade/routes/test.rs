@@ -5,6 +5,7 @@ use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
 use crate::components::testsummary::TestSummary;
 use crate::components::testrunlist::TestRunList;
+use crate::components::testresults::TestResults;
 
 #[server]
 pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
@@ -173,6 +174,7 @@ pub fn Test() -> impl IntoView {
                             <TestRunList />
                         </Card>
                         <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                        <TestResults/>
                         <Suspense
                         fallback=move||view!{<div>Loading...</div>}>
                             {move||match test_out.get() {

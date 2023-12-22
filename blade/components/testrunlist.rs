@@ -58,6 +58,11 @@ fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
 pub fn TestRunList() -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let click = move |test: String| {
+        document()
+            .get_element_by_id(&test)
+            .map(|el| el.scroll_into_view())
+    };
 
     view! {
         <Accordion>
@@ -174,9 +179,17 @@ pub fn TestRunList() -> impl IntoView {
                                             key=move |c| (c.0.clone(), c.1.clone())
                                             children=move |c| {
                                                 let tooltip = c.1.clone();
+                                                let id_memo = c.1.clone();
+                                                let id = create_memo(move |_| id_memo.clone());
                                                 view! {
                                                     <ListItem hide=Signal::derive(|| false)>
-                                                        <div class="flex items-center justify-start w-full">
+                                                        <div
+                                                            on:click=move |_| {
+                                                                click(id.get());
+                                                            }
+                                                            test=id
+                                                            class="flex items-center justify-start w-full"
+                                                        >
                                                             <span class="float-left">
                                                                 <StatusIcon
                                                                     class="h-4 w-4 max-w-fit"

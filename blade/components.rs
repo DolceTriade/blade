@@ -9,3 +9,4 @@ pub mod targetlist;
 pub mod testsummary;
 pub mod testrunlist;
 pub mod tooltip;
+pub mod testresults;
