@@ -72,7 +72,7 @@ pub fn TargetList() -> impl IntoView {
     view! {
         <div>
             <div class="p-xs">
-                <Searchbar id="search" placeholder="Filter targets..." keyup=search_key />
+                <Searchbar id="search" placeholder="Filter targets..." keyup=search_key/>
             </div>
             <Accordion>
 

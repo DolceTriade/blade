@@ -74,7 +74,7 @@ pub fn TestRunList() -> impl IntoView {
 
     view! {
         <div class="p-xs">
-            <Searchbar id="search" placeholder="Filter tests..." keyup=search_key />
+            <Searchbar id="search" placeholder="Filter tests..." keyup=search_key/>
         </div>
         <Accordion>
             {move || {
@@ -198,7 +198,10 @@ pub fn TestRunList() -> impl IntoView {
                                                 let id_memo = c.1.clone();
                                                 let id = create_memo(move |_| id_memo.clone());
                                                 view! {
-                                                    <ListItem hide=Signal::derive(move|| !filter.get().is_empty() && !id.with(|id|id.contains(&filter.get())))>
+                                                    <ListItem hide=Signal::derive(move || {
+                                                        !filter.get().is_empty()
+                                                            && !id.with(|id| id.contains(&filter.get()))
+                                                    })>
                                                         <div
                                                             on:click=move |_| {
                                                                 click(id.get());
