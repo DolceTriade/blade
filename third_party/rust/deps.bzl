@@ -158,6 +158,10 @@ def rust_dependencies():
             "scopeguard": crate.spec(
                 version = "1.2.0",
             ),
+            "time": crate.spec(
+                version = "0.3.31",
+                features = ["formatting", "macros"],
+            ),
             "tokio": crate.spec(
                 version = "1.32.0",
                 features = ["full"],
@@ -286,6 +290,10 @@ def rust_dependencies():
             "junit-parser": crate.spec(
                 version = "1.0.0",
                 features = ["serde"],
+            ),
+            "time": crate.spec(
+                version = "0.3.31",
+                features = ["formatting", "macros"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",

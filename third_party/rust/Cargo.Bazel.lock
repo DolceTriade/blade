@@ -1,5 +1,5 @@
 {
-  "checksum": "f34960dc7e424ef97c96fc571741972359019faf1d74e4f47225fd9ed6c3526f",
+  "checksum": "1de53591f7fc9b0cd75d541734c666fc16ee83e7d1d2a4d446449fe3fd97931a",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -835,7 +835,7 @@
               "target": "socket2"
             },
             {
-              "id": "time 0.3.25",
+              "id": "time 0.3.31",
               "target": "time"
             },
             {
@@ -4261,7 +4261,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "time 0.3.25",
+              "id": "time 0.3.31",
               "target": "time"
             }
           ],
@@ -4650,13 +4650,13 @@
       },
       "license": "MIT"
     },
-    "deranged 0.3.7": {
+    "deranged 0.3.10": {
       "name": "deranged",
-      "version": "0.3.7",
+      "version": "0.3.10",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/deranged/0.3.7/download",
-          "sha256": "7684a49fb1af197853ef7b2ee694bc1f5b4179556f1e5710e1760c5db6f5e929"
+          "url": "https://crates.io/api/v1/crates/deranged/0.3.10/download",
+          "sha256": "8eb30d70a07a3b04884d2677f06bec33509dc67ca60d92949e5535352d3191dc"
         }
       },
       "targets": [
@@ -4678,12 +4678,22 @@
         "crate_features": {
           "common": [
             "alloc",
+            "powerfmt",
             "std"
           ],
           "selects": {}
         },
+        "deps": {
+          "common": [
+            {
+              "id": "powerfmt 0.2.0",
+              "target": "powerfmt"
+            }
+          ],
+          "selects": {}
+        },
         "edition": "2021",
-        "version": "0.3.7"
+        "version": "0.3.10"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -4930,7 +4940,7 @@
               "target": "serde_json"
             },
             {
-              "id": "time 0.3.25",
+              "id": "time 0.3.31",
               "target": "time"
             },
             {
@@ -5239,6 +5249,10 @@
             {
               "id": "serde_json 1.0.108",
               "target": "serde_json"
+            },
+            {
+              "id": "time 0.3.31",
+              "target": "time"
             },
             {
               "id": "tokio 1.32.0",
@@ -11828,6 +11842,36 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "powerfmt 0.2.0": {
+      "name": "powerfmt",
+      "version": "0.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/powerfmt/0.2.0/download",
+          "sha256": "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "powerfmt",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "powerfmt",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.2.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "ppv-lite86 0.2.17": {
       "name": "ppv-lite86",
       "version": "0.2.17",
@@ -16174,13 +16218,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "time 0.3.25": {
+    "time 0.3.31": {
       "name": "time",
-      "version": "0.3.25",
+      "version": "0.3.31",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/time/0.3.25/download",
-          "sha256": "b0fdd63d58b18d663fbdf70e049f00a22c8e42be082203be7f26589213cd75ea"
+          "url": "https://crates.io/api/v1/crates/time/0.3.31/download",
+          "sha256": "f657ba42c3f86e7680e53c8cd3af8abbe56b5491790b46e22e19c0d57463583e"
         }
       },
       "targets": [
@@ -16213,7 +16257,7 @@
         "deps": {
           "common": [
             {
-              "id": "deranged 0.3.7",
+              "id": "deranged 0.3.10",
               "target": "deranged"
             },
             {
@@ -16221,7 +16265,11 @@
               "target": "itoa"
             },
             {
-              "id": "time-core 0.1.1",
+              "id": "powerfmt 0.2.0",
+              "target": "powerfmt"
+            },
+            {
+              "id": "time-core 0.1.2",
               "target": "time_core"
             }
           ],
@@ -16231,23 +16279,23 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "time-macros 0.2.11",
+              "id": "time-macros 0.2.16",
               "target": "time_macros"
             }
           ],
           "selects": {}
         },
-        "version": "0.3.25"
+        "version": "0.3.31"
       },
       "license": "MIT OR Apache-2.0"
     },
-    "time-core 0.1.1": {
+    "time-core 0.1.2": {
       "name": "time-core",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/time-core/0.1.1/download",
-          "sha256": "7300fbefb4dadc1af235a9cef3737cea692a9d97e1b9cbcd4ebdae6f8868e6fb"
+          "url": "https://crates.io/api/v1/crates/time-core/0.1.2/download",
+          "sha256": "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
         }
       },
       "targets": [
@@ -16267,17 +16315,17 @@
           "**"
         ],
         "edition": "2021",
-        "version": "0.1.1"
+        "version": "0.1.2"
       },
       "license": "MIT OR Apache-2.0"
     },
-    "time-macros 0.2.11": {
+    "time-macros 0.2.16": {
       "name": "time-macros",
-      "version": "0.2.11",
+      "version": "0.2.16",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/time-macros/0.2.11/download",
-          "sha256": "eb71511c991639bb078fd5bf97757e03914361c48100d52878b8e52b46fb92cd"
+          "url": "https://crates.io/api/v1/crates/time-macros/0.2.16/download",
+          "sha256": "26197e33420244aeb70c3e8c78376ca46571bc4e701e4791c2cd9f57dcb3a43f"
         }
       },
       "targets": [
@@ -16306,14 +16354,14 @@
         "deps": {
           "common": [
             {
-              "id": "time-core 0.1.1",
+              "id": "time-core 0.1.2",
               "target": "time_core"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.11"
+        "version": "0.2.16"
       },
       "license": "MIT OR Apache-2.0"
     },

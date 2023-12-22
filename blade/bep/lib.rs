@@ -13,6 +13,7 @@ use tonic::{transport::Server, Response, Status};
 mod print_event;
 mod progress;
 mod target;
+mod buildinfo;
 
 trait EventHandler {
     fn handle_event(
@@ -175,7 +176,7 @@ pub async fn run_bes_grpc(
         .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
     let mut handlers: Vec<Box<dyn EventHandler + Sync + Send>> =
-        vec![Box::new(progress::Handler {}), Box::new(target::Handler {})];
+        vec![Box::new(progress::Handler {}), Box::new(target::Handler {}), Box::new(buildinfo::Handler{})];
     if !print_message_re.is_empty() {
         handlers.push(Box::new(print_event::Handler {
             message_re: regex::Regex::new(print_message_re).unwrap(),

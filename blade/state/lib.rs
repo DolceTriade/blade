@@ -54,6 +54,9 @@ pub struct InvocationResults {
     pub tests: HashMap<String, Test>,
     pub status: Status,
     pub output: String,
+    pub start: std::time::SystemTime,
+    pub command: String,
+    pub pattern: Vec<String>,
 }
 
 impl Default for InvocationResults {
@@ -63,6 +66,9 @@ impl Default for InvocationResults {
             tests: HashMap::new(),
             status: Status::Unknown,
             output: "".into(),
+            command: "".into(),
+            pattern: vec![],
+            start: std::time::UNIX_EPOCH,
         }
     }
 }

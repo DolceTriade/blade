@@ -1,5 +1,6 @@
 use crate::components::statusicon::StatusIcon;
 use leptos::*;
+use time::macros::format_description;
 
 #[allow(non_snake_case)]
 #[component]
@@ -26,6 +27,19 @@ struct Counts {
     passing_tests: usize,
     failing_tests: usize,
     status: state::Status,
+}
+
+fn format_time(t: &std::time::SystemTime) -> String {
+    let ts: time::OffsetDateTime = (*t).into();
+    ts.format(&format_description!("[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]")).unwrap_or(format!("{ts:#?}"))
+}
+
+fn ucfirst(s: &str) -> String {
+    let mut new = s.to_owned();
+    if let Some(start) = new.get_mut(0..1) {
+        start.make_ascii_lowercase();
+    }
+    new
 }
 
 #[allow(non_snake_case)]
@@ -69,9 +83,15 @@ pub fn SummaryHeader() -> impl IntoView {
     let passing_tests = Signal::derive(move||with!(|counts| counts.passing_tests));
     let failing_tests = Signal::derive(move||with!(|counts| counts.failing_tests));
     let status = Signal::derive(move||with!(|counts| counts.status));
+    let cmd = with!(|invocation|ucfirst(&invocation.command));
+    let patterns = with!(|invocation|invocation.pattern.join(","));
+    let start = with!(|invocation|format_time(&invocation.start));
     view! {
         <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-            <div class="pr-4">
+            <div class="absolute flex gap-2 items-center">
+                <span class="text-lg"><b>{cmd}</b></span> <span>{patterns}</span><span>@</span><span class="text-grey-400 text-sm">{start}</span>
+            </div>
+            <div class="p-4">
                 <StatusIcon class="h-8 w-8" status=status.into()/>
             </div>
             <SummaryItem num=num_targets suffix="Total Target"/>

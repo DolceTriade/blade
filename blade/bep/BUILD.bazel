@@ -3,6 +3,7 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 rust_library(
     name = "bep",
     srcs = [
+        "buildinfo.rs",
         "lib.rs",
         "print_event.rs",
         "progress.rs",
