@@ -71,7 +71,7 @@ pub fn SummaryHeader() -> impl IntoView {
     let status = Signal::derive(move||with!(|counts| counts.status));
     view! {
         <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-            <div>
+            <div class="pr-4">
                 <StatusIcon class="h-8 w-8" status=status.into()/>
             </div>
             <SummaryItem num=num_targets suffix="Total Target"/>

@@ -119,16 +119,15 @@ pub fn TestRunList() -> impl IntoView {
                                                                 />
 
                                                             </span>
-                                                            <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap text-xs">
+                                                            <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap">
                                                                 <Tooltip tooltip=move || {
                                                                     view! { <span class="p-1">{tooltip.clone()}</span> }
                                                                 }>
-                                                                    <div class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                                        <span class="pl-4">{format!("Run #{}", run.run)}</span>
-                                                                        <span class="pl-4">{format!("Shard #{}", run.shard)}</span>
-                                                                        <span class="pl-4">
-                                                                            {format!("Attempt #{}", run.attempt)}
-                                                                        </span>
+                                                                    <div class="flex items-center max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden text-sm">
+                                                                        <span class="pl-4">{format!("Run {}", run.run)}</span>
+                                                                        <span class="flex items-center  pl-1"><img class="h-4 w-4" src="/pkg/static/shard.svg"/> {run.shard}</span>
+                                                                        <span class="flex items-center pl-1"><img class="h-4 w-4" src="/pkg/static/number.svg"/> {run.attempt}</span>
+
                                                                     </div>
                                                                 </Tooltip>
                                                             </div>
