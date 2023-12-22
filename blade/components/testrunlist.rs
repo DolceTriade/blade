@@ -1,10 +1,12 @@
 use leptos::*;
 use leptos_router::*;
+use web_sys::KeyboardEvent;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
 use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
+use crate::components::searchbar::Searchbar;
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {
@@ -63,8 +65,17 @@ pub fn TestRunList() -> impl IntoView {
             .get_element_by_id(&test)
             .map(|el| el.scroll_into_view())
     };
+    let (filter, set_filter) = create_signal("".to_string());
+    let search_key = move |e: KeyboardEvent| {
+        let value = event_target_value(&e);
+        set_filter.set(value);
+    };
+
 
     view! {
+        <div class="p-xs">
+            <Searchbar id="search" placeholder="Filter tests..." keyup=search_key />
+        </div>
         <Accordion>
             {move || {
                 test.with(|test| test.as_ref().map(|test| test.runs.len() > 1).unwrap_or(false))
@@ -125,8 +136,14 @@ pub fn TestRunList() -> impl IntoView {
                                                                 }>
                                                                     <div class="flex items-center max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden text-sm">
                                                                         <span class="pl-4">{format!("Run {}", run.run)}</span>
-                                                                        <span class="flex items-center  pl-1"><img class="h-4 w-4" src="/pkg/static/shard.svg"/> {run.shard}</span>
-                                                                        <span class="flex items-center pl-1"><img class="h-4 w-4" src="/pkg/static/number.svg"/> {run.attempt}</span>
+                                                                        <span class="flex items-center  pl-1">
+                                                                            <img class="h-4 w-4" src="/pkg/static/shard.svg"/>
+                                                                            {run.shard}
+                                                                        </span>
+                                                                        <span class="flex items-center pl-1">
+                                                                            <img class="h-4 w-4" src="/pkg/static/number.svg"/>
+                                                                            {run.attempt}
+                                                                        </span>
 
                                                                     </div>
                                                                 </Tooltip>
@@ -181,11 +198,12 @@ pub fn TestRunList() -> impl IntoView {
                                                 let id_memo = c.1.clone();
                                                 let id = create_memo(move |_| id_memo.clone());
                                                 view! {
-                                                    <ListItem hide=Signal::derive(|| false)>
+                                                    <ListItem hide=Signal::derive(move|| !filter.get().is_empty() && !id.with(|id|id.contains(&filter.get())))>
                                                         <div
                                                             on:click=move |_| {
                                                                 click(id.get());
                                                             }
+
                                                             test=id
                                                             class="flex items-center justify-start w-full"
                                                         >
