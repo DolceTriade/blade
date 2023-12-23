@@ -38,3 +38,15 @@ def third_party_nix_deps():
             "//nix/rust:rust_platform.nix",
         ],
     )
+    nixpkgs_package(
+        name = "sqlite",
+        attribute_path = "sqlite.out",
+        repository = "@nixpkgs",
+        build_file = "//third_party/nix:BUILD.sqlite",
+    )
+    nixpkgs_package(
+        name = "postgresql",
+        attribute_path = "postgresql.lib",
+        repository = "@nixpkgs",
+        build_file = "//third_party/nix:BUILD.postgresql",
+    )

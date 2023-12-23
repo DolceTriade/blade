@@ -1,5 +1,5 @@
 {
-  "checksum": "4a010580ea3c3b0da81007d1ba7b86e8882d75c1b6b880167815e68607c443b1",
+  "checksum": "2383c34bfabb8223225b76546d0f242ee5606268f1b408f31c0a7edbd13117f8",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -4956,6 +4956,13 @@
               "id": "uuid 1.4.1",
               "target": "uuid"
             }
+          ],
+          "selects": {}
+        },
+        "extra_deps": {
+          "common": [
+            "@postgresql",
+            "@sqlite"
           ],
           "selects": {}
         },

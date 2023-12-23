@@ -66,6 +66,14 @@ def rust_dependencies():
                     patch_args = ["-p1"],
                 ),
             ],
+            "diesel": [
+                crate.annotation(
+                    deps = [
+                        "@postgresql",
+                        "@sqlite",
+                    ],
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(
