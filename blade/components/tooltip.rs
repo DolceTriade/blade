@@ -1,5 +1,6 @@
 use leptos::*;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Tooltip<F, IV>(children: Children, tooltip: F) -> impl IntoView
 where

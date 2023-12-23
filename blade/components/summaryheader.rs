@@ -89,7 +89,12 @@ pub fn SummaryHeader() -> impl IntoView {
     view! {
         <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
             <div class="absolute flex gap-2 items-center">
-                <span class="text-lg"><b>{cmd}</b></span> <span>{patterns}</span><span>@</span><span class="text-grey-400 text-sm">{start}</span>
+                <span class="text-lg">
+                    <b>{cmd}</b>
+                </span>
+                <span>{patterns}</span>
+                <span>@</span>
+                <span class="text-grey-400 text-sm">{start}</span>
             </div>
             <div class="p-4">
                 <StatusIcon class="h-8 w-8" status=status.into()/>

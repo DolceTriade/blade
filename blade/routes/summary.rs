@@ -5,6 +5,7 @@ use crate::components::shellout::ShellOut;
 use crate::components::summaryheader::SummaryHeader;
 use crate::components::targetlist::TargetList;
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Summary() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();

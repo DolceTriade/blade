@@ -25,6 +25,7 @@ struct InvocationParams {
     id: Option<String>,
 }
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
