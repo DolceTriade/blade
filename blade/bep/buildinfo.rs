@@ -24,6 +24,7 @@ impl crate::EventHandler for Handler {
     ) -> anyhow::Result<()> {
         match &event.payload {
             Some(build_event_stream::build_event::Payload::Started(p)) => {
+                invocation.id = p.uuid.clone();
                 invocation.start = time(&p.start_time);
                 invocation.command = p.command.clone();
             }

@@ -103,6 +103,10 @@ def rust_dependencies():
                 version = "2.1.4",
                 features = ["extras", "sqlite", "postgres"],
             ),
+            "diesel_migrations": crate.spec(
+                version = "2.1.0",
+                features = ["sqlite", "postgres"],
+            ),
             "futures": crate.spec(
                 version = "0.3.29",
             ),
@@ -165,6 +169,9 @@ def rust_dependencies():
             ),
             "scopeguard": crate.spec(
                 version = "1.2.0",
+            ),
+            "tempdir": crate.spec(
+                version = "0.3.7",
             ),
             "time": crate.spec(
                 version = "0.3.31",

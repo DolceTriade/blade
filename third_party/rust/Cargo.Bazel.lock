@@ -1,5 +1,5 @@
 {
-  "checksum": "2383c34bfabb8223225b76546d0f242ee5606268f1b408f31c0a7edbd13117f8",
+  "checksum": "d9a9b7fafbcc5aacb343745374bc2d4b17ebeba456086985ad43e99949e84ab2",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -5044,6 +5044,66 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "diesel_migrations 2.1.0": {
+      "name": "diesel_migrations",
+      "version": "2.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/diesel_migrations/2.1.0/download",
+          "sha256": "6036b3f0120c5961381b570ee20a02432d7e2d27ea60de9578799cf9156914ac"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "diesel_migrations",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "diesel_migrations",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "postgres",
+            "sqlite"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "diesel 2.1.4",
+              "target": "diesel"
+            },
+            {
+              "id": "migrations_internals 2.1.0",
+              "target": "migrations_internals"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "migrations_macros 2.1.0",
+              "target": "migrations_macros"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "2.1.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "diesel_table_macro_syntax 0.1.0": {
       "name": "diesel_table_macro_syntax",
       "version": "0.1.0",
@@ -5195,6 +5255,10 @@
               "target": "diesel"
             },
             {
+              "id": "diesel_migrations 2.1.0",
+              "target": "diesel_migrations"
+            },
+            {
               "id": "futures 0.3.29",
               "target": "futures"
             },
@@ -5265,6 +5329,10 @@
             {
               "id": "serde_json 1.0.108",
               "target": "serde_json"
+            },
+            {
+              "id": "tempdir 0.3.7",
+              "target": "tempdir"
             },
             {
               "id": "time 0.3.31",
@@ -5847,6 +5915,36 @@
         "version": "1.2.1"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "fuchsia-cprng 0.1.1": {
+      "name": "fuchsia-cprng",
+      "version": "0.1.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/fuchsia-cprng/0.1.1/download",
+          "sha256": "a06f77d526c1a601b7c4cdd98f54b5eaabffc14d5f2f0296febdc7f357c6d3ba"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "fuchsia_cprng",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "fuchsia_cprng",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "0.1.1"
+      },
+      "license": null
     },
     "futures 0.3.29": {
       "name": "futures",
@@ -10430,6 +10528,102 @@
       },
       "license": "Unlicense/MIT"
     },
+    "migrations_internals 2.1.0": {
+      "name": "migrations_internals",
+      "version": "2.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/migrations_internals/2.1.0/download",
+          "sha256": "0f23f71580015254b020e856feac3df5878c2c7a8812297edd6c0a485ac9dada"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "migrations_internals",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "migrations_internals",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            },
+            {
+              "id": "toml 0.7.8",
+              "target": "toml"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "2.1.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "migrations_macros 2.1.0": {
+      "name": "migrations_macros",
+      "version": "2.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/migrations_macros/2.1.0/download",
+          "sha256": "cce3325ac70e67bbab5bd837a31cae01f1a6db64e0e744a33cb03a543469ef08"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "migrations_macros",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "migrations_macros",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "migrations_internals 2.1.0",
+              "target": "migrations_internals"
+            },
+            {
+              "id": "proc-macro2 1.0.66",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.32",
+              "target": "quote"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "2.1.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "mime 0.3.17": {
       "name": "mime",
       "version": "0.3.17",
@@ -13452,6 +13646,77 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "rand 0.4.6": {
+      "name": "rand",
+      "version": "0.4.6",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/rand/0.4.6/download",
+          "sha256": "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "rand",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "rand",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "libc",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [],
+          "selects": {
+            "cfg(target_env = \"sgx\")": [
+              {
+                "id": "rand_core 0.3.1",
+                "target": "rand_core"
+              },
+              {
+                "id": "rdrand 0.4.0",
+                "target": "rdrand"
+              }
+            ],
+            "cfg(target_os = \"fuchsia\")": [
+              {
+                "id": "fuchsia-cprng 0.1.1",
+                "target": "fuchsia_cprng"
+              }
+            ],
+            "cfg(unix)": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              }
+            ],
+            "cfg(windows)": [
+              {
+                "id": "winapi 0.3.9",
+                "target": "winapi"
+              }
+            ]
+          }
+        },
+        "edition": "2015",
+        "version": "0.4.6"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "rand 0.8.5": {
       "name": "rand",
       "version": "0.8.5",
@@ -13564,6 +13829,75 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "rand_core 0.3.1": {
+      "name": "rand_core",
+      "version": "0.3.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/rand_core/0.3.1/download",
+          "sha256": "7a6fdeb83b075e8266dcc8762c22776f6877a63111121f5f8c7411e5be7eed4b"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "rand_core",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "rand_core",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rand_core 0.4.2",
+              "target": "rand_core"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.3.1"
+      },
+      "license": "MIT/Apache-2.0"
+    },
+    "rand_core 0.4.2": {
+      "name": "rand_core",
+      "version": "0.4.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/rand_core/0.4.2/download",
+          "sha256": "9c33a3c44ca05fa6f1807d8e6743f3824e8509beca625669633be0acbdf509dc"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "rand_core",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "rand_core",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.4.2"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "rand_core 0.6.4": {
       "name": "rand_core",
       "version": "0.6.4",
@@ -13610,6 +13944,45 @@
         "version": "0.6.4"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "rdrand 0.4.0": {
+      "name": "rdrand",
+      "version": "0.4.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/rdrand/0.4.0/download",
+          "sha256": "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "rdrand",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "rdrand",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rand_core 0.3.1",
+              "target": "rand_core"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.4.0"
+      },
+      "license": "ISC"
     },
     "redox_syscall 0.1.57": {
       "name": "redox_syscall",
@@ -13915,6 +14288,47 @@
         "version": "0.7.4"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "remove_dir_all 0.5.3": {
+      "name": "remove_dir_all",
+      "version": "0.5.3",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/remove_dir_all/0.5.3/download",
+          "sha256": "3acd125665422973a33ac9d3dd2df85edad0f4ae9b00dafb1a05e43a9f5ef8e7"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "remove_dir_all",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "remove_dir_all",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [],
+          "selects": {
+            "cfg(windows)": [
+              {
+                "id": "winapi 0.3.9",
+                "target": "winapi"
+              }
+            ]
+          }
+        },
+        "edition": "2015",
+        "version": "0.5.3"
+      },
+      "license": "MIT/Apache-2.0"
     },
     "reqwest 0.11.18": {
       "name": "reqwest",
@@ -15039,6 +15453,51 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "serde_spanned 0.6.5": {
+      "name": "serde_spanned",
+      "version": "0.6.5",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/serde_spanned/0.6.5/download",
+          "sha256": "eb3622f419d1296904700073ea6cc23ad690adbd66f13ea683df73298736f0c1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "serde_spanned",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "serde_spanned",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "serde"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.6.5"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "serde_test 1.0.176": {
       "name": "serde_test",
       "version": "1.0.176",
@@ -16002,6 +16461,49 @@
       },
       "license": "Apache-2.0"
     },
+    "tempdir 0.3.7": {
+      "name": "tempdir",
+      "version": "0.3.7",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tempdir/0.3.7/download",
+          "sha256": "15f2b5fb00ccdf689e0149d1b1b3c03fead81c2b37735d812fa8bddbbf41b6d8"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tempdir",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tempdir",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rand 0.4.6",
+              "target": "rand"
+            },
+            {
+              "id": "remove_dir_all 0.5.3",
+              "target": "remove_dir_all"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.3.7"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "tempfile 3.8.0": {
       "name": "tempfile",
       "version": "3.8.0",
@@ -16871,6 +17373,172 @@
         "version": "0.5.11"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "toml 0.7.8": {
+      "name": "toml",
+      "version": "0.7.8",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/toml/0.7.8/download",
+          "sha256": "dd79e69d3b627db300ff956027cc6c3798cef26d22526befdfcd12feeb6d2257"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "toml",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "toml",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "display",
+            "parse"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            },
+            {
+              "id": "serde_spanned 0.6.5",
+              "target": "serde_spanned"
+            },
+            {
+              "id": "toml_datetime 0.6.5",
+              "target": "toml_datetime"
+            },
+            {
+              "id": "toml_edit 0.19.15",
+              "target": "toml_edit"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.7.8"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "toml_datetime 0.6.5": {
+      "name": "toml_datetime",
+      "version": "0.6.5",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/toml_datetime/0.6.5/download",
+          "sha256": "3550f4e9685620ac18a50ed434eb3aec30db8ba93b0287467bca5826ea25baf1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "toml_datetime",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "toml_datetime",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "serde"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.6.5"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "toml_edit 0.19.15": {
+      "name": "toml_edit",
+      "version": "0.19.15",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/toml_edit/0.19.15/download",
+          "sha256": "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "toml_edit",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "toml_edit",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "serde"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "indexmap 2.0.0",
+              "target": "indexmap"
+            },
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            },
+            {
+              "id": "serde_spanned 0.6.5",
+              "target": "serde_spanned"
+            },
+            {
+              "id": "toml_datetime 0.6.5",
+              "target": "toml_datetime"
+            },
+            {
+              "id": "winnow 0.5.30",
+              "target": "winnow"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.19.15"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "tonic 0.10.2": {
       "name": "tonic",
@@ -18896,8 +19564,10 @@
             "impl-default",
             "minwinbase",
             "minwindef",
+            "ntsecapi",
             "ntstatus",
             "processenv",
+            "profileapi",
             "std",
             "timezoneapi",
             "winbase",
@@ -19635,6 +20305,44 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "winnow 0.5.30": {
+      "name": "winnow",
+      "version": "0.5.30",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/winnow/0.5.30/download",
+          "sha256": "9b5c3db89721d50d0e2a673f5043fc4722f76dcc352d7b1ab8b8288bed4ed2c5"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "winnow",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "winnow",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "alloc",
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.5.30"
+      },
+      "license": "MIT"
+    },
     "winreg 0.10.1": {
       "name": "winreg",
       "version": "0.10.1",
@@ -20364,6 +21072,7 @@
       "i686-pc-windows-msvc",
       "x86_64-pc-windows-msvc"
     ],
+    "cfg(target_env = \"sgx\")": [],
     "cfg(target_feature = \"atomics\")": [],
     "cfg(target_os = \"android\")": [
       "aarch64-linux-android",
@@ -20373,6 +21082,10 @@
     ],
     "cfg(target_os = \"cloudabi\")": [],
     "cfg(target_os = \"dragonfly\")": [],
+    "cfg(target_os = \"fuchsia\")": [
+      "aarch64-fuchsia",
+      "x86_64-fuchsia"
+    ],
     "cfg(target_os = \"haiku\")": [],
     "cfg(target_os = \"hermit\")": [],
     "cfg(target_os = \"redox\")": [],
@@ -20494,6 +21207,7 @@
     "cfg-if 1.0.0",
     "clap 4.4.10",
     "diesel 2.1.4",
+    "diesel_migrations 2.1.0",
     "futures 0.3.29",
     "futures-core 0.3.29",
     "junit-parser 1.0.0",
@@ -20512,6 +21226,7 @@
     "scopeguard 1.2.0",
     "serde 1.0.186",
     "serde_json 1.0.108",
+    "tempdir 0.3.7",
     "time 0.3.31",
     "tokio 1.32.0",
     "tokio-stream 0.1.14",

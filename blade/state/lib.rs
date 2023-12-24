@@ -13,6 +13,24 @@ pub enum Status {
     Skip,
 }
 
+impl std::fmt::Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Status {
+    pub fn parse(s: &str) -> Self {
+        match s {
+            "InProgress" => Status::InProgress,
+            "Success" => Status::Success,
+            "Fail" => Status::Fail,
+            "Skip" => Status::Skip,
+            _ => Status::Unknown,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
 pub struct Target {
     pub name: String,
@@ -50,6 +68,7 @@ pub struct Test {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct InvocationResults {
+    pub id: String,
     pub targets: HashMap<String, Target>,
     pub tests: HashMap<String, Test>,
     pub status: Status,
@@ -62,6 +81,7 @@ pub struct InvocationResults {
 impl Default for InvocationResults {
     fn default() -> Self {
         Self {
+            id: "".to_string(),
             targets: HashMap::new(),
             tests: HashMap::new(),
             status: Status::Unknown,

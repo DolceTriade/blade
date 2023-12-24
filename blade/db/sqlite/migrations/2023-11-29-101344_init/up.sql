@@ -1,27 +1,27 @@
 -- Your SQL goes here
 CREATE TABLE Invocations (
-	id TEXT PRIMARY KEY,
+	id TEXT NOT NULL PRIMARY KEY,
    	status TEXT NOT NULL,
-	start TIMESTAMP NOT NULL,
+	start TEXT NOT NULL,
     output TEXT NOT NULL,
     command TEXT NOT NULL,
     pattern TEXT
 );
 
 CREATE TABLE Targets (
-    id TEXT PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     invocation_id TEXT NOT NULL,
     name TEXT NOT NULL,
     status TEXT NOT NULL,
     kind TEXT NOT NULL,
-    start TIMESTAMP NOT NULL,
-    end TIMESTAMP,
+    start TEXT NOT NULL,
+    end TEXT,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
 );
 
 CREATE TABLE Tests (
-    id TEXT PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     invocation_id TEXT NOT NULL,
     name TEXT NOT NULL,
     status TEXT NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Tests (
 );
 
 CREATE TABLE TestRuns (
-    id TEXT PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     invocation_id TEXT NOT NULL,
     test_id TEXT NOT NULL,
     run INTEGER NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE TestRuns (
 );
 
 CREATE TABLE TestArtifacts (
-    id TEXT PRIMARY KEY,
+    id TEXT NOT NULL PRIMARY KEY,
     invocation_id TEXT NOT NULL,
     test_run_id TEXT NOT NULL,
     uri TEXT NOT NULL,

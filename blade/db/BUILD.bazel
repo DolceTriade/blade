@@ -1,0 +1,25 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "db",
+    srcs = glob(["**/*.rs"]),
+    data = glob(["sqlite/migrations/**"]),
+    deps = [
+        "//blade/state",
+        "@crate//:anyhow",
+        "@crate//:diesel",
+        "@crate//:diesel_migrations",
+        "@crate//:serde",
+        "@crate//:time",
+        "@postgresql",
+        "@rules_rust//tools/runfiles",
+        "@sqlite",
+    ],
+)
+
+rust_test(
+    name = "db_test",
+    size = "small",
+    crate = ":db",
+    deps = ["@crate//:tempdir"],
+)
