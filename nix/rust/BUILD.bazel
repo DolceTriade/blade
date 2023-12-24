@@ -1,4 +1,5 @@
 load("@rules_rust//bindgen:bindgen.bzl", "rust_bindgen_toolchain")
+load("@rules_rust//rust:toolchain.bzl", "rust_analyzer_toolchain", "rustfmt_toolchain")
 
 rust_bindgen_toolchain(
     name = "wasm_bindgen_toolchain_impl",
@@ -9,4 +10,30 @@ toolchain(
     name = "wasm_bindgen_toolchain",
     toolchain = "wasm_bindgen_toolchain_impl",
     toolchain_type = "@rules_rust//wasm_bindgen:toolchain_type",
+)
+
+rust_analyzer_toolchain(
+    name = "rust_analyzer_toolchain_impl",
+    proc_macro_srv = "@nix_rust//:rust-analyzer-proc-macro-srv",
+    rustc = "@nix_rust//:rustc",
+    rustc_srcs = "@nix_rust//rustc_src",
+)
+
+toolchain(
+    name = "rust_analyzer_toolchain",
+    toolchain = "rust_analyzer_toolchain_impl",
+    toolchain_type = "@rules_rust//rust/rust_analyzer:toolchain_type",
+)
+
+rustfmt_toolchain(
+    name = "rustfmt_toolchain_impl",
+    rustc = "@nix_rust//:rustc",
+    rustc_lib = "@nix_rust//:rustc_lib",
+    rustfmt = "@nix_rust//:rustfmt",
+)
+
+toolchain(
+    name = "rustfmt_toolchain",
+    toolchain = "rustfmt_toolchain_impl",
+    toolchain_type = "@rules_rust//rust/rustfmt:toolchain_type",
 )

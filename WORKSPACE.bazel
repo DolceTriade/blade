@@ -37,8 +37,8 @@ rules_proto_toolchains()
 
 http_archive(
     name = "rules_rust",
-    sha256 = "1e7114ea2af800c6987ca38daeee13e3ae6e934875b4f7ca24b798857f95431e",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.32.0/rules_rust-v0.32.0.tar.gz"],
+    sha256 = "75177226380b771be36d7efc538da842c433f14cd6c36d7660976efb53defe86",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.34.1/rules_rust-v0.34.1.tar.gz"],
 )
 
 http_archive(
@@ -121,9 +121,9 @@ nixpkgs_rust_configure(
     ],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_analyzer_toolchain_repository", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
 
-rust_repositories()
+rules_rust_dependencies()
 
 # crate_universe as a way of governing deps
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
@@ -154,13 +154,11 @@ load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
 rust_analyzer_dependencies()
 
-register_toolchains(rust_analyzer_toolchain_repository(
-    name = "rust_analyzer_toolchain",
-    # Run rustc --version
-    version = "1.71.1",
-))
 
+register_toolchains("//nix/rust:rust_analyzer_toolchain")
+register_toolchains("//nix/rust:rustfmt_toolchain")
 register_toolchains("//nix/rust:wasm_bindgen_toolchain")
+register_toolchains("@rules_rust//rust/private/dummy_cc_toolchain:dummy_cc_wasm32_toolchain")
 
 http_archive(
     name = "com_google_protobuf",

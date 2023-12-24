@@ -1,5 +1,5 @@
 {
-  "checksum": "1de53591f7fc9b0cd75d541734c666fc16ee83e7d1d2a4d446449fe3fd97931a",
+  "checksum": "4a010580ea3c3b0da81007d1ba7b86e8882d75c1b6b880167815e68607c443b1",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -2698,6 +2698,12 @@
             "aarch64-unknown-linux-gnu": [
               "std"
             ],
+            "aarch64-unknown-nixos-gnu": [
+              "std"
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              "std"
+            ],
             "arm-unknown-linux-gnueabi": [
               "std"
             ],
@@ -2759,6 +2765,9 @@
               "std"
             ],
             "x86_64-unknown-linux-gnu": [
+              "std"
+            ],
+            "x86_64-unknown-nixos-gnu": [
               "std"
             ],
             "x86_64-unknown-none": [
@@ -9447,6 +9456,9 @@
             "aarch64-linux-android": [
               "extra_traits"
             ],
+            "aarch64-unknown-nto-qnx710": [
+              "extra_traits"
+            ],
             "armv7-linux-androideabi": [
               "extra_traits"
             ],
@@ -9756,6 +9768,9 @@
             "aarch64-unknown-linux-gnu": [
               "errno"
             ],
+            "aarch64-unknown-nixos-gnu": [
+              "errno"
+            ],
             "arm-unknown-linux-gnueabi": [
               "errno"
             ],
@@ -9766,6 +9781,9 @@
               "errno"
             ],
             "x86_64-unknown-linux-gnu": [
+              "errno"
+            ],
+            "x86_64-unknown-nixos-gnu": [
               "errno"
             ]
           }
@@ -11107,6 +11125,12 @@
             "aarch64-unknown-linux-gnu": [
               "unstable"
             ],
+            "aarch64-unknown-nixos-gnu": [
+              "unstable"
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              "unstable"
+            ],
             "arm-unknown-linux-gnueabi": [
               "unstable"
             ],
@@ -11168,6 +11192,9 @@
               "unstable"
             ],
             "x86_64-unknown-linux-gnu": [
+              "unstable"
+            ],
+            "x86_64-unknown-nixos-gnu": [
               "unstable"
             ],
             "x86_64-unknown-none": [
@@ -14258,6 +14285,12 @@
             "aarch64-unknown-linux-gnu": [
               "fs"
             ],
+            "aarch64-unknown-nixos-gnu": [
+              "fs"
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              "fs"
+            ],
             "arm-unknown-linux-gnueabi": [
               "fs"
             ],
@@ -14304,6 +14337,9 @@
               "fs"
             ],
             "x86_64-unknown-linux-gnu": [
+              "fs"
+            ],
+            "x86_64-unknown-nixos-gnu": [
               "fs"
             ]
           }
@@ -19970,7 +20006,11 @@
       "aarch64-pc-windows-msvc"
     ],
     "aarch64-unknown-linux-gnu": [
-      "aarch64-unknown-linux-gnu"
+      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu"
+    ],
+    "aarch64-unknown-nto-qnx710": [
+      "aarch64-unknown-nto-qnx710"
     ],
     "arm-unknown-linux-gnueabi": [
       "arm-unknown-linux-gnueabi"
@@ -19994,10 +20034,12 @@
     ],
     "cfg(all(not(rustix_use_libc), not(miri), target_os = \"linux\", target_endian = \"little\", any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\"))))": [
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
       "arm-unknown-linux-gnueabi",
       "armv7-unknown-linux-gnueabi",
       "i686-unknown-linux-gnu",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = \"linux\", target_endian = \"little\", any(target_arch = \"arm\", all(target_arch = \"aarch64\", target_pointer_width = \"64\"), target_arch = \"riscv64\", all(rustix_use_experimental_asm, target_arch = \"powerpc64\"), all(rustix_use_experimental_asm, target_arch = \"mips\"), all(rustix_use_experimental_asm, target_arch = \"mips32r6\"), all(rustix_use_experimental_asm, target_arch = \"mips64\"), all(rustix_use_experimental_asm, target_arch = \"mips64r6\"), target_arch = \"x86\", all(target_arch = \"x86_64\", target_pointer_width = \"64\")))))))": [
       "aarch64-apple-darwin",
@@ -20005,6 +20047,7 @@
       "aarch64-apple-ios-sim",
       "aarch64-fuchsia",
       "aarch64-linux-android",
+      "aarch64-unknown-nto-qnx710",
       "armv7-linux-androideabi",
       "i686-apple-darwin",
       "i686-linux-android",
@@ -20028,7 +20071,8 @@
       "aarch64-pc-windows-msvc"
     ],
     "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
-      "aarch64-unknown-linux-gnu"
+      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu"
     ],
     "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [
       "aarch64-apple-darwin",
@@ -20042,7 +20086,8 @@
       "i686-pc-windows-msvc"
     ],
     "cfg(all(target_arch = \"x86_64\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": [
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "cfg(all(target_arch = \"x86_64\", target_env = \"msvc\", not(windows_raw_dylib)))": [
       "x86_64-pc-windows-msvc"
@@ -20055,6 +20100,8 @@
       "aarch64-linux-android",
       "aarch64-pc-windows-msvc",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "i686-apple-darwin",
       "i686-linux-android",
       "i686-pc-windows-msvc",
@@ -20067,6 +20114,7 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(any(target_os = \"linux\", target_os = \"android\", target_os = \"windows\", target_os = \"macos\", target_os = \"ios\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\", target_os = \"dragonfly\", target_os = \"solaris\", target_os = \"illumos\", target_os = \"fuchsia\", target_os = \"redox\", target_os = \"cloudabi\", target_os = \"haiku\", target_os = \"vxworks\", target_os = \"emscripten\", target_os = \"wasi\"))": [
@@ -20077,6 +20125,7 @@
       "aarch64-linux-android",
       "aarch64-pc-windows-msvc",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20094,7 +20143,8 @@
       "x86_64-linux-android",
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "cfg(any(target_os = \"macos\", target_os = \"ios\"))": [
       "aarch64-apple-darwin",
@@ -20111,6 +20161,8 @@
       "aarch64-fuchsia",
       "aarch64-linux-android",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20126,7 +20178,8 @@
       "x86_64-fuchsia",
       "x86_64-linux-android",
       "x86_64-unknown-freebsd",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "cfg(not(all(target_arch = \"arm\", target_os = \"none\")))": [
       "aarch64-apple-darwin",
@@ -20136,6 +20189,8 @@
       "aarch64-linux-android",
       "aarch64-pc-windows-msvc",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20157,6 +20212,7 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(any(windows, target_os = \"hermit\", target_os = \"unknown\")))": [
@@ -20166,6 +20222,8 @@
       "aarch64-fuchsia",
       "aarch64-linux-android",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20186,6 +20244,7 @@
       "x86_64-linux-android",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(target_arch = \"wasm32\"))": [
@@ -20196,6 +20255,8 @@
       "aarch64-linux-android",
       "aarch64-pc-windows-msvc",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20217,6 +20278,7 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(target_family = \"wasm\"))": [
@@ -20227,6 +20289,8 @@
       "aarch64-linux-android",
       "aarch64-pc-windows-msvc",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20248,6 +20312,7 @@
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(not(windows))": [
@@ -20257,6 +20322,8 @@
       "aarch64-fuchsia",
       "aarch64-linux-android",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20278,6 +20345,7 @@
       "x86_64-linux-android",
       "x86_64-unknown-freebsd",
       "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
     "cfg(target_arch = \"wasm32\")": [
@@ -20317,6 +20385,8 @@
       "aarch64-fuchsia",
       "aarch64-linux-android",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
       "arm-unknown-linux-gnueabi",
       "armv7-linux-androideabi",
       "armv7-unknown-linux-gnueabi",
@@ -20331,7 +20401,8 @@
       "x86_64-fuchsia",
       "x86_64-linux-android",
       "x86_64-unknown-freebsd",
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "cfg(windows)": [
       "aarch64-pc-windows-msvc",
@@ -20399,10 +20470,49 @@
       "x86_64-unknown-freebsd"
     ],
     "x86_64-unknown-linux-gnu": [
-      "x86_64-unknown-linux-gnu"
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-nixos-gnu"
     ],
     "x86_64-unknown-none": [
       "x86_64-unknown-none"
     ]
-  }
+  },
+  "direct_deps": [
+    "actix-files 0.6.2",
+    "actix-web 4.3.1",
+    "ansi-to-html 0.1.3",
+    "anyhow 1.0.75",
+    "async-stream 0.3.5",
+    "broadcaster 1.0.0",
+    "cfg-if 1.0.0",
+    "clap 4.4.10",
+    "diesel 2.1.4",
+    "futures 0.3.29",
+    "futures-core 0.3.29",
+    "junit-parser 1.0.0",
+    "lazy_static 1.4.0",
+    "leptos 0.5.4",
+    "leptos_actix 0.5.4",
+    "leptos_meta 0.5.4",
+    "leptos_router 0.5.4",
+    "log 0.4.20",
+    "pretty_env_logger 0.5.0",
+    "prost 0.12.3",
+    "prost-reflect 0.12.0",
+    "prost-types 0.12.3",
+    "protoc-gen-prost 0.2.3",
+    "protoc-gen-tonic 0.3.0",
+    "scopeguard 1.2.0",
+    "serde 1.0.186",
+    "serde_json 1.0.108",
+    "time 0.3.31",
+    "tokio 1.32.0",
+    "tokio-stream 0.1.14",
+    "tonic 0.10.2",
+    "tonic-reflection 0.10.2",
+    "url 2.5.0",
+    "url-escape 0.1.1",
+    "walkdir 2.4.0"
+  ],
+  "direct_dev_deps": []
 }

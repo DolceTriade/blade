@@ -18,6 +18,7 @@
       rustc
       rustfmt
       targets.wasm32-unknown-unknown.stable.rust-std
+      rust-analyzer
     ];
   wasm =
     if target == "wasm32-unknown-unknown"
@@ -46,7 +47,7 @@ in
     extraOutputsToInstall = ["out"];
     name = "bazel-rust-toolchain";
     paths = [rust.out];
-    pathsToLink = ["/bin" "/etc" "/lib" "/libexec" "/share"];
+    pathsToLink = ["/bin" "/etc" "/lib" "/libexec" "rustc_src" "/share"];
     postBuild = ''
       cat <<EOF > $out/BUILD
       filegroup(
@@ -90,6 +91,18 @@ in
           visibility = ["//visibility:public"],
       )
 
+      filegroup(
+        name = "rust-analyzer",
+        srcs = ["bin/rust-analyzer"],
+        visibility = ["//visibility:public"],
+      )
+
+      filegroup(
+        name = "rust-analyzer-proc-macro-srv",
+        srcs = ["libexec/rust-analyzer-proc-macro-srv"],
+        visibility = ["//visibility:public"],
+      )
+
       load("@rules_rust//rust:toolchain.bzl", "rust_stdlib_filegroup")
       rust_stdlib_filegroup(
           name = "rust_std",
@@ -131,6 +144,21 @@ in
           default_edition = "2021",
           stdlib_linkflags = ["-lpthread", "-ldl"],
           visibility = ["//visibility:public"],
+      )
+      EOF
+      mkdir $out/rustc_src
+      set -x
+      (cd $out/rustc_src && ln -s ../lib/rustlib/src/rust/library .)
+      cat > $out/rustc_src/BUILD <<EOF
+      filegroup(
+        name = "rustc_src",
+        srcs = glob(
+          [
+            "*/**",
+          ],
+          allow_empty = True,
+        ),
+        visibility = ["//visibility:public"],
       )
       EOF
     '';
