@@ -1,5 +1,5 @@
 {
-  "checksum": "d9a9b7fafbcc5aacb343745374bc2d4b17ebeba456086985ad43e99949e84ab2",
+  "checksum": "d4f20c98dce8ddb6d8fd4a124d9a246cdd268899306375ffd0954467eb39d768",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -4882,6 +4882,7 @@
             "postgres_backend",
             "pq-sys",
             "r2d2",
+            "returning_clauses_for_sqlite_3_35",
             "serde_json",
             "sqlite",
             "time",
@@ -4953,7 +4954,7 @@
               "target": "time"
             },
             {
-              "id": "uuid 1.4.1",
+              "id": "uuid 1.6.1",
               "target": "uuid"
             }
           ],
@@ -5361,6 +5362,10 @@
             {
               "id": "url-escape 0.1.1",
               "target": "url_escape"
+            },
+            {
+              "id": "uuid 1.6.1",
+              "target": "uuid"
             },
             {
               "id": "walkdir 2.4.0",
@@ -9102,7 +9107,7 @@
               "target": "tracing"
             },
             {
-              "id": "uuid 1.4.1",
+              "id": "uuid 1.6.1",
               "target": "uuid"
             }
           ],
@@ -15883,6 +15888,36 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "sha1_smol 1.0.0": {
+      "name": "sha1_smol",
+      "version": "1.0.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/sha1_smol/1.0.0/download",
+          "sha256": "ae1a47186c03a32177042e55dbc5fd5aee900b8e0069a8d70fba96a9375cd012"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "sha1_smol",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "sha1_smol",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "1.0.0"
+      },
+      "license": "BSD-3-Clause"
+    },
     "signal-hook-registry 1.4.1": {
       "name": "signal-hook-registry",
       "version": "1.4.1",
@@ -18683,13 +18718,13 @@
       },
       "license": "Apache-2.0 OR MIT"
     },
-    "uuid 1.4.1": {
+    "uuid 1.6.1": {
       "name": "uuid",
-      "version": "1.4.1",
+      "version": "1.6.1",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/uuid/1.4.1/download",
-          "sha256": "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
+          "url": "https://crates.io/api/v1/crates/uuid/1.6.1/download",
+          "sha256": "5e395fcf16a7a3d8127ec99782007af141946b4795001f876d54fb0d55978560"
         }
       },
       "targets": [
@@ -18711,10 +18746,17 @@
         "crate_features": {
           "common": [
             "default",
+            "fast-rng",
             "getrandom",
+            "macro-diagnostics",
+            "rand",
             "rng",
+            "sha1",
+            "sha1_smol",
             "std",
-            "v4"
+            "uuid-macro-internal",
+            "v4",
+            "v5"
           ],
           "selects": {}
         },
@@ -18723,12 +18765,76 @@
             {
               "id": "getrandom 0.2.10",
               "target": "getrandom"
+            },
+            {
+              "id": "rand 0.8.5",
+              "target": "rand"
+            },
+            {
+              "id": "sha1_smol 1.0.0",
+              "target": "sha1_smol"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.4.1"
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "uuid-macro-internal 1.6.1",
+              "target": "uuid_macro_internal"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "1.6.1"
+      },
+      "license": "Apache-2.0 OR MIT"
+    },
+    "uuid-macro-internal 1.6.1": {
+      "name": "uuid-macro-internal",
+      "version": "1.6.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/uuid-macro-internal/1.6.1/download",
+          "sha256": "f49e7f3f3db8040a100710a11932239fd30697115e2ba4107080d8252939845e"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "uuid_macro_internal",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "uuid_macro_internal",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.66",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.32",
+              "target": "quote"
+            },
+            {
+              "id": "syn 2.0.28",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.6.1"
       },
       "license": "Apache-2.0 OR MIT"
     },
@@ -21234,6 +21340,7 @@
     "tonic-reflection 0.10.2",
     "url 2.5.0",
     "url-escape 0.1.1",
+    "uuid 1.6.1",
     "walkdir 2.4.0"
   ],
   "direct_dev_deps": []

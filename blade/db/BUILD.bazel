@@ -11,6 +11,7 @@ rust_library(
         "@crate//:diesel_migrations",
         "@crate//:serde",
         "@crate//:time",
+        "@crate//:uuid",
         "@postgresql",
         "@rules_rust//tools/runfiles",
         "@sqlite",

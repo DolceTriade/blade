@@ -101,7 +101,7 @@ def rust_dependencies():
             ),
             "diesel": crate.spec(
                 version = "2.1.4",
-                features = ["extras", "sqlite", "postgres"],
+                features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35"],
             ),
             "diesel_migrations": crate.spec(
                 version = "2.1.0",
@@ -195,6 +195,15 @@ def rust_dependencies():
             ),
             "url-escape": crate.spec(
                 version = "0.1.1",
+            ),
+            "uuid": crate.spec(
+                version = "1.6.1",
+                features = [
+                    "v5",  # SHA-1 based UUIDs
+                    "v4",  # Lets you generate random UUIDs
+                    "fast-rng",  # Use a faster (but still sufficiently random) RNG
+                    "macro-diagnostics",  # Enable better diagnostics for compile-time UUIDs]
+                ],
             ),
             "walkdir": crate.spec(
                 version = "2.4.0",

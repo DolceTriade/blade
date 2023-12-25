@@ -28,6 +28,7 @@ diesel::table! {
         id -> Text,
         invocation_id -> Text,
         test_run_id -> Text,
+        name -> Text,
         uri -> Text,
     }
 }
@@ -40,7 +41,9 @@ diesel::table! {
         run -> Integer,
         shard -> Integer,
         attempt -> Integer,
-        duration_s -> Float,
+        status -> Text,
+        details -> Text,
+        duration_s -> Double,
     }
 }
 
@@ -50,7 +53,7 @@ diesel::table! {
         invocation_id -> Text,
         name -> Text,
         status -> Text,
-        duration_s -> Nullable<Float>,
+        duration_s -> Nullable<Double>,
         num_runs -> Nullable<Integer>,
     }
 }

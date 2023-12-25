@@ -25,7 +25,7 @@ CREATE TABLE Tests (
     invocation_id TEXT NOT NULL,
     name TEXT NOT NULL,
     status TEXT NOT NULL,
-    duration_s REAL,
+    duration_s Double,
     num_runs INTEGER,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
@@ -38,7 +38,9 @@ CREATE TABLE TestRuns (
     run INTEGER NOT NULL,
     shard INTEGER NOT NULL,
     attempt INTEGER NOT NULL,
-    duration_s REAL NOT NULL,
+    status TEXT NOT NULL,
+    details TEXT NOT NULL,
+    duration_s Double NOT NULL,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE,
     FOREIGN KEY(test_id) REFERENCES Tests(id)
@@ -49,6 +51,7 @@ CREATE TABLE TestArtifacts (
     id TEXT NOT NULL PRIMARY KEY,
     invocation_id TEXT NOT NULL,
     test_run_id TEXT NOT NULL,
+    name TEXT NOT NULL,
     uri TEXT NOT NULL,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE,
