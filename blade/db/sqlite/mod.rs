@@ -46,7 +46,7 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
         .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))
 }
 
-impl crate::DB for Sqlite {
+impl state::DB for Sqlite {
     fn upsert_invocation(&mut self, invocation: &state::InvocationResults) -> anyhow::Result<()> {
         use schema::Invocations::dsl::*;
         let val = models::Invocation::from_state(invocation)?;
@@ -215,7 +215,7 @@ impl crate::DB for Sqlite {
 mod tests {
     use std::collections::HashMap;
 
-    use crate::DB;
+    use state::DBManager;
     use diesel::prelude::*;
 
     use super::schema;

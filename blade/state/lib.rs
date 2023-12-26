@@ -98,6 +98,19 @@ if #[cfg(feature = "ssr")] {
 use futures::lock::Mutex;
 use std::sync::Arc;
 
+pub trait DB {
+    fn upsert_invocation(&mut self, invocation: &InvocationResults) -> anyhow::Result<()>;
+    fn upsert_target(&mut self, id: &str, target: &Target) -> anyhow::Result<()>;
+    fn upsert_test(&mut self, id: &str, test: &Test) -> anyhow::Result<String>;
+    fn insert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
+
+    fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
+}
+
+pub trait DBManager {
+    fn get(&self) -> anyhow::Result<Box<dyn DB>>;
+}
+
 #[derive(Debug, Default)]
 pub struct Invocation {
     pub results: InvocationResults,

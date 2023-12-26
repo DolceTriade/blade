@@ -27,6 +27,8 @@ cfg_if! {
             grpc_host: SocketAddr,
             #[arg(short='H', long="http_host", value_name = "HTTP_HOST", default_value="[::]:3000")]
             http_host: SocketAddr,
+            #[arg(short='p', long="db_path", value_name = "DATABASE_PATH", default_value="")]
+            db_path: String,
             #[arg(short='d', long="print_message", value_name = "PATTERN", default_value="")]
             debug_message_pattern: String,
         }

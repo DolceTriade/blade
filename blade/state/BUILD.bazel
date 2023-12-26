@@ -17,6 +17,7 @@ rust_library(
             "@wasm_crate//:serde",
         ],
         "//conditions:default": [
+            "@crate//:anyhow",
             "@crate//:cfg-if",
             "@crate//:futures",
             "@crate//:serde",
