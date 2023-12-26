@@ -9,6 +9,7 @@ rust_library(
         "@crate//:anyhow",
         "@crate//:diesel",
         "@crate//:diesel_migrations",
+        "@crate//:r2d2",
         "@crate//:serde",
         "@crate//:time",
         "@crate//:uuid",

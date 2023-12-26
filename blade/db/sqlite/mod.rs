@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Context};
 use diesel::prelude::*;
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
+use diesel::r2d2::ConnectionManager;
+use r2d2::PooledConnection;
 use time::macros::format_description;
 
 mod models;
@@ -22,33 +24,26 @@ fn parse_time(t: &str) -> anyhow::Result<std::time::SystemTime> {
 
 #[allow(dead_code)]
 pub struct Sqlite {
-    pub(crate) conn: diesel::sqlite::SqliteConnection,
+    pub(crate) conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 }
 
 #[allow(dead_code)]
-impl Sqlite {
-    pub fn new(path: &str) -> anyhow::Result<Self> {
-        let mut me = diesel::SqliteConnection::establish(path)
-            .map(|conn| Self { conn })
-            .context("creating sqlite db")?;
-        diesel::sql_query("PRAGMA foreign_keys = ON;")
-            .execute(&mut me.conn)
-            .context("failed to enable foreign keys")?;
-        Ok(me)
-    }
-
-    pub fn run_migrations(&mut self) -> anyhow::Result<()> {
-        let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
-        let path = r.rlocation("blade/blade/db/sqlite/migrations");
-        let finder: FileBasedMigrations = FileBasedMigrations::from_path(
-            path.to_str()
-                .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
-        )
-        .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))?;
-        MigrationHarness::run_pending_migrations(&mut self.conn, finder)
-            .map(|_| {})
-            .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))
-    }
+pub fn init_db(db_path: &str) -> anyhow::Result<()> {
+    let mut me = diesel::SqliteConnection::establish(db_path)
+        .context("creating sqlite db")?;
+    diesel::sql_query("PRAGMA foreign_keys = ON;")
+        .execute(&mut me)
+        .context("failed to enable foreign keys")?;
+    let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
+    let path = r.rlocation("blade/blade/db/sqlite/migrations");
+    let finder: FileBasedMigrations = FileBasedMigrations::from_path(
+        path.to_str()
+            .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
+    )
+    .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))?;
+    MigrationHarness::run_pending_migrations(&mut me, finder)
+        .map(|_| {})
+        .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))
 }
 
 impl crate::DB for Sqlite {
@@ -229,16 +224,17 @@ mod tests {
     fn test_migration() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
         let db_path = tmp.path().join("test.db");
-        let mut db = super::Sqlite::new(db_path.to_str().unwrap()).unwrap();
-        db.run_migrations().unwrap();
+        super::init_db(db_path.to_str().unwrap()).unwrap();
     }
 
     #[test]
     fn test_invocation() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
         let db_path = tmp.path().join("test.db");
-        let mut db = super::Sqlite::new(db_path.to_str().unwrap()).unwrap();
-        db.run_migrations().unwrap();
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
         let mut inv = state::InvocationResults {
             id: "blah".to_string(),
             output: "whatever".to_string(),
@@ -252,7 +248,7 @@ mod tests {
             let res = schema::Invocations::table
                 .select(super::models::Invocation::as_select())
                 .filter(schema::Invocations::id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
             assert_eq!(res.output, inv.output);
@@ -263,7 +259,7 @@ mod tests {
             let res = schema::Invocations::table
                 .select(super::models::Invocation::as_select())
                 .filter(schema::Invocations::id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
             assert_eq!(res.output, inv.output);
@@ -274,8 +270,10 @@ mod tests {
     fn test_target() {
         let tmp = tempdir::TempDir::new("test_target").unwrap();
         let db_path = tmp.path().join("test.db");
-        let mut db = super::Sqlite::new(db_path.to_str().unwrap()).unwrap();
-        db.run_migrations().unwrap();
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
 
         let inv = state::InvocationResults {
             id: "blah".to_string(),
@@ -298,7 +296,7 @@ mod tests {
             let res = schema::Targets::table
                 .select(super::models::Target::as_select())
                 .filter(schema::Targets::invocation_id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(target.name, res.name);
             assert_eq!(target.status.to_string(), res.status);
@@ -311,7 +309,7 @@ mod tests {
             let res = schema::Targets::table
                 .select(super::models::Target::as_select())
                 .filter(schema::Targets::invocation_id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(target.name, res.name);
             assert_eq!(target.status.to_string(), res.status);
@@ -319,12 +317,12 @@ mod tests {
         }
         let targets = super::schema::Targets::table
             .select(super::models::Target::as_select())
-            .load(&mut db.conn)
+            .load(&mut conn)
             .unwrap();
         assert_eq!(targets.len(), 1);
         let invs = super::schema::Invocations::table
             .select(super::models::Invocation::as_select())
-            .load(&mut db.conn)
+            .load(&mut conn)
             .unwrap();
         assert_eq!(invs.len(), 1);
     }
@@ -333,8 +331,10 @@ mod tests {
     fn test_test() {
         let tmp = tempdir::TempDir::new("test_test").unwrap();
         let db_path = tmp.path().join("test.db");
-        let mut db = super::Sqlite::new(db_path.to_str().unwrap()).unwrap();
-        db.run_migrations().unwrap();
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
 
         let inv = state::InvocationResults {
             id: "blah".to_string(),
@@ -357,7 +357,7 @@ mod tests {
             let res = schema::Tests::table
                 .select(super::models::Test::as_select())
                 .filter(schema::Tests::invocation_id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(test.name, res.name);
             assert_eq!(test.status.to_string(), res.status);
@@ -368,19 +368,19 @@ mod tests {
             let res = schema::Tests::table
                 .select(super::models::Test::as_select())
                 .filter(schema::Tests::invocation_id.eq("blah"))
-                .get_result(&mut db.conn)
+                .get_result(&mut conn)
                 .unwrap();
             assert_eq!(test.name, res.name);
             assert_eq!(test.status.to_string(), res.status);
         }
         let tests = super::schema::Tests::table
             .select(super::models::Test::as_select())
-            .load(&mut db.conn)
+            .load(&mut conn)
             .unwrap();
         assert_eq!(tests.len(), 1);
         let invs = super::schema::Invocations::table
             .select(super::models::Invocation::as_select())
-            .load(&mut db.conn)
+            .load(&mut conn)
             .unwrap();
         assert_eq!(invs.len(), 1);
     }
@@ -389,8 +389,10 @@ mod tests {
     fn test_all() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
         let db_path = tmp.path().join("test.db");
-        let mut db = super::Sqlite::new(db_path.to_str().unwrap()).unwrap();
-        db.run_migrations().unwrap();
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
         let inv = state::InvocationResults {
             id: "blah".to_string(),
             output: "whatever".to_string(),

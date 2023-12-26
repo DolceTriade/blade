@@ -101,7 +101,7 @@ def rust_dependencies():
             ),
             "diesel": crate.spec(
                 version = "2.1.4",
-                features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35"],
+                features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35", "r2d2"],
             ),
             "diesel_migrations": crate.spec(
                 version = "2.1.0",
@@ -166,6 +166,9 @@ def rust_dependencies():
             "prost-reflect": crate.spec(
                 version = "0.12.0",
                 features = ["derive", "serde", "text-format"],
+            ),
+            "r2d2": crate.spec(
+                version = "0.8.10",
             ),
             "scopeguard": crate.spec(
                 version = "1.2.0",

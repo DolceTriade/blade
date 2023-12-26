@@ -1,5 +1,5 @@
 {
-  "checksum": "d4f20c98dce8ddb6d8fd4a124d9a246cdd268899306375ffd0954467eb39d768",
+  "checksum": "39386685d895158e8993f60d40e7d25dd5ca487d7a9e44066a4ee0ec37fb79f8",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -5318,6 +5318,10 @@
             {
               "id": "protoc-gen-tonic 0.3.0",
               "target": "protoc_gen_tonic"
+            },
+            {
+              "id": "r2d2 0.8.10",
+              "target": "r2d2"
             },
             {
               "id": "scopeguard 1.2.0",
@@ -21329,6 +21333,7 @@
     "prost-types 0.12.3",
     "protoc-gen-prost 0.2.3",
     "protoc-gen-tonic 0.3.0",
+    "r2d2 0.8.10",
     "scopeguard 1.2.0",
     "serde 1.0.186",
     "serde_json 1.0.108",

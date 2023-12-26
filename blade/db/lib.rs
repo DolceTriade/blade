@@ -1,4 +1,5 @@
 mod sqlite;
+mod manager;
 
 pub trait DB {
     fn upsert_invocation(&mut self, invocation: &state::InvocationResults) -> anyhow::Result<()>;

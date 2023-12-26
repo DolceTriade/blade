@@ -1024,6 +1024,7 @@ dependencies = [
  "prost-types 0.12.3",
  "protoc-gen-prost",
  "protoc-gen-tonic",
+ "r2d2",
  "scopeguard",
  "serde",
  "serde_json",
