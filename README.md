@@ -1,4 +1,4 @@
-# BLADE (Build Log Analysis Engine)
+# BLADE (Build Log Analysis Dashboard Engine)
 
 Blade is a Bazel BEP viewer. It's in its early stages, but should be generally functional.
 

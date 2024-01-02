@@ -55,3 +55,8 @@ def third_party_nix_deps():
         attribute_path = "postgresql",
         repository = "@nixpkgs",
     )
+    nixpkgs_package(
+        name = "oci_base",
+        build_file_content = """exports_files(["closure.tar"])""",
+        nix_file = "//third_party/nix/oci_base:default.nix",
+    )

@@ -1,5 +1,8 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
 load("@rules_rust//wasm_bindgen/rules_js:defs.bzl", "js_rust_wasm_bindgen")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//nix/bazel:runfiles.bzl", "runfiles")
 
 rust_binary(
     name = "blade",
@@ -102,4 +105,31 @@ js_rust_wasm_bindgen(
     name = "blade_wasm",
     target = "web",
     wasm_file = ":blade.wasm",
+)
+
+runfiles(
+    name = "blade_runfiles",
+    binary = ":blade",
+    root = "/app"
+)
+
+pkg_tar(
+    name = "blade_tar",
+    srcs = [":blade_runfiles"],
+)
+
+oci_image(
+    name = "blade_image",
+    base = "@distroless_base",
+    tars = [
+        ":blade_tar",
+        "@oci_base//:closure.tar",
+    ],
+    entrypoint = ["/app/blade"],
+)
+
+oci_tarball(
+    name = "blade_image_tarball",
+    image = ":blade_image",
+    repo_tags = ["ghcr.io/DolceTriade/blade:latest"],
 )
