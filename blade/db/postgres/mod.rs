@@ -23,18 +23,15 @@ pub(crate) fn parse_time(t: &str) -> anyhow::Result<std::time::SystemTime> {
 }
 
 #[allow(dead_code)]
-pub struct Sqlite {
-    pub(crate) conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+pub struct Postgres {
+    pub(crate) conn: PooledConnection<ConnectionManager<diesel::PgConnection>>,
 }
 
 #[allow(dead_code)]
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
-    let mut me = diesel::SqliteConnection::establish(db_path).context("creating sqlite db")?;
-    diesel::sql_query("PRAGMA foreign_keys = ON;")
-        .execute(&mut me)
-        .context("failed to enable foreign keys")?;
+    let mut me = diesel::PgConnection::establish(db_path).context("creating postgres db")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
-    let path = r.rlocation("blade/blade/db/sqlite/migrations");
+    let path = r.rlocation("blade/blade/db/postgres/migrations");
     let finder: FileBasedMigrations = FileBasedMigrations::from_path(
         path.to_str()
             .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
@@ -45,16 +42,15 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
         .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))
 }
 
-impl state::DB for Sqlite {
+impl state::DB for Postgres {
     fn upsert_shallow_invocation(
         &mut self,
         invocation: &state::InvocationResults,
     ) -> anyhow::Result<()> {
-        use schema::Invocations::dsl::*;
         let val = models::Invocation::from_state(invocation)?;
-        diesel::insert_into(schema::Invocations::table)
+        diesel::insert_into(schema::invocations::table)
             .values(&val)
-            .on_conflict(id)
+            .on_conflict(schema::invocations::dsl::id)
             .do_update()
             .set(&val)
             .execute(&mut self.conn)
@@ -63,9 +59,9 @@ impl state::DB for Sqlite {
     }
 
     fn upsert_target(&mut self, inv_id: &str, target: &state::Target) -> anyhow::Result<()> {
-        use schema::Targets::dsl::*;
+        use schema::targets::dsl::*;
         let val = models::Target::from_state(inv_id, target)?;
-        diesel::insert_into(schema::Targets::table)
+        diesel::insert_into(schema::targets::table)
             .values(&val)
             .on_conflict(id)
             .do_update()
@@ -76,9 +72,9 @@ impl state::DB for Sqlite {
     }
 
     fn upsert_test(&mut self, inv_id: &str, test: &state::Test) -> anyhow::Result<String> {
-        use schema::Tests::dsl::*;
+        use schema::tests::dsl::*;
         let val = models::Test::from_state(inv_id, test)?;
-        diesel::insert_into(schema::Tests::table)
+        diesel::insert_into(schema::tests::table)
             .values(&val)
             .on_conflict(id)
             .do_update()
@@ -95,7 +91,7 @@ impl state::DB for Sqlite {
         test_run: &state::TestRun,
     ) -> anyhow::Result<()> {
         let val = models::TestRun::from_state(inv_id, test_id_, test_run)?;
-        diesel::insert_into(schema::TestRuns::table)
+        diesel::insert_into(schema::testruns::table)
             .values(&val)
             .execute(&mut self.conn)
             .map(|_| {})
@@ -105,7 +101,7 @@ impl state::DB for Sqlite {
             .iter()
             .map(|e| models::TestArtifact::from_state(inv_id, &val.id, e.0, e.1))
             .collect::<Vec<_>>();
-        diesel::insert_into(schema::TestArtifacts::table)
+        diesel::insert_into(schema::testartifacts::table)
             .values(artifacts.as_slice())
             .execute(&mut self.conn)
             .map(|_| {})
@@ -114,7 +110,7 @@ impl state::DB for Sqlite {
     }
 
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<state::InvocationResults> {
-        let mut ret = schema::Invocations::table
+        let mut ret = schema::invocations::table
             .select(models::Invocation::as_select())
             .find(id)
             .get_result(&mut self.conn)
@@ -135,9 +131,9 @@ impl state::DB for Sqlite {
                 })
             })?
             .context("failed to get invocation")?;
-        let targets = schema::Targets::table
+        let targets = schema::targets::table
             .select(models::Target::as_select())
-            .filter(schema::Targets::dsl::invocation_id.eq(id))
+            .filter(schema::targets::dsl::invocation_id.eq(id))
             .load(&mut self.conn)?;
         targets.iter().for_each(|res| {
             ret.targets.insert(
@@ -154,18 +150,18 @@ impl state::DB for Sqlite {
                 },
             );
         });
-        let tests = schema::Tests::table
+        let tests = schema::tests::table
             .select(models::Test::as_select())
-            .filter(schema::Tests::invocation_id.eq(id))
+            .filter(schema::tests::invocation_id.eq(id))
             .load(&mut self.conn)?;
 
         let test_runs = models::TestRun::belonging_to(&tests)
             .select(models::TestRun::as_select())
             .load(&mut self.conn)?;
 
-        let mut test_artifacts: std::collections::VecDeque<_> = schema::TestArtifacts::table
+        let mut test_artifacts: std::collections::VecDeque<_> = schema::testartifacts::table
             .select(models::TestArtifact::as_select())
-            .filter(schema::TestArtifacts::dsl::invocation_id.eq(id))
+            .filter(schema::testartifacts::dsl::invocation_id.eq(id))
             .load(&mut self.conn)?
             .grouped_by(&test_runs)
             .into();
@@ -216,9 +212,9 @@ impl state::DB for Sqlite {
         invocation_id: &str,
         upd: Box<dyn FnOnce(&mut state::InvocationResults) -> anyhow::Result<()>>,
     ) -> anyhow::Result<()> {
-        let mut ret = schema::Invocations::table
+        let mut ret = schema::invocations::table
             .select(models::Invocation::as_select())
-            .filter(schema::Invocations::id.eq(invocation_id))
+            .filter(schema::invocations::id.eq(invocation_id))
             .get_result(&mut self.conn)
             .map(|res| res.into_state())?;
         upd(&mut ret)?;
@@ -226,9 +222,9 @@ impl state::DB for Sqlite {
     }
 
     fn get_progress(&mut self, invocation_id: &str) -> anyhow::Result<String> {
-        schema::Invocations::table
+        schema::invocations::table
             .select(models::Invocation::as_select())
-            .filter(schema::Invocations::id.eq(invocation_id))
+            .filter(schema::invocations::id.eq(invocation_id))
             .get_result(&mut self.conn)
             .map(|res: models::Invocation| res.output)
             .context("failed to get progress")
@@ -242,13 +238,13 @@ impl state::DB for Sqlite {
         end: std::time::SystemTime,
     ) -> anyhow::Result<()> {
         let id = models::Target::gen_id(invocation_id, name);
-        let mut res: models::Target = schema::Targets::table
+        let mut res: models::Target = schema::targets::table
             .select(models::Target::as_select())
             .find(id.clone())
             .get_result(&mut self.conn)?;
         res.status = status.to_string();
         res.end = models::format_time(&end).ok();
-        diesel::update(schema::Targets::table.find(id))
+        diesel::update(schema::targets::table.find(id))
             .set(&res)
             .execute(&mut self.conn)
             .map(|_| {})
@@ -256,7 +252,7 @@ impl state::DB for Sqlite {
     }
 
     fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<state::Test> {
-        let t = schema::Tests::table
+        let t = schema::tests::table
             .select(models::Test::as_select())
             .find(models::Test::gen_id(id, name))
             .get_result(&mut self.conn)?;
@@ -272,14 +268,14 @@ impl state::DB for Sqlite {
         num_runs: usize,
     ) -> anyhow::Result<()> {
         let id = models::Test::gen_id(invocation_id, name);
-        let mut t: models::Test = schema::Tests::table
+        let mut t: models::Test = schema::tests::table
             .select(models::Test::as_select())
             .find(id.clone())
             .get_result(&mut self.conn)?;
         t.status = status.to_string();
         t.duration_s = Some(duration.as_secs_f64());
         t.num_runs = Some(num_runs as i32);
-        diesel::update(schema::Tests::dsl::Tests.find(id))
+        diesel::update(schema::tests::dsl::tests.find(id))
             .set(&t)
             .execute(&mut self.conn)
             .map(|_| {})
@@ -298,18 +294,20 @@ mod tests {
     #[test]
     fn test_migration() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
-        let db_path = tmp.path().join("test.db");
-        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
     }
 
     #[test]
     fn test_invocation() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
-        let db_path = tmp.path().join("test.db");
-        super::init_db(db_path.to_str().unwrap()).unwrap();
-        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
         let mut db = mgr.get().unwrap();
-        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
+        let mut conn = PgConnection::establish(&uri).unwrap();
         let mut inv = state::InvocationResults {
             id: "blah".to_string(),
             output: "whatever".to_string(),
@@ -320,9 +318,9 @@ mod tests {
         };
         db.upsert_shallow_invocation(&inv).unwrap();
         {
-            let res = schema::Invocations::table
+            let res = schema::invocations::table
                 .select(super::models::Invocation::as_select())
-                .filter(schema::Invocations::id.eq("blah"))
+                .filter(schema::invocations::id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
@@ -331,9 +329,9 @@ mod tests {
         inv.output.push_str("more output");
         db.upsert_shallow_invocation(&inv).unwrap();
         {
-            let res = schema::Invocations::table
+            let res = schema::invocations::table
                 .select(super::models::Invocation::as_select())
-                .filter(schema::Invocations::id.eq("blah"))
+                .filter(schema::invocations::id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
@@ -344,10 +342,11 @@ mod tests {
     #[test]
     fn test_target() {
         let tmp = tempdir::TempDir::new("test_target").unwrap();
-        let db_path = tmp.path().join("test.db");
-        super::init_db(db_path.to_str().unwrap()).unwrap();
-        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
-        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mut conn = PgConnection::establish(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
         let mut db = mgr.get().unwrap();
 
         let inv = state::InvocationResults {
@@ -368,9 +367,9 @@ mod tests {
         db.upsert_shallow_invocation(&inv).unwrap();
         db.upsert_target("blah", &target).unwrap();
         {
-            let res = schema::Targets::table
+            let res = schema::targets::table
                 .select(super::models::Target::as_select())
-                .filter(schema::Targets::invocation_id.eq("blah"))
+                .filter(schema::targets::invocation_id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(target.name, res.name);
@@ -381,21 +380,21 @@ mod tests {
         target.end = Some(std::time::SystemTime::now());
         db.upsert_target("blah", &target).unwrap();
         {
-            let res = schema::Targets::table
+            let res = schema::targets::table
                 .select(super::models::Target::as_select())
-                .filter(schema::Targets::invocation_id.eq("blah"))
+                .filter(schema::targets::invocation_id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(target.name, res.name);
             assert_eq!(target.status.to_string(), res.status);
             assert!(res.end.is_some());
         }
-        let targets = super::schema::Targets::table
+        let targets = super::schema::targets::table
             .select(super::models::Target::as_select())
             .load(&mut conn)
             .unwrap();
         assert_eq!(targets.len(), 1);
-        let invs = super::schema::Invocations::table
+        let invs = super::schema::invocations::table
             .select(super::models::Invocation::as_select())
             .load(&mut conn)
             .unwrap();
@@ -405,10 +404,11 @@ mod tests {
     #[test]
     fn test_test() {
         let tmp = tempdir::TempDir::new("test_test").unwrap();
-        let db_path = tmp.path().join("test.db");
-        super::init_db(db_path.to_str().unwrap()).unwrap();
-        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
-        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
+        let mut conn = PgConnection::establish(&uri).unwrap();
         let mut db = mgr.get().unwrap();
 
         let inv = state::InvocationResults {
@@ -429,9 +429,9 @@ mod tests {
         db.upsert_shallow_invocation(&inv).unwrap();
         db.upsert_test("blah", &test).unwrap();
         {
-            let res = schema::Tests::table
+            let res = schema::tests::table
                 .select(super::models::Test::as_select())
-                .filter(schema::Tests::invocation_id.eq("blah"))
+                .filter(schema::tests::invocation_id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(test.name, res.name);
@@ -440,20 +440,20 @@ mod tests {
         test.status = state::Status::Success;
         db.upsert_test("blah", &test).unwrap();
         {
-            let res = schema::Tests::table
+            let res = schema::tests::table
                 .select(super::models::Test::as_select())
-                .filter(schema::Tests::invocation_id.eq("blah"))
+                .filter(schema::tests::invocation_id.eq("blah"))
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(test.name, res.name);
             assert_eq!(test.status.to_string(), res.status);
         }
-        let tests = super::schema::Tests::table
+        let tests = super::schema::tests::table
             .select(super::models::Test::as_select())
             .load(&mut conn)
             .unwrap();
         assert_eq!(tests.len(), 1);
-        let invs = super::schema::Invocations::table
+        let invs = super::schema::invocations::table
             .select(super::models::Invocation::as_select())
             .load(&mut conn)
             .unwrap();
@@ -463,9 +463,10 @@ mod tests {
     #[test]
     fn test_all() {
         let tmp = tempdir::TempDir::new("test_invocation").unwrap();
-        let db_path = tmp.path().join("test.db");
-        super::init_db(db_path.to_str().unwrap()).unwrap();
-        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
         let mut db = mgr.get().unwrap();
 
         let mut inv = state::InvocationResults {
@@ -560,8 +561,8 @@ mod tests {
         db.upsert_shallow_invocation(&inv).unwrap();
         let old = inv.id;
         inv.id = "another".to_string();
-        inv.id = old;
         db.upsert_shallow_invocation(&inv).unwrap();
+        inv.id = old;
         inv.targets.iter().for_each(|t| {
             db.upsert_target(&inv.id, t.1).unwrap();
             db.upsert_target("another", t.1).unwrap();

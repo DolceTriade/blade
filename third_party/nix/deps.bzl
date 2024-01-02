@@ -50,3 +50,8 @@ def third_party_nix_deps():
         repository = "@nixpkgs",
         build_file = "//third_party/nix:BUILD.postgresql",
     )
+    nixpkgs_package(
+        name = "postgresql-bin",
+        attribute_path = "postgresql",
+        repository = "@nixpkgs",
+    )

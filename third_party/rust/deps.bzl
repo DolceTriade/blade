@@ -74,6 +74,11 @@ def rust_dependencies():
                     ],
                 ),
             ],
+            "rustix": [
+                crate.annotation(
+                    crate_features = ["process"],
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(

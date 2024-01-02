@@ -3,7 +3,10 @@ load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 rust_library(
     name = "db",
     srcs = glob(["**/*.rs"]),
-    data = glob(["sqlite/migrations/**"]),
+    data = glob([
+        "sqlite/migrations/**",
+        "postgres/migrations/**",
+    ]),
     visibility = ["//visibility:public"],
     deps = [
         "//blade/state",
@@ -24,5 +27,8 @@ rust_test(
     name = "db_test",
     size = "small",
     crate = ":db",
-    deps = ["@crate//:tempdir"],
+    deps = [
+        "//postgres/harness",
+        "@crate//:tempdir",
+    ],
 )

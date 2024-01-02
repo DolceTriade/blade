@@ -1,5 +1,5 @@
 {
-  "checksum": "39386685d895158e8993f60d40e7d25dd5ca487d7a9e44066a4ee0ec37fb79f8",
+  "checksum": "4c9a139f06e6d0c60330f68d08a63082e20f603764fc16075e0b4ff6f443d615",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -14692,6 +14692,7 @@
         "crate_features": {
           "common": [
             "default",
+            "process",
             "std",
             "termios",
             "use-libc-auxv"

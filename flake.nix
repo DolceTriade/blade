@@ -59,6 +59,7 @@
                 leptosfmt
                 diesel-cli'
                 wabt
+                postgresql
                 (import ./nix/cc/cc.nix)
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;

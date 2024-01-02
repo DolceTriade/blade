@@ -116,7 +116,7 @@ pub trait DBManager: std::marker::Send + std::marker::Sync {
 }
 
 pub struct Global {
-    pub db_manager: Box<dyn DBManager + Sync + Send>,
+    pub db_manager: Box<dyn DBManager>,
 }
 
 }

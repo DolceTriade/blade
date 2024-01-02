@@ -14,7 +14,7 @@ CREATE TABLE Targets (
     status TEXT NOT NULL,
     kind TEXT NOT NULL,
     start TEXT NOT NULL,
-    end TEXT,
+    "end" TEXT,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
 );
@@ -25,7 +25,7 @@ CREATE TABLE Tests (
     invocation_id TEXT NOT NULL,
     name TEXT NOT NULL,
     status TEXT NOT NULL,
-    duration_s Double,
+    duration_s double precision,
     num_runs INTEGER,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
@@ -41,7 +41,7 @@ CREATE TABLE TestRuns (
     attempt INTEGER NOT NULL,
     status TEXT NOT NULL,
     details TEXT NOT NULL,
-    duration_s Double NOT NULL,
+    duration_s double precision NOT NULL,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE,
     FOREIGN KEY(test_id) REFERENCES Tests(id)

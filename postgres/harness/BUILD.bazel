@@ -1,0 +1,22 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "harness",
+    srcs = [
+        "lib.rs",
+    ],
+    data = ["@postgresql-bin//:bin"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crate//:anyhow",
+        "@crate__rustix-0.38.8//:rustix",
+        "@rules_rust//tools/runfiles",
+    ],
+)
+
+rust_test(
+    name = "harness_test",
+    size = "small",
+    crate = ":harness",
+    deps = ["@crate//:tempdir"],
+)
