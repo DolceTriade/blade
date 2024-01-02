@@ -20,7 +20,6 @@ impl PgHarness {
     }
 
     pub fn close(&mut self) -> anyhow::Result<()> {
-
         self.postgres.wait()?;
         Ok(())
     }
@@ -28,7 +27,11 @@ impl PgHarness {
 
 impl Drop for PgHarness {
     fn drop(&mut self) {
-        rustix::process::kill_process(rustix::process::Pid::from_child(&self.postgres), rustix::process::Signal::Term).unwrap();
+        rustix::process::kill_process(
+            rustix::process::Pid::from_child(&self.postgres),
+            rustix::process::Signal::Term,
+        )
+        .unwrap();
         self.close().unwrap();
     }
 }
@@ -62,6 +65,8 @@ pub fn new(p: &str) -> anyhow::Result<PgHarness> {
         postgres: std::process::Command::new(postgres_path)
             .arg("-D")
             .arg(p)
+            .arg("-k")
+            .arg(p)
             .spawn()?,
         db_name: "blade".into(),
         port,
@@ -70,6 +75,8 @@ pub fn new(p: &str) -> anyhow::Result<PgHarness> {
     let createdb_path = bin_path.join("createdb");
     while attempts > 0 {
         if std::process::Command::new(createdb_path.clone())
+            .arg("-h")
+            .arg("127.0.0.1")
             .arg("-p")
             .arg(harness.port.to_string())
             .arg("blade")
