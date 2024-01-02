@@ -1,4 +1,3 @@
--- Your SQL goes here
 CREATE TABLE Invocations (
 	id TEXT NOT NULL PRIMARY KEY,
    	status TEXT NOT NULL,
@@ -19,6 +18,7 @@ CREATE TABLE Targets (
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
 );
+CREATE INDEX Targets_Inv_ID Targets ( invocation_id );
 
 CREATE TABLE Tests (
     id TEXT NOT NULL PRIMARY KEY,
@@ -30,6 +30,7 @@ CREATE TABLE Tests (
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
 );
+CREATE INDEX Tests_Inv_ID Tests ( invocation_id );
 
 CREATE TABLE TestRuns (
     id TEXT NOT NULL PRIMARY KEY,
