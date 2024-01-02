@@ -31,7 +31,10 @@ struct Counts {
 
 fn format_time(t: &std::time::SystemTime) -> String {
     let ts: time::OffsetDateTime = (*t).into();
-    ts.format(&format_description!("[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]")).unwrap_or(format!("{ts:#?}"))
+    ts.format(&format_description!(
+        "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]"
+    ))
+    .unwrap_or(format!("{ts:#?}"))
 }
 
 fn ucfirst(s: &str) -> String {
@@ -47,80 +50,82 @@ fn ucfirst(s: &str) -> String {
 pub fn SummaryHeader() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
     let counts = create_memo(move |_| {
-        with!(|invocation| {
-        let num_targets = invocation.targets.len();
-        let mut passing_targets: usize = 0;
-        let mut failing_targets: usize = 0;
-        invocation.targets.values().for_each(|t| match t.status {
-            state::Status::Success => passing_targets += 1,
-            state::Status::Fail => failing_targets += 1,
-            _ => {}
-        });
-        let num_tests = invocation.tests.len();
-        let mut passing_tests: usize = 0;
-        let mut failing_tests: usize = 0;
-        invocation.tests.values().for_each(|t| match t.status {
-            state::Status::Success => passing_tests += 1,
-            state::Status::InProgress => {},
-            _ => failing_tests += 1,
-        });
+        invocation.with(|invocation| {
+            let num_targets = invocation.targets.len();
+            let mut passing_targets: usize = 0;
+            let mut failing_targets: usize = 0;
+            invocation.targets.values().for_each(|t| match t.status {
+                state::Status::Success => passing_targets += 1,
+                state::Status::Fail => failing_targets += 1,
+                _ => {}
+            });
+            let num_tests = invocation.tests.len();
+            let mut passing_tests: usize = 0;
+            let mut failing_tests: usize = 0;
+            invocation.tests.values().for_each(|t| match t.status {
+                state::Status::Success => passing_tests += 1,
+                state::Status::InProgress => {}
+                _ => failing_tests += 1,
+            });
 
-        Counts {
-            num_targets,
-            passing_targets,
-            failing_targets,
-            num_tests,
-            passing_tests,
-            failing_tests,
-            status: invocation.status,
-        }})
+            Counts {
+                num_targets,
+                passing_targets,
+                failing_targets,
+                num_tests,
+                passing_tests,
+                failing_tests,
+                status: invocation.status,
+            }
+        })
     });
-    move|| {
-    let num_targets = Signal::derive(move||with!(|counts| counts.num_targets));
-    let passing_targets = Signal::derive(move||with!(|counts| counts.passing_targets));
-    let failing_targets = Signal::derive(move||with!(|counts| counts.failing_targets));
-    let num_tests = Signal::derive(move||with!(|counts| counts.num_tests));
-    let passing_tests = Signal::derive(move||with!(|counts| counts.passing_tests));
-    let failing_tests = Signal::derive(move||with!(|counts| counts.failing_tests));
-    let status = Signal::derive(move||with!(|counts| counts.status));
-    let cmd = with!(|invocation|ucfirst(&invocation.command));
-    let patterns = with!(|invocation|invocation.pattern.join(","));
-    let start = with!(|invocation|format_time(&invocation.start));
-    view! {
-        <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-            <div class="absolute flex gap-2 items-center">
-                <span class="text-lg">
-                    <b>{cmd}</b>
-                </span>
-                <span>{patterns}</span>
-                <span>@</span>
-                <span class="text-grey-400 text-sm">{start}</span>
+    move || {
+        let num_targets = Signal::derive(move || with!(|counts| counts.num_targets));
+        let passing_targets = Signal::derive(move || with!(|counts| counts.passing_targets));
+        let failing_targets = Signal::derive(move || with!(|counts| counts.failing_targets));
+        let num_tests = Signal::derive(move || with!(|counts| counts.num_tests));
+        let passing_tests = Signal::derive(move || with!(|counts| counts.passing_tests));
+        let failing_tests = Signal::derive(move || with!(|counts| counts.failing_tests));
+        let status = Signal::derive(move || with!(|counts| counts.status));
+        let cmd = with!(|invocation| ucfirst(&invocation.command));
+        let patterns = with!(|invocation| invocation.pattern.join(","));
+        let start = with!(|invocation| format_time(&invocation.start));
+        view! {
+            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
+                <div class="absolute flex gap-2 items-center">
+                    <span class="text-lg">
+                        <b>{cmd}</b>
+                    </span>
+                    <span>{patterns}</span>
+                    <span>@</span>
+                    <span class="text-grey-400 text-sm">{start}</span>
+                </div>
+                <div class="p-4">
+                    <StatusIcon class="h-8 w-8" status=status.into()/>
+                </div>
+                <SummaryItem num=num_targets suffix="Total Target"/>
+                <SummaryItem num=passing_targets suffix="Passing Target"/>
+                {(failing_targets.get() > 0)
+                    .then(|| {
+                        view! { <SummaryItem num=failing_targets suffix="Failing Target"/> }
+                    })}
+
+                {(num_tests.get() > 0)
+                    .then(|| {
+                        view! { <SummaryItem num=num_tests suffix="Total Test"/> }
+                    })}
+
+                {(passing_tests.get() > 0)
+                    .then(|| {
+                        view! { <SummaryItem num=passing_tests suffix="Passing Test"/> }
+                    })}
+
+                {(failing_tests.get() > 0)
+                    .then(|| {
+                        view! { <SummaryItem num=failing_tests suffix="Failing Test"/> }
+                    })}
+
             </div>
-            <div class="p-4">
-                <StatusIcon class="h-8 w-8" status=status.into()/>
-            </div>
-            <SummaryItem num=num_targets suffix="Total Target"/>
-            <SummaryItem num=passing_targets suffix="Passing Target"/>
-            {(failing_targets.get() > 0)
-                .then(|| {
-                    view! { <SummaryItem num=failing_targets suffix="Failing Target"/> }
-                })}
-
-            {(num_tests.get() > 0)
-                .then(|| {
-                    view! { <SummaryItem num=num_tests suffix="Total Test"/> }
-                })}
-
-            {(passing_tests.get() > 0)
-                .then(|| {
-                    view! { <SummaryItem num=passing_tests suffix="Passing Test"/> }
-                })}
-
-            {(failing_tests.get() > 0)
-                .then(|| {
-                    view! { <SummaryItem num=failing_tests suffix="Failing Test"/> }
-                })}
-
-        </div>
-    }}
+        }
+    }
 }

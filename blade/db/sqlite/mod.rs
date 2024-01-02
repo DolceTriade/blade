@@ -116,7 +116,7 @@ impl state::DB for Sqlite {
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<state::InvocationResults> {
         let mut ret = schema::Invocations::table
             .select(models::Invocation::as_select())
-            .filter(schema::Invocations::id.eq(id))
+            .find(id)
             .get_result(&mut self.conn)
             .map(|res| -> anyhow::Result<state::InvocationResults> {
                 Ok(state::InvocationResults {
@@ -135,26 +135,25 @@ impl state::DB for Sqlite {
                 })
             })?
             .context("failed to get invocation")?;
-        schema::Targets::table
+        let targets = schema::Targets::table
             .select(models::Target::as_select())
-            .filter(schema::Targets::invocation_id.eq(id))
-            .load(&mut self.conn)?
-            .into_iter()
-            .for_each(|res| {
-                ret.targets.insert(
-                    res.name.clone(),
-                    state::Target {
-                        name: res.name,
-                        status: state::Status::parse(&res.status),
-                        kind: res.kind,
-                        start: parse_time(&res.start)
-                            .unwrap_or_else(|_| std::time::SystemTime::now()),
-                        end: res.end.map(|t| {
-                            parse_time(&t).unwrap_or_else(|_| std::time::SystemTime::now())
-                        }),
-                    },
-                );
-            });
+            .filter(schema::Targets::dsl::invocation_id.eq(id))
+            .load(&mut self.conn)?;
+        targets.iter().for_each(|res| {
+            ret.targets.insert(
+                res.name.clone(),
+                state::Target {
+                    name: res.name.clone(),
+                    status: state::Status::parse(&res.status),
+                    kind: res.kind.clone(),
+                    start: parse_time(&res.start)
+                        .unwrap_or_else(|_| std::time::SystemTime::now()),
+                    end: res.end.as_ref().map(|t| {
+                        parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())
+                    }),
+                },
+            );
+        });
         let tests = schema::Tests::table
             .select(models::Test::as_select())
             .filter(schema::Tests::invocation_id.eq(id))
@@ -242,13 +241,14 @@ impl state::DB for Sqlite {
         status: state::Status,
         end: std::time::SystemTime,
     ) -> anyhow::Result<()> {
+        let id = models::Target::gen_id(invocation_id, name);
         let mut res: models::Target = schema::Targets::table
             .select(models::Target::as_select())
-            .filter(schema::Targets::id.eq(models::Target::gen_id(invocation_id, name)))
+            .find(id.clone())
             .get_result(&mut self.conn)?;
         res.status = status.to_string();
         res.end = models::format_time(&end).ok();
-        diesel::update(schema::Targets::table)
+        diesel::update(schema::Targets::table.find(id))
             .set(&res)
             .execute(&mut self.conn)
             .map(|_| {})
@@ -258,7 +258,7 @@ impl state::DB for Sqlite {
     fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<state::Test> {
         let t = schema::Tests::table
             .select(models::Test::as_select())
-            .filter(schema::Tests::id.eq(models::Test::gen_id(id, name)))
+            .find(models::Test::gen_id(id, name))
             .get_result(&mut self.conn)?;
         Ok(t.into_state())
     }
@@ -271,14 +271,15 @@ impl state::DB for Sqlite {
         duration: std::time::Duration,
         num_runs: usize,
     ) -> anyhow::Result<()> {
+        let id = models::Test::gen_id(invocation_id, name);
         let mut t: models::Test = schema::Tests::table
             .select(models::Test::as_select())
-            .filter(schema::Tests::id.eq(models::Test::gen_id(invocation_id, name)))
+            .find(id.clone())
             .get_result(&mut self.conn)?;
         t.status = status.to_string();
         t.duration_s = Some(duration.as_secs_f64());
         t.num_runs = Some(num_runs as i32);
-        diesel::update(schema::Tests::table)
+        diesel::update(schema::Tests::dsl::Tests.find(id))
             .set(&t)
             .execute(&mut self.conn)
             .map(|_| {})
@@ -468,7 +469,7 @@ mod tests {
         let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
         let mut db = mgr.get().unwrap();
 
-        let inv = state::InvocationResults {
+        let mut inv = state::InvocationResults {
             id: "blah".to_string(),
             output: "whatever".to_string(),
             command: "test".to_string(),
@@ -558,8 +559,13 @@ mod tests {
             )]),
         };
         db.upsert_shallow_invocation(&inv).unwrap();
+        let old = inv.id;
+        inv.id = "another".to_string();
+        inv.id = old;
+        db.upsert_shallow_invocation(&inv).unwrap();
         inv.targets.iter().for_each(|t| {
             db.upsert_target(&inv.id, t.1).unwrap();
+            db.upsert_target("another", t.1).unwrap();
         });
         inv.tests.iter().for_each(|t| {
             let t_id = db.upsert_test(&inv.id, t.1).unwrap();
