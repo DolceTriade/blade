@@ -8,16 +8,19 @@ use state;
 use std::sync::Arc;
 use std::time::Duration;
 
+#[cfg(feature = "ssr")]
+fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
+    ServerFnError::ServerError(format!(
+        "Invocation {e} not found"
+    ))
+}
+
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
-    let map = global.sessions.lock().await;
-    if let Some(invocation) = map.get(&uuid) {
-        return Ok(invocation.lock().await.results.clone());
-    }
-    return Err(ServerFnError::ServerError(format!(
-        "Invocation {uuid} not found"
-    )));
+    let mut db= global.db_manager.get().map_err(internal_err)?;
+    let inv = db.get_invocation(&uuid).map_err(internal_err)?;
+    Ok(inv)
 }
 
 #[derive(PartialEq, Params)]

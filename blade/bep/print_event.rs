@@ -1,5 +1,7 @@
+use build_event_stream_proto::build_event_stream;
 use prost_reflect::ReflectMessage;
 use regex::Regex;
+use state::DBManager;
 pub(crate) struct Handler {
     pub message_re: Regex,
 }
@@ -7,8 +9,9 @@ pub(crate) struct Handler {
 impl crate::EventHandler for Handler {
     fn handle_event(
         &self,
-        _invocation: &mut state::InvocationResults,
-        event: &build_event_stream_proto::build_event_stream::BuildEvent,
+        _db_mgr: &dyn DBManager,
+        _invocation_id: &str,
+        event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
         let desc = event.descriptor();
         let dm = event.transcode_to_dynamic();

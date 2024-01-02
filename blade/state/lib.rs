@@ -95,43 +95,29 @@ impl Default for InvocationResults {
 
 cfg_if! {
 if #[cfg(feature = "ssr")] {
-use futures::lock::Mutex;
-use std::sync::Arc;
 
 pub trait DB {
-    fn upsert_invocation(&mut self, invocation: &InvocationResults) -> anyhow::Result<()>;
+    fn upsert_shallow_invocation(&mut self, invocation: &InvocationResults) -> anyhow::Result<()>;
+    #[allow(clippy::type_complexity)]
+    fn update_shallow_invocation(&mut self, invocation_id: &str, upd: Box<dyn FnOnce(&mut InvocationResults) -> anyhow::Result<()>>) -> anyhow::Result<()>;
+    fn get_progress(&mut self, invocation_id: &str) -> anyhow::Result<String>;
     fn upsert_target(&mut self, id: &str, target: &Target) -> anyhow::Result<()>;
+    fn update_target_result(&mut self, invocation_id: &str, name: &str, status: Status, end: std::time::SystemTime) -> anyhow::Result<()>;
     fn upsert_test(&mut self, id: &str, test: &Test) -> anyhow::Result<String>;
+    fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<Test>;
+    fn update_test_result(&mut self, invocation_id: &str, name: &str, status: Status, duration: std::time::Duration, num_runs: usize) -> anyhow::Result<()>;
     fn insert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
 
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
 }
 
-pub trait DBManager {
+pub trait DBManager: std::marker::Send + std::marker::Sync {
     fn get(&self) -> anyhow::Result<Box<dyn DB>>;
 }
 
-#[derive(Debug, Default)]
-pub struct Invocation {
-    pub results: InvocationResults,
-}
-
 pub struct Global {
-    pub sessions: Mutex<HashMap<String, Arc<Mutex<Invocation>>>>,
+    pub db_manager: Box<dyn DBManager + Sync + Send>,
 }
-
-impl Global {
-    pub fn new() -> Self {
-        Self {
-            sessions: Mutex::new(HashMap::new()),
-        }
-    }
-}
-
-impl Default for Global {
-         fn default() -> Self {
-             Self::new()
-}}
 
 }
 }

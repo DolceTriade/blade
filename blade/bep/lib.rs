@@ -2,23 +2,24 @@ use anyhow::Context;
 use anyhow::Result;
 use build_event_stream_proto::*;
 use build_proto::google::devtools::build::v1::*;
-use futures::lock::Mutex;
 use prost::Message;
+use state::DBManager;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{transport::Server, Response, Status};
 
+mod buildinfo;
 mod print_event;
 mod progress;
 mod target;
-mod buildinfo;
 
 trait EventHandler {
     fn handle_event(
         &self,
-        invocation: &mut state::InvocationResults,
+        db_mgr: &dyn DBManager,
+        invocation_id: &str,
         event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()>;
 }
@@ -28,23 +29,35 @@ pub struct BuildEventService {
     handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
-fn unexpected_cleanup_session(invocation: &mut state::Invocation) {
-    match invocation.results.status {
-        state::Status::Unknown | state::Status::InProgress => {
-            invocation.results.status = state::Status::Fail;
+fn unexpected_cleanup_session(
+    db_mgr: &dyn DBManager,
+    invocation_id: &str,
+) -> anyhow::Result<()> {
+    let mut db = db_mgr.get()?;
+    db.update_shallow_invocation(invocation_id, Box::new(move|i: &mut state::InvocationResults| {
+        match i.status {
+            state::Status::InProgress | state::Status::Unknown => i.status = state::Status::Fail,
+            _ => {}
         }
-        _ => {}
-    }
+        Ok(())
+    }))?;
+    Ok(())
 }
 
-async fn get_session(global: Arc<state::Global>, uuid: String) -> Arc<Mutex<state::Invocation>> {
-    let mut map = global.sessions.lock().await;
-    if let Some(invocation) = map.get(&uuid) {
-        return invocation.clone();
-    }
-    let invocation = Arc::new(Mutex::new(state::Invocation::default()));
-    map.insert(uuid, invocation.clone());
-    invocation
+fn session_result(
+    db_mgr: &dyn DBManager,
+    invocation_id: &str,
+    success: bool,
+) -> anyhow::Result<()> {
+    let mut db = db_mgr.get()?;
+    db.update_shallow_invocation(invocation_id, Box::new(move |i: &mut state::InvocationResults| {
+        match success {
+            true => i.status = state::Status::Success,
+            false => i.status = state::Status::Fail,
+        }
+        Ok(())
+    }))?;
+    Ok(())
 }
 
 #[tonic::async_trait]
@@ -85,7 +98,6 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     return;
                                 }
                                 let uuid = stream_id_or.unwrap().invocation_id.clone();
-                                let session = get_session(global.clone(), uuid.clone()).await;
                                 let event = obe.event.as_ref().unwrap().event.as_ref().unwrap();
                                 match event {
                                     build_event::Event::BazelEvent(any) => {
@@ -98,8 +110,13 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                 be_or.unwrap_err()
                                             );
                                             {
-                                                let mut s = session.lock().await;
-                                                unexpected_cleanup_session(&mut s);
+                                                let _ = unexpected_cleanup_session(
+                                                    global.db_manager.as_ref(),
+                                                    &uuid,
+                                                )
+                                                .map_err(|e| {
+                                                    log::error!("error closing stream: {e:#?}")
+                                                });
                                             }
                                             return;
                                         }
@@ -108,19 +125,23 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             build_event_stream::build_event::Payload::Finished(
                                                 f,
                                             ) => {
-                                                let mut s = session.lock().await;
                                                 let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
-                                                s.results.status = match success {
-                                                    true => state::Status::Success,
-                                                    false => state::Status::Fail,
-                                                };
+                                                let _ = session_result(
+                                                    global.db_manager.as_ref(),
+                                                    &uuid,
+                                                    success,
+                                                )
+                                                .map_err(|e| {
+                                                    log::error!("error closing stream: {e:#?}")
+                                                });
                                             }
                                             _ => {
                                                 for v in &*handlers {
-                                                    let mut s = session.lock().await;
-                                                    if let Err(e) =
-                                                        v.handle_event(&mut s.results, &be)
-                                                    {
+                                                    if let Err(e) = v.handle_event(
+                                                        global.db_manager.as_ref(),
+                                                        &uuid,
+                                                        &be,
+                                                    ) {
                                                         log::warn!("{:#?}", e);
                                                     }
                                                 }
@@ -175,8 +196,11 @@ pub async fn run_bes_grpc(
     let reflect = tonic_reflection::server::Builder::configure()
         .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
-    let mut handlers: Vec<Box<dyn EventHandler + Sync + Send>> =
-        vec![Box::new(progress::Handler {}), Box::new(target::Handler {}), Box::new(buildinfo::Handler{})];
+    let mut handlers: Vec<Box<dyn EventHandler + Sync + Send>> = vec![
+        Box::new(progress::Handler {}),
+        Box::new(target::Handler {}),
+        Box::new(buildinfo::Handler {}),
+    ];
     if !print_message_re.is_empty() {
         handlers.push(Box::new(print_event::Handler {
             message_re: regex::Regex::new(print_message_re).unwrap(),

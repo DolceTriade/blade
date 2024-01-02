@@ -48,7 +48,8 @@ cfg_if! {
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(App);
-            let state = Arc::new(state::Global::new());
+            let db_manager = Box::new(db::new(&args.db_path)?);
+            let state = Arc::new(state::Global { db_manager });
             let actix_state = state.clone();
             log::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {

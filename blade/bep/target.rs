@@ -1,4 +1,6 @@
+use anyhow::Context;
 use build_event_stream_proto::build_event_stream;
+use state::DBManager;
 use std::{option::Option, time::Duration};
 
 pub(crate) struct Handler {}
@@ -76,83 +78,89 @@ fn proto_to_rust_duration(
 impl crate::EventHandler for Handler {
     fn handle_event(
         &self,
-        invocation: &mut state::InvocationResults,
-        event: &build_event_stream_proto::build_event_stream::BuildEvent,
+        db_mgr: &dyn DBManager,
+        invocation_id: &str,
+        event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
         match event.payload.as_ref() {
             Some(build_event_stream::build_event::Payload::Configured(target)) => {
+                let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
-                invocation.targets.insert(
-                    label.to_string(),
-                    state::Target {
+                db.upsert_target(
+                    invocation_id,
+                    &state::Target {
                         name: label.to_string(),
                         status: state::Status::InProgress,
                         kind: target.target_kind.to_string(),
                         start: std::time::SystemTime::now(),
                         end: None,
                     },
-                );
+                )
+                .context("failed to insert target")?;
             }
             Some(build_event_stream::build_event::Payload::Completed(t)) => {
+                let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
-                let target = invocation
-                    .targets
-                    .get_mut(&label)
-                    .ok_or(anyhow::anyhow!("failed to find target {}", label))?;
-                target.end = Some(std::time::SystemTime::now());
-                target.status = if t.success {
-                    state::Status::Success
-                } else {
-                    state::Status::Fail
-                };
+                db.update_target_result(
+                    invocation_id,
+                    &label,
+                    if t.success {
+                        state::Status::Success
+                    } else {
+                        state::Status::Fail
+                    },
+                    std::time::SystemTime::now(),
+                )
+                .context("failed to update target result")?;
             }
             Some(build_event_stream::build_event::Payload::Aborted(a)) => {
+                let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
-                let target = invocation
-                    .targets
-                    .get_mut(&label)
-                    .ok_or(anyhow::anyhow!("failed to find target {}", label))?;
-                target.end = Some(std::time::SystemTime::now());
-                target.status = match build_event_stream::aborted::AbortReason::try_from(a.reason) {
-                    Ok(build_event_stream::aborted::AbortReason::Skipped) => state::Status::Skip,
-                    _ => state::Status::Fail,
-                };
+                db.update_target_result(
+                    invocation_id,
+                    &label,
+                    match build_event_stream::aborted::AbortReason::try_from(a.reason) {
+                        Ok(build_event_stream::aborted::AbortReason::Skipped) => {
+                            state::Status::Skip
+                        }
+                        _ => state::Status::Fail,
+                    },
+                    std::time::SystemTime::now(),
+                )
+                .context("failed to update target result")?;
             }
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
+                let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
-                let test = invocation
-                    .tests
-                    .entry(label.clone())
-                    .or_insert_with(|| state::Test {
-                        name: label.clone(),
-                        status: state::Status::InProgress,
-                        duration: Duration::default(),
-                        runs: Default::default(),
-                        num_runs: 0,
-                    });
-                test.status =
-                    match build_event_stream::TestStatus::try_from(summary.overall_status)? {
+                let test = state::Test {
+                    name: label.clone(),
+                    status: match build_event_stream::TestStatus::try_from(summary.overall_status)?
+                    {
                         build_event_stream::TestStatus::Passed => state::Status::Success,
                         _ => state::Status::Fail,
-                    };
-                test.duration = to_duration(
-                    summary.first_start_time.as_ref(),
-                    summary.last_stop_time.as_ref(),
-                );
-                test.num_runs = summary.run_count as usize;
+                    },
+                    duration: to_duration(
+                        summary.first_start_time.as_ref(),
+                        summary.last_stop_time.as_ref(),
+                    ),
+                    runs: Default::default(),
+                    num_runs: summary.run_count as usize,
+                };
+                db.upsert_test(invocation_id, &test)
+                    .context("failed to insert test")?;
             }
             Some(build_event_stream::build_event::Payload::TestResult(r)) => {
+                let mut db = db_mgr.get().context("failed to get db handle")?;
                 let mut info =
                     test_run_info(event).ok_or(anyhow::anyhow!("failed to find test id"))?;
-                let test = invocation
-                    .tests
-                    .entry(info.0.clone())
-                    .or_insert_with(|| state::Test {
+                let mut test = db
+                    .get_test(invocation_id, &info.0)
+                    .unwrap_or_else(|_| state::Test {
                         name: info.0.clone(),
-                        status: state::Status::InProgress,
-                        duration: Duration::default(),
-                        runs: Default::default(),
+                        duration: Default::default(),
                         num_runs: 0,
+                        runs: vec![],
+                        status: state::Status::InProgress,
                     });
                 r.test_action_output.iter().for_each(|f| {
                     if let Some(build_event_stream_proto::build_event_stream::file::File::Uri(
@@ -174,8 +182,13 @@ impl crate::EventHandler for Handler {
                     _ => state::Status::Fail,
                 };
                 info.1.details = r.status_details.clone();
+
                 test.num_runs = std::cmp::max(test.num_runs, info.1.run as usize);
-                test.runs.push(info.1);
+                let test_id = db
+                    .upsert_test(invocation_id, &test)
+                    .context("failed to update test")?;
+                db.insert_test_run(invocation_id, &test_id, &info.1)
+                    .context("error inserting test run")?;
             }
             _ => {}
         }

@@ -4,6 +4,7 @@ rust_library(
     name = "db",
     srcs = glob(["**/*.rs"]),
     data = glob(["sqlite/migrations/**"]),
+    visibility = ["//visibility:public"],
     deps = [
         "//blade/state",
         "@crate//:anyhow",

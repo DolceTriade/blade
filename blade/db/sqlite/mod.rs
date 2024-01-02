@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Context};
 use diesel::prelude::*;
-use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use diesel::r2d2::ConnectionManager;
+use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use r2d2::PooledConnection;
 use time::macros::format_description;
 
@@ -11,7 +11,7 @@ mod models;
 #[allow(non_snake_case)]
 mod schema;
 
-fn parse_time(t: &str) -> anyhow::Result<std::time::SystemTime> {
+pub(crate) fn parse_time(t: &str) -> anyhow::Result<std::time::SystemTime> {
     time::PrimitiveDateTime::parse(
         t,
         &format_description!(
@@ -29,8 +29,7 @@ pub struct Sqlite {
 
 #[allow(dead_code)]
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
-    let mut me = diesel::SqliteConnection::establish(db_path)
-        .context("creating sqlite db")?;
+    let mut me = diesel::SqliteConnection::establish(db_path).context("creating sqlite db")?;
     diesel::sql_query("PRAGMA foreign_keys = ON;")
         .execute(&mut me)
         .context("failed to enable foreign keys")?;
@@ -47,7 +46,10 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
 }
 
 impl state::DB for Sqlite {
-    fn upsert_invocation(&mut self, invocation: &state::InvocationResults) -> anyhow::Result<()> {
+    fn upsert_shallow_invocation(
+        &mut self,
+        invocation: &state::InvocationResults,
+    ) -> anyhow::Result<()> {
         use schema::Invocations::dsl::*;
         let val = models::Invocation::from_state(invocation)?;
         diesel::insert_into(schema::Invocations::table)
@@ -114,7 +116,7 @@ impl state::DB for Sqlite {
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<state::InvocationResults> {
         let mut ret = schema::Invocations::table
             .select(models::Invocation::as_select())
-            .filter(schema::Invocations::id.eq("blah"))
+            .filter(schema::Invocations::id.eq(id))
             .get_result(&mut self.conn)
             .map(|res| -> anyhow::Result<state::InvocationResults> {
                 Ok(state::InvocationResults {
@@ -209,13 +211,86 @@ impl state::DB for Sqlite {
         });
         Ok(ret)
     }
+
+    fn update_shallow_invocation(
+        &mut self,
+        invocation_id: &str,
+        upd: Box<dyn FnOnce(&mut state::InvocationResults) -> anyhow::Result<()>>,
+    ) -> anyhow::Result<()> {
+        let mut ret = schema::Invocations::table
+            .select(models::Invocation::as_select())
+            .filter(schema::Invocations::id.eq(invocation_id))
+            .get_result(&mut self.conn)
+            .map(|res| res.into_state())?;
+        upd(&mut ret)?;
+        self.upsert_shallow_invocation(&ret)
+    }
+
+    fn get_progress(&mut self, invocation_id: &str) -> anyhow::Result<String> {
+        schema::Invocations::table
+            .select(models::Invocation::as_select())
+            .filter(schema::Invocations::id.eq(invocation_id))
+            .get_result(&mut self.conn)
+            .map(|res: models::Invocation| res.output)
+            .context("failed to get progress")
+    }
+
+    fn update_target_result(
+        &mut self,
+        invocation_id: &str,
+        name: &str,
+        status: state::Status,
+        end: std::time::SystemTime,
+    ) -> anyhow::Result<()> {
+        let mut res: models::Target = schema::Targets::table
+            .select(models::Target::as_select())
+            .filter(schema::Targets::id.eq(models::Target::gen_id(invocation_id, name)))
+            .get_result(&mut self.conn)?;
+        res.status = status.to_string();
+        res.end = models::format_time(&end).ok();
+        diesel::update(schema::Targets::table)
+            .set(&res)
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to update target result")
+    }
+
+    fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<state::Test> {
+        let t = schema::Tests::table
+            .select(models::Test::as_select())
+            .filter(schema::Tests::id.eq(models::Test::gen_id(id, name)))
+            .get_result(&mut self.conn)?;
+        Ok(t.into_state())
+    }
+
+    fn update_test_result(
+        &mut self,
+        invocation_id: &str,
+        name: &str,
+        status: state::Status,
+        duration: std::time::Duration,
+        num_runs: usize,
+    ) -> anyhow::Result<()> {
+        let mut t: models::Test = schema::Tests::table
+            .select(models::Test::as_select())
+            .filter(schema::Tests::id.eq(models::Test::gen_id(invocation_id, name)))
+            .get_result(&mut self.conn)?;
+        t.status = status.to_string();
+        t.duration_s = Some(duration.as_secs_f64());
+        t.num_runs = Some(num_runs as i32);
+        diesel::update(schema::Tests::table)
+            .set(&t)
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to update test result")
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
-
     use state::DBManager;
+
     use diesel::prelude::*;
 
     use super::schema;
@@ -243,7 +318,7 @@ mod tests {
             start: std::time::SystemTime::now(),
             ..Default::default()
         };
-        db.upsert_invocation(&inv).unwrap();
+        db.upsert_shallow_invocation(&inv).unwrap();
         {
             let res = schema::Invocations::table
                 .select(super::models::Invocation::as_select())
@@ -254,7 +329,7 @@ mod tests {
             assert_eq!(res.output, inv.output);
         }
         inv.output.push_str("more output");
-        db.upsert_invocation(&inv).unwrap();
+        db.upsert_shallow_invocation(&inv).unwrap();
         {
             let res = schema::Invocations::table
                 .select(super::models::Invocation::as_select())
@@ -290,7 +365,7 @@ mod tests {
             start: std::time::SystemTime::now(),
             end: None,
         };
-        db.upsert_invocation(&inv).unwrap();
+        db.upsert_shallow_invocation(&inv).unwrap();
         db.upsert_target("blah", &target).unwrap();
         {
             let res = schema::Targets::table
@@ -351,7 +426,7 @@ mod tests {
             num_runs: 0,
             runs: vec![],
         };
-        db.upsert_invocation(&inv).unwrap();
+        db.upsert_shallow_invocation(&inv).unwrap();
         db.upsert_test("blah", &test).unwrap();
         {
             let res = schema::Tests::table
@@ -482,7 +557,7 @@ mod tests {
                 },
             )]),
         };
-        db.upsert_invocation(&inv).unwrap();
+        db.upsert_shallow_invocation(&inv).unwrap();
         inv.targets.iter().for_each(|t| {
             db.upsert_target(&inv.id, t.1).unwrap();
         });

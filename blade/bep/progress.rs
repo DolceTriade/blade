@@ -1,4 +1,6 @@
+use anyhow::Context;
 use build_event_stream_proto::build_event_stream;
+use state::DBManager;
 pub(crate) struct Handler {}
 
 fn cleanup(orig: &str, stdout: &str, stderr: &str) -> String {
@@ -53,15 +55,22 @@ fn cleanup(orig: &str, stdout: &str, stderr: &str) -> String {
 impl crate::EventHandler for Handler {
     fn handle_event(
         &self,
-        invocation: &mut state::InvocationResults,
-        event: &build_event_stream_proto::build_event_stream::BuildEvent,
+        db_mgr: &dyn DBManager,
+        invocation_id: &str,
+        event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
         if let Some(build_event_stream::build_event::Payload::Progress(p)) = event.payload.as_ref()
         {
             if p.stderr.is_empty() && p.stdout.is_empty() {
                 return Ok(());
             }
-            invocation.output = cleanup(&invocation.output, &p.stdout, &p.stderr);
+            let mut db = db_mgr.get().context("failed to get db handle")?;
+            let output = db.get_progress(invocation_id)?;
+            let progress = cleanup(&output, &p.stdout, &p.stderr);
+            db.update_shallow_invocation(invocation_id, Box::new(move|i: &mut state::InvocationResults| {
+                i.output = progress;
+                Ok(())
+            })).context("failed to update progress")?;
         }
         Ok(())
     }

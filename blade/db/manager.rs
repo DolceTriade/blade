@@ -11,6 +11,7 @@ pub struct SqliteManager {
 #[allow(dead_code)]
 impl SqliteManager {
     pub fn new(uri: &str) -> anyhow::Result<Self> {
+        crate::sqlite::init_db(uri)?;
         let manager = ConnectionManager::<SqliteConnection>::new(uri);
         let pool = Pool::builder()
             .test_on_check_out(true)

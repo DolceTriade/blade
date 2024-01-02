@@ -22,6 +22,7 @@ rust_binary(
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
     deps = [
+        "//blade/db",
         "//blade/bep",
         "//blade/state",
         "//blade/tailwindmerge",
