@@ -19,9 +19,10 @@ def _srcs_aspect_impl(target, ctx):
         # print their paths.
         for src in ctx.rule.attr.srcs:
             srcs.append(src.files)
-    for dep in ctx.rule.attr.deps:
-        if SrcsInfo in dep:
-            srcs.append(dep[SrcsInfo].srcs)
+    if hasattr(ctx.rule.attr, "deps"):
+        for dep in ctx.rule.attr.deps:
+            if SrcsInfo in dep:
+                srcs.append(dep[SrcsInfo].srcs)
     return [SrcsInfo(srcs = depset(transitive = srcs))]
 
 _srcs_aspect = aspect(

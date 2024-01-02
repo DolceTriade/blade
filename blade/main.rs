@@ -31,6 +31,11 @@ cfg_if! {
             db_path: String,
             #[arg(short='d', long="print_message", value_name = "PATTERN", default_value="")]
             debug_message_pattern: String,
+            #[arg(short='l', long="allow_local", value_name = "ALLOW_LOCAL", default_value="false")]
+            allow_local: bool,
+            #[arg(short='o', long="bytestream_override", value_name = "OVERRIDE")]
+            bytestream_overrides: Vec<String>,
+
         }
 
         #[actix_web::main]
@@ -48,8 +53,14 @@ cfg_if! {
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(App);
+            let mut bs = bytestream::Client::new();
+            for o in &args.bytestream_overrides {
+                if let Some(s) = o.split_once('=') {
+                    bs.add_override(s.0, s.1);
+                }
+            }
             let db_manager = db::new(&args.db_path)?;
-            let state = Arc::new(state::Global { db_manager });
+            let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs });
             let actix_state = state.clone();
             log::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {

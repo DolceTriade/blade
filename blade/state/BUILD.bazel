@@ -22,6 +22,7 @@ rust_library(
             "@crate//:futures",
             "@crate//:serde",
             "@crate//:tokio",
+            "//blade/bytestream",
         ],
     }),
 )

@@ -24,6 +24,7 @@ rust_binary(
     deps = [
         "//blade/db",
         "//blade/bep",
+        "//blade/bytestream",
         "//blade/state",
         "//blade/tailwindmerge",
         "@crate//:actix-files",

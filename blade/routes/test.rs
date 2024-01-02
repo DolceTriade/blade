@@ -3,20 +3,39 @@ use leptos_router::*;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
-use crate::components::testsummary::TestSummary;
-use crate::components::testrunlist::TestRunList;
 use crate::components::testresults::TestResults;
+use crate::components::testrunlist::TestRunList;
+use crate::components::testsummary::TestSummary;
+
+#[cfg(feature = "ssr")]
+use std::sync::Arc;
 
 #[server]
 pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
-    let uri = url::Url::parse(&uri).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
-    if uri.scheme() == "file" {
-        let path = uri
-            .to_file_path()
-            .map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
-        return std::fs::read(path).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")));
+    let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
+    let parsed =
+        url::Url::parse(&uri).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
+    match parsed.scheme() {
+        "file" => {
+            if !global.allow_local {
+                return Err(ServerFnError::ServerError("not implemented".to_string()));
+            }
+            let path = parsed
+                .to_file_path()
+                .map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
+            return std::fs::read(path).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")));
+        }
+        "bytestream" | "http" | "https" => {
+            return global
+                .bytestream_client
+                .download_file(&uri)
+                .await
+                .map_err(|e| ServerFnError::ServerError(format!("failed to get artifact: {e}")));
+        }
+        _ => {
+            Err(ServerFnError::ServerError("not implemented".to_string()))
+        }
     }
-    Err(ServerFnError::ServerError("not implemented".to_string()))
 }
 
 fn get_run(
@@ -131,10 +150,14 @@ pub fn Test() -> impl IntoView {
         move |uri| async move {
             match uri {
                 None => None,
-                Some(uri) => get_artifact(uri.to_string()).await.ok().as_ref().and_then(|v| {
-                    let c = std::io::Cursor::new(v);
-                    junit_parser::from_reader(c).ok()
-                }),
+                Some(uri) => get_artifact(uri.to_string())
+                    .await
+                    .ok()
+                    .as_ref()
+                    .and_then(|v| {
+                        let c = std::io::Cursor::new(v);
+                        junit_parser::from_reader(c).ok()
+                    }),
             }
         },
     );
