@@ -19,9 +19,7 @@ fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
     let mut db= global.db_manager.get().map_err(internal_err)?;
-    let inv = db.get_invocation(&uuid).map_err(internal_err)?;
-    log::info!("TARGETS = {}", inv.targets.len());
-    Ok(inv)
+    db.get_invocation(&uuid).map_err(internal_err)
 }
 
 #[derive(PartialEq, Params)]
