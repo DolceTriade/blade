@@ -13,14 +13,14 @@ index 178abcf..96af0b1 100644
              Ok(XMLEvent::End(ref e)) if e.name() == orig.name() => break,
              Ok(XMLEvent::Text(e)) => {
 -                res = Some(e.unescape()?.to_string());
-+                println!("{:#?}", e);
++
 +                match res.as_mut() {
 +                    Some(res) => res.push_str(&e.unescape()?.to_string()),
 +                    None => res = Some(e.unescape()?.to_string()),
 +                }
 +            }
 +            Ok(XMLEvent::CData(e)) => {
-+                println!("{:#?}", e);
++
 +                match res.as_mut() {
 +                    Some(res) => res.push_str(&String::from_utf8_lossy(&e)),
 +                    None => res = Some(String::from_utf8_lossy(&e).to_string()),
