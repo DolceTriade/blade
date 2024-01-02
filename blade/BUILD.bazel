@@ -128,10 +128,12 @@ oci_image(
         ":blade_tar",
         "@oci_base//:closure.tar",
     ],
+    tags = ["noosx"],
 )
 
 oci_tarball(
     name = "blade_image_tarball",
     image = ":blade_image",
     repo_tags = ["ghcr.io/dolcetriade/blade:latest"],
+    tags = ["noosx"],
 )
