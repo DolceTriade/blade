@@ -2,7 +2,10 @@ cc_library(
     name = "sqlite",
     srcs = select({
         "@platforms//os:osx": ["lib/libsqlite3.dylib"],
-        "//conditions:default": ["lib/libsqlite3.so"],
+        "//conditions:default": glob(
+            ["lib/libsqlite3.*"],
+            exclude = ["**/*.la"],
+        ),
     }),
     linkstatic = False,
     visibility = ["//visibility:public"],

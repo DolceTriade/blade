@@ -25,9 +25,9 @@ rust_binary(
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
     deps = [
-        "//blade/db",
         "//blade/bep",
         "//blade/bytestream",
+        "//blade/db",
         "//blade/state",
         "//blade/tailwindmerge",
         "@crate//:actix-files",
@@ -55,6 +55,7 @@ rust_binary(
         "@crate//:url-escape",
         "@crate__wasm-bindgen-0.2.87//:wasm_bindgen",
         "@crate__web-sys-0.3.64//:web_sys",
+        "@rules_rust//tools/runfiles",
     ],
 )
 
@@ -110,7 +111,7 @@ js_rust_wasm_bindgen(
 runfiles(
     name = "blade_runfiles",
     binary = ":blade",
-    root = "/app"
+    root = "/app",
 )
 
 pkg_tar(
@@ -121,15 +122,16 @@ pkg_tar(
 oci_image(
     name = "blade_image",
     base = "@distroless_base",
+    entrypoint = ["/app/blade/blade"],
+    workdir = "/app/blade/blade.runfiles/blade",
     tars = [
         ":blade_tar",
         "@oci_base//:closure.tar",
     ],
-    entrypoint = ["/app/blade"],
 )
 
 oci_tarball(
     name = "blade_image_tarball",
     image = ":blade_image",
-    repo_tags = ["ghcr.io/DolceTriade/blade:latest"],
+    repo_tags = ["ghcr.io/dolcetriade/blade:latest"],
 )

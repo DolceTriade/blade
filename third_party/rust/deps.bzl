@@ -74,6 +74,11 @@ def rust_dependencies():
                     ],
                 ),
             ],
+            "linux-raw-sys": [
+                crate.annotation(
+                    crate_features = ["prctl"],
+                ),
+            ],
             "rustix": [
                 crate.annotation(
                     crate_features = ["process"],

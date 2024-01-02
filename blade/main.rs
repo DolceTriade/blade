@@ -16,6 +16,7 @@ cfg_if! {
         use leptos::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use std::sync::Arc;
+        use runfiles::Runfiles;
 
         use crate::routes::app::App;
 
@@ -49,7 +50,9 @@ cfg_if! {
 
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
-            let mut conf = get_configuration(Some("blade/leptos.toml")).await.unwrap();
+            let r = Runfiles::create().expect("Must run using bazel with runfiles");
+            let leptos_toml = r.rlocation("blade/blade/leptos.toml");
+            let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).await.unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
             let routes = generate_route_list(App);

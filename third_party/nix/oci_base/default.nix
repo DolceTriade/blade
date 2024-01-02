@@ -1,12 +1,12 @@
 let
-    pkgs = import <nixpkgs>;
-    packages = with pkgs; [
-        postgresql.lib
-        sqlite.out
-    ];
-    closure = with pkgs; builtins.toString (lib.strings.splitString "\n" (builtins.readFile "${closureInfo {rootPaths = packages;}}/store-paths"));
+  pkgs = import <nixpkgs> {};
+  packages = with pkgs; [
+    postgresql.lib
+    sqlite.out
+  ];
+  closure = with pkgs; builtins.toString (lib.strings.splitString "\n" (builtins.readFile "${closureInfo {rootPaths = packages;}}/store-paths"));
 in
-    pkgs.buildEnv {
+  pkgs.buildEnv {
     name = "closure";
     paths = [];
     buildInputs = packages;
