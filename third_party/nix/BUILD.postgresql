@@ -2,7 +2,7 @@ cc_library(
     name = "postgresql",
     srcs = select({
         "@platforms//os:osx": ["lib/libpq.dylib"],
-        "//conditions:default": ["lib/libpq.so"],
+        "//conditions:default": glob(["lib/libpq.*"]),
     }),
     linkstatic = False,
     visibility = ["//visibility:public"],
