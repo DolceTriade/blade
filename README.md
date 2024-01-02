@@ -2,6 +2,8 @@
 
 Blade is a Bazel BEP viewer. It's in its early stages, but should be generally functional.
 
+![screenshot](img/ss.png)
+
 # Building
 
 ## Environment
