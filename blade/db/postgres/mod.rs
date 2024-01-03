@@ -165,7 +165,7 @@ impl state::DB for Postgres {
             .filter(schema::testartifacts::dsl::invocation_id.eq(id))
             .load(&mut self.conn)?
             .into_iter().for_each(|a: models::TestArtifact| {
-                let v = test_artifacts.entry(a.test_run_id.clone()).or_insert(Vec::new());
+                let v = test_artifacts.entry(a.test_run_id.clone()).or_default();
                 v.push(a);
             });
         let test_runs = test_runs.grouped_by(&tests);
