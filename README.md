@@ -27,8 +27,10 @@ If you want the database to be persistent, you bind mount a location in. You nee
 There isn't a fully fleshed out example for this... Assuming you can access postgresql from the docker container:
 
 ```
-docker run --rm -p 3000:3000 -p 50332:50332 ghcr.io/dolcetriade/blade:0.1 --db_path postgres://username:password@localhost/diesel_demo
+docker run --rm -p 3000:3000 -p 50332:50332 ghcr.io/dolcetriade/blade:0.1 --db_path postgres://username:password@localhost/blade
 ```
+
+Note that the database must exist prior to starting blade.
 
 # Building
 
