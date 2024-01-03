@@ -79,7 +79,7 @@ fn get_run(
     }
 }
 
-#[derive(PartialEq, Params)]
+#[derive(PartialEq, Params, Debug)]
 struct TestParams {
     target: Option<String>,
     run: Option<i32>,
