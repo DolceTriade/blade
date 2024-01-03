@@ -17,12 +17,12 @@ rust_library(
             "@wasm_crate//:serde",
         ],
         "//conditions:default": [
+            "//blade/bytestream",
             "@crate//:anyhow",
             "@crate//:cfg-if",
             "@crate//:futures",
             "@crate//:serde",
             "@crate//:tokio",
-            "//blade/bytestream",
         ],
     }),
 )

@@ -1,6 +1,6 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
 load("@rules_rust//wasm_bindgen/rules_js:defs.bzl", "js_rust_wasm_bindgen")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("//nix/bazel:runfiles.bzl", "runfiles")
 
@@ -123,12 +123,12 @@ oci_image(
     name = "blade_image",
     base = "@distroless_base",
     entrypoint = ["/app/blade/blade"],
-    workdir = "/app/blade/blade.runfiles/blade",
+    tags = ["noosx"],
     tars = [
         ":blade_tar",
         "@oci_base//:closure.tar",
     ],
-    tags = ["noosx"],
+    workdir = "/app/blade/blade.runfiles/blade",
 )
 
 oci_tarball(
@@ -136,4 +136,25 @@ oci_tarball(
     image = ":blade_image",
     repo_tags = ["ghcr.io/dolcetriade/blade:latest"],
     tags = ["noosx"],
+)
+
+genrule(
+    name = "tags",
+    outs = ["tags.txt"],
+    cmd = """
+        s=$$(cat bazel-out/stable-status.txt | grep BUILD_EMBED_LABEL | awk '{print $$2}')
+        if [[ -n $$s ]]; then
+            echo $$s > $@
+        else
+            echo 0.0.0 > $@
+        fi
+    """,
+    stamp = 1,
+)
+
+oci_push(
+    name = "blade_push",
+    image = ":blade_image",
+    remote_tags = ":tags",
+    repository = "ghcr.io/dolcetriade/blade",
 )

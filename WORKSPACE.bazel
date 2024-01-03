@@ -154,10 +154,12 @@ load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_dependencies")
 
 rust_analyzer_dependencies()
 
-
 register_toolchains("//nix/rust:rust_analyzer_toolchain")
+
 register_toolchains("//nix/rust:rustfmt_toolchain")
+
 register_toolchains("//nix/rust:wasm_bindgen_toolchain")
+
 register_toolchains("@rules_rust//rust/private/dummy_cc_toolchain:dummy_cc_wasm32_toolchain")
 
 http_archive(
