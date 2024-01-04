@@ -1,5 +1,5 @@
 {
-  "checksum": "ebbb695514a52d414a55caba3e779945fb0cf49e735c3df2de64c8ffbd17b24b",
+  "checksum": "fbe1636caa2240ae1088ef48b0c7456390ff22c6061d8ecdd5da5a670775587b",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -4442,6 +4442,70 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "crossbeam-utils 0.8.18": {
+      "name": "crossbeam-utils",
+      "version": "0.8.18",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/crossbeam-utils/0.8.18/download",
+          "sha256": "c3a430a770ebd84726f584a90ee7f020d28db52c6d02138900f22341f866d39c"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "crossbeam_utils",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "crossbeam_utils",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "crossbeam-utils 0.8.18",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.8.18"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "crypto-common 0.1.6": {
       "name": "crypto-common",
       "version": "0.1.6",
@@ -5374,6 +5438,10 @@
             {
               "id": "walkdir 2.4.0",
               "target": "walkdir"
+            },
+            {
+              "id": "zip 0.6.6",
+              "target": "zip"
             }
           ],
           "selects": {}
@@ -19445,6 +19513,7 @@
             "Event",
             "EventSource",
             "EventTarget",
+            "File",
             "FileReader",
             "FocusEvent",
             "FormData",
@@ -20586,6 +20655,72 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "zip 0.6.6": {
+      "name": "zip",
+      "version": "0.6.6",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/zip/0.6.6/download",
+          "sha256": "760394e246e4c28189f19d488c058bf16f564016aefac5d32bb1f3b51d5e9261"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "zip",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "zip",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "deflate",
+            "flate2",
+            "time"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "byteorder 1.5.0",
+              "target": "byteorder"
+            },
+            {
+              "id": "crc32fast 1.3.2",
+              "target": "crc32fast"
+            },
+            {
+              "id": "flate2 1.0.26",
+              "target": "flate2"
+            },
+            {
+              "id": "time 0.3.31",
+              "target": "time"
+            }
+          ],
+          "selects": {
+            "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
+              {
+                "id": "crossbeam-utils 0.8.18",
+                "target": "crossbeam_utils"
+              }
+            ]
+          }
+        },
+        "edition": "2021",
+        "version": "0.6.6"
+      },
+      "license": "MIT"
+    },
     "zstd 0.12.4": {
       "name": "zstd",
       "version": "0.12.4",
@@ -20918,6 +21053,14 @@
     ],
     "cfg(all(target_arch = \"x86_64\", target_env = \"msvc\", not(windows_raw_dylib)))": [
       "x86_64-pc-windows-msvc"
+    ],
+    "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "powerpc-unknown-linux-gnu",
+      "thumbv7em-none-eabi",
+      "thumbv8m.main-none-eabi"
     ],
     "cfg(any(target_arch = \"aarch64\", target_arch = \"x86\", target_arch = \"x86_64\"))": [
       "aarch64-apple-darwin",
@@ -21348,7 +21491,8 @@
     "url 2.5.0",
     "url-escape 0.1.1",
     "uuid 1.6.1",
-    "walkdir 2.4.0"
+    "walkdir 2.4.0",
+    "zip 0.6.6"
   ],
   "direct_dev_deps": []
 }

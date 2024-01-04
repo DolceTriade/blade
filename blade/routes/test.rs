@@ -6,6 +6,7 @@ use crate::components::shellout::ShellOut;
 use crate::components::testresults::TestResults;
 use crate::components::testrunlist::TestRunList;
 use crate::components::testsummary::TestSummary;
+use crate::components::testartifactlist::TestArtifactList;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -207,6 +208,7 @@ pub fn Test() -> impl IntoView {
                                 _ => view!{ <div>No test output</div> },
                             }}
                         </Suspense>
+                        <TestArtifactList />
                         </Card>
                     </div>
                     </div>

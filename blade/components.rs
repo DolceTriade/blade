@@ -11,3 +11,4 @@ pub mod testrunlist;
 pub mod tooltip;
 pub mod testresults;
 pub mod searchbar;
+pub mod testartifactlist;

@@ -1,5 +1,5 @@
 {
-  "checksum": "fc86404d3bf181dabe120ec5b2112024873d2ad77e95dfd5dea7ea423cf3de1c",
+  "checksum": "dc541b6c11ec16c7e434f38a34cda86f48812d48c456b0514005ba2feedede01",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -772,6 +772,43 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "byteorder 1.5.0": {
+      "name": "byteorder",
+      "version": "1.5.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/byteorder/1.5.0/download",
+          "sha256": "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "byteorder",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "byteorder",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "1.5.0"
+      },
+      "license": "Unlicense OR MIT"
+    },
     "bytes 1.4.0": {
       "name": "bytes",
       "version": "1.4.0",
@@ -1396,6 +1433,134 @@
       },
       "license": "MIT"
     },
+    "crc32fast 1.3.2": {
+      "name": "crc32fast",
+      "version": "1.3.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/crc32fast/1.3.2/download",
+          "sha256": "b540bd8bc810d3885c6ea91e2018302f68baba2129ab3e88f32389ee9370880d"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "crc32fast",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "crc32fast",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "crc32fast 1.3.2",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "1.3.2"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "crossbeam-utils 0.8.18": {
+      "name": "crossbeam-utils",
+      "version": "0.8.18",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/crossbeam-utils/0.8.18/download",
+          "sha256": "c3a430a770ebd84726f584a90ee7f020d28db52c6d02138900f22341f866d39c"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "crossbeam_utils",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "crossbeam_utils",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "crossbeam-utils 0.8.18",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.8.18"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "deranged 0.3.10": {
       "name": "deranged",
       "version": "0.3.10",
@@ -1549,6 +1714,10 @@
               "target": "futures_util"
             },
             {
+              "id": "gloo-file 0.3.0",
+              "target": "gloo_file"
+            },
+            {
               "id": "gloo-net 0.4.0",
               "target": "gloo_net"
             },
@@ -1599,6 +1768,10 @@
             {
               "id": "wasm-bindgen 0.2.87",
               "target": "wasm_bindgen"
+            },
+            {
+              "id": "zip 0.6.6",
+              "target": "zip"
             }
           ],
           "selects": {}
@@ -1758,6 +1931,57 @@
         "version": "1.0.1"
       },
       "license": "Apache-2.0 OR MIT"
+    },
+    "flate2 1.0.28": {
+      "name": "flate2",
+      "version": "1.0.28",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/flate2/1.0.28/download",
+          "sha256": "46303f565772937ffe1d394a4fac6f411c6013172fadde9dcdb1e147a086940e"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "flate2",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "flate2",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "any_impl",
+            "miniz_oxide",
+            "rust_backend"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "crc32fast 1.3.2",
+              "target": "crc32fast"
+            },
+            {
+              "id": "miniz_oxide 0.7.1",
+              "target": "miniz_oxide"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.28"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "fnv 1.0.7": {
       "name": "fnv",
@@ -2504,6 +2728,106 @@
         ],
         "edition": "2018",
         "version": "0.27.3"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "gloo-events 0.2.0": {
+      "name": "gloo-events",
+      "version": "0.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/gloo-events/0.2.0/download",
+          "sha256": "27c26fb45f7c385ba980f5fa87ac677e363949e065a083722697ef1b2cc91e41"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "gloo_events",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "gloo_events",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "wasm-bindgen 0.2.87",
+              "target": "wasm_bindgen"
+            },
+            {
+              "id": "web-sys 0.3.64",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.2.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "gloo-file 0.3.0": {
+      "name": "gloo-file",
+      "version": "0.3.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/gloo-file/0.3.0/download",
+          "sha256": "97563d71863fb2824b2e974e754a81d19c4a7ec47b09ced8a0e6656b6d54bd1f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "gloo_file",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "gloo_file",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "gloo-events 0.2.0",
+              "target": "gloo_events"
+            },
+            {
+              "id": "js-sys 0.3.64",
+              "target": "js_sys"
+            },
+            {
+              "id": "wasm-bindgen 0.2.87",
+              "target": "wasm_bindgen"
+            },
+            {
+              "id": "web-sys 0.3.64",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.3.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -5234,6 +5558,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "with-alloc"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -10164,6 +10494,7 @@
             "BeforeUnloadEvent",
             "BinaryType",
             "Blob",
+            "BlobPropertyBag",
             "CharacterData",
             "ClipboardEvent",
             "CloseEvent",
@@ -10176,6 +10507,7 @@
             "DeviceOrientationEvent",
             "Document",
             "DocumentFragment",
+            "DomException",
             "DomQuad",
             "DomRect",
             "DomRectList",
@@ -10188,6 +10520,9 @@
             "Event",
             "EventSource",
             "EventTarget",
+            "File",
+            "FileList",
+            "FilePropertyBag",
             "FileReader",
             "FocusEvent",
             "FormData",
@@ -11192,6 +11527,72 @@
         "version": "1.0.0-rc.1"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "zip 0.6.6": {
+      "name": "zip",
+      "version": "0.6.6",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/zip/0.6.6/download",
+          "sha256": "760394e246e4c28189f19d488c058bf16f564016aefac5d32bb1f3b51d5e9261"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "zip",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "zip",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "deflate",
+            "flate2",
+            "time"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "byteorder 1.5.0",
+              "target": "byteorder"
+            },
+            {
+              "id": "crc32fast 1.3.2",
+              "target": "crc32fast"
+            },
+            {
+              "id": "flate2 1.0.28",
+              "target": "flate2"
+            },
+            {
+              "id": "time 0.3.31",
+              "target": "time"
+            }
+          ],
+          "selects": {
+            "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
+              {
+                "id": "crossbeam-utils 0.8.18",
+                "target": "crossbeam_utils"
+              }
+            ]
+          }
+        },
+        "edition": "2021",
+        "version": "0.6.6"
+      },
+      "license": "MIT"
     }
   },
   "binary_crates": [],
@@ -11252,6 +11653,14 @@
     ],
     "cfg(all(target_arch = \"x86_64\", target_env = \"msvc\", not(windows_raw_dylib)))": [
       "x86_64-pc-windows-msvc"
+    ],
+    "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "powerpc-unknown-linux-gnu",
+      "thumbv7em-none-eabi",
+      "thumbv8m.main-none-eabi"
     ],
     "cfg(any(target_os = \"linux\", target_os = \"android\", target_os = \"windows\", target_os = \"macos\", target_os = \"ios\", target_os = \"freebsd\", target_os = \"openbsd\", target_os = \"netbsd\", target_os = \"dragonfly\", target_os = \"solaris\", target_os = \"illumos\", target_os = \"fuchsia\", target_os = \"redox\", target_os = \"cloudabi\", target_os = \"haiku\", target_os = \"vxworks\", target_os = \"emscripten\", target_os = \"wasi\"))": [
       "aarch64-apple-darwin",
@@ -11538,6 +11947,7 @@
     "futures 0.3.29",
     "futures-core 0.3.29",
     "futures-util 0.3.29",
+    "gloo-file 0.3.0",
     "gloo-net 0.4.0",
     "junit-parser 1.0.0",
     "leptos 0.5.4",
@@ -11550,7 +11960,8 @@
     "tokio-stream 0.1.14",
     "url 2.5.0",
     "url-escape 0.1.1",
-    "wasm-bindgen 0.2.87"
+    "wasm-bindgen 0.2.87",
+    "zip 0.6.6"
   ],
   "direct_dev_deps": []
 }

@@ -8,7 +8,7 @@ pub fn Nav(
     view! {
         <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
             <div class="flex flex-wrap items-center justify-between mx-auto p-4">
-                <a href="#" class="flex items-center rtl:space-x-reverse">
+                <a href="" class="flex items-center rtl:space-x-reverse">
                     <img class="hover:animate-spin" src=move || logo.get() class="w-14" alt="Logo"/>
                     <span class="self-center text-4xl font-semibold whitespace-nowrap dark:text-white">
                         {move || name.get()}

@@ -3,6 +3,7 @@ use crate::routes::empty::Empty;
 use crate::routes::invocation::Invocation;
 use crate::routes::summary::Summary;
 use crate::routes::test::Test;
+use crate::routes::artifact::Artifact;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -20,6 +21,7 @@ pub fn App() -> impl IntoView {
                         <Route path="invocation/:id" view=Invocation>
                             <Route path="*any" view=Summary/>
                             <Route path="test" view=Test/>
+                            <Route path="artifact" view=Artifact/>
                         </Route>
                         <Route path="*" view=Empty/>
                     </Routes>

@@ -57,7 +57,7 @@ def rust_dependencies():
             ],
             "web-sys": [
                 crate.annotation(
-                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob"],
                 ),
             ],
             "junit-parser": [
@@ -221,6 +221,11 @@ def rust_dependencies():
             "walkdir": crate.spec(
                 version = "2.4.0",
             ),
+            "zip": crate.spec(
+                version = "0.6.6",
+                default_features = False,
+                features = ["deflate", "time"],
+            ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
         # to always use the root package when looking for dependencies or aliases. This should be considered
@@ -285,6 +290,9 @@ def rust_dependencies():
                 version = "0.5.4",
                 features = ["hydrate"],
             ),
+            "gloo-file": crate.spec(
+                version = "0.3.0",
+            ),
             "gloo-net": crate.spec(
                 version = "0.4.0",
             ),
@@ -344,6 +352,11 @@ def rust_dependencies():
             ),
             "url-escape": crate.spec(
                 version = "0.1.1",
+            ),
+            "zip": crate.spec(
+                version = "0.6.6",
+                default_features = False,
+                features = ["deflate", "time"],
             ),
         },
         # Setting the default package name to `""` forces the use of the macros defined in this repository
