@@ -59,7 +59,7 @@ fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
 #[component]
 pub fn TestRunList() -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
-    let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
     let click = move |test: String| {
         document()
             .get_element_by_id(&test)

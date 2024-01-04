@@ -41,7 +41,7 @@ fn get_test_counts(cases: &[junit_parser::TestCase]) -> TestCounts {
 #[component]
 fn RunSummary() -> impl IntoView {
     let run = expect_context::<Memo<Option<state::TestRun>>>();
-    let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
     view! {
         {move || {
             run.with(|run| {

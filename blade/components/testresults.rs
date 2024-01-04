@@ -90,7 +90,7 @@ fn merge_skip(e: &junit_parser::TestSkipped) -> String {
 #[allow(non_snake_case)]
 #[component]
 pub fn TestResults() -> impl IntoView {
-    let xml = expect_context::<Resource<Option<String>, Option<junit_parser::TestSuites>>>();
+    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
     let sorted_tests = move || {
         xml.with(|x| {
             x.clone()

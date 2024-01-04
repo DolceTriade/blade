@@ -141,7 +141,7 @@ pub fn Test() -> impl IntoView {
         })
     });
 
-    let test_xml = create_resource(
+    let test_xml = create_local_resource(
         move || {
             with!(|test_run| test_run
                 .as_ref()
@@ -178,15 +178,17 @@ pub fn Test() -> impl IntoView {
             }
         },
     );
-
+    let test_xml_signal = create_rw_signal(None);
     provide_context(test);
     provide_context(test_run);
-    provide_context(test_xml);
+    provide_context(test_xml_signal);
 
     {
         move || {
-            with!(|test_run| match test_run {
-                Some(_) => view! {
+            with!(|test_run, test_xml| match test_run {
+                Some(_) => {
+                    test_xml_signal.set(test_xml.clone());
+                    view! {
                     <div class="flex flex-col">
                     <Card class="p-0 m-0">
                         <TestSummary/>
@@ -208,7 +210,7 @@ pub fn Test() -> impl IntoView {
                         </Card>
                     </div>
                     </div>
-                },
+                }},
                 None => view! {
                     <div>
                         {move||with!(|test, run, shard, attempt| if let Ok(test) = test {
