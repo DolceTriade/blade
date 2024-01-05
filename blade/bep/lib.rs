@@ -29,18 +29,20 @@ pub struct BuildEventService {
     handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
-fn unexpected_cleanup_session(
-    db_mgr: &dyn DBManager,
-    invocation_id: &str,
-) -> anyhow::Result<()> {
+fn unexpected_cleanup_session(db_mgr: &dyn DBManager, invocation_id: &str) -> anyhow::Result<()> {
     let mut db = db_mgr.get()?;
-    db.update_shallow_invocation(invocation_id, Box::new(move|i: &mut state::InvocationResults| {
-        match i.status {
-            state::Status::InProgress | state::Status::Unknown => i.status = state::Status::Fail,
-            _ => {}
-        }
-        Ok(())
-    }))?;
+    db.update_shallow_invocation(
+        invocation_id,
+        Box::new(move |i: &mut state::InvocationResults| {
+            match i.status {
+                state::Status::InProgress | state::Status::Unknown => {
+                    i.status = state::Status::Fail
+                }
+                _ => {}
+            }
+            Ok(())
+        }),
+    )?;
     Ok(())
 }
 
@@ -50,13 +52,16 @@ fn session_result(
     success: bool,
 ) -> anyhow::Result<()> {
     let mut db = db_mgr.get()?;
-    db.update_shallow_invocation(invocation_id, Box::new(move |i: &mut state::InvocationResults| {
-        match success {
-            true => i.status = state::Status::Success,
-            false => i.status = state::Status::Fail,
-        }
-        Ok(())
-    }))?;
+    db.update_shallow_invocation(
+        invocation_id,
+        Box::new(move |i: &mut state::InvocationResults| {
+            match success {
+                true => i.status = state::Status::Success,
+                false => i.status = state::Status::Fail,
+            }
+            Ok(())
+        }),
+    )?;
     Ok(())
 }
 
@@ -85,6 +90,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         let global = self.state.clone();
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
+            let mut session_uuid = "".to_string();
             loop {
                 let maybe_message = in_stream.message().await;
                 match maybe_message {
@@ -98,6 +104,9 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     return;
                                 }
                                 let uuid = stream_id_or.unwrap().invocation_id.clone();
+                                if session_uuid.is_empty() {
+                                    session_uuid = uuid.clone();
+                                }
                                 let event = obe.event.as_ref().unwrap().event.as_ref().unwrap();
                                 match event {
                                     build_event::Event::BazelEvent(any) => {
@@ -178,6 +187,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                     }
                     Err(err) => {
                         log::error!("Error: {}", err);
+                        if !session_uuid.is_empty() {
+                            let _ = unexpected_cleanup_session(global.db_manager.as_ref(), &session_uuid)
+                                .map_err(|e| log::error!("error closing stream: {e:#?}"));
+                        }
+                        drop(tx);
                         return;
                     }
                 }
