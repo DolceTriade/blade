@@ -142,6 +142,7 @@ pub struct Test {
     pub name: String,
     pub status: String,
     pub duration_s: Option<f64>,
+    pub end: String,
     pub num_runs: Option<i32>,
 }
 
@@ -155,6 +156,7 @@ impl Test {
             invocation_id: invocation_id.to_string(),
             name: t.name.clone(),
             status: t.status.to_string(),
+            end: format_time(&t.end)?,
             duration_s: Some(t.duration.as_secs_f64()),
             num_runs: Some(t.num_runs as i32),
         })
@@ -167,6 +169,7 @@ impl Test {
             num_runs: self.num_runs.unwrap_or(0) as usize,
             runs: vec![],
             status: state::Status::parse(&self.status),
+            end: super::parse_time(&self.end).unwrap_or(UNIX_EPOCH),
         }
     }
 }

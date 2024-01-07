@@ -54,6 +54,7 @@ diesel::table! {
         name -> Text,
         status -> Text,
         duration_s -> Nullable<Float8>,
+        end -> Text,
         num_runs -> Nullable<Int4>,
     }
 }

@@ -62,6 +62,7 @@ pub struct Test {
     pub name: String,
     pub status: Status,
     pub duration: std::time::Duration,
+    pub end: std::time::SystemTime,
     pub runs: Vec<TestRun>,
     pub num_runs: usize,
 }

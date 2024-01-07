@@ -143,6 +143,7 @@ impl crate::EventHandler for Handler {
                         summary.first_start_time.as_ref(),
                         summary.last_stop_time.as_ref(),
                     ),
+                    end: std::time::SystemTime::now(),
                     runs: Default::default(),
                     num_runs: summary.run_count as usize,
                 };
@@ -160,6 +161,7 @@ impl crate::EventHandler for Handler {
                         duration: Default::default(),
                         num_runs: 0,
                         runs: vec![],
+                        end: std::time::SystemTime::now(),
                         status: state::Status::InProgress,
                     });
                 r.test_action_output.iter().for_each(|f| {

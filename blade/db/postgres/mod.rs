@@ -142,11 +142,11 @@ impl state::DB for Postgres {
                     name: res.name.clone(),
                     status: state::Status::parse(&res.status),
                     kind: res.kind.clone(),
-                    start: parse_time(&res.start)
-                        .unwrap_or_else(|_| std::time::SystemTime::now()),
-                    end: res.end.as_ref().map(|t| {
-                        parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())
-                    }),
+                    start: parse_time(&res.start).unwrap_or_else(|_| std::time::SystemTime::now()),
+                    end: res
+                        .end
+                        .as_ref()
+                        .map(|t| parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())),
                 },
             );
         });
@@ -164,7 +164,8 @@ impl state::DB for Postgres {
             .select(models::TestArtifact::as_select())
             .filter(schema::testartifacts::dsl::invocation_id.eq(id))
             .load(&mut self.conn)?
-            .into_iter().for_each(|a: models::TestArtifact| {
+            .into_iter()
+            .for_each(|a: models::TestArtifact| {
                 let v = test_artifacts.entry(a.test_run_id.clone()).or_default();
                 v.push(a);
             });
@@ -176,6 +177,7 @@ impl state::DB for Postgres {
                     name: test.name,
                     status: state::Status::parse(&test.status),
                     duration: std::time::Duration::from_secs_f64(test.duration_s.unwrap_or(0.0)),
+                    end: parse_time(&test.end).unwrap_or_else(|_| std::time::SystemTime::now()),
                     num_runs: test.num_runs.map(|nr| nr as usize).unwrap_or(0),
                     runs: trs
                         .into_iter()
@@ -186,7 +188,8 @@ impl state::DB for Postgres {
                             status: state::Status::parse(&tr.status),
                             details: tr.details,
                             duration: std::time::Duration::from_secs_f64(tr.duration_s),
-                            files: test_artifacts.get_mut(&tr.id)
+                            files: test_artifacts
+                                .get_mut(&tr.id)
                                 .map(|v| {
                                     v.drain(..)
                                         .map(|ta| {
@@ -425,6 +428,7 @@ mod tests {
             name: "//target/path:thing".to_string(),
             status: state::Status::InProgress,
             duration: std::time::Duration::from_secs_f64(4.343),
+            end: std::time::SystemTime::now(),
             num_runs: 0,
             runs: vec![],
         };
@@ -507,6 +511,7 @@ mod tests {
                     status: state::Status::Fail,
                     duration: std::time::Duration::from_secs(5),
                     num_runs: 2,
+                    end: std::time::SystemTime::now(),
                     runs: vec![
                         state::TestRun {
                             run: 1,

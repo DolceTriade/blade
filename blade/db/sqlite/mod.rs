@@ -146,11 +146,11 @@ impl state::DB for Sqlite {
                     name: res.name.clone(),
                     status: state::Status::parse(&res.status),
                     kind: res.kind.clone(),
-                    start: parse_time(&res.start)
-                        .unwrap_or_else(|_| std::time::SystemTime::now()),
-                    end: res.end.as_ref().map(|t| {
-                        parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())
-                    }),
+                    start: parse_time(&res.start).unwrap_or_else(|_| std::time::SystemTime::now()),
+                    end: res
+                        .end
+                        .as_ref()
+                        .map(|t| parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())),
                 },
             );
         });
@@ -177,6 +177,7 @@ impl state::DB for Sqlite {
                     name: test.name,
                     status: state::Status::parse(&test.status),
                     duration: std::time::Duration::from_secs_f64(test.duration_s.unwrap_or(0.0)),
+                    end: parse_time(&test.end).unwrap_or_else(|_| std::time::SystemTime::now()),
                     num_runs: test.num_runs.map(|nr| nr as usize).unwrap_or(0),
                     runs: trs
                         .into_iter()
@@ -423,6 +424,7 @@ mod tests {
             name: "//target/path:thing".to_string(),
             status: state::Status::InProgress,
             duration: std::time::Duration::from_secs_f64(4.343),
+            end: std::time::SystemTime::now(),
             num_runs: 0,
             runs: vec![],
         };
@@ -503,6 +505,7 @@ mod tests {
                     name: "//target1:some_test".to_string(),
                     status: state::Status::Fail,
                     duration: std::time::Duration::from_secs(5),
+                    end: std::time::SystemTime::now(),
                     num_runs: 2,
                     runs: vec![
                         state::TestRun {
