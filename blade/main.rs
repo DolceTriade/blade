@@ -86,7 +86,10 @@ cfg_if! {
                         App,
                     )
                     .app_data(web::Data::new(leptos_options.to_owned()))
-                    .wrap(middleware::Logger::new("%t -- %a %s %U"))
+                    .wrap(middleware::Logger::new("%t -- %a %s %U")
+                        .exclude("/")
+                        .exclude("/favicon.ico")
+                        .exclude_regex("/pkg/.*"))
             })
             .disable_signals()
             .bind(&addr)?
