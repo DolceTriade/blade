@@ -39,6 +39,9 @@ fn sorted_targets(targets: &HashMap<String, state::Target>) -> Vec<state::Target
         if a_status != b_status {
             return a_status.partial_cmp(&b_status).unwrap();
         }
+        if a.end != b.end {
+            return a.end.cmp(&b.end);
+        }
         a.name.partial_cmp(&b.name).unwrap()
     });
     vec.into_iter().cloned().collect::<Vec<_>>()
