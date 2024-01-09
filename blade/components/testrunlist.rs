@@ -175,7 +175,7 @@ pub fn TestRunList() -> impl IntoView {
                                                     x.clone()
                                                         .flatten()
                                                         .as_ref()
-                                                        .and_then(|x| x.suites.get(0))
+                                                        .and_then(|x| x.suites.first())
                                                         .map(|c| {
                                                             c.cases
                                                                 .iter()

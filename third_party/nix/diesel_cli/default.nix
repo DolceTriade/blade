@@ -23,7 +23,7 @@ in
 
     cargoDeps = super.cargoDeps.overrideAttrs (_: {
       inherit src;
-      outputHash = "sha256-icFURGklj+TjO5g6KV3j5aq0JkCylKCCEi5BlbzhzIQ=";
+      outputHash = "sha256-nPmUCww8sOJwnG7+uIflLPgT87xPX0s7g0AcuDKhY2I";
     });
     doCheck = false;
   })

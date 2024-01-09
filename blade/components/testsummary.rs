@@ -63,7 +63,7 @@ fn RunSummary() -> impl IntoView {
                                         ts.clone()
                                             .flatten()
                                             .and_then(|ts| {
-                                                ts.suites.get(0).map(|s| get_test_counts(&s.cases))
+                                                ts.suites.first().map(|s| get_test_counts(&s.cases))
                                             })
                                             .map(|tc| {
                                                 view! {

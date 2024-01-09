@@ -1,7 +1,7 @@
 {
   description = "BLADE";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/latest";
     fenix = {
@@ -51,7 +51,7 @@
             packages = with pkgs;
               [
                 alejandra
-                bazel_6
+                bazel_7
                 bazel-buildtools
                 pkg-config
                 rust

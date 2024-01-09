@@ -96,7 +96,7 @@ pub fn TestResults() -> impl IntoView {
             x.clone()
                 .flatten()
                 .as_ref()
-                .and_then(|x| x.suites.get(0))
+                .and_then(|x| x.suites.first())
                 .map(|c| sort_tests(&c.cases))
                 .unwrap_or_default()
         })

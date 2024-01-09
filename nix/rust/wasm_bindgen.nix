@@ -37,7 +37,7 @@ in
       };
     cargoDeps = super.cargoDeps.overrideAttrs (_: {
       inherit src;
-      outputHash = "sha256-ip14+vTn2Lyb4geQuHdi4JswEuAdGVknjNU06/6kSV8=";
+      outputHash = "sha256-9E37D3x2gB/b4+kgwS1FILCqbVLHpPuLW2s+FaS4J2c=";
     });
     doCheck = false;
   })

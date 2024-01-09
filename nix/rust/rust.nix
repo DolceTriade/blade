@@ -147,7 +147,6 @@ in
       )
       EOF
       mkdir $out/rustc_src
-      set -x
       (cd $out/rustc_src && ln -s ../lib/rustlib/src/rust/library .)
       cat > $out/rustc_src/BUILD <<EOF
       filegroup(

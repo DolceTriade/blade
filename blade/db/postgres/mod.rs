@@ -31,7 +31,7 @@ pub struct Postgres {
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
     let mut me = diesel::PgConnection::establish(db_path).context("creating postgres db")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
-    let path = r.rlocation("blade/blade/db/postgres/migrations");
+    let path = r.rlocation("_main/blade/db/postgres/migrations");
     let finder: FileBasedMigrations = FileBasedMigrations::from_path(
         path.to_str()
             .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
