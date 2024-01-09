@@ -103,11 +103,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     log::warn!("missing stream id");
                                     return;
                                 }
-                                let uuid = stream_id_or.unwrap().invocation_id.clone();
+                                let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone()) else { continue; };
                                 if session_uuid.is_empty() {
                                     session_uuid = uuid.clone();
                                 }
-                                let event = obe.event.as_ref().unwrap().event.as_ref().unwrap();
+                                let Some(event) = obe.event.as_ref().and_then(|event| event.event.as_ref()) else { continue; };
                                 match event {
                                     build_event::Event::BazelEvent(any) => {
                                         let be_or =
@@ -129,11 +129,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             }
                                             return;
                                         }
-                                        let be = be_or.unwrap();
-                                        match be.payload.as_ref().unwrap() {
-                                            build_event_stream::build_event::Payload::Finished(
+                                        let Ok(be) = be_or else { continue; };
+                                        match be.payload.as_ref() {
+                                            Some(build_event_stream::build_event::Payload::Finished(
                                                 f,
-                                            ) => {
+                                            )) => {
                                                 let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
                                                 let _ = session_result(
                                                     global.db_manager.as_ref(),
@@ -143,8 +143,8 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                 .map_err(|e| {
                                                     log::error!("error closing stream: {e:#?}")
                                                 });
-                                            }
-                                            _ => {
+                                            },
+                                            Some(_) => {
                                                 for v in &*handlers {
                                                     if let Err(e) = v.handle_event(
                                                         global.db_manager.as_ref(),
@@ -154,7 +154,8 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                         log::warn!("{:#?}", e);
                                                     }
                                                 }
-                                            }
+                                            },
+                                            _ => {},
                                         }
                                     }
                                     build_event::Event::ComponentStreamFinished(_) => {

@@ -26,7 +26,7 @@ CREATE TABLE Tests (
     name TEXT NOT NULL,
     status TEXT NOT NULL,
     duration_s double precision,
-    "end" TEXT NOT NULl,
+    "end" TEXT NOT NULL,
     num_runs INTEGER,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
