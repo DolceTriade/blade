@@ -13,7 +13,7 @@ pub fn ListItem(children: Children, hide: Signal<bool>) -> impl IntoView {
 #[component]
 pub fn List(children: Children) -> impl IntoView {
     view! {
-        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+        <ul role="list" class="divide-y divide-gray-200">
             {children()}
         </ul>
     }

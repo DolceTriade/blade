@@ -42,7 +42,7 @@ pub fn StatusIcon(
                              <svg
                                  aria-hidden="true"
                                  class=move || tailwind_merge(
-                                     "text-gray-200 animate-spin dark:text-gray-600 fill-blue-600",
+                                     "text-gray-200 animate-spin fill-blue-600",
                                      &c(),
                                  )
 
