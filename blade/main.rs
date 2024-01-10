@@ -52,7 +52,6 @@ cfg_if! {
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
             let leptos_toml = r.rlocation("_main/blade/leptos.toml");
-            println!("{leptos_toml:#?}");
             let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).await.unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
