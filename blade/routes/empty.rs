@@ -34,9 +34,7 @@ pub fn Empty() -> impl IntoView {
                     </g>
                 </svg>
             </div>
-            <p class="font-normal text-3xl text-gray-500">
-                Missing Invocation ID
-            </p>
+            <p class="font-normal text-3xl text-gray-500">Missing Invocation ID</p>
         </div>
     }
 }

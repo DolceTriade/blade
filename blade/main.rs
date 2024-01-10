@@ -52,6 +52,8 @@ cfg_if! {
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
             let leptos_toml = r.rlocation("_main/blade/leptos.toml");
+            let assets = r.rlocation("_main/blade/static");
+            let pkg = r.rlocation("_main/blade");
             let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).await.unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
@@ -74,9 +76,9 @@ cfg_if! {
                 App::new()
                     .route("/api/{tail:.*}", leptos_actix::handle_server_fns_with_context(move|| provide_context(fn_state.clone())))
                     // serve JS/WASM/CSS from `pkg`
-                    .service(Files::new("/pkg", site_root))
+                    .service(Files::new("/pkg", pkg.clone()))
                     // serve other assets from the `assets` directory
-                    .service(Files::new("/assets", format!("{site_root}/static")))
+                    .service(Files::new("/assets", assets.clone()))
                     // serve the favicon from /favicon.ico
                     .service(favicon)
                     .leptos_routes_with_context(
