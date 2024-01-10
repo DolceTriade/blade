@@ -85,7 +85,7 @@ impl crate::EventHandler for Handler {
         match event.payload.as_ref() {
             Some(build_event_stream::build_event::Payload::Configured(target)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
-                let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
+                let label = target_label(event).ok_or(anyhow::anyhow!("target not found: {event:#?}"))?;
                 db.upsert_target(
                     invocation_id,
                     &state::Target {
