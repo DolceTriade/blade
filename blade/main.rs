@@ -70,7 +70,6 @@ cfg_if! {
             log::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
-                let site_root = &leptos_options.site_root;
                 let fn_state = actix_state.clone();
                 let rt_state = actix_state.clone();
                 App::new()
