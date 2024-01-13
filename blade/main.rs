@@ -108,14 +108,9 @@ cfg_if! {
         }
 
         #[actix_web::get("favicon.ico")]
-        async fn favicon(
-            leptos_options: actix_web::web::Data<leptos::LeptosOptions>,
-        ) -> actix_web::Result<actix_files::NamedFile> {
-            let leptos_options = leptos_options.into_inner();
-            let site_root = &leptos_options.site_root;
-            Ok(actix_files::NamedFile::open(format!(
-                "{site_root}/static/favicon.ico"
-            ))?)
+        async fn favicon() -> actix_web::Result<actix_files::NamedFile> {
+            let r = Runfiles::create().expect("Must run using bazel with runfiles");
+            Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico"))?)
         }
     }
 
