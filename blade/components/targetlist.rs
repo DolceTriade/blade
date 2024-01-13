@@ -40,7 +40,7 @@ fn sorted_targets(targets: &HashMap<String, state::Target>) -> Vec<state::Target
             return a_status.partial_cmp(&b_status).unwrap();
         }
         if a.end != b.end {
-            return a.end.cmp(&b.end);
+            return b.end.cmp(&a.end);
         }
         a.name.partial_cmp(&b.name).unwrap()
     });
@@ -54,6 +54,9 @@ fn sorted_tests(tests: &HashMap<String, state::Test>) -> Vec<state::Test> {
         let b_status = status_weight(&b.status);
         if a_status != b_status {
             return a_status.partial_cmp(&b_status).unwrap();
+        }
+        if a.end != b.end {
+            return b.end.cmp(&a.end);
         }
         a.name.partial_cmp(&b.name).unwrap()
     });
