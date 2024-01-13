@@ -177,7 +177,6 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     });
                                 if build_ended {
                                     log::error!("BUILD OVER");
-                                    drop(tx);
                                     return;
                                 }
                             } else {
