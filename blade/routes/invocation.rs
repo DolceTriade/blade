@@ -1,8 +1,7 @@
 use leptos::*;
 use leptos_router::*;
+use leptos_meta::*;
 use state;
-
-//use crate::routes::test::Test;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -90,6 +89,10 @@ pub fn Invocation() -> impl IntoView {
     });
 
     view! {
+        <Title text=move || {
+            params
+                .with(|p| p.as_ref().map(|p| p.id.clone().unwrap_or_default()).unwrap_or_default())
+        }/>
         <Transition fallback=move || {
             view! { <p>"Loading..."</p> }
         }>
