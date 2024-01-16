@@ -112,6 +112,8 @@ pub trait DB {
     fn insert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
 
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
+    fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {

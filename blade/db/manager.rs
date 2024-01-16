@@ -26,7 +26,7 @@ impl state::DBManager for SqliteManager {
             .pool
             .get()
             .context("failed to get connection from pool")?;
-        Ok(Box::new(crate::sqlite::Sqlite { conn }))
+        Ok(Box::new(crate::sqlite::Sqlite::new(conn)?))
     }
 }
 

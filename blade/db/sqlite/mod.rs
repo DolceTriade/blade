@@ -15,6 +15,17 @@ pub struct Sqlite {
     pub(crate) conn: PooledConnection<ConnectionManager<SqliteConnection>>,
 }
 
+impl Sqlite {
+    pub fn new(
+        mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+    ) -> anyhow::Result<Self> {
+        diesel::sql_query("PRAGMA foreign_keys = ON;")
+            .execute(&mut conn)
+            .context("failed to enable foreign keys")?;
+        Ok(Self { conn })
+    }
+}
+
 #[allow(dead_code)]
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
     let mut me = diesel::SqliteConnection::establish(db_path).context("creating sqlite db")?;
@@ -276,11 +287,35 @@ impl state::DB for Sqlite {
             .map(|_| {})
             .context("failed to update test result")
     }
+    fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()> {
+        diesel::delete(schema::Invocations::table.find(id))
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to delete invocation")
+    }
+
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()> {
+        let ot: time::OffsetDateTime = (*ts).into();
+        diesel::delete(
+            schema::Invocations::table
+                .filter(unixepoch(schema::Invocations::start).le(unixepoch(ot))),
+        )
+        .execute(&mut self.conn)
+        .map(|_| {})
+        .context(format!("failed to delete invocation since {:#?}", ot))
+    }
+}
+
+sql_function! {
+    fn unixepoch(ts: diesel::sql_types::TimestamptzSqlite) -> diesel::sql_types::Integer;
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::{
+        collections::HashMap,
+        time::{Duration, UNIX_EPOCH},
+    };
 
     use diesel::prelude::*;
 
@@ -554,8 +589,8 @@ mod tests {
         db.upsert_shallow_invocation(&inv).unwrap();
         let old = inv.id;
         inv.id = "another".to_string();
-        inv.id = old;
         db.upsert_shallow_invocation(&inv).unwrap();
+        inv.id = old;
         inv.targets.iter().for_each(|t| {
             db.upsert_target(&inv.id, t.1).unwrap();
             db.upsert_target("another", t.1).unwrap();
@@ -570,5 +605,50 @@ mod tests {
         assert_eq!(new_inv.id, inv.id);
         assert_eq!(new_inv.tests.len(), inv.tests.len());
         assert_eq!(new_inv.targets.len(), inv.targets.len());
+        let _ = db.get_test("blah", "//target1:some_test").unwrap();
+        db.delete_invocation("blah").unwrap();
+        let _ = db.get_invocation("blah").unwrap_err();
+        let _ = db.get_test("blah", "//target1:some_test").unwrap_err();
+    }
+
+    #[test]
+    fn test_delete_since() {
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let db_path = tmp.path().join("test.db");
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mut conn = SqliteConnection::establish(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let start = UNIX_EPOCH;
+        let mut curr = start;
+        let day = Duration::from_secs(60 * 60 * 24);
+        for i in 0..5 {
+            db.upsert_shallow_invocation(&state::InvocationResults {
+                id: format!("id{}", i),
+                start: curr.checked_add(day).unwrap(),
+                ..Default::default()
+            })
+            .unwrap();
+            curr += day;
+        }
+        {
+            let res = super::schema::Invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5);
+        }
+
+        curr = start;
+        for i in 0..5 {
+            db.delete_invocations_since(&curr).unwrap();
+            let res = super::schema::Invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5 - i);
+            curr += day;
+        }
     }
 }

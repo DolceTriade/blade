@@ -276,11 +276,30 @@ impl state::DB for Postgres {
             .map(|_| {})
             .context("failed to update test result")
     }
+
+    fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()> {
+        diesel::delete(schema::invocations::table.find(id))
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to delete invocation")
+    }
+
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()> {
+        let ot: time::OffsetDateTime = (*ts).into();
+        diesel::delete(
+            schema::invocations::table
+                .filter(schema::invocations::start.le(ot)),
+        )
+        .execute(&mut self.conn)
+        .map(|_| {})
+        .context(format!("failed to delete invocation since {:#?}", ot))
+    }
+
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::{collections::HashMap, time::{Duration, UNIX_EPOCH}};
 
     use diesel::prelude::*;
 
@@ -575,5 +594,52 @@ mod tests {
         assert_eq!(new_inv.id, inv.id);
         assert_eq!(new_inv.tests.len(), inv.tests.len());
         assert_eq!(new_inv.targets.len(), inv.targets.len());
+        let _ = db.get_test("blah", "//target1:some_test").unwrap();
+        db.delete_invocation("blah").unwrap();
+        let _ = db.get_invocation("blah").unwrap_err();
+        let _ = db.get_test("blah", "//target1:some_test").unwrap_err();
     }
+
+    #[test]
+    fn test_delete_since() {
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
+        let mut conn = PgConnection::establish(&uri).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let start = UNIX_EPOCH;
+        let mut curr = start;
+        let day = Duration::from_secs(60 * 60 * 24);
+        for i in 0..5 {
+            db.upsert_shallow_invocation(&state::InvocationResults {
+                id: format!("id{}", i),
+                start: curr.checked_add(day).unwrap(),
+                ..Default::default()
+            })
+            .unwrap();
+            curr += day;
+        }
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5);
+        }
+
+        curr = start;
+        for i in 0..5 {
+            db.delete_invocations_since(&curr).unwrap();
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5 - i);
+            curr += day;
+        }
+    }
+
 }
