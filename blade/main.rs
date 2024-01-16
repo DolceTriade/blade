@@ -36,7 +36,8 @@ cfg_if! {
             allow_local: bool,
             #[arg(short='o', long="bytestream_override", value_name = "OVERRIDE")]
             bytestream_overrides: Vec<String>,
-
+            #[arg(short='r', long="retention", value_name = "RETENTION", value_parser = humantime::parse_duration)]
+            retention: Option<std::time::Duration>,
         }
 
         #[actix_web::main]
@@ -65,8 +66,9 @@ cfg_if! {
                 }
             }
             let db_manager = db::new(&args.db_path)?;
-            let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs });
+            let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs, retention: args.retention });
             let actix_state = state.clone();
+            let cleanup_state = state.clone();
             log::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
@@ -96,7 +98,8 @@ cfg_if! {
             .bind(&addr)?
             .run();
             let fut2 = bep::run_bes_grpc(args.grpc_host, state, &args.debug_message_pattern);
-            let res = join!(fut1, fut2);
+            let fut3 = periodic_cleanup(cleanup_state);
+            let res = join!(fut1, fut2, fut3);
             if res.0.is_ok() && res.1.is_ok() {
                 return Ok(());
             }
@@ -112,8 +115,25 @@ cfg_if! {
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
             Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico"))?)
         }
-    }
 
+        async fn periodic_cleanup(global: Arc<state::Global>) {
+            let Some(interval) = global.retention else { return; };
+            let day = std::time::Duration::from_secs(60 * 60 * 24);
+            let check_interval = std::cmp::min(day, interval/7);
+            loop {
+                tokio::time::sleep(check_interval).await;
+                let Ok(mut db) = global.db_manager.get() else {
+                    log::warn!("Failed to get DB handle for cleanup");
+                    continue;
+                };
+                let Some(since) = std::time::SystemTime::now().checked_sub(interval) else {
+                    log::warn!("Overflow when clean up time");
+                    continue;
+                };
+                log::info!("Cleanup result: {:#?}", db.delete_invocations_since(&since));
+            }
+        }
+    }
     // client-only main for Trunk
     else {
         pub fn main() {

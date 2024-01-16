@@ -1,5 +1,5 @@
 {
-  "checksum": "e7347889afeaf7500d3e12dba5d81577cc5aeba179af5dc00c85f0894219767c",
+  "checksum": "27396ab0e797b520a992b0de838c94acad372a26ec05281a08d259290fa9d6f9",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -5335,6 +5335,10 @@
             {
               "id": "futures-core 0.3.29",
               "target": "futures_core"
+            },
+            {
+              "id": "humantime 2.1.0",
+              "target": "humantime"
             },
             {
               "id": "junit-parser 1.0.0",
@@ -21476,6 +21480,7 @@
     "diesel_migrations 2.1.0",
     "futures 0.3.29",
     "futures-core 0.3.29",
+    "humantime 2.1.0",
     "junit-parser 1.0.0",
     "lazy_static 1.4.0",
     "leptos 0.5.4",

@@ -113,7 +113,7 @@ pub trait DB {
 
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
-    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()>;
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {
@@ -124,6 +124,7 @@ pub struct Global {
     pub db_manager: Box<dyn DBManager>,
     pub bytestream_client: bytestream::Client,
     pub allow_local: bool,
+    pub retention: Option<std::time::Duration>,
 }
 
 }

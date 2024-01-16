@@ -39,6 +39,7 @@ rust_binary(
         "@crate//:clap",
         "@crate//:diesel",
         "@crate//:futures",
+        "@crate//:humantime",
         "@crate//:junit-parser",
         "@crate//:lazy_static",
         "@crate//:leptos",

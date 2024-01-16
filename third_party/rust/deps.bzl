@@ -126,6 +126,9 @@ def rust_dependencies():
             "cfg-if": crate.spec(
                 version = "1",
             ),
+            "humantime": crate.spec(
+                version = "2.1.0",
+            ),
             "junit-parser": crate.spec(
                 version = "1.0.0",
                 features = ["serde"],

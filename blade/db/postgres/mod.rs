@@ -284,22 +284,20 @@ impl state::DB for Postgres {
             .context("failed to delete invocation")
     }
 
-    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()> {
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize> {
         let ot: time::OffsetDateTime = (*ts).into();
-        diesel::delete(
-            schema::invocations::table
-                .filter(schema::invocations::start.le(ot)),
-        )
-        .execute(&mut self.conn)
-        .map(|_| {})
-        .context(format!("failed to delete invocation since {:#?}", ot))
+        diesel::delete(schema::invocations::table.filter(schema::invocations::start.le(ot)))
+            .execute(&mut self.conn)
+            .context(format!("failed to delete invocation since {:#?}", ot))
     }
-
 }
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, time::{Duration, UNIX_EPOCH}};
+    use std::{
+        collections::HashMap,
+        time::{Duration, UNIX_EPOCH},
+    };
 
     use diesel::prelude::*;
 
@@ -641,5 +639,4 @@ mod tests {
             curr += day;
         }
     }
-
 }

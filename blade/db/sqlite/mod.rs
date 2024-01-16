@@ -294,14 +294,13 @@ impl state::DB for Sqlite {
             .context("failed to delete invocation")
     }
 
-    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<()> {
+    fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize> {
         let ot: time::OffsetDateTime = (*ts).into();
         diesel::delete(
             schema::Invocations::table
                 .filter(unixepoch(schema::Invocations::start).le(unixepoch(ot))),
         )
         .execute(&mut self.conn)
-        .map(|_| {})
         .context(format!("failed to delete invocation since {:#?}", ot))
     }
 }

@@ -1021,6 +1021,7 @@ dependencies = [
  "diesel_migrations",
  "futures",
  "futures-core",
+ "humantime",
  "junit-parser",
  "lazy_static",
  "leptos",
