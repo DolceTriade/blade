@@ -1,0 +1,33 @@
+load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_prost_library(
+    name = "timestamp_proto",
+    proto = "@com_github_protocolbuffers_protobuf//:timestamp_proto",
+    visibility = ["//visibility:public"],
+)
+
+rust_prost_library(
+    name = "duration_proto",
+    proto = "@com_github_protocolbuffers_protobuf//:duration_proto",
+    visibility = ["//visibility:public"],
+)
+
+rust_library(
+    name = "prototime",
+    srcs = [
+        "lib.rs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":duration_proto",
+        ":timestamp_proto",
+        "@crate//:anyhow",
+    ],
+)
+
+rust_test(
+    name = "prototime_test",
+    size = "small",
+    crate = ":prototime",
+)
