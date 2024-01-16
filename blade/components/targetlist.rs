@@ -1,15 +1,15 @@
 use crate::components::accordion::*;
 use crate::components::list::*;
+use crate::components::searchbar::Searchbar;
 use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
-use crate::components::searchbar::Searchbar;
 use leptos::*;
 use leptos_router::A;
 use state;
 use std::collections::HashMap;
 use std::string::ToString;
-use web_sys::KeyboardEvent;
 use url_escape;
+use web_sys::KeyboardEvent;
 
 fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {
     if end.is_none() {

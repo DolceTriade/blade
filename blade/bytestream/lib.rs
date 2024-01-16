@@ -169,7 +169,10 @@ mod test {
         let request_future = async {
             let mut c = crate::Client::new();
             let uri = "bytestream://whatever.com/path/to/real_resource";
-            c.add_override("bytestream://whatever.com", &format!("bytestream://{}", &addr.to_string()));
+            c.add_override(
+                "bytestream://whatever.com",
+                &format!("bytestream://{}", &addr.to_string()),
+            );
             let bytes = c.download_file(uri).await.unwrap();
             // Validate server response with assertions
             assert_eq!(bytes.len(), 100);
@@ -181,5 +184,4 @@ mod test {
             _ = request_future => (),
         }
     }
-
 }

@@ -4,7 +4,8 @@ diesel::table! {
     invocations (id) {
         id -> Text,
         status -> Text,
-        start -> Text,
+        start -> Timestamptz,
+        end -> Nullable<Timestamptz>,
         output -> Text,
         command -> Text,
         pattern -> Nullable<Text>,
@@ -18,8 +19,8 @@ diesel::table! {
         name -> Text,
         status -> Text,
         kind -> Text,
-        start -> Text,
-        end -> Nullable<Text>,
+        start -> Timestamptz,
+        end -> Nullable<Timestamptz>,
     }
 }
 
@@ -54,7 +55,7 @@ diesel::table! {
         name -> Text,
         status -> Text,
         duration_s -> Nullable<Float8>,
-        end -> Text,
+        end -> Timestamptz,
         num_runs -> Nullable<Int4>,
     }
 }
@@ -66,10 +67,4 @@ diesel::joinable!(testruns -> invocations (invocation_id));
 diesel::joinable!(testruns -> tests (test_id));
 diesel::joinable!(tests -> invocations (invocation_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    invocations,
-    targets,
-    testartifacts,
-    testruns,
-    tests,
-);
+diesel::allow_tables_to_appear_in_same_query!(invocations, targets, testartifacts, testruns, tests,);

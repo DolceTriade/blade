@@ -18,6 +18,7 @@ rust_library(
         "//blade/bep/proto_registry",
         "//blade/bep/protos:bep_proto",
         "//blade/bep/protos:build_event_stream_rust_proto",
+        "//blade/prototime",
         "//blade/state",
         "@crate//:anyhow",
         "@crate//:async-stream",

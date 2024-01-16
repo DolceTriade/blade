@@ -26,13 +26,11 @@ struct TestCounts {
 
 fn get_test_counts(cases: &[junit_parser::TestCase]) -> TestCounts {
     let mut tc = TestCounts::default();
-    cases.iter().for_each(|c| {
-        match c.status {
-            junit_parser::TestStatus::Success => tc.passing += 1,
-            junit_parser::TestStatus::Error(_) => tc.failing += 1,
-            junit_parser::TestStatus::Failure(_) => tc.failing += 1,
-            junit_parser::TestStatus::Skipped(_) => tc.skipped += 1,
-        }
+    cases.iter().for_each(|c| match c.status {
+        junit_parser::TestStatus::Success => tc.passing += 1,
+        junit_parser::TestStatus::Error(_) => tc.failing += 1,
+        junit_parser::TestStatus::Failure(_) => tc.failing += 1,
+        junit_parser::TestStatus::Skipped(_) => tc.skipped += 1,
     });
     tc
 }
@@ -115,9 +113,11 @@ fn RunSummary() -> impl IntoView {
 pub fn TestSummary() -> impl IntoView
 where
 {
-    let link = create_memo(move|_| {
+    let link = create_memo(move |_| {
         let loc = use_location();
-        let mut path = loc.pathname.with(move|p| p.split('/').map(|s| s.to_string()).collect::<Vec<_>>());
+        let mut path = loc
+            .pathname
+            .with(move |p| p.split('/').map(|s| s.to_string()).collect::<Vec<_>>());
         path.pop();
         path.join("/")
     });

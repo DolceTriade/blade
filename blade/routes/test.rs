@@ -3,10 +3,10 @@ use leptos_router::*;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
+use crate::components::testartifactlist::TestArtifactList;
 use crate::components::testresults::TestResults;
 use crate::components::testrunlist::TestRunList;
 use crate::components::testsummary::TestSummary;
-use crate::components::testartifactlist::TestArtifactList;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -33,9 +33,7 @@ pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
                 .await
                 .map_err(|e| ServerFnError::ServerError(format!("failed to get artifact: {e}")));
         }
-        _ => {
-            Err(ServerFnError::ServerError("not implemented".to_string()))
-        }
+        _ => Err(ServerFnError::ServerError("not implemented".to_string())),
     }
 }
 
@@ -190,29 +188,30 @@ pub fn Test() -> impl IntoView {
                 Some(_) => {
                     test_xml_signal.set(test_xml.clone());
                     view! {
-                    <div class="flex flex-col">
-                    <Card class="p-0 m-0">
-                        <TestSummary/>
-                    </Card>
+                        <div class="flex flex-col">
+                        <Card class="p-0 m-0">
+                            <TestSummary/>
+                        </Card>
 
-                    <div class="h-[80vh] flex items-start justify-start justify-items-center">
-                        <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
-                            <TestRunList />
-                        </Card>
-                        <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                        <TestResults/>
-                        <Suspense
-                        fallback=move||view!{<div>Loading...</div>}>
-                            {move||match test_out.get() {
-                                Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> },
-                                _ => view!{ <div>No test output</div> },
-                            }}
-                        </Suspense>
-                        <TestArtifactList />
-                        </Card>
-                    </div>
-                    </div>
-                }},
+                        <div class="h-[80vh] flex items-start justify-start justify-items-center">
+                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
+                                <TestRunList />
+                            </Card>
+                            <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <TestResults/>
+                            <Suspense
+                            fallback=move||view!{<div>Loading...</div>}>
+                                {move||match test_out.get() {
+                                    Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> },
+                                    _ => view!{ <div>No test output</div> },
+                                }}
+                            </Suspense>
+                            <TestArtifactList />
+                            </Card>
+                        </div>
+                        </div>
+                    }
+                }
                 None => view! {
                     <div>
                         {move||with!(|test, run, shard, attempt| if let Ok(test) = test {

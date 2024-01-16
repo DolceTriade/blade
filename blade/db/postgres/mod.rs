@@ -5,22 +5,10 @@ use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use r2d2::PooledConnection;
-use time::macros::format_description;
 
 mod models;
 #[allow(non_snake_case)]
 mod schema;
-
-pub(crate) fn parse_time(t: &str) -> anyhow::Result<std::time::SystemTime> {
-    time::PrimitiveDateTime::parse(
-        t,
-        &format_description!(
-            "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]"
-        ),
-    )
-    .map(|pt| std::convert::Into::<std::time::SystemTime>::into(pt.assume_utc()))
-    .context("error parsing time")
-}
 
 #[allow(dead_code)]
 pub struct Postgres {
@@ -119,7 +107,7 @@ impl state::DB for Postgres {
                     id: res.id.to_string(),
                     status: state::Status::parse(&res.status),
                     output: res.output,
-                    start: parse_time(&res.start)?,
+                    start: crate::time::to_systemtime(&res.start)?,
                     command: res.command,
                     pattern: res
                         .pattern
@@ -142,11 +130,12 @@ impl state::DB for Postgres {
                     name: res.name.clone(),
                     status: state::Status::parse(&res.status),
                     kind: res.kind.clone(),
-                    start: parse_time(&res.start).unwrap_or_else(|_| std::time::SystemTime::now()),
-                    end: res
-                        .end
-                        .as_ref()
-                        .map(|t| parse_time(t).unwrap_or_else(|_| std::time::SystemTime::now())),
+                    start: crate::time::to_systemtime(&res.start)
+                        .unwrap_or_else(|_| std::time::SystemTime::now()),
+                    end: res.end.as_ref().map(|t| {
+                        crate::time::to_systemtime(t)
+                            .unwrap_or_else(|_| std::time::SystemTime::now())
+                    }),
                 },
             );
         });
@@ -177,7 +166,8 @@ impl state::DB for Postgres {
                     name: test.name,
                     status: state::Status::parse(&test.status),
                     duration: std::time::Duration::from_secs_f64(test.duration_s.unwrap_or(0.0)),
-                    end: parse_time(&test.end).unwrap_or_else(|_| std::time::SystemTime::now()),
+                    end: crate::time::to_systemtime(&test.end)
+                        .unwrap_or_else(|_| std::time::SystemTime::now()),
                     num_runs: test.num_runs.map(|nr| nr as usize).unwrap_or(0),
                     runs: trs
                         .into_iter()
@@ -248,7 +238,7 @@ impl state::DB for Postgres {
             .find(id.clone())
             .get_result(&mut self.conn)?;
         res.status = status.to_string();
-        res.end = models::format_time(&end).ok();
+        res.end = Some(end.into());
         diesel::update(schema::targets::table.find(id))
             .set(&res)
             .execute(&mut self.conn)
@@ -481,6 +471,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::InProgress,
             start: std::time::SystemTime::now(),
+            end: None,
             pattern: vec!["//...".to_string()],
             targets: HashMap::from([
                 (

@@ -188,7 +188,7 @@ def rust_dependencies():
             ),
             "time": crate.spec(
                 version = "0.3.31",
-                features = ["formatting", "macros"],
+                features = ["formatting", "macros", "serde"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",

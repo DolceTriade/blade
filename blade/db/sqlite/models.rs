@@ -1,17 +1,5 @@
-use std::time::UNIX_EPOCH;
-
-use anyhow::Context;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use time::macros::format_description;
-
-pub(crate) fn format_time(t: &std::time::SystemTime) -> anyhow::Result<String> {
-    let ts: time::OffsetDateTime = (*t).into();
-    ts.format(&format_description!(
-        "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]"
-    ))
-    .context("error formatting time")
-}
 
 #[derive(
     Serialize,
@@ -32,7 +20,8 @@ pub(crate) fn format_time(t: &std::time::SystemTime) -> anyhow::Result<String> {
 pub struct Invocation {
     pub id: String,
     pub status: String,
-    pub start: String,
+    pub start: time::OffsetDateTime,
+    pub end: Option<time::OffsetDateTime>,
     pub output: String,
     pub command: String,
     pub pattern: Option<String>,
@@ -43,7 +32,8 @@ impl Invocation {
         Ok(Self {
             id: ir.id.clone(),
             status: ir.status.to_string(),
-            start: format_time(&ir.start)?,
+            start: ir.start.into(),
+            end: ir.end.map(core::convert::Into::into),
             output: ir.output.clone(),
             command: ir.command.clone(),
             pattern: Some(ir.pattern.join(",")),
@@ -55,10 +45,15 @@ impl Invocation {
             id: self.id,
             status: state::Status::parse(&self.status),
             output: self.output,
-            start: super::parse_time(&self.start).unwrap_or(UNIX_EPOCH),
+            start: crate::time::to_systemtime(&self.start)
+                .unwrap_or_else(|_| std::time::SystemTime::now()),
+            end: self.end.map(|e| {
+                crate::time::to_systemtime(&e).unwrap_or_else(|_| std::time::SystemTime::now())
+            }),
             command: self.command,
             pattern: self
-                .pattern.as_ref()
+                .pattern
+                .as_ref()
                 .map(|p| p.split(',').map(|s| s.to_string()).collect::<Vec<_>>())
                 .unwrap_or_default(),
             ..Default::default()
@@ -90,8 +85,8 @@ pub struct Target {
     pub name: String,
     pub status: String,
     pub kind: String,
-    pub start: String,
-    pub end: Option<String>,
+    pub start: time::OffsetDateTime,
+    pub end: Option<time::OffsetDateTime>,
 }
 
 impl Target {
@@ -100,21 +95,14 @@ impl Target {
     }
 
     pub fn from_state(invocation_id: &str, t: &state::Target) -> anyhow::Result<Self> {
-        let end = {
-            if let Some(end) = &t.end {
-                Some(format_time(end)?)
-            } else {
-                None
-            }
-        };
         Ok(Self {
             id: Self::gen_id(invocation_id, &t.name),
             invocation_id: invocation_id.to_string(),
             name: t.name.clone(),
             status: t.status.to_string(),
             kind: t.kind.clone(),
-            start: format_time(&t.start)?,
-            end,
+            start: t.start.into(),
+            end: t.end.map(core::convert::Into::into),
         })
     }
 }
@@ -142,7 +130,7 @@ pub struct Test {
     pub name: String,
     pub status: String,
     pub duration_s: Option<f64>,
-    pub end: String,
+    pub end: time::OffsetDateTime,
     pub num_runs: Option<i32>,
 }
 
@@ -156,7 +144,7 @@ impl Test {
             invocation_id: invocation_id.to_string(),
             name: t.name.clone(),
             status: t.status.to_string(),
-            end: format_time(&t.end)?,
+            end: t.end.into(),
             duration_s: Some(t.duration.as_secs_f64()),
             num_runs: Some(t.num_runs as i32),
         })
@@ -165,11 +153,15 @@ impl Test {
     pub fn into_state(self) -> state::Test {
         state::Test {
             name: self.name,
-            duration: self.duration_s.map(std::time::Duration::from_secs_f64).unwrap_or_default(),
+            duration: self
+                .duration_s
+                .map(std::time::Duration::from_secs_f64)
+                .unwrap_or_default(),
             num_runs: self.num_runs.unwrap_or(0) as usize,
             runs: vec![],
             status: state::Status::parse(&self.status),
-            end: super::parse_time(&self.end).unwrap_or(UNIX_EPOCH),
+            end: crate::time::to_systemtime(&self.end)
+                .unwrap_or_else(|_| std::time::SystemTime::now()),
         }
     }
 }

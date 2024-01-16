@@ -9,6 +9,7 @@ rust_library(
     ]),
     visibility = ["//visibility:public"],
     deps = [
+        "//blade/prototime",
         "//blade/state",
         "@crate//:anyhow",
         "@crate//:diesel",

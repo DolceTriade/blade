@@ -5,8 +5,7 @@ pub fn AccordionItem<F, IV>(
     header: F,
     children: Children,
     #[prop(optional, into)] header_class: String,
-    #[prop(optional, default = false)]
-    hide: bool,
+    #[prop(optional, default = false)] hide: bool,
 ) -> impl IntoView
 where
     F: Fn() -> IV,

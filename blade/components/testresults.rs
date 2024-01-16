@@ -86,7 +86,6 @@ fn merge_skip(e: &junit_parser::TestSkipped) -> String {
     ret
 }
 
-
 #[allow(non_snake_case)]
 #[component]
 pub fn TestResults() -> impl IntoView {

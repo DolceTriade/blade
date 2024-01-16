@@ -1,6 +1,6 @@
 use leptos::*;
-use leptos_router::*;
 use leptos_meta::*;
+use leptos_router::*;
 use state;
 
 #[cfg(feature = "ssr")]
@@ -9,15 +9,13 @@ use std::time::Duration;
 
 #[cfg(feature = "ssr")]
 fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
-    ServerFnError::ServerError(format!(
-        "Invocation {e} not found"
-    ))
+    ServerFnError::ServerError(format!("Invocation {e} not found"))
 }
 
 #[server]
 pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
-    let mut db= global.db_manager.get().map_err(internal_err)?;
+    let mut db = global.db_manager.get().map_err(internal_err)?;
     db.get_invocation(&uuid).map_err(internal_err)
 }
 
@@ -71,7 +69,7 @@ pub fn Invocation() -> impl IntoView {
     );
 
     create_effect(move |_| {
-        local.with(move|i| {
+        local.with(move |i| {
             if let Some(Ok(i)) = i {
                 invocation.set(i.clone());
             }

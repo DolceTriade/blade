@@ -1,7 +1,7 @@
 use anyhow::Context;
 use build_event_stream_proto::build_event_stream;
 use state::DBManager;
-use std::{option::Option, time::Duration};
+use std::option::Option;
 
 pub(crate) struct Handler {}
 
@@ -51,28 +51,24 @@ fn to_duration(
     end: Option<&::timestamp_proto::google::protobuf::Timestamp>,
 ) -> std::time::Duration {
     let convert = |d: &::timestamp_proto::google::protobuf::Timestamp| {
-        if d.seconds < 0 || d.nanos < 0 {
-            return Default::default();
-        }
-        let nanos: u64 = d.nanos as u64;
-        Duration::from_secs(d.seconds as u64) + Duration::from_nanos(nanos)
+        prototime::timestamp::from_proto(d).ok()
     };
-    let s = start.map(convert).unwrap_or_default();
-    let e = end.map(convert).unwrap_or_default();
-    e - s
+    let s = start
+        .and_then(convert)
+        .unwrap_or_else(std::time::SystemTime::now);
+    let e = end
+        .and_then(convert)
+        .unwrap_or_else(std::time::SystemTime::now);
+    e.duration_since(s)
+        .unwrap_or(std::time::Duration::from_secs(0))
 }
 
 fn proto_to_rust_duration(
     d: Option<&duration_proto::google::protobuf::Duration>,
 ) -> std::time::Duration {
-    let convert = |d: &duration_proto::google::protobuf::Duration| {
-        if d.seconds < 0 || d.nanos < 0 {
-            return Default::default();
-        }
-        let nanos: u64 = d.nanos as u64;
-        Duration::from_secs(d.seconds as u64) + Duration::from_nanos(nanos)
-    };
-    d.map(convert).unwrap_or_default()
+    let convert =
+        |d: &duration_proto::google::protobuf::Duration| prototime::duration::from_proto(d).ok();
+    d.and_then(convert).unwrap_or_default()
 }
 
 impl crate::EventHandler for Handler {
@@ -85,7 +81,8 @@ impl crate::EventHandler for Handler {
         match event.payload.as_ref() {
             Some(build_event_stream::build_event::Payload::Configured(target)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
-                let label = target_label(event).ok_or(anyhow::anyhow!("target not found: {event:#?}"))?;
+                let label =
+                    target_label(event).ok_or(anyhow::anyhow!("target not found: {event:#?}"))?;
                 db.upsert_target(
                     invocation_id,
                     &state::Target {
@@ -154,16 +151,16 @@ impl crate::EventHandler for Handler {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let mut info =
                     test_run_info(event).ok_or(anyhow::anyhow!("failed to find test id"))?;
-                let mut test = db
-                    .get_test(invocation_id, &info.0)
-                    .unwrap_or_else(|_| state::Test {
-                        name: info.0.clone(),
-                        duration: Default::default(),
-                        num_runs: 0,
-                        runs: vec![],
-                        end: std::time::SystemTime::now(),
-                        status: state::Status::InProgress,
-                    });
+                let mut test =
+                    db.get_test(invocation_id, &info.0)
+                        .unwrap_or_else(|_| state::Test {
+                            name: info.0.clone(),
+                            duration: Default::default(),
+                            num_runs: 0,
+                            runs: vec![],
+                            end: std::time::SystemTime::now(),
+                            status: state::Status::InProgress,
+                        });
                 r.test_action_output.iter().for_each(|f| {
                     if let Some(build_event_stream_proto::build_event_stream::file::File::Uri(
                         uri,

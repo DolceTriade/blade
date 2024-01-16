@@ -4,9 +4,9 @@ use web_sys::KeyboardEvent;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
+use crate::components::searchbar::Searchbar;
 use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
-use crate::components::searchbar::Searchbar;
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {
@@ -70,7 +70,6 @@ pub fn TestRunList() -> impl IntoView {
         let value = event_target_value(&e);
         set_filter.set(value);
     };
-
 
     view! {
         <div class="p-xs">

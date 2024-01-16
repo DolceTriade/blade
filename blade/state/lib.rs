@@ -75,6 +75,7 @@ pub struct InvocationResults {
     pub status: Status,
     pub output: String,
     pub start: std::time::SystemTime,
+    pub end: Option<std::time::SystemTime>,
     pub command: String,
     pub pattern: Vec<String>,
 }
@@ -90,6 +91,7 @@ impl Default for InvocationResults {
             command: "".into(),
             pattern: vec![],
             start: std::time::UNIX_EPOCH,
+            end: None,
         }
     }
 }

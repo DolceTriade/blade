@@ -10,9 +10,9 @@ pub fn StatusIcon(
     status: MaybeSignal<state::Status>,
     #[prop(into, default = "".into())] class: MaybeSignal<String>,
 ) -> impl IntoView {
-    move|| {
+    move || {
         let cc = class.clone();
-        let c = move||cc.get();
+        let c = move || cc.get();
         match status.get() {
             state::Status::Success => {
                  view! {
@@ -64,5 +64,6 @@ pub fn StatusIcon(
                      </Tooltip>
                  }.into_view()
             }
-        }}
+        }
+    }
 }

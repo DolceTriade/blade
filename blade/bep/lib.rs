@@ -40,6 +40,7 @@ fn unexpected_cleanup_session(db_mgr: &dyn DBManager, invocation_id: &str) -> an
                 }
                 _ => {}
             }
+            i.end = Some(std::time::SystemTime::now());
             Ok(())
         }),
     )?;
@@ -59,6 +60,7 @@ fn session_result(
                 true => i.status = state::Status::Success,
                 false => i.status = state::Status::Fail,
             }
+            i.end = Some(std::time::SystemTime::now());
             Ok(())
         }),
     )?;
@@ -103,11 +105,18 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     log::warn!("missing stream id");
                                     return;
                                 }
-                                let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone()) else { continue; };
+                                let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone())
+                                else {
+                                    continue;
+                                };
                                 if session_uuid.is_empty() {
                                     session_uuid = uuid.clone();
                                 }
-                                let Some(event) = obe.event.as_ref().and_then(|event| event.event.as_ref()) else { continue; };
+                                let Some(event) =
+                                    obe.event.as_ref().and_then(|event| event.event.as_ref())
+                                else {
+                                    continue;
+                                };
                                 match event {
                                     build_event::Event::BazelEvent(any) => {
                                         let be_or =
@@ -129,11 +138,15 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                             }
                                             return;
                                         }
-                                        let Ok(be) = be_or else { continue; };
+                                        let Ok(be) = be_or else {
+                                            continue;
+                                        };
                                         match be.payload.as_ref() {
-                                            Some(build_event_stream::build_event::Payload::Finished(
-                                                f,
-                                            )) => {
+                                            Some(
+                                                build_event_stream::build_event::Payload::Finished(
+                                                    f,
+                                                ),
+                                            ) => {
                                                 let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
                                                 let _ = session_result(
                                                     global.db_manager.as_ref(),
@@ -143,7 +156,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                 .map_err(|e| {
                                                     log::error!("error closing stream: {e:#?}")
                                                 });
-                                            },
+                                            }
                                             Some(_) => {
                                                 for v in &*handlers {
                                                     if let Err(e) = v.handle_event(
@@ -154,8 +167,8 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                         log::warn!("{:#?}", e);
                                                     }
                                                 }
-                                            },
-                                            _ => {},
+                                            }
+                                            _ => {}
                                         }
                                     }
                                     build_event::Event::ComponentStreamFinished(_) => {
@@ -188,8 +201,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                     Err(err) => {
                         log::error!("Error: {}", err);
                         if !session_uuid.is_empty() {
-                            let _ = unexpected_cleanup_session(global.db_manager.as_ref(), &session_uuid)
-                                .map_err(|e| log::error!("error closing stream: {e:#?}"));
+                            let _ = unexpected_cleanup_session(
+                                global.db_manager.as_ref(),
+                                &session_uuid,
+                            )
+                            .map_err(|e| log::error!("error closing stream: {e:#?}"));
                         }
                         drop(tx);
                         return;

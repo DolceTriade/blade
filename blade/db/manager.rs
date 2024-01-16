@@ -30,7 +30,6 @@ impl state::DBManager for SqliteManager {
     }
 }
 
-
 pub struct PostgresManager {
     pool: Pool<ConnectionManager<PgConnection>>,
 }

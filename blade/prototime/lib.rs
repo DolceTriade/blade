@@ -1,4 +1,4 @@
-mod duration {
+pub mod duration {
     use anyhow::anyhow;
     use duration_proto::google::protobuf::Duration as DurationProto;
     use std::time::Duration;
@@ -28,7 +28,7 @@ mod duration {
     }
 }
 
-mod timestamp {
+pub mod timestamp {
     use anyhow::anyhow;
     use std::time::Duration;
     use std::time::UNIX_EPOCH;

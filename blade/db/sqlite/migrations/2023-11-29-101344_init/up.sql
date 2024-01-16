@@ -2,6 +2,7 @@ CREATE TABLE Invocations (
 	id TEXT NOT NULL PRIMARY KEY,
    	status TEXT NOT NULL,
 	start TEXT NOT NULL,
+    end TEXT,
     output TEXT NOT NULL,
     command TEXT NOT NULL,
     pattern TEXT

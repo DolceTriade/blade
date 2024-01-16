@@ -1,4 +1,4 @@
-use std::io::{Cursor, prelude::Read};
+use std::io::{prelude::Read, Cursor};
 
 use leptos::*;
 use leptos_router::*;
@@ -18,11 +18,19 @@ fn stringify(e: impl std::fmt::Debug) -> String {
 #[component]
 pub fn Artifact() -> impl IntoView {
     let params = use_query::<ArtifactParams>();
-    let artifact = create_local_resource(move || params.get(),
+    let artifact = create_local_resource(
+        move || params.get(),
         move |params| async move {
-            let uri = params.as_ref().map_err(stringify)?.uri.clone().ok_or("missing params".to_string())?;
+            let uri = params
+                .as_ref()
+                .map_err(stringify)?
+                .uri
+                .clone()
+                .ok_or("missing params".to_string())?;
             let zip = params.as_ref().map_err(stringify)?.zip.as_ref();
-            let bytes = crate::routes::test::get_artifact(uri).await.map_err(stringify)?;
+            let bytes = crate::routes::test::get_artifact(uri)
+                .await
+                .map_err(stringify)?;
             if let Some(zip) = zip {
                 let cur = Cursor::new(bytes);
                 let mut arc = zip::ZipArchive::new(cur).map_err(stringify)?;
@@ -33,7 +41,8 @@ pub fn Artifact() -> impl IntoView {
                 return Ok::<String, String>(out);
             }
             Ok(String::from_utf8_lossy(&bytes).to_string())
-        });
+        },
+    );
     view! {
         <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto overflow-x-auto">
             <Suspense fallback=move || view! { <div>Loading...</div> }>

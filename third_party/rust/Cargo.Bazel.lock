@@ -1,5 +1,5 @@
 {
-  "checksum": "f4052b1a550d80f4ed477b13037bd9da2c226891ffd172ed374ec400f5a6d163",
+  "checksum": "e7347889afeaf7500d3e12dba5d81577cc5aeba179af5dc00c85f0894219767c",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -4752,6 +4752,7 @@
           "common": [
             "alloc",
             "powerfmt",
+            "serde",
             "std"
           ],
           "selects": {}
@@ -4761,6 +4762,10 @@
             {
               "id": "powerfmt 0.2.0",
               "target": "powerfmt"
+            },
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
             }
           ],
           "selects": {}
@@ -16904,6 +16909,7 @@
             "formatting",
             "macros",
             "parsing",
+            "serde",
             "std"
           ],
           "selects": {}
@@ -16921,6 +16927,10 @@
             {
               "id": "powerfmt 0.2.0",
               "target": "powerfmt"
+            },
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
             },
             {
               "id": "time-core 0.1.2",
@@ -17001,7 +17011,8 @@
         "crate_features": {
           "common": [
             "formatting",
-            "parsing"
+            "parsing",
+            "serde"
           ],
           "selects": {}
         },

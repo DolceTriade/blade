@@ -1,7 +1,8 @@
 CREATE TABLE Invocations (
 	id TEXT NOT NULL PRIMARY KEY,
    	status TEXT NOT NULL,
-	start TEXT NOT NULL,
+	start TIMESTAMP WITH TIME ZONE NOT NULL,
+    "end" TIMESTAMP WITH TIME ZONE,
     output TEXT NOT NULL,
     command TEXT NOT NULL,
     pattern TEXT
@@ -13,8 +14,8 @@ CREATE TABLE Targets (
     name TEXT NOT NULL,
     status TEXT NOT NULL,
     kind TEXT NOT NULL,
-    start TEXT NOT NULL,
-    "end" TEXT,
+    start TIMESTAMP WITH TIME ZONE NOT NULL,
+    "end" TIMESTAMP WITH TIME ZONE,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE
 );
@@ -26,7 +27,7 @@ CREATE TABLE Tests (
     name TEXT NOT NULL,
     status TEXT NOT NULL,
     duration_s double precision,
-    "end" TEXT NOT NULL,
+    "end" TIMESTAMP WITH TIME ZONE NOT NULL,
     num_runs INTEGER,
     FOREIGN KEY(invocation_id) REFERENCES Invocations(id)
         ON DELETE CASCADE

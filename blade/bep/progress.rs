@@ -67,10 +67,14 @@ impl crate::EventHandler for Handler {
             let mut db = db_mgr.get().context("failed to get db handle")?;
             let output = db.get_progress(invocation_id)?;
             let progress = cleanup(&output, &p.stdout, &p.stderr);
-            db.update_shallow_invocation(invocation_id, Box::new(move|i: &mut state::InvocationResults| {
-                i.output = progress;
-                Ok(())
-            })).context("failed to update progress")?;
+            db.update_shallow_invocation(
+                invocation_id,
+                Box::new(move |i: &mut state::InvocationResults| {
+                    i.output = progress;
+                    Ok(())
+                }),
+            )
+            .context("failed to update progress")?;
         }
         Ok(())
     }
