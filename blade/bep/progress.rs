@@ -12,24 +12,13 @@ fn cleanup(orig: &str, stdout: &str, stderr: &str) -> String {
     };
     let clean_stdout = stdout.replace('\r', "");
     let clean_stderr = stderr.replace('\r', "");
-    let out_lines = clean_stdout.split('\n');
     let err_lines = clean_stderr.split('\n');
-    let mut lines = orig_lines
-        .into_iter()
-        .chain(out_lines)
-        .chain(err_lines)
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<_>>();
+    let mut lines = orig_lines.into_iter().chain(err_lines).collect::<Vec<_>>();
     let mut to_remove = vec![];
     for (i, l) in lines.iter().enumerate().skip(orig_num_lines) {
-        if i == 0 {
-            continue;
-        }
         let c = l.matches("\x1b[1A\x1b[K").count();
-        if c > 0 {
-            for j in 0..c {
-                to_remove.push(i - 1 - j);
-            }
+        for j in 0..c {
+            to_remove.push(i - 1 - j);
         }
     }
 
@@ -44,6 +33,7 @@ fn cleanup(orig: &str, stdout: &str, stderr: &str) -> String {
         }
         lines[i] = "";
     }
+    lines.insert(orig_num_lines, &clean_stdout);
     lines
         .into_iter()
         .filter(|s| !s.is_empty())
