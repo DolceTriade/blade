@@ -10,7 +10,7 @@ impl crate::EventHandler for Handler {
     fn handle_event(
         &self,
         _db_mgr: &dyn DBManager,
-        _invocation_id: &str,
+        invocation_id: &str,
         event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
         let desc = event.descriptor();
@@ -28,7 +28,7 @@ impl crate::EventHandler for Handler {
                     .is_match(f.field_descriptor_proto().type_name())
             {
                 let j = serde_json::ser::to_string(&dm).map_err(|_| ())?;
-                log::info!("{}", j);
+                log::info!("{}: {}", invocation_id, j);
                 return Err(());
             }
             Ok(())
