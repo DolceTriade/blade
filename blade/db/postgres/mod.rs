@@ -72,7 +72,7 @@ impl state::DB for Postgres {
             .context("failed to upsert test")
     }
 
-    fn insert_test_run(
+    fn upsert_test_run(
         &mut self,
         inv_id: &str,
         test_id_: &str,
@@ -81,6 +81,9 @@ impl state::DB for Postgres {
         let val = models::TestRun::from_state(inv_id, test_id_, test_run)?;
         diesel::insert_into(schema::testruns::table)
             .values(&val)
+            .on_conflict(schema::testruns::dsl::id)
+            .do_update()
+            .set(&val)
             .execute(&mut self.conn)
             .map(|_| {})
             .context("failed to upsert testrun")?;
@@ -585,7 +588,7 @@ mod tests {
         inv.tests.iter().for_each(|t| {
             let t_id = db.upsert_test(&inv.id, t.1).unwrap();
             t.1.runs.iter().for_each(|r| {
-                db.insert_test_run(&inv.id, &t_id, r).unwrap();
+                db.upsert_test_run(&inv.id, &t_id, r).unwrap();
             })
         });
         let new_inv = db.get_invocation("blah").unwrap();

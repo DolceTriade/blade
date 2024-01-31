@@ -186,7 +186,7 @@ impl crate::EventHandler for Handler {
                 let test_id = db
                     .upsert_test(invocation_id, &test)
                     .context("failed to update test")?;
-                db.insert_test_run(invocation_id, &test_id, &info.1)
+                db.upsert_test_run(invocation_id, &test_id, &info.1)
                     .context("error inserting test run")?;
             }
             _ => {}

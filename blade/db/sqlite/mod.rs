@@ -87,7 +87,7 @@ impl state::DB for Sqlite {
             .context("failed to upsert test")
     }
 
-    fn insert_test_run(
+    fn upsert_test_run(
         &mut self,
         inv_id: &str,
         test_id_: &str,
@@ -597,7 +597,7 @@ mod tests {
         inv.tests.iter().for_each(|t| {
             let t_id = db.upsert_test(&inv.id, t.1).unwrap();
             t.1.runs.iter().for_each(|r| {
-                db.insert_test_run(&inv.id, &t_id, r).unwrap();
+                db.upsert_test_run(&inv.id, &t_id, r).unwrap();
             })
         });
         let new_inv = db.get_invocation("blah").unwrap();

@@ -109,7 +109,7 @@ pub trait DB {
     fn upsert_test(&mut self, id: &str, test: &Test) -> anyhow::Result<String>;
     fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<Test>;
     fn update_test_result(&mut self, invocation_id: &str, name: &str, status: Status, duration: std::time::Duration, num_runs: usize) -> anyhow::Result<()>;
-    fn insert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
+    fn upsert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
 
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
