@@ -113,10 +113,15 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     session_uuid = uuid.clone();
                                     log::info!("{}: Stream started", session_uuid);
                                     if let Ok(mut db) = global.db_manager.as_ref().get() {
-                                        let _ = db.update_shallow_invocation(&session_uuid, Box::new(|i: &mut state::InvocationResults| {
-                                            i.status = state::Status::InProgress;
-                                            Ok(())
-                                        })).ok();
+                                        let _ = db
+                                            .update_shallow_invocation(
+                                                &session_uuid,
+                                                Box::new(|i: &mut state::InvocationResults| {
+                                                    i.status = state::Status::InProgress;
+                                                    Ok(())
+                                                }),
+                                            )
+                                            .ok();
                                     }
                                 }
 
@@ -191,7 +196,11 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                     }))
                                     .await
                                     .map_err(|e| {
-                                        log::warn!("{}: failed to send message: {:#?}", session_uuid, e);
+                                        log::warn!(
+                                            "{}: failed to send message: {:#?}",
+                                            session_uuid,
+                                            e
+                                        );
                                         build_ended = true;
                                     });
                                 if build_ended {
@@ -211,7 +220,9 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                 global.db_manager.as_ref(),
                                 &session_uuid,
                             )
-                            .map_err(|e| log::error!("{session_uuid}: error closing stream: {e:#?}"));
+                            .map_err(|e| {
+                                log::error!("{session_uuid}: error closing stream: {e:#?}")
+                            });
                         }
                         drop(tx);
                         return;

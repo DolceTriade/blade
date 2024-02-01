@@ -111,6 +111,10 @@ impl state::DB for Postgres {
                     status: state::Status::parse(&res.status),
                     output: res.output,
                     start: crate::time::to_systemtime(&res.start)?,
+                    end: res
+                        .end
+                        .as_ref()
+                        .and_then(|t| crate::time::to_systemtime(t).ok()),
                     command: res.command,
                     pattern: res
                         .pattern

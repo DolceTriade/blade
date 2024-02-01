@@ -90,15 +90,25 @@ pub fn SummaryHeader() -> impl IntoView {
         let cmd = with!(|invocation| ucfirst(&invocation.command));
         let patterns = with!(|invocation| invocation.pattern.join(","));
         let start = with!(|invocation| format_time(&invocation.start));
+        let duration = with!(|invocation| {
+            let Some(end) = invocation.end else {
+                return "".to_string();
+            };
+            let duration = end.duration_since(invocation.start).unwrap_or_default();
+            format!("Build Time: {}", humantime::format_duration(duration))
+        });
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-                <div class="absolute flex gap-2 items-center">
-                    <span class="text-lg">
-                        <b>{cmd}</b>
-                    </span>
-                    <span>{patterns}</span>
-                    <span>@</span>
-                    <span class="text-grey-400 text-sm">{start}</span>
+                <div class="absolute">
+                    <div class="flex gap-2 items-center">
+                        <span class="text-lg">
+                            <b>{cmd}</b>
+                        </span>
+                        <span class="inline-flex max-w-1/4 overflow-auto">{patterns}</span>
+                        <span>@</span>
+                        <span class="text-grey-400 text-sm">{start}</span>
+                    </div>
+                    <div class="flex gap-2 items-center">{duration}</div>
                 </div>
                 <div class="p-4">
                     <StatusIcon class="h-8 w-8" status=status.into()/>

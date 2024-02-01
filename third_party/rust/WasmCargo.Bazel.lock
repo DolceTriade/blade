@@ -1,5 +1,5 @@
 {
-  "checksum": "c39537dd5d0fd65ce4ffa37b2fba10d27a8284b9ba46041cd39686f2f4b78ca2",
+  "checksum": "86230726259f75c240a83704be13bc0bf61c349de4455148797f6f1f492b0c2f",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1720,6 +1720,10 @@
             {
               "id": "gloo-net 0.4.0",
               "target": "gloo_net"
+            },
+            {
+              "id": "humantime 2.1.0",
+              "target": "humantime"
             },
             {
               "id": "junit-parser 1.0.0",
@@ -3595,6 +3599,36 @@
         "version": "1.0.3"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "humantime 2.1.0": {
+      "name": "humantime",
+      "version": "2.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/humantime/2.1.0/download",
+          "sha256": "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "humantime",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "humantime",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "2.1.0"
+      },
+      "license": "MIT/Apache-2.0"
     },
     "hyper 0.14.27": {
       "name": "hyper",
@@ -11949,6 +11983,7 @@
     "futures-util 0.3.29",
     "gloo-file 0.3.0",
     "gloo-net 0.4.0",
+    "humantime 2.1.0",
     "junit-parser 1.0.0",
     "leptos 0.5.4",
     "leptos_meta 0.5.4",

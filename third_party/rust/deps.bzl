@@ -339,6 +339,9 @@ def rust_dependencies():
                 version = "1.0.0",
                 features = ["serde"],
             ),
+            "humantime": crate.spec(
+                version = "2.1.0",
+            ),
             "time": crate.spec(
                 version = "0.3.31",
                 features = ["formatting", "macros"],

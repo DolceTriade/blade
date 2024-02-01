@@ -123,6 +123,7 @@ impl state::DB for Sqlite {
                     status: state::Status::parse(&res.status),
                     output: res.output,
                     start: res.start.into(),
+                    end: res.end.map(|t| t.into()),
                     command: res.command,
                     pattern: res
                         .pattern
