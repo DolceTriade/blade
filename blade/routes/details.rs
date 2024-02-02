@@ -46,6 +46,7 @@ pub fn Details() -> impl IntoView {
                                     let opts = opts.clone();
                                     view! {
                                         <Accordion>
+                                        {(!opts.build_metadata.is_empty()).then(move|| view! {
                                             <AccordionItem
                                                 hide=false
                                                 header=move || {
@@ -55,6 +56,7 @@ pub fn Details() -> impl IntoView {
 
                                                 <BuildMetadata md=opts.build_metadata/>
                                             </AccordionItem>
+                                        })}
 
                                             <AccordionItem
                                                 hide=false
