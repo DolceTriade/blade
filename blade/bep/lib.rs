@@ -120,7 +120,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                 if std::time::SystemTime::now()
                                                     .duration_since(end)
                                                     .unwrap_or(std::time::Duration::from_secs(0))
-                                                    > std::time::Duration::from_secs(60)
+                                                    > global.session_lock_time
                                                 {
                                                     already_over = true;
                                                 }

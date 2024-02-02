@@ -38,6 +38,8 @@ cfg_if! {
             bytestream_overrides: Vec<String>,
             #[arg(short='r', long="retention", value_name = "RETENTION", value_parser = humantime::parse_duration)]
             retention: Option<std::time::Duration>,
+            #[arg(short='s', long="session_lock_time", value_name = "LOCK_TIME", value_parser = humantime::parse_duration, default_value="5m")]
+            session_lock_time: std::time::Duration,
         }
 
         #[actix_web::main]
@@ -66,7 +68,7 @@ cfg_if! {
                 }
             }
             let db_manager = db::new(&args.db_path)?;
-            let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs, retention: args.retention });
+            let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs, retention: args.retention, session_lock_time: args.session_lock_time });
             let actix_state = state.clone();
             let cleanup_state = state.clone();
             log::info!("Starting blade server at: {}", addr.to_string());

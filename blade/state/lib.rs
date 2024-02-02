@@ -138,6 +138,7 @@ pub struct Global {
     pub bytestream_client: bytestream::Client,
     pub allow_local: bool,
     pub retention: Option<std::time::Duration>,
+    pub session_lock_time: std::time::Duration,
 }
 
 }
