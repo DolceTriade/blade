@@ -52,6 +52,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Build Metadata</h3> }
                                                 }
                                             >
+
                                                 <BuildMetadata md=opts.build_metadata/>
                                             </AccordionItem>
 
@@ -61,6 +62,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Explicit Command Line</h3> }
                                                 }
                                             >
+
                                                 <OptionsList opts=opts.explicit_cmd_line/>
                                             </AccordionItem>
                                             <AccordionItem
@@ -69,6 +71,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Command Line</h3> }
                                                 }
                                             >
+
                                                 <OptionsList opts=opts.cmd_line/>
                                             </AccordionItem>
                                             <AccordionItem
@@ -77,6 +80,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Unstructured Command Line</h3> }
                                                 }
                                             >
+
                                                 <OptionsList opts=opts.unstructured/>
                                             </AccordionItem>
                                             <AccordionItem
@@ -85,6 +89,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Explicit Startup Command Line</h3> }
                                                 }
                                             >
+
                                                 <OptionsList opts=opts.explicit_startup/>
                                             </AccordionItem>
                                             <AccordionItem
@@ -93,6 +98,7 @@ pub fn Details() -> impl IntoView {
                                                     view! { <h3>Startup Command Line</h3> }
                                                 }
                                             >
+
                                                 <OptionsList opts=opts.startup/>
                                             </AccordionItem>
 

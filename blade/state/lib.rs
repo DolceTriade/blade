@@ -122,6 +122,7 @@ pub trait DB {
     fn update_test_result(&mut self, invocation_id: &str, name: &str, status: Status, duration: std::time::Duration, num_runs: usize) -> anyhow::Result<()>;
     fn upsert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
+    fn get_shallow_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
     fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
     fn insert_options(&mut self, id: &str, options: &BuildOptions) -> anyhow::Result<()>;

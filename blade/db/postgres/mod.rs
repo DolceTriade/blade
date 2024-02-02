@@ -232,6 +232,17 @@ impl state::DB for Postgres {
             .context("failed to get progress")
     }
 
+    fn get_shallow_invocation(
+        &mut self,
+        invocation_id: &str,
+    ) -> anyhow::Result<state::InvocationResults> {
+        schema::invocations::table
+            .select(models::Invocation::as_select())
+            .filter(schema::invocations::id.eq(invocation_id))
+            .get_result(&mut self.conn)
+            .map(|res| res.into_state())
+            .context("failed to get shallow invocation")
+    }
     fn update_target_result(
         &mut self,
         invocation_id: &str,

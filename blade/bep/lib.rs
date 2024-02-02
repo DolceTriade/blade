@@ -113,6 +113,33 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                 if session_uuid.is_empty() {
                                     session_uuid = uuid.clone();
                                     log::info!("{}: Stream started", session_uuid);
+                                    let mut already_over = false;
+                                    if let Ok(mut db) = global.db_manager.as_ref().get() {
+                                        if let Ok(inv) = db.get_shallow_invocation(&session_uuid) {
+                                            if let Some(end) = inv.end {
+                                                if std::time::SystemTime::now()
+                                                    .duration_since(end)
+                                                    .unwrap_or(std::time::Duration::from_secs(0))
+                                                    > std::time::Duration::from_secs(60)
+                                                {
+                                                    already_over = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if already_over {
+                                        log::warn!("{}: session already ended", session_uuid);
+
+                                        let _ = tx
+                                            .send(Err(Status::new(
+                                                tonic::Code::FailedPrecondition,
+                                                "session already ended",
+                                            )))
+                                            .await
+                                            .ok();
+                                        return;
+                                    }
+
                                     if let Ok(mut db) = global.db_manager.as_ref().get() {
                                         let _ = db
                                             .update_shallow_invocation(
