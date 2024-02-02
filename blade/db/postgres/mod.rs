@@ -297,13 +297,82 @@ impl state::DB for Postgres {
             .execute(&mut self.conn)
             .context(format!("failed to delete invocation since {:#?}", ot))
     }
-
-    fn insert_options(&mut self, _id: &str, _options: &state::BuildOptions) -> anyhow::Result<()> {
-        todo!()
+    fn insert_options(
+        &mut self,
+        inv_id: &str,
+        opts: &state::BuildOptions,
+    ) -> anyhow::Result<()> {
+        use schema::options::dsl::*;
+        let mut vals = vec![];
+        let mut vec_helper = |vec: &Vec<String>, kind_: &str| {
+            if !vec.is_empty() {
+                vec.iter().for_each(|v| {
+                    let uid = uuid::Uuid::new_v4().to_string();
+                    vals.push((
+                        id.eq(uid),
+                        invocation_id.eq(inv_id.to_string()),
+                        kind.eq(kind_.to_string()),
+                        keyval.eq(crate::envscrub::scrub(v)),
+                    ));
+                });
+            }
+        };
+        vec_helper(&opts.unstructured, "Unstructured");
+        vec_helper(&opts.startup, "Startup");
+        vec_helper(&opts.explicit_startup, "Explicit Startup");
+        vec_helper(&opts.cmd_line, "Command Line");
+        vec_helper(&opts.explicit_cmd_line, "Explicit Command Line");
+        if !opts.structured.is_empty() {
+            opts.structured.iter().for_each(|(k, vec)| {
+                vec_helper(vec, k);
+            });
+        }
+        if !opts.build_metadata.is_empty() {
+            opts.build_metadata.iter().for_each(|(k, v)| {
+                let uid = uuid::Uuid::new_v4().to_string();
+                vals.push((
+                    id.eq(uid),
+                    invocation_id.eq(inv_id.to_string()),
+                    kind.eq("Build Metadata".to_string()),
+                    keyval.eq(format!("{}={}", k.clone(), v.clone()).to_string()),
+                ));
+            });
+        }
+        diesel::insert_into(schema::options::table)
+            .values(vals)
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to insert options")
     }
 
-    fn get_options(&mut self, _id: &str) -> anyhow::Result<state::BuildOptions> {
-        todo!()
+    fn get_options(&mut self, id: &str) -> anyhow::Result<state::BuildOptions> {
+        let mut opts = state::BuildOptions::default();
+        let ret: Vec<_> = schema::options::table
+            .select((schema::options::kind, schema::options::keyval))
+            .filter(schema::options::invocation_id.eq(id))
+            .order_by(schema::options::kind)
+            .load::<(String, String)>(&mut self.conn)?;
+
+        ret.into_iter().for_each(|(kind, keyval)| match &kind[..] {
+            "Unstructured" => opts.unstructured.push(keyval),
+            "Startup" => opts.startup.push(keyval),
+            "Explicit Startup" => opts.explicit_startup.push(keyval),
+            "Command Line" => opts.cmd_line.push(keyval),
+            "Explicit Command Line" => opts.explicit_cmd_line.push(keyval),
+            "Build Metadata" => {
+                let Some((k, v)) = keyval.split_once('=') else {
+                    return;
+                };
+                opts.build_metadata.insert(k.to_string(), v.to_string());
+            }
+            _ => {
+                opts.structured
+                    .entry(kind)
+                    .or_insert_with(Vec::new)
+                    .push(keyval);
+            }
+        });
+        Ok(opts)
     }
 }
 
@@ -653,5 +722,43 @@ mod tests {
             assert_eq!(res.len(), 5 - i);
             curr += day;
         }
+    }
+
+    #[test]
+    fn test_options() {
+        let tmp = tempdir::TempDir::new("test_test").unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let opts = state::BuildOptions {
+            unstructured: vec!["unstructured".to_string()],
+            structured: HashMap::from([("key".to_string(), vec!["val".to_string()])]),
+            startup: vec!["startup".to_string()],
+            explicit_startup: vec!["explicit_startup".to_string()],
+            cmd_line: vec!["cmd_line".to_string()],
+            explicit_cmd_line: vec!["explicit_cmd_line".to_string()],
+            build_metadata: HashMap::from([("key".to_string(), "val".to_string())]),
+        };
+        let inv = state::InvocationResults {
+            id: "blah".to_string(),
+            output: "whatever".to_string(),
+            command: "test".to_string(),
+            status: state::Status::Fail,
+            start: std::time::SystemTime::now(),
+            ..Default::default()
+        };
+        db.upsert_shallow_invocation(&inv).unwrap();
+        db.insert_options("blah", &opts).unwrap();
+        let res = db.get_options("blah").unwrap();
+        assert_eq!(res.unstructured, opts.unstructured);
+        assert_eq!(res.structured, opts.structured);
+        assert_eq!(res.startup, opts.startup);
+        assert_eq!(res.explicit_startup, opts.explicit_startup);
+        assert_eq!(res.cmd_line, opts.cmd_line);
+        assert_eq!(res.explicit_cmd_line, opts.explicit_cmd_line);
+        assert_eq!(res.build_metadata, opts.build_metadata);
     }
 }

@@ -734,7 +734,6 @@ mod tests {
     fn test_options() {
         let tmp = tempdir::TempDir::new("test_target").unwrap();
         let db_path = tmp.path().join("test.db");
-        println!("{}", db_path.display());
         super::init_db(db_path.to_str().unwrap()).unwrap();
         let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
         let mut db = mgr.get().unwrap();
