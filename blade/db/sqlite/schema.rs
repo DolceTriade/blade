@@ -13,6 +13,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    Options (id) {
+        id -> Text,
+        invocation_id -> Text,
+        kind -> Text,
+        keyval -> Text,
+    }
+}
+
+diesel::table! {
     Targets (id) {
         id -> Text,
         invocation_id -> Text,
@@ -60,6 +69,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(Options -> Invocations (invocation_id));
 diesel::joinable!(Targets -> Invocations (invocation_id));
 diesel::joinable!(TestArtifacts -> Invocations (invocation_id));
 diesel::joinable!(TestArtifacts -> TestRuns (test_run_id));
@@ -67,4 +77,11 @@ diesel::joinable!(TestRuns -> Invocations (invocation_id));
 diesel::joinable!(TestRuns -> Tests (test_id));
 diesel::joinable!(Tests -> Invocations (invocation_id));
 
-diesel::allow_tables_to_appear_in_same_query!(Invocations, Targets, TestArtifacts, TestRuns, Tests,);
+diesel::allow_tables_to_appear_in_same_query!(
+    Invocations,
+    Options,
+    Targets,
+    TestArtifacts,
+    TestRuns,
+    Tests,
+);

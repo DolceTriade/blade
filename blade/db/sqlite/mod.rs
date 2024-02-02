@@ -304,6 +304,84 @@ impl state::DB for Sqlite {
         .execute(&mut self.conn)
         .context(format!("failed to delete invocation since {:#?}", ot))
     }
+
+    fn insert_options(
+        &mut self,
+        inv_id: &str,
+        options: &state::BuildOptions,
+    ) -> anyhow::Result<()> {
+        use schema::Options::dsl::*;
+        let mut vals = vec![];
+        let mut vec_helper = |vec: &Vec<String>, kind_: &str| {
+            if !vec.is_empty() {
+                vec.iter().for_each(|v| {
+                    let uid = uuid::Uuid::new_v4().to_string();
+                    vals.push((
+                        id.eq(uid),
+                        invocation_id.eq(inv_id.to_string()),
+                        kind.eq(kind_.to_string()),
+                        keyval.eq(crate::envscrub::scrub(v)),
+                    ));
+                });
+            }
+        };
+        vec_helper(&options.unstructured, "Unstructured");
+        vec_helper(&options.startup, "Startup");
+        vec_helper(&options.explicit_startup, "Explicit Startup");
+        vec_helper(&options.cmd_line, "Command Line");
+        vec_helper(&options.explicit_cmd_line, "Explicit Command Line");
+        if !options.structured.is_empty() {
+            options.structured.iter().for_each(|(k, vec)| {
+                vec_helper(vec, k);
+            });
+        }
+        if !options.build_metadata.is_empty() {
+            options.build_metadata.iter().for_each(|(k, v)| {
+                let uid = uuid::Uuid::new_v4().to_string();
+                vals.push((
+                    id.eq(uid),
+                    invocation_id.eq(inv_id.to_string()),
+                    kind.eq("Build Metadata".to_string()),
+                    keyval.eq(format!("{}={}", k.clone(), v.clone()).to_string()),
+                ));
+            });
+        }
+        diesel::insert_into(schema::Options::table)
+            .values(vals)
+            .execute(&mut self.conn)
+            .map(|_| {})
+            .context("failed to insert options")
+    }
+
+    fn get_options(&mut self, id: &str) -> anyhow::Result<state::BuildOptions> {
+        let mut opts = state::BuildOptions::default();
+        let ret: Vec<_> = schema::Options::table
+            .select((schema::Options::kind, schema::Options::keyval))
+            .filter(schema::Options::invocation_id.eq(id))
+            .order_by(schema::Options::kind)
+            .load::<(String, String)>(&mut self.conn)?;
+
+        ret.into_iter().for_each(|(kind, keyval)| match &kind[..] {
+            "Unstructured" => opts.unstructured.push(keyval),
+            "Startup" => opts.startup.push(keyval),
+            "Explicit Startup" => opts.explicit_startup.push(keyval),
+            "Command Line" => opts.cmd_line.push(keyval),
+            "Explicit Command Line" => opts.explicit_cmd_line.push(keyval),
+            "Build Metadata" => {
+                let Some((k, v)) = keyval.split_once('=') else {
+                    return;
+                };
+                opts.build_metadata.insert(k.to_string(), v.to_string());
+            }
+            _ => {
+                opts.structured
+                    .entry(kind)
+                    .or_insert_with(Vec::new)
+                    .push(keyval);
+            }
+        });
+        Ok(opts)
+    }
 }
 
 sql_function! {
@@ -650,5 +728,43 @@ mod tests {
             assert_eq!(res.len(), 5 - i);
             curr += day;
         }
+    }
+
+    #[test]
+    fn test_options() {
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let db_path = tmp.path().join("test.db");
+        println!("{}", db_path.display());
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let opts = state::BuildOptions {
+            unstructured: vec!["unstructured".to_string()],
+            structured: HashMap::from([("key".to_string(), vec!["val".to_string()])]),
+            startup: vec!["startup".to_string()],
+            explicit_startup: vec!["explicit_startup".to_string()],
+            cmd_line: vec!["cmd_line".to_string()],
+            explicit_cmd_line: vec!["explicit_cmd_line".to_string()],
+            build_metadata: HashMap::from([("key".to_string(), "val".to_string())]),
+        };
+        let inv = state::InvocationResults {
+            id: "blah".to_string(),
+            output: "whatever".to_string(),
+            command: "test".to_string(),
+            status: state::Status::Fail,
+            start: std::time::SystemTime::now(),
+            ..Default::default()
+        };
+        db.upsert_shallow_invocation(&inv).unwrap();
+        db.insert_options("blah", &opts).unwrap();
+        let res = db.get_options("blah").unwrap();
+        assert_eq!(res.unstructured, opts.unstructured);
+        assert_eq!(res.structured, opts.structured);
+        assert_eq!(res.startup, opts.startup);
+        assert_eq!(res.explicit_startup, opts.explicit_startup);
+        assert_eq!(res.cmd_line, opts.cmd_line);
+        assert_eq!(res.explicit_cmd_line, opts.explicit_cmd_line);
+        assert_eq!(res.build_metadata, opts.build_metadata);
     }
 }

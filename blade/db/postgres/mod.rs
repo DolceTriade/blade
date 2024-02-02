@@ -297,6 +297,14 @@ impl state::DB for Postgres {
             .execute(&mut self.conn)
             .context(format!("failed to delete invocation since {:#?}", ot))
     }
+
+    fn insert_options(&mut self, _id: &str, _options: &state::BuildOptions) -> anyhow::Result<()> {
+        todo!()
+    }
+
+    fn get_options(&mut self, _id: &str) -> anyhow::Result<state::BuildOptions> {
+        todo!()
+    }
 }
 
 #[cfg(test)]

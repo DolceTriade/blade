@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 
+mod envscrub;
 mod manager;
 mod postgres;
 mod sqlite;

@@ -96,6 +96,17 @@ impl Default for InvocationResults {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Default)]
+pub struct BuildOptions {
+    pub unstructured: Vec<String>,
+    pub structured: HashMap<String, Vec<String>>,
+    pub startup: Vec<String>,
+    pub explicit_startup: Vec<String>,
+    pub cmd_line: Vec<String>,
+    pub explicit_cmd_line: Vec<String>,
+    pub build_metadata: HashMap<String, String>,
+}
+
 cfg_if! {
 if #[cfg(feature = "ssr")] {
 
@@ -110,10 +121,11 @@ pub trait DB {
     fn get_test(&mut self, id: &str, name: &str) -> anyhow::Result<Test>;
     fn update_test_result(&mut self, invocation_id: &str, name: &str, status: Status, duration: std::time::Duration, num_runs: usize) -> anyhow::Result<()>;
     fn upsert_test_run(&mut self, id: &str, test_id: &str, run: &TestRun) -> anyhow::Result<()>;
-
     fn get_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
     fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
+    fn insert_options(&mut self, id: &str, options: &BuildOptions) -> anyhow::Result<()>;
+    fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {
