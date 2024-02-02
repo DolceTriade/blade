@@ -14,6 +14,7 @@ mod buildinfo;
 mod print_event;
 mod progress;
 mod target;
+mod options;
 
 trait EventHandler {
     fn handle_event(
@@ -247,6 +248,7 @@ pub async fn run_bes_grpc(
         Box::new(progress::Handler {}),
         Box::new(target::Handler {}),
         Box::new(buildinfo::Handler {}),
+        Box::new(options::Handler {})
     ];
     if !print_message_re.is_empty() {
         handlers.push(Box::new(print_event::Handler {

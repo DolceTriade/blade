@@ -5,6 +5,7 @@ rust_library(
     srcs = [
         "buildinfo.rs",
         "lib.rs",
+        "options.rs",
         "print_event.rs",
         "progress.rs",
         "target.rs",
