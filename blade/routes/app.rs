@@ -1,5 +1,6 @@
 use crate::components::nav::Nav;
 use crate::routes::artifact::Artifact;
+use crate::routes::details::Details;
 use crate::routes::empty::Empty;
 use crate::routes::invocation::Invocation;
 use crate::routes::summary::Summary;
@@ -29,6 +30,7 @@ pub fn App() -> impl IntoView {
                         <Route path="invocation/:id" view=Invocation>
                             <Route path="*any" view=Summary/>
                             <Route path="test" view=Test/>
+                            <Route path="details" view=Details/>
                             <Route path="artifact" view=Artifact/>
                         </Route>
                         <Route path="*" view=Empty/>

@@ -297,11 +297,7 @@ impl state::DB for Postgres {
             .execute(&mut self.conn)
             .context(format!("failed to delete invocation since {:#?}", ot))
     }
-    fn insert_options(
-        &mut self,
-        inv_id: &str,
-        opts: &state::BuildOptions,
-    ) -> anyhow::Result<()> {
+    fn insert_options(&mut self, inv_id: &str, opts: &state::BuildOptions) -> anyhow::Result<()> {
         use schema::options::dsl::*;
         let mut vals = vec![];
         let mut vec_helper = |vec: &Vec<String>, kind_: &str| {

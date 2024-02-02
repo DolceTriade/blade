@@ -30,6 +30,9 @@ mod tests {
         assert_eq!(scrub("yo"), "yo");
         assert_eq!(scrub("foo="), "foo=");
         assert_eq!(scrub("foo=bar="), "foo=bar=");
-        assert_eq!(scrub("--client_env=foo=bar="), "--client_env=foo=<SCRUBBED>");
+        assert_eq!(
+            scrub("--client_env=foo=bar="),
+            "--client_env=foo=<SCRUBBED>"
+        );
     }
 }

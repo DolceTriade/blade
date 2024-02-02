@@ -8,7 +8,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 #[cfg(feature = "ssr")]
-fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
+pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
     ServerFnError::ServerError(format!("Invocation {e} not found"))
 }
 

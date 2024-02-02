@@ -1,5 +1,6 @@
 use crate::components::statusicon::StatusIcon;
 use leptos::*;
+use leptos_router::A;
 use time::macros::format_description;
 
 #[allow(non_snake_case)]
@@ -95,7 +96,7 @@ pub fn SummaryHeader() -> impl IntoView {
                 return "".to_string();
             };
             let duration = end.duration_since(invocation.start).unwrap_or_default();
-            format!("Build Time: {}", humantime::format_duration(duration))
+            format!("Took {}", humantime::format_duration(duration))
         });
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
@@ -108,7 +109,11 @@ pub fn SummaryHeader() -> impl IntoView {
                         <span>@</span>
                         <span class="text-grey-400 text-sm">{start}</span>
                     </div>
-                    <div class="flex gap-2 items-center">{duration}</div>
+                    <div class="flex gap-2 items-center">
+                        {duration} <A class="text-blue-500 underline" href="details">
+                            (details)
+                        </A>
+                    </div>
                 </div>
                 <div class="p-4">
                     <StatusIcon class="h-8 w-8" status=status.into()/>
