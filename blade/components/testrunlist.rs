@@ -17,9 +17,24 @@ fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     }
 }
 
+fn status_weight(s: state::Status) -> u8 {
+    match s {
+        state::Status::InProgress => 1,
+        state::Status::Fail => 2,
+        state::Status::Skip => 3,
+        state::Status::Success => 4,
+        _ => 5,
+    }
+}
+
 fn sort_runs(runs: &[state::TestRun]) -> Vec<state::TestRun> {
     let mut runs = runs.to_owned();
     runs.sort_unstable_by(|a, b| {
+        let a_s = status_weight(a.status);
+        let b_s = status_weight(b.status);
+        if a_s != b_s {
+            return a_s.cmp(&b_s);
+        }
         if a.run != b.run {
             return a.run.cmp(&b.run);
         }
@@ -33,7 +48,7 @@ fn sort_runs(runs: &[state::TestRun]) -> Vec<state::TestRun> {
 
 type TestListItem = (String, String, junit_parser::TestStatus, f64);
 
-fn status_weight(s: &junit_parser::TestStatus) -> u8 {
+fn junit_status_weight(s: &junit_parser::TestStatus) -> u8 {
     match s {
         junit_parser::TestStatus::Error(_) => 1,
         junit_parser::TestStatus::Failure(_) => 1,
@@ -45,8 +60,8 @@ fn status_weight(s: &junit_parser::TestStatus) -> u8 {
 fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
     let mut cases = cases.to_owned();
     cases.sort_unstable_by(|a, b| {
-        let a_s = status_weight(&a.2);
-        let b_s = status_weight(&b.2);
+        let a_s = junit_status_weight(&a.2);
+        let b_s = junit_status_weight(&b.2);
         if a_s != b_s {
             return a_s.cmp(&b_s);
         }
