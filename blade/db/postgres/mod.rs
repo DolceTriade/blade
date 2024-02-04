@@ -313,10 +313,10 @@ impl state::DB for Postgres {
         let mut vals = vec![];
         let mut vec_helper = |vec: &Vec<String>, kind_: &str| {
             if !vec.is_empty() {
-                vec.iter().for_each(|v| {
-                    let uid = uuid::Uuid::new_v4().to_string();
+                let uid = uuid::Uuid::new_v4().to_string();
+                vec.iter().enumerate().for_each(|(i, v)| {
                     vals.push((
-                        id.eq(uid),
+                        id.eq(format!("{}-{:04}", uid, i)),
                         invocation_id.eq(inv_id.to_string()),
                         kind.eq(kind_.to_string()),
                         keyval.eq(crate::envscrub::scrub(v)),
@@ -357,7 +357,7 @@ impl state::DB for Postgres {
         let ret: Vec<_> = schema::options::table
             .select((schema::options::kind, schema::options::keyval))
             .filter(schema::options::invocation_id.eq(id))
-            .order_by(schema::options::kind)
+            .order_by(schema::options::id.asc())
             .load::<(String, String)>(&mut self.conn)?;
 
         ret.into_iter().for_each(|(kind, keyval)| match &kind[..] {
