@@ -17,7 +17,7 @@ fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime
     }
     let e = end.unwrap();
     e.duration_since(*start)
-        .map(|d| format!("{:#?}", d))
+        .map(|d| humantime::format_duration(d).to_string())
         .unwrap_or_default()
 }
 
@@ -119,8 +119,8 @@ pub fn TargetList() -> impl IntoView {
                                                                         </span>
                                                                     </Tooltip>
                                                                 </span>
-                                                                <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                                    {format!("{:#?}", t.duration)}
+                                                                <span class="text-gray-400 text-xs pl-1 ml-auto float-right whitespace-nowrap">
+                                                                    {format!("{}", humantime::format_duration(t.duration))}
                                                                 </span>
                                                             </div>
                                                         </A>
@@ -163,7 +163,7 @@ pub fn TargetList() -> impl IntoView {
                                                     </span>
                                                 </Tooltip>
                                             </span>
-                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
+                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
                                                 {format_time(&t.start, t.end.as_ref())}
 
                                             </span>

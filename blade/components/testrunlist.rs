@@ -46,7 +46,12 @@ fn sort_runs(runs: &[state::TestRun]) -> Vec<state::TestRun> {
     runs
 }
 
-type TestListItem = (String, String, junit_parser::TestStatus, f64);
+type TestListItem = (
+    String,
+    String,
+    junit_parser::TestStatus,
+    std::time::Duration,
+);
 
 fn junit_status_weight(s: &junit_parser::TestStatus) -> u8 {
     match s {
@@ -162,6 +167,10 @@ pub fn TestRunList() -> impl IntoView {
                                                                     </div>
                                                                 </Tooltip>
                                                             </div>
+                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
+                                                                {format!("{}", humantime::format_duration(run.duration))}
+                                                            </span>
+
                                                         </div>
                                                     </A>
                                                 </ListItem>
@@ -197,7 +206,7 @@ pub fn TestRunList() -> impl IntoView {
                                                                     c.name.clone(),
                                                                     i.name.clone(),
                                                                     i.status.clone(),
-                                                                    i.time,
+                                                                    std::time::Duration::from_secs_f64(i.time),
                                                                 ))
                                                                 .collect::<Vec<_>>()
                                                         })
@@ -240,8 +249,8 @@ pub fn TestRunList() -> impl IntoView {
                                                                     </span>
                                                                 </Tooltip>
                                                             </span>
-                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right">
-                                                                {format!("{:.2}s", c.3)}
+                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
+                                                                {format!("{}", humantime::format_duration(c.3))}
                                                             </span>
                                                         </div>
 
