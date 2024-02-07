@@ -93,7 +93,9 @@ impl state::DB for Postgres {
             .map(|e| models::TestArtifact::from_state(inv_id, &val.id, e.0, e.1))
             .collect::<Vec<_>>();
         diesel::insert_into(schema::testartifacts::table)
-            .values(artifacts.as_slice())
+            .values(&artifacts)
+            .on_conflict(schema::testartifacts::dsl::id)
+            .do_nothing()
             .execute(&mut self.conn)
             .map(|_| {})
             .context("failed to insert test artifacts")?;

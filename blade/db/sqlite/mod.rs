@@ -96,6 +96,9 @@ impl state::DB for Sqlite {
         let val = models::TestRun::from_state(inv_id, test_id_, test_run)?;
         diesel::insert_into(schema::TestRuns::table)
             .values(&val)
+            .on_conflict(schema::TestRuns::dsl::id)
+            .do_update()
+            .set(&val)
             .execute(&mut self.conn)
             .map(|_| {})
             .context("failed to upsert testrun")?;
@@ -108,7 +111,7 @@ impl state::DB for Sqlite {
             .values(artifacts.as_slice())
             .execute(&mut self.conn)
             .map(|_| {})
-            .context("failed to insert test artifacts")?;
+            .context(anyhow!("failed to insert test artifacts: {:#?}", &artifacts))?;
         Ok(())
     }
 
