@@ -117,6 +117,10 @@ def rust_dependencies():
                 version = "2.1.0",
                 features = ["sqlite", "postgres"],
             ),
+            "diesel-tracing": crate.spec(
+                version = "0.2.2",
+                features = ["sqlite", "postgres"],
+            ),
             "futures": crate.spec(
                 version = "0.3.29",
             ),
@@ -153,9 +157,6 @@ def rust_dependencies():
             ),
             "log": crate.spec(
                 version = "0.4",
-            ),
-            "pretty_env_logger": crate.spec(
-                version = "0.5.0",
             ),
             "serde": crate.spec(
                 version = "1.0.186",
@@ -205,6 +206,12 @@ def rust_dependencies():
             ),
             "tonic-reflection": crate.spec(
                 version = "0.10.2",
+            ),
+            "tracing": crate.spec(
+                version = "0.1.40",
+            ),
+            "tracing-subscriber": crate.spec(
+                version = "0.3.18",
             ),
             "url": crate.spec(
                 version = "2.5.0",
@@ -352,6 +359,15 @@ def rust_dependencies():
             ),
             "tokio-stream": crate.spec(
                 version = "0.1",
+            ),
+            "tracing": crate.spec(
+                version = "0.1.40",
+            ),
+            "tracing-subscriber": crate.spec(
+                version = "0.3.18",
+            ),
+            "tracing-web": crate.spec(
+                version = "0.1.3",
             ),
             "url": crate.spec(
                 version = "2.5.0",

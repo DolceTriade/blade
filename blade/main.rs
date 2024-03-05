@@ -47,7 +47,8 @@ cfg_if! {
             if std::env::var("RUST_LOG").is_err() {
                 std::env::set_var("RUST_LOG", "info");
             }
-            pretty_env_logger::init();
+            // install global subscriber configured based on RUST_LOG envvar.
+            tracing_subscriber::fmt::init();
 
             let args = Args::parse();
 

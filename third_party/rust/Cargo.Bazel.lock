@@ -1,5 +1,5 @@
 {
-  "checksum": "27396ab0e797b520a992b0de838c94acad372a26ec05281a08d259290fa9d6f9",
+  "checksum": "207dc3b0b9fc3d655c12bf1ee5e9a67a3b77a4ea47676589c202fec2fe290d96",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -61,7 +61,7 @@
               "target": "tokio_util"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -332,7 +332,7 @@
               "target": "tokio_util"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -450,7 +450,7 @@
               "target": "serde"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -574,7 +574,7 @@
               "target": "tokio"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -4938,6 +4938,7 @@
             "chrono",
             "default",
             "extras",
+            "i-implement-a-third-party-backend-and-opt-into-breaking-changes",
             "ipnetwork",
             "itoa",
             "libc",
@@ -5049,6 +5050,62 @@
         "version": "2.1.4"
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "diesel-tracing 0.2.2": {
+      "name": "diesel-tracing",
+      "version": "0.2.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/diesel-tracing/0.2.2/download",
+          "sha256": "00d6e99b5ecad02a26e089cc275caf2b0cea2b0d9ace41e4972dadf62c1c72dd"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "diesel_tracing",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "diesel_tracing",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "ipnetwork",
+            "postgres",
+            "sqlite"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "diesel 2.1.4",
+              "target": "diesel"
+            },
+            {
+              "id": "ipnetwork 0.20.0",
+              "target": "ipnetwork"
+            },
+            {
+              "id": "tracing 0.1.40",
+              "target": "tracing"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.2.2"
+      },
+      "license": "MIT"
     },
     "diesel_derives 2.1.2": {
       "name": "diesel_derives",
@@ -5325,6 +5382,10 @@
               "target": "diesel"
             },
             {
+              "id": "diesel-tracing 0.2.2",
+              "target": "diesel_tracing"
+            },
+            {
               "id": "diesel_migrations 2.1.0",
               "target": "diesel_migrations"
             },
@@ -5367,10 +5428,6 @@
             {
               "id": "log 0.4.20",
               "target": "log"
-            },
-            {
-              "id": "pretty_env_logger 0.5.0",
-              "target": "pretty_env_logger"
             },
             {
               "id": "prost 0.12.3",
@@ -5431,6 +5488,14 @@
             {
               "id": "tonic-reflection 0.10.2",
               "target": "tonic_reflection"
+            },
+            {
+              "id": "tracing 0.1.40",
+              "target": "tracing"
+            },
+            {
+              "id": "tracing-subscriber 0.3.18",
+              "target": "tracing_subscriber"
             },
             {
               "id": "url 2.5.0",
@@ -5572,71 +5637,6 @@
         "version": "0.8.32"
       },
       "license": "(Apache-2.0 OR MIT) AND BSD-3-Clause"
-    },
-    "env_logger 0.10.0": {
-      "name": "env_logger",
-      "version": "0.10.0",
-      "repository": {
-        "Http": {
-          "url": "https://crates.io/api/v1/crates/env_logger/0.10.0/download",
-          "sha256": "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "env_logger",
-            "crate_root": "src/lib.rs",
-            "srcs": [
-              "**/*.rs"
-            ]
-          }
-        }
-      ],
-      "library_target_name": "env_logger",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "auto-color",
-            "color",
-            "default",
-            "humantime",
-            "regex"
-          ],
-          "selects": {}
-        },
-        "deps": {
-          "common": [
-            {
-              "id": "humantime 2.1.0",
-              "target": "humantime"
-            },
-            {
-              "id": "is-terminal 0.4.9",
-              "target": "is_terminal"
-            },
-            {
-              "id": "log 0.4.20",
-              "target": "log"
-            },
-            {
-              "id": "regex 1.9.3",
-              "target": "regex"
-            },
-            {
-              "id": "termcolor 1.2.0",
-              "target": "termcolor"
-            }
-          ],
-          "selects": {}
-        },
-        "edition": "2021",
-        "version": "0.10.0"
-      },
-      "license": "MIT OR Apache-2.0"
     },
     "equivalent 1.0.1": {
       "name": "equivalent",
@@ -6998,7 +6998,7 @@
               "target": "tokio_util"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -7621,7 +7621,7 @@
               "target": "tower_service"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -8215,59 +8215,6 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "is-terminal 0.4.9": {
-      "name": "is-terminal",
-      "version": "0.4.9",
-      "repository": {
-        "Http": {
-          "url": "https://crates.io/api/v1/crates/is-terminal/0.4.9/download",
-          "sha256": "cb0889898416213fab133e1d33a0e5858a48177452750691bde3666d0fdbaf8b"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "is_terminal",
-            "crate_root": "src/lib.rs",
-            "srcs": [
-              "**/*.rs"
-            ]
-          }
-        }
-      ],
-      "library_target_name": "is_terminal",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "deps": {
-          "common": [],
-          "selects": {
-            "cfg(not(any(windows, target_os = \"hermit\", target_os = \"unknown\")))": [
-              {
-                "id": "rustix 0.38.8",
-                "target": "rustix"
-              }
-            ],
-            "cfg(target_os = \"hermit\")": [
-              {
-                "id": "hermit-abi 0.3.2",
-                "target": "hermit_abi"
-              }
-            ],
-            "cfg(windows)": [
-              {
-                "id": "windows-sys 0.48.0",
-                "target": "windows_sys"
-              }
-            ]
-          }
-        },
-        "edition": "2018",
-        "version": "0.4.9"
-      },
-      "license": "MIT"
-    },
     "itertools 0.10.5": {
       "name": "itertools",
       "version": "0.10.5",
@@ -8655,7 +8602,7 @@
               "target": "server_fn"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -8759,7 +8706,7 @@
               "target": "tokio"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -8920,7 +8867,7 @@
               "target": "smallvec"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -9086,7 +9033,7 @@
               "target": "leptos_meta"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -9184,7 +9131,7 @@
               "target": "syn"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -9246,7 +9193,7 @@
               "target": "leptos"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -9353,7 +9300,7 @@
               "target": "tokio"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -9487,7 +9434,7 @@
               "target": "thiserror"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             },
             {
@@ -9572,7 +9519,7 @@
               "target": "thiserror"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -11052,6 +10999,52 @@
       },
       "license": "MIT"
     },
+    "nu-ansi-term 0.46.0": {
+      "name": "nu-ansi-term",
+      "version": "0.46.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/nu-ansi-term/0.46.0/download",
+          "sha256": "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "nu_ansi_term",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "nu_ansi_term",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "overload 0.1.1",
+              "target": "overload"
+            }
+          ],
+          "selects": {
+            "cfg(target_os = \"windows\")": [
+              {
+                "id": "winapi 0.3.9",
+                "target": "winapi"
+              }
+            ]
+          }
+        },
+        "edition": "2018",
+        "version": "0.46.0"
+      },
+      "license": "MIT"
+    },
     "num-bigint 0.4.4": {
       "name": "num-bigint",
       "version": "0.4.4",
@@ -11538,6 +11531,36 @@
         },
         "edition": "2018",
         "version": "2.10.1"
+      },
+      "license": "MIT"
+    },
+    "overload 0.1.1": {
+      "name": "overload",
+      "version": "0.1.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/overload/0.1.1/download",
+          "sha256": "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "overload",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "overload",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "0.1.1"
       },
       "license": "MIT"
     },
@@ -12300,49 +12323,6 @@
         "links": "pq"
       },
       "license": "MIT OR Apache-2.0"
-    },
-    "pretty_env_logger 0.5.0": {
-      "name": "pretty_env_logger",
-      "version": "0.5.0",
-      "repository": {
-        "Http": {
-          "url": "https://crates.io/api/v1/crates/pretty_env_logger/0.5.0/download",
-          "sha256": "865724d4dbe39d9f3dd3b52b88d859d66bcb2d6a0acfd5ea68a65fb66d4bdc1c"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "pretty_env_logger",
-            "crate_root": "src/lib.rs",
-            "srcs": [
-              "**/*.rs"
-            ]
-          }
-        }
-      ],
-      "library_target_name": "pretty_env_logger",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "deps": {
-          "common": [
-            {
-              "id": "env_logger 0.10.0",
-              "target": "env_logger"
-            },
-            {
-              "id": "log 0.4.20",
-              "target": "log"
-            }
-          ],
-          "selects": {}
-        },
-        "edition": "2015",
-        "version": "0.5.0"
-      },
-      "license": "MIT/Apache-2.0"
     },
     "prettyplease 0.1.25": {
       "name": "prettyplease",
@@ -16001,6 +15981,45 @@
       },
       "license": "BSD-3-Clause"
     },
+    "sharded-slab 0.1.7": {
+      "name": "sharded-slab",
+      "version": "0.1.7",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/sharded-slab/0.1.7/download",
+          "sha256": "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "sharded_slab",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "sharded_slab",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "lazy_static 1.4.0",
+              "target": "lazy_static"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.7"
+      },
+      "license": "MIT"
+    },
     "signal-hook-registry 1.4.1": {
       "name": "signal-hook-registry",
       "version": "1.4.1",
@@ -16684,47 +16703,6 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "termcolor 1.2.0": {
-      "name": "termcolor",
-      "version": "1.2.0",
-      "repository": {
-        "Http": {
-          "url": "https://crates.io/api/v1/crates/termcolor/1.2.0/download",
-          "sha256": "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "termcolor",
-            "crate_root": "src/lib.rs",
-            "srcs": [
-              "**/*.rs"
-            ]
-          }
-        }
-      ],
-      "library_target_name": "termcolor",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "deps": {
-          "common": [],
-          "selects": {
-            "cfg(windows)": [
-              {
-                "id": "winapi-util 0.1.5",
-                "target": "winapi_util"
-              }
-            ]
-          }
-        },
-        "edition": "2018",
-        "version": "1.2.0"
-      },
-      "license": "Unlicense OR MIT"
-    },
     "terminal_size 0.3.0": {
       "name": "terminal_size",
       "version": "0.3.0",
@@ -16878,6 +16856,49 @@
         },
         "edition": "2021",
         "version": "1.0.44"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "thread_local 1.1.8": {
+      "name": "thread_local",
+      "version": "1.1.8",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/thread_local/1.1.8/download",
+          "sha256": "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "thread_local",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "thread_local",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
+            },
+            {
+              "id": "once_cell 1.18.0",
+              "target": "once_cell"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "1.1.8"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -17442,7 +17463,7 @@
               "target": "tokio"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -17770,7 +17791,7 @@
               "target": "tower_service"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -18006,7 +18027,7 @@
               "target": "tower_service"
             },
             {
-              "id": "tracing 0.1.37",
+              "id": "tracing 0.1.40",
               "target": "tracing"
             }
           ],
@@ -18077,13 +18098,13 @@
       },
       "license": "MIT"
     },
-    "tracing 0.1.37": {
+    "tracing 0.1.40": {
       "name": "tracing",
-      "version": "0.1.37",
+      "version": "0.1.40",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tracing/0.1.37/download",
-          "sha256": "8ce8c33a8d48bd45d624a6e523445fd21ec13d3653cd51f681abf67418f54eb8"
+          "url": "https://crates.io/api/v1/crates/tracing/0.1.40/download",
+          "sha256": "c3523ab5a71916ccf420eebdf5521fcef02141234bbc0b8a49f2fdc4544364ef"
         }
       },
       "targets": [
@@ -18115,10 +18136,6 @@
         "deps": {
           "common": [
             {
-              "id": "cfg-if 1.0.0",
-              "target": "cfg_if"
-            },
-            {
               "id": "log 0.4.20",
               "target": "log"
             },
@@ -18127,7 +18144,7 @@
               "target": "pin_project_lite"
             },
             {
-              "id": "tracing-core 0.1.31",
+              "id": "tracing-core 0.1.32",
               "target": "tracing_core"
             }
           ],
@@ -18137,23 +18154,23 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "tracing-attributes 0.1.26",
+              "id": "tracing-attributes 0.1.27",
               "target": "tracing_attributes"
             }
           ],
           "selects": {}
         },
-        "version": "0.1.37"
+        "version": "0.1.40"
       },
       "license": "MIT"
     },
-    "tracing-attributes 0.1.26": {
+    "tracing-attributes 0.1.27": {
       "name": "tracing-attributes",
-      "version": "0.1.26",
+      "version": "0.1.27",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tracing-attributes/0.1.26/download",
-          "sha256": "5f4f31f56159e98206da9efd823404b79b6ef3143b4a7ab76e67b1751b25a4ab"
+          "url": "https://crates.io/api/v1/crates/tracing-attributes/0.1.27/download",
+          "sha256": "34704c8d6ebcbc939824180af020566b01a7c01f80641264eba0999f6c2b6be7"
         }
       },
       "targets": [
@@ -18190,17 +18207,17 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.26"
+        "version": "0.1.27"
       },
       "license": "MIT"
     },
-    "tracing-core 0.1.31": {
+    "tracing-core 0.1.32": {
       "name": "tracing-core",
-      "version": "0.1.31",
+      "version": "0.1.32",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tracing-core/0.1.31/download",
-          "sha256": "0955b8137a1df6f1a2e9a37d8a6656291ff0297c1a97c24e0d8425fe2312f79a"
+          "url": "https://crates.io/api/v1/crates/tracing-core/0.1.32/download",
+          "sha256": "c06d3da6113f116aaee68e4d601191614c9053067f9ab7f6edbcb161237daa54"
         }
       },
       "targets": [
@@ -18221,6 +18238,7 @@
         ],
         "crate_features": {
           "common": [
+            "default",
             "once_cell",
             "std"
           ],
@@ -18233,10 +18251,146 @@
               "target": "once_cell"
             }
           ],
+          "selects": {
+            "cfg(tracing_unstable)": [
+              {
+                "id": "valuable 0.1.0",
+                "target": "valuable"
+              }
+            ]
+          }
+        },
+        "edition": "2018",
+        "version": "0.1.32"
+      },
+      "license": "MIT"
+    },
+    "tracing-log 0.2.0": {
+      "name": "tracing-log",
+      "version": "0.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tracing-log/0.2.0/download",
+          "sha256": "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tracing_log",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tracing_log",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "log-tracer",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "log 0.4.20",
+              "target": "log"
+            },
+            {
+              "id": "once_cell 1.18.0",
+              "target": "once_cell"
+            },
+            {
+              "id": "tracing-core 0.1.32",
+              "target": "tracing_core"
+            }
+          ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.31"
+        "version": "0.2.0"
+      },
+      "license": "MIT"
+    },
+    "tracing-subscriber 0.3.18": {
+      "name": "tracing-subscriber",
+      "version": "0.3.18",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tracing-subscriber/0.3.18/download",
+          "sha256": "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tracing_subscriber",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tracing_subscriber",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "alloc",
+            "ansi",
+            "default",
+            "fmt",
+            "nu-ansi-term",
+            "registry",
+            "sharded-slab",
+            "smallvec",
+            "std",
+            "thread_local",
+            "tracing-log"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "nu-ansi-term 0.46.0",
+              "target": "nu_ansi_term"
+            },
+            {
+              "id": "sharded-slab 0.1.7",
+              "target": "sharded_slab"
+            },
+            {
+              "id": "smallvec 1.11.0",
+              "target": "smallvec"
+            },
+            {
+              "id": "thread_local 1.1.8",
+              "target": "thread_local"
+            },
+            {
+              "id": "tracing-core 0.1.32",
+              "target": "tracing_core"
+            },
+            {
+              "id": "tracing-log 0.2.0",
+              "target": "tracing_log"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.3.18"
       },
       "license": "MIT"
     },
@@ -18926,6 +19080,59 @@
         "version": "1.6.1"
       },
       "license": "Apache-2.0 OR MIT"
+    },
+    "valuable 0.1.0": {
+      "name": "valuable",
+      "version": "0.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/valuable/0.1.0/download",
+          "sha256": "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "valuable",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "valuable",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "valuable 0.1.0",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.0"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT"
     },
     "vcpkg 0.2.15": {
       "name": "vcpkg",
@@ -21200,38 +21407,6 @@
       "x86_64-unknown-nixos-gnu",
       "x86_64-unknown-none"
     ],
-    "cfg(not(any(windows, target_os = \"hermit\", target_os = \"unknown\")))": [
-      "aarch64-apple-darwin",
-      "aarch64-apple-ios",
-      "aarch64-apple-ios-sim",
-      "aarch64-fuchsia",
-      "aarch64-linux-android",
-      "aarch64-unknown-linux-gnu",
-      "aarch64-unknown-nixos-gnu",
-      "aarch64-unknown-nto-qnx710",
-      "arm-unknown-linux-gnueabi",
-      "armv7-linux-androideabi",
-      "armv7-unknown-linux-gnueabi",
-      "i686-apple-darwin",
-      "i686-linux-android",
-      "i686-unknown-freebsd",
-      "i686-unknown-linux-gnu",
-      "powerpc-unknown-linux-gnu",
-      "riscv32imc-unknown-none-elf",
-      "riscv64gc-unknown-none-elf",
-      "s390x-unknown-linux-gnu",
-      "thumbv7em-none-eabi",
-      "thumbv8m.main-none-eabi",
-      "wasm32-wasi",
-      "x86_64-apple-darwin",
-      "x86_64-apple-ios",
-      "x86_64-fuchsia",
-      "x86_64-linux-android",
-      "x86_64-unknown-freebsd",
-      "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-nixos-gnu",
-      "x86_64-unknown-none"
-    ],
     "cfg(not(target_arch = \"wasm32\"))": [
       "aarch64-apple-darwin",
       "aarch64-apple-ios",
@@ -21368,6 +21543,7 @@
       "x86_64-pc-windows-msvc"
     ],
     "cfg(tokio_taskdump)": [],
+    "cfg(tracing_unstable)": [],
     "cfg(unix)": [
       "aarch64-apple-darwin",
       "aarch64-apple-ios",
@@ -21477,6 +21653,7 @@
     "cfg-if 1.0.0",
     "clap 4.4.10",
     "diesel 2.1.4",
+    "diesel-tracing 0.2.2",
     "diesel_migrations 2.1.0",
     "futures 0.3.29",
     "futures-core 0.3.29",
@@ -21488,7 +21665,6 @@
     "leptos_meta 0.5.4",
     "leptos_router 0.5.4",
     "log 0.4.20",
-    "pretty_env_logger 0.5.0",
     "prost 0.12.3",
     "prost-reflect 0.12.0",
     "prost-types 0.12.3",
@@ -21504,6 +21680,8 @@
     "tokio-stream 0.1.14",
     "tonic 0.10.2",
     "tonic-reflection 0.10.2",
+    "tracing 0.1.40",
+    "tracing-subscriber 0.3.18",
     "url 2.5.0",
     "url-escape 0.1.1",
     "uuid 1.6.1",

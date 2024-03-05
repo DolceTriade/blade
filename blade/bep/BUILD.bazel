@@ -26,7 +26,6 @@ rust_library(
         "@crate//:futures",
         "@crate//:lazy_static",
         "@crate//:log",
-        "@crate//:pretty_env_logger",
         "@crate//:prost",
         "@crate//:prost-reflect",
         "@crate//:prost-types",
