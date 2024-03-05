@@ -111,7 +111,10 @@ impl state::DB for Sqlite {
             .values(artifacts.as_slice())
             .execute(&mut self.conn)
             .map(|_| {})
-            .context(anyhow!("failed to insert test artifacts: {:#?}", &artifacts))?;
+            .context(anyhow!(
+                "failed to insert test artifacts: {:#?}",
+                &artifacts
+            ))?;
         Ok(())
     }
 
