@@ -1,17 +1,18 @@
 use anyhow::Context;
-use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
+use diesel_tracing::pg::InstrumentedPgConnection;
+use diesel_tracing::sqlite::InstrumentedSqliteConnection;
 
 pub struct SqliteManager {
-    pool: Pool<ConnectionManager<SqliteConnection>>,
+    pool: Pool<ConnectionManager<InstrumentedSqliteConnection>>,
 }
 
 impl SqliteManager {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(uri: &str) -> anyhow::Result<Box<dyn state::DBManager>> {
         crate::sqlite::init_db(uri)?;
-        let manager = ConnectionManager::<SqliteConnection>::new(uri);
+        let manager = ConnectionManager::<InstrumentedSqliteConnection>::new(uri);
         let pool = Pool::builder()
             .test_on_check_out(true)
             .build(manager)
@@ -31,14 +32,14 @@ impl state::DBManager for SqliteManager {
 }
 
 pub struct PostgresManager {
-    pool: Pool<ConnectionManager<PgConnection>>,
+    pool: Pool<ConnectionManager<InstrumentedPgConnection>>,
 }
 
 impl PostgresManager {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(uri: &str) -> anyhow::Result<Box<dyn state::DBManager>> {
         crate::postgres::init_db(uri)?;
-        let manager = ConnectionManager::<PgConnection>::new(uri);
+        let manager = ConnectionManager::<InstrumentedPgConnection>::new(uri);
         let pool = Pool::builder()
             .test_on_check_out(true)
             .build(manager)

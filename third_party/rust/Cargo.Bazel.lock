@@ -1,5 +1,5 @@
 {
-  "checksum": "207dc3b0b9fc3d655c12bf1ee5e9a67a3b77a4ea47676589c202fec2fe290d96",
+  "checksum": "05b51517bdfb3a9b40d81de77766e53ed03778df611f1e8d571f37498ffc0f38",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -4775,6 +4775,53 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "derivative 2.2.0": {
+      "name": "derivative",
+      "version": "2.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/derivative/2.2.0/download",
+          "sha256": "fcc3dd5e9e9c0b295d6e1e4d811fb6f157d5ffd784b8d202fc62eac8035a770b"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "derivative",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "derivative",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.66",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.32",
+              "target": "quote"
+            },
+            {
+              "id": "syn 1.0.109",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "2.2.0"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "derive-where 1.2.1": {
       "name": "derive-where",
       "version": "1.2.1",
@@ -5057,7 +5104,13 @@
       "repository": {
         "Http": {
           "url": "https://crates.io/api/v1/crates/diesel-tracing/0.2.2/download",
-          "sha256": "00d6e99b5ecad02a26e089cc275caf2b0cea2b0d9ace41e4972dadf62c1c72dd"
+          "sha256": "00d6e99b5ecad02a26e089cc275caf2b0cea2b0d9ace41e4972dadf62c1c72dd",
+          "patch_args": [
+            "-p1"
+          ],
+          "patches": [
+            "@//third_party/rust/patches/diesel-tracing:fix-pgmetadata.patch"
+          ]
         }
       },
       "targets": [
@@ -5081,6 +5134,7 @@
             "default",
             "ipnetwork",
             "postgres",
+            "r2d2",
             "sqlite"
           ],
           "selects": {}
@@ -5494,6 +5548,10 @@
               "target": "tracing"
             },
             {
+              "id": "tracing-actix-web 0.7.9",
+              "target": "tracing_actix_web"
+            },
+            {
               "id": "tracing-subscriber 0.3.18",
               "target": "tracing_subscriber"
             },
@@ -5521,6 +5579,15 @@
           "selects": {}
         },
         "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "derivative 2.2.0",
+              "target": "derivative"
+            }
+          ],
+          "selects": {}
+        },
         "version": "0.0.1"
       },
       "license": null
@@ -10466,6 +10533,45 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "matchers 0.1.0": {
+      "name": "matchers",
+      "version": "0.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/matchers/0.1.0/download",
+          "sha256": "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "matchers",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "matchers",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "regex-automata 0.1.10",
+              "target": "regex_automata"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.0"
+      },
+      "license": "MIT"
+    },
     "matchit 0.7.2": {
       "name": "matchit",
       "version": "0.7.2",
@@ -10947,6 +11053,36 @@
         "version": "0.8.3"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "mutually_exclusive_features 0.0.3": {
+      "name": "mutually_exclusive_features",
+      "version": "0.0.3",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/mutually_exclusive_features/0.0.3/download",
+          "sha256": "6d02c0b00610773bb7fc61d85e13d86c7858cbdf00e1a120bfc41bc055dbaa0e"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "mutually_exclusive_features",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "mutually_exclusive_features",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.0.3"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "nom 7.1.3": {
       "name": "nom",
@@ -14193,6 +14329,53 @@
       },
       "license": "MIT OR Apache-2.0"
     },
+    "regex-automata 0.1.10": {
+      "name": "regex-automata",
+      "version": "0.1.10",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/regex-automata/0.1.10/download",
+          "sha256": "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "regex_automata",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "regex_automata",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "regex-syntax",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "regex-syntax 0.6.29",
+              "target": "regex_syntax"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.1.10"
+      },
+      "license": "Unlicense/MIT"
+    },
     "regex-automata 0.3.6": {
       "name": "regex-automata",
       "version": "0.3.6",
@@ -16418,7 +16601,8 @@
             "parsing",
             "printing",
             "proc-macro",
-            "quote"
+            "quote",
+            "visit"
           ],
           "selects": {}
         },
@@ -18164,6 +18348,68 @@
       },
       "license": "MIT"
     },
+    "tracing-actix-web 0.7.9": {
+      "name": "tracing-actix-web",
+      "version": "0.7.9",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tracing-actix-web/0.7.9/download",
+          "sha256": "1fe0d5feac3f4ca21ba33496bcb1ccab58cca6412b1405ae80f0581541e0ca78"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tracing_actix_web",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tracing_actix_web",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "emit_event_on_error"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "actix-web 4.3.1",
+              "target": "actix_web"
+            },
+            {
+              "id": "mutually_exclusive_features 0.0.3",
+              "target": "mutually_exclusive_features"
+            },
+            {
+              "id": "pin-project 1.1.3",
+              "target": "pin_project"
+            },
+            {
+              "id": "tracing 0.1.40",
+              "target": "tracing"
+            },
+            {
+              "id": "uuid 1.6.1",
+              "target": "uuid"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.7.9"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "tracing-attributes 0.1.27": {
       "name": "tracing-attributes",
       "version": "0.1.27",
@@ -18349,13 +18595,19 @@
             "alloc",
             "ansi",
             "default",
+            "env-filter",
             "fmt",
+            "matchers",
             "nu-ansi-term",
+            "once_cell",
+            "parking_lot",
+            "regex",
             "registry",
             "sharded-slab",
             "smallvec",
             "std",
             "thread_local",
+            "tracing",
             "tracing-log"
           ],
           "selects": {}
@@ -18363,8 +18615,24 @@
         "deps": {
           "common": [
             {
+              "id": "matchers 0.1.0",
+              "target": "matchers"
+            },
+            {
               "id": "nu-ansi-term 0.46.0",
               "target": "nu_ansi_term"
+            },
+            {
+              "id": "once_cell 1.18.0",
+              "target": "once_cell"
+            },
+            {
+              "id": "parking_lot 0.12.1",
+              "target": "parking_lot"
+            },
+            {
+              "id": "regex 1.9.3",
+              "target": "regex"
             },
             {
               "id": "sharded-slab 0.1.7",
@@ -18377,6 +18645,10 @@
             {
               "id": "thread_local 1.1.8",
               "target": "thread_local"
+            },
+            {
+              "id": "tracing 0.1.40",
+              "target": "tracing"
             },
             {
               "id": "tracing-core 0.1.32",
@@ -21652,6 +21924,7 @@
     "broadcaster 1.0.0",
     "cfg-if 1.0.0",
     "clap 4.4.10",
+    "derivative 2.2.0",
     "diesel 2.1.4",
     "diesel-tracing 0.2.2",
     "diesel_migrations 2.1.0",
@@ -21681,6 +21954,7 @@
     "tonic 0.10.2",
     "tonic-reflection 0.10.2",
     "tracing 0.1.40",
+    "tracing-actix-web 0.7.9",
     "tracing-subscriber 0.3.18",
     "url 2.5.0",
     "url-escape 0.1.1",

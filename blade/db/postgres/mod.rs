@@ -4,6 +4,7 @@ use anyhow::{anyhow, Context};
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
+use diesel_tracing::pg::InstrumentedPgConnection;
 use r2d2::PooledConnection;
 
 mod models;
@@ -12,12 +13,12 @@ mod schema;
 
 #[allow(dead_code)]
 pub struct Postgres {
-    pub(crate) conn: PooledConnection<ConnectionManager<diesel::PgConnection>>,
+    pub(crate) conn: PooledConnection<ConnectionManager<InstrumentedPgConnection>>,
 }
 
 #[allow(dead_code)]
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
-    let mut me = diesel::PgConnection::establish(db_path).context("creating postgres db")?;
+    let mut me = InstrumentedPgConnection::establish(db_path).context("creating postgres db")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
     let path = r.rlocation("_main/blade/db/postgres/migrations");
     let finder: FileBasedMigrations = FileBasedMigrations::from_path(

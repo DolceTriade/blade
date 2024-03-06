@@ -1,7 +1,7 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
-load("@rules_rust//wasm_bindgen/rules_js:defs.bzl", "js_rust_wasm_bindgen")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
+load("@rules_rust//wasm_bindgen/rules_js:defs.bzl", "js_rust_wasm_bindgen")
 load("//nix/bazel:runfiles.bzl", "runfiles")
 
 rust_binary(
@@ -11,6 +11,7 @@ rust_binary(
         "lib.rs",
         "main.rs",
         "routes.rs",
+        "admin.rs",
     ] + glob([
         "routes/**/*.rs",
         "components/**/*.rs",
@@ -52,6 +53,7 @@ rust_binary(
         "@crate//:tokio",
         "@crate//:tokio-stream",
         "@crate//:tracing",
+        "@crate//:tracing-actix-web",
         "@crate//:tracing-subscriber",
         "@crate//:url",
         "@crate//:url-escape",
@@ -83,9 +85,6 @@ rust_shared_library(
     deps = [
         "//blade/state",
         "//blade/tailwindmerge",
-        "@wasm_crate//:tracing",
-        "@wasm_crate//:tracing-web",
-        "@wasm_crate//:tracing-subscriber",
         "@wasm_crate//:ansi-to-html",
         "@wasm_crate//:anyhow",
         "@wasm_crate//:cfg-if",
@@ -103,6 +102,9 @@ rust_shared_library(
         "@wasm_crate//:log",
         "@wasm_crate//:serde",
         "@wasm_crate//:time",
+        "@wasm_crate//:tracing",
+        "@wasm_crate//:tracing-subscriber",
+        "@wasm_crate//:tracing-web",
         "@wasm_crate//:url",
         "@wasm_crate//:url-escape",
         "@wasm_crate//:wasm-bindgen",

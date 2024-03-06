@@ -74,6 +74,12 @@ def rust_dependencies():
                     ],
                 ),
             ],
+            "diesel-tracing": [
+                crate.annotation(
+                    patches = ["@//third_party/rust/patches/diesel-tracing:fix-pgmetadata.patch"],
+                    patch_args = ["-p1"],
+                ),
+            ],
             "linux-raw-sys": [
                 crate.annotation(
                     crate_features = ["prctl"],
@@ -109,6 +115,9 @@ def rust_dependencies():
                 version = "4.4.10",
                 features = ["derive", "wrap_help"],
             ),
+            "derivative": crate.spec(
+                version = "2.2.0",
+            ),
             "diesel": crate.spec(
                 version = "2.1.4",
                 features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35", "r2d2"],
@@ -119,7 +128,7 @@ def rust_dependencies():
             ),
             "diesel-tracing": crate.spec(
                 version = "0.2.2",
-                features = ["sqlite", "postgres"],
+                features = ["sqlite", "postgres", "r2d2"],
             ),
             "futures": crate.spec(
                 version = "0.3.29",
@@ -212,6 +221,10 @@ def rust_dependencies():
             ),
             "tracing-subscriber": crate.spec(
                 version = "0.3.18",
+                features = ["env-filter", "parking_lot"],
+            ),
+            "tracing-actix-web": crate.spec(
+                version = "0.7.9",
             ),
             "url": crate.spec(
                 version = "2.5.0",

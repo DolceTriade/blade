@@ -4,6 +4,7 @@ use anyhow::{anyhow, Context};
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
+use diesel_tracing::sqlite::InstrumentedSqliteConnection;
 use r2d2::PooledConnection;
 
 mod models;
@@ -12,12 +13,12 @@ mod schema;
 
 #[allow(dead_code)]
 pub struct Sqlite {
-    pub(crate) conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+    pub(crate) conn: PooledConnection<ConnectionManager<InstrumentedSqliteConnection>>,
 }
 
 impl Sqlite {
     pub fn new(
-        mut conn: PooledConnection<ConnectionManager<SqliteConnection>>,
+        mut conn: PooledConnection<ConnectionManager<InstrumentedSqliteConnection>>,
     ) -> anyhow::Result<Self> {
         diesel::sql_query("PRAGMA foreign_keys = ON;")
             .execute(&mut conn)
@@ -28,7 +29,7 @@ impl Sqlite {
 
 #[allow(dead_code)]
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
-    let mut me = diesel::SqliteConnection::establish(db_path).context("creating sqlite db")?;
+    let mut me = InstrumentedSqliteConnection::establish(db_path).context("creating sqlite db")?;
     diesel::sql_query("PRAGMA foreign_keys = ON;")
         .execute(&mut me)
         .context("failed to enable foreign keys")?;

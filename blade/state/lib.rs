@@ -109,6 +109,7 @@ pub struct BuildOptions {
 
 cfg_if! {
 if #[cfg(feature = "ssr")] {
+use derivative::Derivative;
 
 pub trait DB {
     fn upsert_shallow_invocation(&mut self, invocation: &InvocationResults) -> anyhow::Result<()>;
@@ -133,8 +134,12 @@ pub trait DBManager: std::marker::Send + std::marker::Sync {
     fn get(&self) -> anyhow::Result<Box<dyn DB>>;
 }
 
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Global {
+    #[derivative(Debug="ignore")]
     pub db_manager: Box<dyn DBManager>,
+    #[derivative(Debug="ignore")]
     pub bytestream_client: bytestream::Client,
     pub allow_local: bool,
     pub retention: Option<std::time::Duration>,

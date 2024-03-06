@@ -37,7 +37,6 @@ pub fn Artifact() -> impl IntoView {
                 let mut file = arc.by_name(zip).map_err(stringify)?;
                 let mut out = "".to_string();
                 file.read_to_string(&mut out).map_err(stringify)?;
-                log::info!("{}", out);
                 return Ok::<String, String>(out);
             }
             Ok(String::from_utf8_lossy(&bytes).to_string())

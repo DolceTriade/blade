@@ -14,6 +14,7 @@ fn target_label(
         Some(build_event_stream::build_event_id::Id::TargetConfigured(t)) => &t.label,
         Some(build_event_stream::build_event_id::Id::TargetCompleted(t)) => &t.label,
         Some(build_event_stream::build_event_id::Id::TestSummary(t)) => &t.label,
+        Some(build_event_stream::build_event_id::Id::TestResult(t)) => &t.label,
         _ => {
             return None;
         }
@@ -112,7 +113,8 @@ impl crate::EventHandler for Handler {
             }
             Some(build_event_stream::build_event::Payload::Aborted(a)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
-                let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
+                let label =
+                    target_label(event).ok_or(anyhow::anyhow!("target not found: {event:#?}"))?;
                 db.update_target_result(
                     invocation_id,
                     &label,
@@ -128,7 +130,8 @@ impl crate::EventHandler for Handler {
             }
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
-                let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
+                let label =
+                    target_label(event).ok_or(anyhow::anyhow!("target not found: {event:#?}"))?;
                 let test = state::Test {
                     name: label.clone(),
                     status: match build_event_stream::TestStatus::try_from(summary.overall_status)?

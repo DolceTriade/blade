@@ -1,6 +1,15 @@
 use std::net::SocketAddr;
 
 use cfg_if::cfg_if;
+use std::io::IsTerminal;
+use tracing::{event, instrument, level_filters::LevelFilter};
+use tracing_actix_web::{DefaultRootSpanBuilder, RootSpanBuilder};
+use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Registry;
+use tracing_subscriber::{
+    prelude::__tracing_subscriber_SubscriberExt, reload::Handle, EnvFilter, Layer,
+};
 pub mod components;
 pub mod routes;
 
@@ -11,12 +20,15 @@ cfg_if! {
         use anyhow::Context;
         use actix_files::Files;
         use actix_web::*;
+        use tracing_actix_web::TracingLogger;
         use clap::*;
         use futures::join;
         use leptos::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use std::sync::Arc;
         use runfiles::Runfiles;
+
+        pub mod admin;
 
         use crate::routes::app::App;
 
@@ -28,6 +40,8 @@ cfg_if! {
             grpc_host: SocketAddr,
             #[arg(short='H', long="http_host", value_name = "HTTP_HOST", default_value="[::]:3000")]
             http_host: SocketAddr,
+            #[arg(short='A', long="admin_host", value_name = "ADMIN_HOST", default_value="[::]:3001")]
+            admin_host: SocketAddr,
             #[arg(short='p', long="db_path", value_name = "DATABASE_PATH", default_value="")]
             db_path: String,
             #[arg(short='d', long="print_message", value_name = "PATTERN", default_value="")]
@@ -42,15 +56,84 @@ cfg_if! {
             session_lock_time: std::time::Duration,
         }
 
+        fn fmt_layer<S>(show_spans: bool) -> Box<dyn Layer<S> + Sync + Send>
+        where S: for<'a> tracing_subscriber::registry::LookupSpan<'a> + tracing::Subscriber{
+            let use_ansi = std::io::stdout().is_terminal();
+            let mut fmt_layer = tracing_subscriber::fmt::layer()
+                .with_ansi(use_ansi)
+                .compact()
+                .with_file(true)
+                .with_line_number(true);
+
+            if show_spans {
+                fmt_layer = fmt_layer.with_span_events(FmtSpan::CLOSE);
+            }
+
+            fmt_layer.boxed()
+        }
+
+        type SpanHandle = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
+        fn init_logging() -> (Handle<EnvFilter, impl Sized>, SpanHandle) {
+            let env_filter = tracing_subscriber::EnvFilter::builder().with_default_directive(LevelFilter::INFO.into()).from_env_lossy();
+            let fmt_layer = fmt_layer(false);
+            let (layer, span_handle) = tracing_subscriber::reload::Layer::new(fmt_layer);
+            let (filter, handle) = tracing_subscriber::reload::Layer::new(env_filter);
+
+            tracing_subscriber::registry().with(layer).with(filter).init();
+
+            (handle, span_handle)
+        }
+
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
-            if std::env::var("RUST_LOG").is_err() {
-                std::env::set_var("RUST_LOG", "info");
-            }
             // install global subscriber configured based on RUST_LOG envvar.
-            tracing_subscriber::fmt::init();
+            let (filter_handle, span_handle) = init_logging();
 
             let args = Args::parse();
+
+            let (filter_tx, mut filter_rx) = tokio::sync::mpsc::channel::<String>(3);
+            let set_filter_fut = tokio::spawn(async move {
+                loop {
+                    match filter_rx.recv().await {
+                        Some(filter) => {
+                            let span = tracing::span!(tracing::Level::INFO, "set_filter", filter=filter);
+                            let _e = span.enter();
+                            tracing::info!("Setting log filter: {filter}");
+                            match tracing_subscriber::filter::EnvFilter::builder().parse(&filter) {
+                                Ok(f) => {
+                                    if let Some(e) = filter_handle.reload(f).err() {
+                                        tracing::error!("error setting filter: {e}");
+                                    }
+                                },
+                                Err(e) => { tracing::error!("error parsing filter: {e}"); },
+                            }
+                        },
+                        None => {
+                            tracing::error!("None filter received by set_filter");
+                            break;
+                        },
+                    }
+                }
+            });
+            let (span_tx, mut span_rx) = tokio::sync::mpsc::channel::<bool>(3);
+            let set_span_fut = tokio::spawn(async move {
+                loop {
+                    match span_rx.recv().await {
+                        Some(enable) => {
+                            let span = tracing::span!(tracing::Level::INFO, "set_span", enable=enable);
+                            let _e = span.enter();
+                            tracing::info!("Setting span enable: {enable}");
+                            if let Some(e) = span_handle.reload(fmt_layer(enable)).err() {
+                                tracing::error!("error setting span enable: {e}");
+                            }
+                        },
+                        None => {
+                            tracing::error!("None filter received by set_span");
+                            break;
+                        },
+                    }
+                }
+            });
 
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
@@ -72,7 +155,7 @@ cfg_if! {
             let state = Arc::new(state::Global { db_manager, allow_local: args.allow_local, bytestream_client: bs, retention: args.retention, session_lock_time: args.session_lock_time });
             let actix_state = state.clone();
             let cleanup_state = state.clone();
-            log::info!("Starting blade server at: {}", addr.to_string());
+            tracing::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
                 let fn_state = actix_state.clone();
@@ -92,17 +175,16 @@ cfg_if! {
                         App,
                     )
                     .app_data(web::Data::new(leptos_options.to_owned()))
-                    .wrap(middleware::Logger::new("%t -- %a %s %U")
-                        .exclude("/")
-                        .exclude("/favicon.ico")
-                        .exclude_regex("/pkg/.*"))
+                    .wrap(TracingLogger::<BladeRootSpanBuilder>::new())
             })
             .disable_signals()
             .bind(&addr)?
             .run();
             let fut2 = bep::run_bes_grpc(args.grpc_host, state, &args.debug_message_pattern);
             let fut3 = periodic_cleanup(cleanup_state);
-            let res = join!(fut1, fut2, fut3);
+            let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx);
+
+            let res = join!(fut1, fut2, fut3, fut4, set_filter_fut, set_span_fut);
             if res.0.is_ok() && res.1.is_ok() {
                 return Ok(());
             }
@@ -114,11 +196,13 @@ cfg_if! {
         }
 
         #[actix_web::get("favicon.ico")]
+        #[instrument]
         async fn favicon() -> actix_web::Result<actix_files::NamedFile> {
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
             Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico"))?)
         }
 
+        #[instrument]
         async fn periodic_cleanup(global: Arc<state::Global>) {
             let Some(interval) = global.retention else { return; };
             let day = std::time::Duration::from_secs(60 * 60 * 24);
@@ -126,14 +210,32 @@ cfg_if! {
             loop {
                 tokio::time::sleep(check_interval).await;
                 let Ok(mut db) = global.db_manager.get() else {
-                    log::warn!("Failed to get DB handle for cleanup");
+                    tracing::warn!("Failed to get DB handle for cleanup");
                     continue;
                 };
                 let Some(since) = std::time::SystemTime::now().checked_sub(interval) else {
-                    log::warn!("Overflow when clean up time");
+                    tracing::warn!("Overflow when clean up time");
                     continue;
                 };
-                log::info!("Cleanup result: {:#?}", db.delete_invocations_since(&since));
+                tracing::info!("Cleanup result: {:#?}", db.delete_invocations_since(&since));
+            }
+        }
+
+        #[derive(Default)]
+        pub(crate) struct BladeRootSpanBuilder;
+
+        impl RootSpanBuilder for BladeRootSpanBuilder {
+            fn on_request_start(request: &dev::ServiceRequest) -> tracing::Span {
+                DefaultRootSpanBuilder::on_request_start(request)
+            }
+
+            fn on_request_end<B: body::MessageBody>(span: tracing::Span, outcome: &std::prelude::v1::Result<dev::ServiceResponse<B>, actix_web::error::Error>) {
+                if let Ok(response) = &outcome {
+                    if response.response().error().is_none() {
+                        event!(tracing::Level::DEBUG, "OK");
+                    }
+                }
+                DefaultRootSpanBuilder::on_request_end(span, outcome)
             }
         }
     }
