@@ -1,0 +1,45 @@
+From ac13a0fc464323c95d8e11a57e182be155a05922 Mon Sep 17 00:00:00 2001
+From: Chris Portela <chris@chrisportela.com>
+Date: Fri, 1 Mar 2024 16:54:43 +0000
+Subject: [PATCH 1/2] Fix type for PgMetadataLookup for r2d2 support
+
+---
+ src/pg.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/pg.rs b/src/pg.rs
+index bddbcc5..bf8ffa0 100644
+--- a/src/pg.rs
++++ b/src/pg.rs
+@@ -61,7 +61,7 @@ impl MultiConnectionHelper for InstrumentedPgConnection {
+     ) -> Option<&mut <Self::Backend as diesel::sql_types::TypeMetadata>::MetadataLookup> {
+         lookup
+             .downcast_mut::<Self>()
+-            .map(|conn| conn as &mut dyn super::PgMetadataLookup)
++            .map(|conn| conn as &mut dyn diesel::pg::PgMetadataLookup)
+     }
+ }
+ 
+
+From d78907704d8575c156fc3341aa67ab92a57aa2af Mon Sep 17 00:00:00 2001
+From: Chris Portela <chris@chrisportela.com>
+Date: Fri, 1 Mar 2024 17:22:37 +0000
+Subject: [PATCH 2/2] Fix missing sql_function import
+
+---
+ src/pg.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/pg.rs b/src/pg.rs
+index bf8ffa0..c106282 100644
+--- a/src/pg.rs
++++ b/src/pg.rs
+@@ -14,7 +14,7 @@ use diesel::query_dsl::{LoadQuery, UpdateAndFetchResults};
+ use diesel::r2d2::R2D2Connection;
+ use diesel::result::{ConnectionError, ConnectionResult, QueryResult};
+ use diesel::{select, Table};
+-use diesel::{sql_query, RunQueryDsl};
++use diesel::{sql_query, sql_function, RunQueryDsl};
+ use tracing::{debug, field, instrument};
+ 
+ // https://www.postgresql.org/docs/12/functions-info.html
