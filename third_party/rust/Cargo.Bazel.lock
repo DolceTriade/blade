@@ -1,5 +1,5 @@
 {
-  "checksum": "05b51517bdfb3a9b40d81de77766e53ed03778df611f1e8d571f37498ffc0f38",
+  "checksum": "1b94a3d2fabd13045a4d6669f621733b322ca43842de765e8fb4226cdf099018",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -5550,6 +5550,10 @@
             {
               "id": "tracing-actix-web 0.7.9",
               "target": "tracing_actix_web"
+            },
+            {
+              "id": "tracing-flame 0.2.0",
+              "target": "tracing_flame"
             },
             {
               "id": "tracing-subscriber 0.3.18",
@@ -18511,6 +18515,60 @@
       },
       "license": "MIT"
     },
+    "tracing-flame 0.2.0": {
+      "name": "tracing-flame",
+      "version": "0.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tracing-flame/0.2.0/download",
+          "sha256": "0bae117ee14789185e129aaee5d93750abe67fdc5a9a62650452bfe4e122a3a9"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tracing_flame",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tracing_flame",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "smallvec"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "lazy_static 1.4.0",
+              "target": "lazy_static"
+            },
+            {
+              "id": "tracing 0.1.40",
+              "target": "tracing"
+            },
+            {
+              "id": "tracing-subscriber 0.3.18",
+              "target": "tracing_subscriber"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.2.0"
+      },
+      "license": "MIT"
+    },
     "tracing-log 0.2.0": {
       "name": "tracing-log",
       "version": "0.2.0",
@@ -21955,6 +22013,7 @@
     "tonic-reflection 0.10.2",
     "tracing 0.1.40",
     "tracing-actix-web 0.7.9",
+    "tracing-flame 0.2.0",
     "tracing-subscriber 0.3.18",
     "url 2.5.0",
     "url-escape 0.1.1",

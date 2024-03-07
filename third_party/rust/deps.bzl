@@ -226,6 +226,9 @@ def rust_dependencies():
             "tracing-actix-web": crate.spec(
                 version = "0.7.9",
             ),
+            "tracing-flame": crate.spec(
+                version = "0.2.0",
+            ),
             "url": crate.spec(
                 version = "2.5.0",
             ),

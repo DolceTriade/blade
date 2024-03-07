@@ -54,6 +54,8 @@ cfg_if! {
             retention: Option<std::time::Duration>,
             #[arg(short='s', long="session_lock_time", value_name = "LOCK_TIME", value_parser = humantime::parse_duration, default_value="5m")]
             session_lock_time: std::time::Duration,
+            #[arg(long="flame", value_name = "FLAME")]
+            flame_path: Option<String>,
         }
 
         fn fmt_layer<S>(show_spans: bool) -> Box<dyn Layer<S> + Sync + Send>
@@ -73,23 +75,34 @@ cfg_if! {
         }
 
         type SpanHandle = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
-        fn init_logging() -> (Handle<EnvFilter, impl Sized>, SpanHandle) {
+        fn init_logging(flame: Option<&String>) -> (Handle<EnvFilter, impl Sized>, SpanHandle, Option<impl Drop>) {
             let env_filter = tracing_subscriber::EnvFilter::builder().with_default_directive(LevelFilter::INFO.into()).from_env_lossy();
             let fmt_layer = fmt_layer(false);
             let (layer, span_handle) = tracing_subscriber::reload::Layer::new(fmt_layer);
             let (filter, handle) = tracing_subscriber::reload::Layer::new(env_filter);
 
-            tracing_subscriber::registry().with(layer).with(filter).init();
 
-            (handle, span_handle)
+            let reg = tracing_subscriber::registry().with(layer).with(filter);
+
+            let mut guard_opt = None;
+            if let Some(flame_path) = flame {
+                let (flame, guard) = tracing_flame::FlameLayer::with_file(flame_path).expect("error creating flame logger");
+                reg.with(flame).init();
+                guard_opt = Some(guard);
+            } else {
+                reg.init();
+            }
+
+
+            (handle, span_handle, guard_opt)
         }
 
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
-            // install global subscriber configured based on RUST_LOG envvar.
-            let (filter_handle, span_handle) = init_logging();
-
             let args = Args::parse();
+            // install global subscriber configured based on RUST_LOG envvar.
+            let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.as_ref());
+
 
             let (filter_tx, mut filter_rx) = tokio::sync::mpsc::channel::<String>(3);
             let set_filter_fut = tokio::spawn(async move {

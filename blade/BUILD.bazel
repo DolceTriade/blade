@@ -7,11 +7,11 @@ load("//nix/bazel:runfiles.bzl", "runfiles")
 rust_binary(
     name = "blade",
     srcs = [
+        "admin.rs",
         "components.rs",
         "lib.rs",
         "main.rs",
         "routes.rs",
-        "admin.rs",
     ] + glob([
         "routes/**/*.rs",
         "components/**/*.rs",
@@ -54,6 +54,7 @@ rust_binary(
         "@crate//:tokio-stream",
         "@crate//:tracing",
         "@crate//:tracing-actix-web",
+        "@crate//:tracing-flame",
         "@crate//:tracing-subscriber",
         "@crate//:url",
         "@crate//:url-escape",
