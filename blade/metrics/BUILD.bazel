@@ -1,0 +1,21 @@
+load("@rules_rust//proto/prost:defs.bzl", "rust_prost_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "metrics",
+    srcs = [
+        "lib.rs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crate//:anyhow",
+        "@crate//:prometheus-client",
+        "@crate//:lazy_static",
+    ],
+)
+
+rust_test(
+    name = "metrics_test",
+    size = "small",
+    crate = ":metrics",
+)

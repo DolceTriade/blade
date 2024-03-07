@@ -4,6 +4,7 @@ use futures::prelude::future::FutureExt;
 use std::net::SocketAddr;
 use tracing::instrument;
 
+
 #[instrument]
 pub async fn run_admin_server(
     admin_host: SocketAddr,
@@ -16,6 +17,7 @@ pub async fn run_admin_server(
             .app_data(web::Data::new(span_channel.clone()))
             .service(set_filter)
             .service(set_span)
+            .service(metrics_handler)
             .wrap(tracing_actix_web::TracingLogger::<
                 super::BladeRootSpanBuilder,
             >::new())
@@ -59,4 +61,14 @@ async fn set_span(
         .context("failed to send span enable")
         .map_err(|e| error::ErrorInternalServerError(format!("{e}")))?;
     HttpResponse::Ok().await
+}
+
+#[get("/admin/metrics")]
+#[instrument]
+async fn metrics_handler() -> Result<HttpResponse> {
+    let body = metrics::openmetrics_string().map_err(|e| error::ErrorInternalServerError(format!("{e}")))?;
+    Ok(HttpResponse::Ok()
+        .content_type("application/openmetrics-text; version=1.0.0; charset=utf-8")
+        .body(body))
+
 }

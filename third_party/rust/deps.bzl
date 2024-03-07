@@ -174,6 +174,9 @@ def rust_dependencies():
             "serde_json": crate.spec(
                 version = "1.0.108",
             ),
+            "prometheus-client": crate.spec(
+                version = "0.22.2",
+            ),
             "prost": crate.spec(
                 version = "0.12.3",
             ),
