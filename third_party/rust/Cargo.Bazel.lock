@@ -1,5 +1,5 @@
 {
-  "checksum": "1b94a3d2fabd13045a4d6669f621733b322ca43842de765e8fb4226cdf099018",
+  "checksum": "6bb716c128152f86d4bbe70d4621d48b2e212f0507856440505b59135aaa4d14",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -18623,6 +18623,49 @@
       },
       "license": "MIT"
     },
+    "tracing-serde 0.1.3": {
+      "name": "tracing-serde",
+      "version": "0.1.3",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/tracing-serde/0.1.3/download",
+          "sha256": "bc6b213177105856957181934e4920de57730fc69bf42c37ee5bb664d406d9e1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "tracing_serde",
+            "crate_root": "src/lib.rs",
+            "srcs": [
+              "**/*.rs"
+            ]
+          }
+        }
+      ],
+      "library_target_name": "tracing_serde",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            },
+            {
+              "id": "tracing-core 0.1.32",
+              "target": "tracing_core"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.3"
+      },
+      "license": "MIT"
+    },
     "tracing-subscriber 0.3.18": {
       "name": "tracing-subscriber",
       "version": "0.3.18",
@@ -18655,18 +18698,22 @@
             "default",
             "env-filter",
             "fmt",
+            "json",
             "matchers",
             "nu-ansi-term",
             "once_cell",
             "parking_lot",
             "regex",
             "registry",
+            "serde",
+            "serde_json",
             "sharded-slab",
             "smallvec",
             "std",
             "thread_local",
             "tracing",
-            "tracing-log"
+            "tracing-log",
+            "tracing-serde"
           ],
           "selects": {}
         },
@@ -18693,6 +18740,14 @@
               "target": "regex"
             },
             {
+              "id": "serde 1.0.186",
+              "target": "serde"
+            },
+            {
+              "id": "serde_json 1.0.108",
+              "target": "serde_json"
+            },
+            {
               "id": "sharded-slab 0.1.7",
               "target": "sharded_slab"
             },
@@ -18715,6 +18770,10 @@
             {
               "id": "tracing-log 0.2.0",
               "target": "tracing_log"
+            },
+            {
+              "id": "tracing-serde 0.1.3",
+              "target": "tracing_serde"
             }
           ],
           "selects": {}

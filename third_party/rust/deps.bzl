@@ -221,7 +221,7 @@ def rust_dependencies():
             ),
             "tracing-subscriber": crate.spec(
                 version = "0.3.18",
-                features = ["env-filter", "parking_lot"],
+                features = ["env-filter", "parking_lot", "json"],
             ),
             "tracing-actix-web": crate.spec(
                 version = "0.7.9",

@@ -56,14 +56,15 @@ cfg_if! {
             session_lock_time: std::time::Duration,
             #[arg(long="flame", value_name = "FLAME")]
             flame_path: Option<String>,
+            #[arg(long="json", value_name="JSON", default_value="false")]
+            json: bool,
         }
 
-        fn fmt_layer<S>(show_spans: bool) -> Box<dyn Layer<S> + Sync + Send>
+        fn fmt_layer<S>(show_spans: bool, json: bool) -> Box<dyn Layer<S> + Sync + Send>
         where S: for<'a> tracing_subscriber::registry::LookupSpan<'a> + tracing::Subscriber{
             let use_ansi = std::io::stdout().is_terminal();
             let mut fmt_layer = tracing_subscriber::fmt::layer()
                 .with_ansi(use_ansi)
-                .compact()
                 .with_file(true)
                 .with_line_number(true);
 
@@ -71,13 +72,17 @@ cfg_if! {
                 fmt_layer = fmt_layer.with_span_events(FmtSpan::CLOSE);
             }
 
-            fmt_layer.boxed()
+            if json {
+                return fmt_layer.json().boxed();
+            }
+
+            fmt_layer.compact().boxed()
         }
 
         type SpanHandle = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
-        fn init_logging(flame: Option<&String>) -> (Handle<EnvFilter, impl Sized>, SpanHandle, Option<impl Drop>) {
+        fn init_logging(flame: Option<&String>, json: bool) -> (Handle<EnvFilter, impl Sized>, SpanHandle, Option<impl Drop>) {
             let env_filter = tracing_subscriber::EnvFilter::builder().with_default_directive(LevelFilter::INFO.into()).from_env_lossy();
-            let fmt_layer = fmt_layer(false);
+            let fmt_layer = fmt_layer(false, json);
             let (layer, span_handle) = tracing_subscriber::reload::Layer::new(fmt_layer);
             let (filter, handle) = tracing_subscriber::reload::Layer::new(env_filter);
 
@@ -101,7 +106,7 @@ cfg_if! {
         async fn main() -> anyhow::Result<()> {
             let args = Args::parse();
             // install global subscriber configured based on RUST_LOG envvar.
-            let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.as_ref());
+            let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.as_ref(), args.json);
 
 
             let (filter_tx, mut filter_rx) = tokio::sync::mpsc::channel::<String>(3);
@@ -136,7 +141,7 @@ cfg_if! {
                             let span = tracing::span!(tracing::Level::INFO, "set_span", enable=enable);
                             let _e = span.enter();
                             tracing::info!("Setting span enable: {enable}");
-                            if let Some(e) = span_handle.reload(fmt_layer(enable)).err() {
+                            if let Some(e) = span_handle.reload(fmt_layer(enable, args.json)).err() {
                                 tracing::error!("error setting span enable: {e}");
                             }
                         },
