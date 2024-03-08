@@ -25,7 +25,7 @@ rust_library(
         "@crate//:async-stream",
         "@crate//:futures",
         "@crate//:lazy_static",
-        "@crate//:log",
+        "@crate//:tracing",
         "@crate//:prost",
         "@crate//:prost-reflect",
         "@crate//:prost-types",

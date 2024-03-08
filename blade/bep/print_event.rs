@@ -28,7 +28,7 @@ impl crate::EventHandler for Handler {
                     .is_match(f.field_descriptor_proto().type_name())
             {
                 let j = serde_json::ser::to_string(&dm).map_err(|_| ())?;
-                log::info!("{}: {}", invocation_id, j);
+                tracing::info!("{}: {}", invocation_id, j);
                 return Err(());
             }
             Ok(())

@@ -95,161 +95,169 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         tokio::spawn(async move {
             let mut session_uuid = "".to_string();
             loop {
-                let maybe_message = in_stream.message().await;
+                let maybe_message = in_stream
+                    .message()
+                    .await
+                    .and_then(|msg| {
+                        msg.ok_or(Status::invalid_argument(
+                            "empty PublishBuildToolEventStreamRequest",
+                        ))
+                    })
+                    .and_then(|msg| {
+                        msg.ordered_build_event
+                            .ok_or(Status::invalid_argument("empty OrderedBuildEvent"))
+                    });
                 match maybe_message {
-                    Ok(res) => {
-                        if let Some(v) = res {
-                            if let Some(obe) = &v.ordered_build_event {
-                                let mut build_ended = false;
-                                let stream_id_or = obe.stream_id.as_ref();
-                                if stream_id_or.is_none() {
-                                    log::warn!("missing stream id");
+                    Ok(obe) => {
+                        let mut build_ended = false;
+                        let stream_id_or = obe.stream_id.as_ref();
+                        if stream_id_or.is_none() {
+                            tracing::warn!("missing stream id");
+                            return;
+                        }
+                        let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone()) else {
+                            continue;
+                        };
+                        if session_uuid.is_empty() {
+                            session_uuid = uuid.clone();
+                            tracing::info!("{}: Stream started", session_uuid);
+                            let mut already_over = false;
+                            if let Ok(mut db) = global.db_manager.as_ref().get() {
+                                if let Ok(inv) = db.get_shallow_invocation(&session_uuid) {
+                                    if let Some(end) = inv.end {
+                                        if std::time::SystemTime::now()
+                                            .duration_since(end)
+                                            .unwrap_or(std::time::Duration::from_secs(0))
+                                            > global.session_lock_time
+                                        {
+                                            already_over = true;
+                                        }
+                                    }
+                                }
+                            }
+                            if already_over {
+                                tracing::warn!("{}: session already ended", session_uuid);
+
+                                let _ = tx
+                                    .send(Err(Status::new(
+                                        tonic::Code::FailedPrecondition,
+                                        "session already ended",
+                                    )))
+                                    .await
+                                    .ok();
+                                return;
+                            }
+
+                            if let Ok(mut db) = global.db_manager.as_ref().get() {
+                                let _ = db
+                                    .update_shallow_invocation(
+                                        &session_uuid,
+                                        Box::new(|i: &mut state::InvocationResults| {
+                                            i.status = state::Status::InProgress;
+                                            Ok(())
+                                        }),
+                                    )
+                                    .ok();
+                            }
+                        }
+
+                        let Some(event) = obe.event.as_ref().and_then(|event| event.event.as_ref())
+                        else {
+                            continue;
+                        };
+                        match event {
+                            build_event::Event::BazelEvent(any) => {
+                                let be_or = build_event_stream::BuildEvent::decode(&any.value[..]);
+                                if be_or.is_err() {
+                                    tracing::error!(
+                                        "{}: invalid event: {:#?}",
+                                        uuid,
+                                        be_or.unwrap_err()
+                                    );
+                                    {
+                                        let _ = unexpected_cleanup_session(
+                                            global.db_manager.as_ref(),
+                                            &uuid,
+                                        )
+                                        .map_err(|e| {
+                                            tracing::error!(
+                                                "{session_uuid}: error closing stream: {e:#?}"
+                                            )
+                                        });
+                                    }
                                     return;
                                 }
-                                let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone())
-                                else {
+                                let Ok(be) = be_or else {
                                     continue;
                                 };
-                                if session_uuid.is_empty() {
-                                    session_uuid = uuid.clone();
-                                    log::info!("{}: Stream started", session_uuid);
-                                    let mut already_over = false;
-                                    if let Ok(mut db) = global.db_manager.as_ref().get() {
-                                        if let Ok(inv) = db.get_shallow_invocation(&session_uuid) {
-                                            if let Some(end) = inv.end {
-                                                if std::time::SystemTime::now()
-                                                    .duration_since(end)
-                                                    .unwrap_or(std::time::Duration::from_secs(0))
-                                                    > global.session_lock_time
-                                                {
-                                                    already_over = true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if already_over {
-                                        log::warn!("{}: session already ended", session_uuid);
-
-                                        let _ = tx
-                                            .send(Err(Status::new(
-                                                tonic::Code::FailedPrecondition,
-                                                "session already ended",
-                                            )))
-                                            .await
-                                            .ok();
-                                        return;
-                                    }
-
-                                    if let Ok(mut db) = global.db_manager.as_ref().get() {
-                                        let _ = db
-                                            .update_shallow_invocation(
-                                                &session_uuid,
-                                                Box::new(|i: &mut state::InvocationResults| {
-                                                    i.status = state::Status::InProgress;
-                                                    Ok(())
-                                                }),
+                                match be.payload.as_ref() {
+                                    Some(build_event_stream::build_event::Payload::Finished(f)) => {
+                                        let success = f
+                                            .exit_code
+                                            .as_ref()
+                                            .unwrap_or(
+                                                &build_event_stream::build_finished::ExitCode {
+                                                    name: "idk".into(),
+                                                    code: 1,
+                                                },
                                             )
-                                            .ok();
+                                            .code
+                                            == 0;
+                                        let _ = session_result(
+                                            global.db_manager.as_ref(),
+                                            &uuid,
+                                            success,
+                                        )
+                                        .map_err(|e| {
+                                            tracing::error!(
+                                                "{session_uuid}: error closing stream: {e:#?}"
+                                            )
+                                        });
                                     }
-                                }
-
-                                let Some(event) =
-                                    obe.event.as_ref().and_then(|event| event.event.as_ref())
-                                else {
-                                    continue;
-                                };
-                                match event {
-                                    build_event::Event::BazelEvent(any) => {
-                                        let be_or =
-                                            build_event_stream::BuildEvent::decode(&any.value[..]);
-                                        if be_or.is_err() {
-                                            log::error!(
-                                                "{}: invalid event: {:#?}",
-                                                uuid,
-                                                be_or.unwrap_err()
-                                            );
-                                            {
-                                                let _ = unexpected_cleanup_session(
-                                                    global.db_manager.as_ref(),
-                                                    &uuid,
-                                                )
-                                                .map_err(|e| {
-                                                    log::error!("{session_uuid}: error closing stream: {e:#?}")
-                                                });
+                                    Some(_) => {
+                                        for v in &*handlers {
+                                            if let Err(e) = v.handle_event(
+                                                global.db_manager.as_ref(),
+                                                &uuid,
+                                                &be,
+                                            ) {
+                                                tracing::warn!("{}: {:#?}", session_uuid, e);
                                             }
-                                            return;
                                         }
-                                        let Ok(be) = be_or else {
-                                            continue;
-                                        };
-                                        match be.payload.as_ref() {
-                                            Some(
-                                                build_event_stream::build_event::Payload::Finished(
-                                                    f,
-                                                ),
-                                            ) => {
-                                                let success = f.exit_code.as_ref().unwrap_or(&build_event_stream::build_finished::ExitCode { name: "idk".into(), code: 1 }).code == 0;
-                                                let _ = session_result(
-                                                    global.db_manager.as_ref(),
-                                                    &uuid,
-                                                    success,
-                                                )
-                                                .map_err(|e| {
-                                                    log::error!("{session_uuid}: error closing stream: {e:#?}")
-                                                });
-                                            }
-                                            Some(_) => {
-                                                for v in &*handlers {
-                                                    if let Err(e) = v.handle_event(
-                                                        global.db_manager.as_ref(),
-                                                        &uuid,
-                                                        &be,
-                                                    ) {
-                                                        log::warn!("{}: {:#?}", session_uuid, e);
-                                                    }
-                                                }
-                                            }
-                                            _ => {}
-                                        }
-                                    }
-                                    build_event::Event::ComponentStreamFinished(_) => {
-                                        build_ended = true;
                                     }
                                     _ => {}
                                 }
-                                let _ = tx
-                                    .send(Ok(PublishBuildToolEventStreamResponse {
-                                        sequence_number: obe.sequence_number,
-                                        stream_id: obe.stream_id.clone(),
-                                    }))
-                                    .await
-                                    .map_err(|e| {
-                                        log::warn!(
-                                            "{}: failed to send message: {:#?}",
-                                            session_uuid,
-                                            e
-                                        );
-                                        build_ended = true;
-                                    });
-                                if build_ended {
-                                    log::info!("{}: Build over", session_uuid);
-                                    return;
-                                }
-                            } else {
-                                log::info!("{}: Party over", session_uuid);
-                                return;
                             }
+                            build_event::Event::ComponentStreamFinished(_) => {
+                                build_ended = true;
+                            }
+                            _ => {}
+                        }
+                        let send_fail = tx
+                            .send(Ok(PublishBuildToolEventStreamResponse {
+                                sequence_number: obe.sequence_number,
+                                stream_id: obe.stream_id.clone(),
+                            }))
+                            .await
+                            .inspect_err(|e| {
+                                tracing::warn!("{}: failed to send message: {:#?}", session_uuid, e)
+                            })
+                            .map(|_| false)
+                            .unwrap_or(true);
+                        if build_ended || send_fail {
+                            tracing::info!("{}: Build over", session_uuid);
+                            return;
                         }
                     }
                     Err(err) => {
-                        log::error!("{}: Error: {}", session_uuid, err);
+                        tracing::error!("{}: Error: {}", session_uuid, err);
                         if !session_uuid.is_empty() {
                             let _ = unexpected_cleanup_session(
                                 global.db_manager.as_ref(),
                                 &session_uuid,
                             )
                             .map_err(|e| {
-                                log::error!("{session_uuid}: error closing stream: {e:#?}")
+                                tracing::error!("{session_uuid}: error closing stream: {e:#?}")
                             });
                         }
                         drop(tx);
