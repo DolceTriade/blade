@@ -3,12 +3,19 @@ use anyhow::Result;
 use build_event_stream_proto::*;
 use build_proto::google::devtools::build::v1::*;
 use prost::Message;
+use regex::Regex;
 use state::DBManager;
 use std::net::SocketAddr;
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::Mutex;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tonic::{transport::Server, Response, Status};
+use tracing::instrument;
+use tracing::span;
+use tracing::Instrument;
+use tracing::Level;
 
 mod buildinfo;
 mod options;
@@ -73,6 +80,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     type PublishBuildToolEventStreamStream =
         ReceiverStream<Result<PublishBuildToolEventStreamResponse, Status>>;
 
+    #[instrument(skip_all)]
     async fn publish_lifecycle_event(
         &self,
         _request: tonic::Request<
@@ -83,6 +91,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         return Ok(Response::new(empty_proto::google::protobuf::Empty {}));
     }
 
+    #[instrument(skip_all)]
     async fn publish_build_tool_event_stream(
         &self,
         request: tonic::Request<tonic::Streaming<PublishBuildToolEventStreamRequest>>,
@@ -94,6 +103,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
             let mut session_uuid = "".to_string();
+            let span = tracing::span::Span::current();
             loop {
                 let maybe_message = in_stream
                     .message()
@@ -120,7 +130,8 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                         };
                         if session_uuid.is_empty() {
                             session_uuid = uuid.clone();
-                            tracing::info!("{}: Stream started", session_uuid);
+                            span.record("session_uuid", &session_uuid);
+                            tracing::info!("Stream started");
                             let mut already_over = false;
                             if let Ok(mut db) = global.db_manager.as_ref().get() {
                                 if let Ok(inv) = db.get_shallow_invocation(&session_uuid) {
@@ -136,7 +147,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                 }
                             }
                             if already_over {
-                                tracing::warn!("{}: session already ended", session_uuid);
+                                tracing::warn!("session already ended");
 
                                 let _ = tx
                                     .send(Err(Status::new(
@@ -170,8 +181,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                 let be_or = build_event_stream::BuildEvent::decode(&any.value[..]);
                                 if be_or.is_err() {
                                     tracing::error!(
-                                        "{}: invalid event: {:#?}",
-                                        uuid,
+                                        "invalid event: {:#?}",
                                         be_or.unwrap_err()
                                     );
                                     {
@@ -221,7 +231,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                                                 &uuid,
                                                 &be,
                                             ) {
-                                                tracing::warn!("{}: {:#?}", session_uuid, e);
+                                                tracing::warn!("{:#?}", e);
                                             }
                                         }
                                     }
@@ -240,24 +250,29 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                             }))
                             .await
                             .inspect_err(|e| {
-                                tracing::warn!("{}: failed to send message: {:#?}", session_uuid, e)
+                                tracing::warn!("failed to send message: {:#?}", e)
                             })
                             .map(|_| false)
                             .unwrap_or(true);
                         if build_ended || send_fail {
-                            tracing::info!("{}: Build over", session_uuid);
+                            tracing::info!("Build over");
                             return;
                         }
                     }
                     Err(err) => {
-                        tracing::error!("{}: Error: {}", session_uuid, err);
+                        // Tonic gives us this scary message for disconnects. It's really just a disconnect.
+                        if err.message().contains("error reading a body from connection: stream closed because of a broken pipe") {
+                            tracing::warn!("Client closed stream. Closing session.")
+                        } else {
+                            tracing::error!("Error: {}", err);
+                        }
                         if !session_uuid.is_empty() {
                             let _ = unexpected_cleanup_session(
                                 global.db_manager.as_ref(),
                                 &session_uuid,
                             )
                             .map_err(|e| {
-                                tracing::error!("{session_uuid}: error closing stream: {e:#?}")
+                                tracing::error!("error closing stream: {e:#?}")
                             });
                         }
                         drop(tx);
@@ -265,31 +280,30 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                     }
                 }
             }
-        });
+        }.instrument(span!(Level::INFO, "bep_grpc_stream", "session_uuid" = tracing::field::Empty)));
         let out_stream = ReceiverStream::new(rx);
         return Ok(Response::new(out_stream));
     }
 }
 
+#[instrument(skip_all)]
 pub async fn run_bes_grpc(
     host: SocketAddr,
     state: Arc<state::Global>,
-    print_message_re: &str,
+    print_message_re: Arc<Mutex<Regex>>,
 ) -> Result<()> {
     let reflect = tonic_reflection::server::Builder::configure()
         .register_file_descriptor_set(*proto_registry::DESCRIPTORS.clone())
         .build()?;
-    let mut handlers: Vec<Box<dyn EventHandler + Sync + Send>> = vec![
+    let handlers: Vec<Box<dyn EventHandler + Sync + Send>> = vec![
         Box::new(progress::Handler {}),
         Box::new(target::Handler {}),
         Box::new(buildinfo::Handler {}),
         Box::new(options::Handler {}),
+        Box::new(print_event::Handler {
+            message_re: print_message_re,
+        }),
     ];
-    if !print_message_re.is_empty() {
-        handlers.push(Box::new(print_event::Handler {
-            message_re: regex::Regex::new(print_message_re).unwrap(),
-        }));
-    }
     proto_registry::init_global_descriptor_pool()?;
     let server = BuildEventService {
         state,
@@ -304,4 +318,43 @@ pub async fn run_bes_grpc(
         .serve(host)
         .await
         .context("error starting grpc server")
+}
+
+pub struct RegexHandle {
+    enabled: AtomicBool,
+    regex: Mutex<regex::Regex>,
+}
+
+impl RegexHandle {
+    pub fn new(re: &str) -> anyhow::Result<Self> {
+        Ok(Self {
+            enabled: AtomicBool::new(!re.is_empty()),
+            regex: Mutex::new(regex::Regex::new(re)?),
+        })
+    }
+
+    pub fn enabled(&self) -> bool {
+        self.enabled.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
+    pub fn update_regex(&mut self, re: &str) -> anyhow::Result<()> {
+        if re.is_empty() {
+            self.enabled
+                .store(false, std::sync::atomic::Ordering::Relaxed);
+            return Ok(());
+        }
+        let mut r = self.regex.lock().unwrap();
+        *r = regex::Regex::new(re)?;
+        self.enabled
+            .store(true, std::sync::atomic::Ordering::Relaxed);
+        Ok(())
+    }
+
+    pub fn is_match(&self, text: &str) -> bool {
+        if !self.enabled.load(std::sync::atomic::Ordering::Relaxed) {
+            return false;
+        }
+        let r = self.regex.lock().unwrap();
+        r.is_match(text)
+    }
 }

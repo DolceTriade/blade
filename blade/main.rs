@@ -1,5 +1,6 @@
 use std::fmt::Write;
 use std::net::SocketAddr;
+use std::sync::Mutex;
 
 use actix_web::body::MessageBody;
 use actix_web::dev::ServiceResponse;
@@ -258,9 +259,10 @@ cfg_if! {
             .disable_signals()
             .bind(&addr)?
             .run();
-            let fut2 = bep::run_bes_grpc(args.grpc_host, state, &args.debug_message_pattern);
+            let re_handle = Arc::new(Mutex::new(regex::Regex::new(&args.debug_message_pattern)?));
+            let fut2 = bep::run_bes_grpc(args.grpc_host, state, re_handle.clone());
             let fut3 = periodic_cleanup(cleanup_state);
-            let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx);
+            let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx, re_handle);
 
             let res = join!(fut1, fut2, fut3, fut4, set_filter_fut, set_span_fut);
             if res.0.is_ok() && res.1.is_ok() {
