@@ -92,14 +92,17 @@ def rust_dependencies():
             ],
         },
         packages = {
+            "ahash": crate.spec(
+                version = "0.8.11",
+            ),
             "ansi-to-html": crate.spec(
                 version = "0.1.3",
             ),
             "actix-files": crate.spec(
-                version = "0.6",
+                version = "0.6.5",
             ),
             "actix-web": crate.spec(
-                version = "4",
+                version = "4.5.1",
                 features = ["macros"],
             ),
             "anyhow": crate.spec(
@@ -339,7 +342,7 @@ def rust_dependencies():
                 version = "0.2.31",
             ),
             "ahash": crate.spec(
-                version = "0.7.6",
+                version = "0.8.11",
                 default_features = False,
                 features = ["std"],
             ),

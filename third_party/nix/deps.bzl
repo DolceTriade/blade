@@ -60,4 +60,5 @@ def third_party_nix_deps():
         build_file_content = """exports_files(["closure.tar"])""",
         repository = "@nixpkgs",
         nix_file = "//third_party/nix/oci_base:default.nix",
+        nixopts = ["--show-trace"],
     )

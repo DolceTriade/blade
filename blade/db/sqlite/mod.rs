@@ -307,6 +307,7 @@ impl state::DB for Sqlite {
             .map(|_| {})
             .context("failed to update test result")
     }
+
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()> {
         diesel::delete(schema::Invocations::table.find(id))
             .execute(&mut self.conn)

@@ -1,7 +1,6 @@
 use anyhow::Context;
 use build_event_stream_proto::build_event_stream;
 use state::DBManager;
-use std::option::Option;
 
 pub(crate) struct Handler {}
 

@@ -2,7 +2,6 @@
   og = import <nixpkgs> {};
   fenix = import <fenix> {pkgs = og;};
   pkgs = import <nixpkgs> {
-    system = builtins.currentSystem;
     overlays = [
       (self: super: {
         inherit fenix;
@@ -10,14 +9,14 @@
     ];
   };
   rust = with pkgs.fenix;
-  with stable;
+  with latest;
     combine [
       cargo
       clippy
       rust-src
       rustc
       rustfmt
-      targets.wasm32-unknown-unknown.stable.rust-std
+      targets.wasm32-unknown-unknown.latest.rust-std
       rust-analyzer
     ];
   wasm =

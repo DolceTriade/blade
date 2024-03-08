@@ -52,10 +52,7 @@ pub fn new(p: &str) -> anyhow::Result<PgHarness> {
         let lis = TcpListener::bind("127.0.0.1:0")?;
         let addr = lis.local_addr()?;
 
-        let mut f = OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(config_path)?;
+        let mut f = OpenOptions::new().append(true).open(config_path)?;
         port = addr.port();
         writeln!(f, "\nport = {}", addr.port())?;
     }

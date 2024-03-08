@@ -5,10 +5,7 @@ use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
 use leptos::*;
 use leptos_router::A;
-use state;
 use std::collections::HashMap;
-use std::string::ToString;
-use url_escape;
 use web_sys::KeyboardEvent;
 
 fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {

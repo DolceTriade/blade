@@ -135,6 +135,7 @@ impl Test {
     pub fn gen_id(invocation_id: &str, name: &str) -> String {
         [invocation_id, name].join("|")
     }
+
     pub fn from_state(invocation_id: &str, t: &state::Test) -> anyhow::Result<Self> {
         Ok(Self {
             id: Self::gen_id(invocation_id, &t.name),
@@ -202,6 +203,7 @@ impl TestRun {
     ) -> String {
         [invocation_id, test_id, run, shard, attempt].join("|")
     }
+
     pub fn from_state(
         invocation_id: &str,
         test_id: &str,

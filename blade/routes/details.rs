@@ -152,7 +152,7 @@ fn BuildMetadata(md: HashMap<String, String>) -> impl IntoView {
                     view! {
                         <ListItem hide=Signal::derive(|| false)>
                             <span class="text-sm font-mono">
-                                {o.0.clone()} => {linkify(o.1.clone())}
+                                {o.0.clone()}=> {linkify(o.1.clone())}
                             </span>
                         </ListItem>
                     }

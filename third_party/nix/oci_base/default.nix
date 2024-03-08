@@ -4,7 +4,6 @@ let
     postgresql.lib
     sqlite.out
     openssl
-    libgcc.lib
   ];
   closure = with pkgs; builtins.toString (lib.strings.splitString "\n" (builtins.readFile "${closureInfo {rootPaths = packages;}}/store-paths"));
 in

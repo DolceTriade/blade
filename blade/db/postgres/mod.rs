@@ -246,6 +246,7 @@ impl state::DB for Postgres {
             .map(|res| res.into_state())
             .context("failed to get shallow invocation")
     }
+
     fn update_target_result(
         &mut self,
         invocation_id: &str,
@@ -311,6 +312,7 @@ impl state::DB for Postgres {
             .execute(&mut self.conn)
             .context(format!("failed to delete invocation since {:#?}", ot))
     }
+
     fn insert_options(&mut self, inv_id: &str, opts: &state::BuildOptions) -> anyhow::Result<()> {
         use schema::options::dsl::*;
         let mut vals = vec![];

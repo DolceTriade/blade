@@ -22,16 +22,17 @@
         inherit system;
         overlays = [fenix.overlays.default];
       };
+
       bazelEnv = import ./nix/bazel/env.nix {inherit pkgs;};
       rust = with pkgs.fenix;
-      with stable;
+      with latest;
         combine [
           cargo
           clippy
           rust-src
           rustc
           rustfmt
-          targets.wasm32-unknown-unknown.stable.rust-std
+          targets.wasm32-unknown-unknown.latest.rust-std
           rust-analyzer
         ];
 

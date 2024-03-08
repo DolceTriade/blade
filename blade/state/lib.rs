@@ -2,7 +2,6 @@ use cfg_if::cfg_if;
 use serde::*;
 use std::collections::HashMap;
 use std::default::Default;
-use std::option::Option;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Status {

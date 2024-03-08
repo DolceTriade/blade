@@ -4,9 +4,9 @@ use anyhow::Context;
 use lazy_static::lazy_static;
 use prometheus_client::{encoding::text::encode, registry::Metric};
 
-
 lazy_static! {
-    pub static ref REGISTRY: Mutex<prometheus_client::registry::Registry> = Mutex::new(prometheus_client::registry::Registry::default());
+    pub static ref REGISTRY: Mutex<prometheus_client::registry::Registry> =
+        Mutex::new(prometheus_client::registry::Registry::default());
 }
 
 pub fn register_metric<N: Into<String>, H: Into<String>>(name: N, help: H, metric: impl Metric) {
@@ -17,7 +17,9 @@ pub fn register_metric<N: Into<String>, H: Into<String>>(name: N, help: H, metri
 pub fn openmetrics_string() -> anyhow::Result<String> {
     let mut ret: String = "".to_string();
     let r = REGISTRY.lock().unwrap();
-    encode(&mut ret, &r).map(|_|ret ).context("failed to generate metrics")
+    encode(&mut ret, &r)
+        .map(|_| ret)
+        .context("failed to generate metrics")
 }
 
 #[cfg(test)]

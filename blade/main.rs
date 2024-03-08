@@ -10,7 +10,9 @@ use tracing_subscriber::Registry;
 use tracing_subscriber::{
     prelude::__tracing_subscriber_SubscriberExt, reload::Handle, EnvFilter, Layer,
 };
+#[allow(clippy::empty_docs)]
 pub mod components;
+#[allow(clippy::empty_docs)]
 pub mod routes;
 
 // boilerplate to run in different modes

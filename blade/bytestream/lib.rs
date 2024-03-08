@@ -117,6 +117,7 @@ mod test {
         ) -> std::result::Result<tonic::Response<super::WriteResponse>, tonic::Status> {
             todo!()
         }
+
         async fn query_write_status(
             &self,
             _request: tonic::Request<super::QueryWriteStatusRequest>,

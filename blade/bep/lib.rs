@@ -70,6 +70,9 @@ fn session_result(
 
 #[tonic::async_trait]
 impl publish_build_event_server::PublishBuildEvent for BuildEventService {
+    type PublishBuildToolEventStreamStream =
+        ReceiverStream<Result<PublishBuildToolEventStreamResponse, Status>>;
+
     async fn publish_lifecycle_event(
         &self,
         _request: tonic::Request<
@@ -79,9 +82,6 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     {
         return Ok(Response::new(empty_proto::google::protobuf::Empty {}));
     }
-
-    type PublishBuildToolEventStreamStream =
-        ReceiverStream<Result<PublishBuildToolEventStreamResponse, Status>>;
 
     async fn publish_build_tool_event_stream(
         &self,

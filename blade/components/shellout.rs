@@ -1,4 +1,3 @@
-use ansi_to_html;
 use leptos::*;
 use leptos_dom::html::*;
 
