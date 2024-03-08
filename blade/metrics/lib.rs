@@ -5,13 +5,19 @@ use lazy_static::lazy_static;
 use prometheus_client::{encoding::text::encode, registry::Metric};
 
 lazy_static! {
-    pub static ref REGISTRY: Mutex<prometheus_client::registry::Registry> =
+    static ref REGISTRY: Mutex<prometheus_client::registry::Registry> =
         Mutex::new(prometheus_client::registry::Registry::default());
 }
 
-pub fn register_metric<N: Into<String>, H: Into<String>>(name: N, help: H, metric: impl Metric) {
+pub fn register_metric<N, H, M>(name: N, help: H, metric: M) -> M
+where
+    N: Into<String>,
+    H: Into<String>,
+    M: Metric + Clone,
+{
     let mut r = REGISTRY.lock().unwrap();
-    r.register(name, help, metric);
+    r.register(name, help, metric.clone());
+    metric
 }
 
 pub fn openmetrics_string() -> anyhow::Result<String> {
@@ -28,8 +34,11 @@ mod test {
 
     #[test]
     fn test_register() {
-        let c = prometheus_client::metrics::counter::Counter::<u64>::default();
-        register_metric("metric", "help", c.clone());
+        let c = register_metric(
+            "metric",
+            "help",
+            prometheus_client::metrics::counter::Counter::<u64>::default(),
+        );
         let enc1 = openmetrics_string().unwrap();
         assert!(enc1.contains("metric_total 0"));
         c.inc();

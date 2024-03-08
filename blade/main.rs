@@ -1,8 +1,14 @@
+use std::fmt::Write;
 use std::net::SocketAddr;
 
+use actix_web::body::MessageBody;
+use actix_web::dev::ServiceResponse;
+use actix_web::http::{Method, StatusCode};
 use cfg_if::cfg_if;
+use prometheus_client::encoding::{EncodeLabelSet, EncodeLabelValue};
 use std::io::IsTerminal;
-use tracing::{event, instrument, level_filters::LevelFilter};
+use tracing::Span;
+use tracing::{instrument, level_filters::LevelFilter};
 use tracing_actix_web::{DefaultRootSpanBuilder, RootSpanBuilder};
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -29,10 +35,62 @@ cfg_if! {
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use std::sync::Arc;
         use runfiles::Runfiles;
+        use lazy_static::lazy_static;
+        use prometheus_client::metrics::family::Family;
+        use prometheus_client::metrics::counter::Counter;
 
         pub mod admin;
 
         use crate::routes::app::App;
+
+        lazy_static! {
+            static ref API_ERRORS: Family::<APIErrorLabels, Counter> = metrics::register_metric("blade_http_errors", "Actix API requests errors", Family::default());
+            static ref API_REQUESTS: Family::<APIRequestLabels, Counter> = metrics::register_metric("blade_http_requests", "Actix API requests", Family::default());
+        }
+
+        #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+        struct HTTPMethod(Method);
+
+        impl EncodeLabelValue for HTTPMethod {
+            fn encode(&self, encoder: &mut prometheus_client::encoding::LabelValueEncoder) -> std::prelude::v1::Result<(), std::fmt::Error> {
+                encoder.write_str(self.0.as_str())
+            }
+        }
+
+        impl From<Method> for HTTPMethod {
+            fn from(value: Method) -> Self {
+                Self(value)
+            }
+        }
+
+        #[derive(Clone, Debug, Hash, PartialEq, Eq)]
+        struct HTTPStatusCode(StatusCode);
+
+        impl EncodeLabelValue for HTTPStatusCode {
+            fn encode(&self, encoder: &mut prometheus_client::encoding::LabelValueEncoder) -> std::prelude::v1::Result<(), std::fmt::Error> {
+                encoder.write_str(self.0.as_str())
+            }
+        }
+
+        impl From<StatusCode> for HTTPStatusCode {
+            fn from(value: StatusCode) -> Self {
+                Self(value)
+            }
+        }
+
+        #[derive(Clone, Debug, Hash, PartialEq, Eq, EncodeLabelSet)]
+        struct APIRequestLabels {
+            method: HTTPMethod,
+            path: String
+        }
+
+        #[derive(Clone, Debug, Hash, PartialEq, Eq, EncodeLabelSet)]
+        struct APIErrorLabels {
+            method: HTTPMethod,
+            path: String,
+            code: HTTPStatusCode
+        }
+
 
         #[derive(Parser)]
         #[command(name = "Blade")]
@@ -249,13 +307,51 @@ cfg_if! {
                 DefaultRootSpanBuilder::on_request_start(request)
             }
 
-            fn on_request_end<B: body::MessageBody>(span: tracing::Span, outcome: &std::prelude::v1::Result<dev::ServiceResponse<B>, actix_web::error::Error>) {
-                if let Ok(response) = &outcome {
-                    if response.response().error().is_none() {
-                        event!(tracing::Level::DEBUG, "OK");
+            fn on_request_end<B: MessageBody>(span: Span, outcome: &Result<ServiceResponse<B>, actix_web::error::Error>) {
+                match &outcome {
+                    Ok(response) => {
+                        let method = response.request().method().clone();
+                        let path = response.request().match_pattern().unwrap_or("unknown".to_string());
+                        API_REQUESTS.get_or_create(&APIRequestLabels{ method: method.clone().into(), path: path.clone() }).inc();
+                        if let Some(error) = response.response().error() {
+                            // use the status code already constructed for the outgoing HTTP response
+                            API_ERRORS.get_or_create(&APIErrorLabels{ method: method.into(), code: response.status().into(), path: path.clone()}).inc();
+                            handle_error(span, response.status(), error.as_response_error());
+                        } else {
+                            if !response.response().status().is_success() {
+                                API_ERRORS.get_or_create(&APIErrorLabels{ method: method.into(), code: response.status().into(), path: path.clone()}).inc();
+                            }
+                            let code: i32 = response.response().status().as_u16().into();
+                            span.record("http.status_code", code);
+                            span.record("otel.status_code", "OK");
+                        }
                     }
-                }
-                DefaultRootSpanBuilder::on_request_end(span, outcome)
+                    Err(error) => {
+                        let method = Method::TRACE;
+                        let path = "unknown";
+                        API_REQUESTS.get_or_create(&APIRequestLabels{ method: method.clone().into(), path: path.to_string() }).inc();
+                        let response_error = error.as_response_error();
+                        API_ERRORS.get_or_create(&APIErrorLabels{ method: method.into(), code: response_error.status_code().into(), path: path.to_string()}).inc();
+                        handle_error(span, response_error.status_code(), response_error);
+                    }
+                };
+            }
+        }
+
+        fn handle_error(span: Span, status_code: StatusCode, response_error: &dyn ResponseError) {
+            // pre-formatting errors is a workaround for https://github.com/tokio-rs/tracing/issues/1565
+            let display = format!("{response_error}");
+            let debug = format!("{response_error:?}");
+            span.record("exception.message", &tracing::field::display(display));
+            span.record("exception.details", &tracing::field::display(debug));
+            let code: i32 = status_code.as_u16().into();
+
+            span.record("http.status_code", code);
+
+            if status_code.is_client_error() {
+                span.record("otel.status_code", "OK");
+            } else {
+                span.record("otel.status_code", "ERROR");
             }
         }
     }
