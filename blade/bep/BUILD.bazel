@@ -30,6 +30,7 @@ rust_library(
         "@crate//:prost",
         "@crate//:prost-reflect",
         "@crate//:prost-types",
+        "@crate//:prometheus-client",
         "@crate//:scopeguard",
         "@crate//:serde",
         "@crate//:serde_json",
