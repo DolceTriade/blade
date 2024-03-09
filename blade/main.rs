@@ -237,10 +237,8 @@ cfg_if! {
             tracing::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
-                let fn_state = actix_state.clone();
                 let rt_state = actix_state.clone();
                 App::new()
-                    .route("/api/{tail:.*}", leptos_actix::handle_server_fns_with_context(move|| provide_context(fn_state.clone())))
                     // serve JS/WASM/CSS from `pkg`
                     .service(Files::new("/pkg", pkg.clone()))
                     // serve other assets from the `assets` directory
