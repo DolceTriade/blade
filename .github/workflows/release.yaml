@@ -24,4 +24,4 @@ jobs:
       - uses: HatsuneMiku3939/direnv-action@v1
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
-      - run: bazel run -c opt --embed_label="$(git describe --tags HEAD)" //blade:blade_push
+      - run: bazel run --config=release -c opt --embed_label="$(git describe --tags HEAD)" //blade:blade_push

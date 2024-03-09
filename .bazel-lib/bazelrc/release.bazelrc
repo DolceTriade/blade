@@ -1,0 +1,4 @@
+build:release --@rules_rust//:extra_exec_rustc_flags=-Copt-level=3 
+build:release --@rules_rust//:extra_exec_rustc_flags=-Cembed-bitcode=yes 
+build:release --@rules_rust//:extra_exec_rustc_flags=-Clto=thin 
+build:release --@rules_rust//:extra_exec_rustc_flags=-Zdylib-lto
