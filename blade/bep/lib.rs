@@ -32,10 +32,26 @@ mod progress;
 mod target;
 
 lazy_static! {
-    static ref TOTAL_STREAMS: Counter::<u64> = metrics::register_metric("blade_bep_streams", "Total number of streams", Counter::default());
-    static ref TOTAL_STREAMS_ERRORS: Family::<ErrorLabels, Counter> = metrics::register_metric("blade_bep_stream_errors", "Total number of stream errors", Family::default());
-    static ref MESSAGE_HANDLER_ERRORS: Counter::<u64> = metrics::register_metric("blade_bep_message_handler_errors", "Total number of errors returned by the message handlers", Counter::default());
-    static ref ACTIVE_STREAMS: Gauge::<u32, AtomicU32> = metrics::register_metric("blade_bep_active_streams", "Total number of active streams", Gauge::default());
+    static ref TOTAL_STREAMS: Counter::<u64> = metrics::register_metric(
+        "blade_bep_streams",
+        "Total number of streams",
+        Counter::default()
+    );
+    static ref TOTAL_STREAMS_ERRORS: Family::<ErrorLabels, Counter> = metrics::register_metric(
+        "blade_bep_stream_errors",
+        "Total number of stream errors",
+        Family::default()
+    );
+    static ref MESSAGE_HANDLER_ERRORS: Counter::<u64> = metrics::register_metric(
+        "blade_bep_message_handler_errors",
+        "Total number of errors returned by the message handlers",
+        Counter::default()
+    );
+    static ref ACTIVE_STREAMS: Gauge::<u32, AtomicU32> = metrics::register_metric(
+        "blade_bep_active_streams",
+        "Total number of active streams",
+        Gauge::default()
+    );
 }
 
 trait EventHandler {
@@ -362,7 +378,10 @@ struct ErrorLabels {
 struct StatusCode(tonic::Code);
 
 impl EncodeLabelValue for StatusCode {
-    fn encode(&self, encoder: &mut prometheus_client::encoding::LabelValueEncoder) -> std::prelude::v1::Result<(), std::fmt::Error> {
+    fn encode(
+        &self,
+        encoder: &mut prometheus_client::encoding::LabelValueEncoder,
+    ) -> std::prelude::v1::Result<(), std::fmt::Error> {
         encoder.write_str(&format!("{:#?}", self.0))
     }
 }
