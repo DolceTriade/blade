@@ -105,7 +105,7 @@ pub fn SummaryHeader() -> impl IntoView {
                         <span class="text-lg">
                             <b>{cmd}</b>
                         </span>
-                        <span class="inline-flex max-w-1/4 overflow-auto">{patterns}</span>
+                        <span class="inline-flex max-w-1/2 overflow-auto whitespace-nowrap">{patterns}</span>
                         <span>@</span>
                         <span class="text-grey-400 text-sm">{start}</span>
                     </div>
