@@ -236,12 +236,17 @@ impl state::DB for Sqlite {
     }
 
     fn get_progress(&mut self, invocation_id: &str) -> anyhow::Result<String> {
-        schema::Invocations::table
+        match schema::Invocations::table
             .select(models::Invocation::as_select())
             .filter(schema::Invocations::id.eq(invocation_id))
             .get_result(&mut self.conn)
-            .map(|res: models::Invocation| res.output)
-            .context("failed to get progress")
+        {
+            Ok(res) => Ok(res.output),
+            Err(e) => match e {
+                diesel::result::Error::NotFound => Ok("".to_string()),
+                _ => Err(e).context("failed to get progress"),
+            },
+        }
     }
 
     fn get_shallow_invocation(
