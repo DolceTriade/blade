@@ -359,6 +359,9 @@ pub async fn run_bes_grpc(
         handlers: Arc::new(handlers),
     };
     Server::builder()
+        .tcp_keepalive(Some((std::time::Duration::from_secs(20))))
+        .http2_keepalive_interval(Some(std::time::Duration::from_secs(20)))
+        .http2_keepalive_timeout(Some(std::time::Duration::from_secs(30)))
         .add_service(
             publish_build_event_server::PublishBuildEventServer::new(server)
                 .max_decoding_message_size(10 * 1024 * 1024),
