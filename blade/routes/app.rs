@@ -1,5 +1,10 @@
 use crate::components::nav::Nav;
+use crate::routes::artifact::Artifact;
+use crate::routes::details::Details;
 use crate::routes::empty::Empty;
+use crate::routes::invocation::Invocation;
+use crate::routes::summary::Summary;
+use crate::routes::test::Test;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -22,6 +27,12 @@ pub fn App() -> impl IntoView {
                 <Nav name="Blade" logo="/pkg/static/logo.svg"/>
                 <main>
                     <Routes>
+                        <Route path="invocation/:id" view=Invocation>
+                            <Route path="*any" view=Summary/>
+                            <Route path="test" view=Test/>
+                            <Route path="details" view=Details/>
+                            <Route path="artifact" view=Artifact/>
+                        </Route>
                         <Route path="*" view=Empty/>
                     </Routes>
                 </main>
