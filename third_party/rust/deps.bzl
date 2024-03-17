@@ -205,6 +205,10 @@ def rust_dependencies():
             "tempdir": crate.spec(
                 version = "0.3.7",
             ),
+            "tikv-jemallocator": crate.spec(
+                version = "0.5.4",
+                features = ["profiling"],
+            ),
             "time": crate.spec(
                 version = "0.3.31",
                 features = ["formatting", "macros", "serde"],

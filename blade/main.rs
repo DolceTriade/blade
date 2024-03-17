@@ -39,10 +39,14 @@ cfg_if! {
         use lazy_static::lazy_static;
         use prometheus_client::metrics::family::Family;
         use prometheus_client::metrics::counter::Counter;
+        use tikv_jemallocator::Jemalloc;
 
         pub mod admin;
 
         use crate::routes::app::App;
+
+        #[global_allocator]
+        static GLOBAL: Jemalloc = Jemalloc;
 
         lazy_static! {
             static ref API_ERRORS: Family::<APIErrorLabels, Counter> = metrics::register_metric("blade_http_errors", "Actix API requests errors", Family::default());

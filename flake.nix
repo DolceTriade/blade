@@ -61,6 +61,7 @@
                 diesel-cli'
                 wabt
                 postgresql
+                jemalloc
                 (import ./nix/cc/cc.nix)
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;

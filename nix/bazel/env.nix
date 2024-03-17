@@ -7,6 +7,7 @@
     findutils
     gawk
     gnugrep
+    gnumake
     gnused
     gnutar
     gzip

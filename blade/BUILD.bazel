@@ -51,6 +51,7 @@ rust_binary(
         "@crate//:log",
         "@crate//:prometheus-client",
         "@crate//:serde",
+        "@crate//:tikv-jemallocator",
         "@crate//:time",
         "@crate//:tokio",
         "@crate//:tokio-stream",
