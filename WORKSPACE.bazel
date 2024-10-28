@@ -84,7 +84,8 @@ nixpkgs_local_repository(
 # rules_rust also uses the cc compiler
 nixpkgs_cc_configure(
     name = "nixpkgs_config_cc",
-    nix_file = "//nix/cc:cc.nix",
+    nix_file_deps = ["//nix/cc:cc.nix"],
+    nix_file_content = "import ./nix/cc/cc.nix {}",
     repository = "@nixpkgs",
 )
 

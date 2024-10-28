@@ -62,7 +62,7 @@
                 wabt
                 postgresql
                 jemalloc
-                (import ./nix/cc/cc.nix)
+                (import ./nix/cc/cc.nix {inherit pkgs;})
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
             enterShell = ''

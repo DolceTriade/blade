@@ -1,9 +1,7 @@
 # We need to write a fancy nix file to handle the CC compiler due to OSX: https://github.com/tweag/rules_nixpkgs/issues/368
 # What this file is basically saying is: if OSX, change the CXX compiler to use a bunch of Apple frameworks, LLVM libs,
 # libc++ instead of libstdc++, and some additional compiler flags to ignore some warnings, otherwise, just use clang11
-let
-  pkgs = import <nixpkgs> {};
-in let
+{pkgs ? import <nixpkgs> {} }: let
   clang = pkgs.clang;
   # The original `postLinkSignHook` from nixpkgs assumes `codesign_allocate` is
   # in the PATH which is not the case when using our cc_wrapper. Set
