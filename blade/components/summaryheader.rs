@@ -50,7 +50,7 @@ fn ucfirst(s: &str) -> String {
 #[component]
 pub fn SummaryHeader() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
-    let counts = create_memo(move |_| {
+    let counts = Memo::new(move |_| {
         invocation.with(|invocation| {
             let num_targets = invocation.targets.len();
             let mut passing_targets: usize = 0;

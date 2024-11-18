@@ -113,7 +113,7 @@ fn RunSummary() -> impl IntoView {
 pub fn TestSummary() -> impl IntoView
 where
 {
-    let link = create_memo(move |_| {
+    let link = Memo::new(move |_| {
         let loc = use_location();
         let mut path = loc
             .pathname

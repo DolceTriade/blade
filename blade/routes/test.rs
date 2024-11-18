@@ -91,7 +91,7 @@ struct TestParams {
 pub fn Test() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
     let params = use_query::<TestParams>();
-    let test = create_memo(move |_| {
+    let test = Memo::new(move |_| {
         with!(|invocation, params| {
             match params {
                 Ok(params) => match &params.target {
@@ -109,17 +109,17 @@ pub fn Test() -> impl IntoView {
             }
         })
     });
-    let run = create_memo(move |_| {
+    let run = Memo::new(move |_| {
         with!(|params| { params.as_ref().ok().and_then(|params| params.run) })
     });
-    let shard = create_memo(move |_| {
+    let shard = Memo::new(move |_| {
         with!(|params| { params.as_ref().ok().and_then(|params| params.shard) })
     });
-    let attempt = create_memo(move |_| {
+    let attempt = Memo::new(move |_| {
         with!(|params| { params.as_ref().ok().and_then(|params| params.attempt) })
     });
 
-    let test_run = create_memo(move |_| {
+    let test_run = Memo::new(move |_| {
         with!(|run, shard, attempt, test| {
             if run.is_none() || shard.is_none() || attempt.is_none() {
                 return None;
