@@ -219,7 +219,7 @@ pub fn TestRunList() -> impl IntoView {
                                             children=move |c| {
                                                 let tooltip = c.1.clone();
                                                 let id_memo = c.1.clone();
-                                                let id = create_memo(move |_| id_memo.clone());
+                                                let id = Memo::new(move |_| id_memo.clone());
                                                 view! {
                                                     <ListItem hide=Signal::derive(move || {
                                                         !filter.get().is_empty()
