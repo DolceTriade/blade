@@ -62,9 +62,9 @@ rust_binary(
         "@crate//:url",
         "@crate//:url-escape",
         "@crate//:zip",
-        "@crate__regex-1.9.3//:regex",
-        "@crate__wasm-bindgen-0.2.87//:wasm_bindgen",
-        "@crate__web-sys-0.3.64//:web_sys",
+        "@crate//:regex",
+        "@crate__wasm-bindgen-0.2.95//:wasm_bindgen",
+        "@crate__web-sys-0.3.72//:web_sys",
         "@rules_rust//tools/runfiles",
     ],
 )
@@ -114,7 +114,7 @@ rust_shared_library(
         "@wasm_crate//:url-escape",
         "@wasm_crate//:wasm-bindgen",
         "@wasm_crate//:zip",
-        "@wasm_crate__web-sys-0.3.64//:web_sys",
+        "@wasm_crate__web-sys-0.3.72//:web_sys",
     ],
 )
 

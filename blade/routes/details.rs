@@ -23,7 +23,7 @@ pub async fn get_options(uuid: String) -> Result<state::BuildOptions, ServerFnEr
 #[component]
 pub fn Details() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
-    let res = create_resource(
+    let res = Resource::new(
         move || invocation.with(|invocation| invocation.id.clone()),
         get_options,
     );

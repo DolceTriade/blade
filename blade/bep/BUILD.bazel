@@ -39,7 +39,7 @@ rust_library(
         "@crate//:tonic",
         "@crate//:tonic-reflection",
         "@crate//:walkdir",
-        "@crate__regex-1.9.3//:regex",
+        "@crate//:regex",
         "@rules_rust//tools/runfiles",
     ],
 )

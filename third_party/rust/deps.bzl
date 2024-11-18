@@ -153,18 +153,18 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.5.4",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.5.4",
+                version = "0.7.0-rc1",
             ),
             "leptos_meta": crate.spec(
-                version = "0.5.4",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.5.4",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "log": crate.spec(
@@ -199,6 +199,9 @@ def rust_dependencies():
             "r2d2": crate.spec(
                 version = "0.8.10",
             ),
+            "regex": crate.spec(
+                version = "1.11.1",
+            ),
             "scopeguard": crate.spec(
                 version = "1.2.0",
             ),
@@ -206,7 +209,7 @@ def rust_dependencies():
                 version = "0.3.7",
             ),
             "tikv-jemallocator": crate.spec(
-                version = "0.5.4",
+                version = "0.6.0",
                 features = ["profiling"],
             ),
             "time": crate.spec(
@@ -315,16 +318,14 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.5.4",
-                features = ["hydrate"],
+                version = "0.7.0-rc1",
+                features = ["hydrate", "tracing"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.5.4",
-                features = ["hydrate"],
+                version = "0.7.0-rc1",
             ),
             "leptos_router": crate.spec(
-                version = "0.5.4",
-                features = ["hydrate"],
+                version = "0.7.0-rc1",
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",

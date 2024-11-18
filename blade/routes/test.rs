@@ -12,10 +12,10 @@ use crate::components::testsummary::TestSummary;
 use std::sync::Arc;
 
 #[server]
-pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
+pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError<String>> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
     let parsed =
-        url::Url::parse(&uri).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
+        url::Url::parse(&uri).map_err(|e| ServerFnError::<String>::ServerError(format!("{e:#?}")))?;
     match parsed.scheme() {
         "file" => {
             if !global.allow_local {
@@ -23,15 +23,15 @@ pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError> {
             }
             let path = parsed
                 .to_file_path()
-                .map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))?;
-            return std::fs::read(path).map_err(|e| ServerFnError::ServerError(format!("{e:#?}")));
+                .map_err(|e| ServerFnError::<String>::ServerError(format!("{e:#?}")))?;
+            std::fs::read(path).map_err(|_| ServerFnError::<String>::ServerError("bad path".into()))
         }
         "bytestream" | "http" | "https" => {
-            return global
+            global
                 .bytestream_client
                 .download_file(&uri)
                 .await
-                .map_err(|e| ServerFnError::ServerError(format!("failed to get artifact: {e}")));
+                .map_err(|e| ServerFnError::ServerError(format!("failed to get artifact: {e}")))
         }
         _ => Err(ServerFnError::ServerError("not implemented".to_string())),
     }
@@ -140,7 +140,7 @@ pub fn Test() -> impl IntoView {
         })
     });
 
-    let test_xml = create_local_resource(
+    let test_xml = Resource::local(
         move || {
             with!(|test_run| test_run
                 .as_ref()
@@ -160,7 +160,7 @@ pub fn Test() -> impl IntoView {
             }
         },
     );
-    let test_out = create_resource(
+    let test_out = Resource::new(
         move || {
             with!(|test_run| test_run
                 .as_ref()
@@ -215,6 +215,9 @@ pub fn Test() -> impl IntoView {
                 None => view! {
                     <div>
                         {move||with!(|test, run, shard, attempt| if let Ok(test) = test {
+                            if test.runs.is_empty() {
+                                return view!{<div> RIP </div>}.into_view();
+                            }
                             let (r, s, a) = get_run(run, shard, attempt, &test.runs);
                             let mut q = use_location().query.get();
                             let path = use_location().pathname;
