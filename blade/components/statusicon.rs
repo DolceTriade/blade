@@ -6,8 +6,8 @@ use crate::components::tooltip::Tooltip;
 #[allow(non_snake_case)]
 #[component]
 pub fn StatusIcon(
-    status: MaybeSignal<state::Status>,
-    #[prop(into, default = "".into())] class: MaybeSignal<String>,
+    status: Signal<state::Status>,
+    #[prop(into, default = "".into())] class: Signal<String>,
 ) -> impl IntoView {
     move || {
         let cc = class.clone();

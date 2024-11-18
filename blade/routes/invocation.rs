@@ -67,7 +67,7 @@ pub fn Invocation() -> impl IntoView {
         },
     );
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         local.with(move |i| {
             if let Some(Ok(i)) = i {
                 invocation.set(i.clone());

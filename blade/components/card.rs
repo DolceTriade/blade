@@ -5,7 +5,7 @@ use tailwindmerge::tailwind_merge;
 #[component]
 pub fn Card(
     children: Children,
-    #[prop(into, default = "".into())] class: MaybeSignal<String>,
+    #[prop(into, default = "".into())] class: Signal<String>,
 ) -> impl IntoView {
     view! {
         <div class=move || tailwind_merge(

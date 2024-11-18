@@ -66,7 +66,7 @@ pub fn TargetList() -> impl IntoView {
     let (tests, _) = slice!(invocation.tests);
     let (targets, _) = slice!(invocation.targets);
 
-    let (filter, set_filter) = create_signal("".to_string());
+    let (filter, set_filter) = signal("".to_string());
     let search_key = move |e: KeyboardEvent| {
         let value = event_target_value(&e);
         set_filter.set(value);

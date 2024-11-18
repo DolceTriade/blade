@@ -11,7 +11,7 @@ where
     F: Fn() -> IV,
     IV: IntoView,
 {
-    let (hide, set_hide) = create_signal(hide);
+    let (hide, set_hide) = signal(hide);
     view! {
         <button
             type="button"
