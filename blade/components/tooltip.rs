@@ -7,7 +7,7 @@ where
     F: Fn() -> IV,
     IV: IntoView,
 {
-    let tel = create_node_ref::<html::Span>();
+    let tel = NodeRef::new::<html::Span>();
     let hover = move |_| {
         if let Some(el) = tel.get() {
             el.parent_element()

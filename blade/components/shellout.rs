@@ -9,10 +9,10 @@ pub fn scroll_bottom(el: HtmlElement<Div>) {
 
 #[allow(non_snake_case)]
 #[component]
-pub fn ShellOut(#[prop(into)] text: MaybeSignal<String>) -> impl IntoView {
-    let nr = create_node_ref::<Div>();
+pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
+    let nr = NodeRef::new::<Div>();
     let t = text.clone();
-    create_effect(move |_| {
+    Effect::new(move |_| {
         // Empty callback so this is called on update.
         t.with(|_| {});
         if let Some(nr) = nr.get() {

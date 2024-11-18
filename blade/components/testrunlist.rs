@@ -85,7 +85,7 @@ pub fn TestRunList() -> impl IntoView {
             .get_element_by_id(&test)
             .map(|el| el.scroll_into_view())
     };
-    let (filter, set_filter) = create_signal("".to_string());
+    let (filter, set_filter) = signal("".to_string());
     let search_key = move |e: KeyboardEvent| {
         let value = event_target_value(&e);
         set_filter.set(value);
