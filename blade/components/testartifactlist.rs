@@ -16,7 +16,7 @@ struct UndeclaredOutput {
 #[component]
 pub fn TestArtifactList() -> impl IntoView {
     let test_run = expect_context::<Memo<Option<state::TestRun>>>();
-    let manifest = create_local_resource(
+    let manifest = Resource::local(
         move || test_run.with(|test_run| test_run.as_ref().map(|test_run| test_run.files.clone())),
         move |files| async move {
             let files = files?;

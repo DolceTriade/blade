@@ -8,6 +8,7 @@ pub mod routes;
 cfg_if! {
     if #[cfg(feature = "hydrate")] {
         use leptos::*;
+        use leptos::mount::mount_to_body
         use wasm_bindgen::prelude::wasm_bindgen;
         use tracing_web::{MakeWebConsoleWriter};
         use tracing_subscriber::prelude::*;

@@ -30,7 +30,7 @@ pub fn Invocation() -> impl IntoView {
     let invocation = create_rw_signal(state::InvocationResults::default());
     provide_context(invocation);
     let load_invocation = move |id: String| async move { get_invocation(id).await };
-    let res = create_resource(
+    let res = Resource::new(
         move || {
             params.with(|p| {
                 p.as_ref()
@@ -42,7 +42,7 @@ pub fn Invocation() -> impl IntoView {
         load_invocation,
     );
 
-    let local = create_local_resource(
+    let local = Resource::local(
         move || {
             params.with(|p| {
                 p.as_ref()
@@ -54,7 +54,7 @@ pub fn Invocation() -> impl IntoView {
         load_invocation,
     );
 
-    let refetch = create_local_resource(
+    let refetch = Resource::local(
         move || (),
         move |_| async move {
             set_interval_with_handle(

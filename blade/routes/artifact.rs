@@ -18,7 +18,7 @@ fn stringify(e: impl std::fmt::Debug) -> String {
 #[component]
 pub fn Artifact() -> impl IntoView {
     let params = use_query::<ArtifactParams>();
-    let artifact = create_local_resource(
+    let artifact = Resource::local(
         move || params.get(),
         move |params| async move {
             let uri = params
