@@ -27,7 +27,7 @@ struct InvocationParams {
 #[component]
 pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
-    let invocation = create_rw_signal(state::InvocationResults::default());
+    let invocation = RwSignal::new(state::InvocationResults::default());
     provide_context(invocation);
     let load_invocation = move |id: String| async move { get_invocation(id).await };
     let res = Resource::new(

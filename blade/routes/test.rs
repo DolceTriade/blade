@@ -177,7 +177,7 @@ pub fn Test() -> impl IntoView {
             }
         },
     );
-    let test_xml_signal = create_rw_signal(None);
+    let test_xml_signal = RwSignal::new(None);
     provide_context(test);
     provide_context(test_run);
     provide_context(test_xml_signal);
