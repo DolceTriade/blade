@@ -1,5 +1,5 @@
 use crate::components::statusicon::StatusIcon;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::A;
 use time::macros::format_description;
 
