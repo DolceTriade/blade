@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use tailwindmerge::tailwind_merge;
 
 use crate::components::tooltip::Tooltip;

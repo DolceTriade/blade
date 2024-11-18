@@ -5,7 +5,7 @@ use crate::routes::empty::Empty;
 use crate::routes::invocation::Invocation;
 use crate::routes::summary::Summary;
 use crate::routes::test::Test;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::*;
 

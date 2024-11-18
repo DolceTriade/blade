@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 
 #[allow(non_snake_case)]
 #[component]

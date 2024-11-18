@@ -3,7 +3,7 @@ use crate::components::list::*;
 use crate::components::searchbar::Searchbar;
 use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::A;
 use std::collections::HashMap;
 use web_sys::KeyboardEvent;

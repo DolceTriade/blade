@@ -32,7 +32,7 @@ cfg_if! {
         use tracing_actix_web::TracingLogger;
         use clap::*;
         use futures::join;
-        use leptos::*;
+        use leptos::prelude::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use std::sync::Arc;
         use runfiles::Runfiles;

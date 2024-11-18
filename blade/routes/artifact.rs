@@ -1,6 +1,6 @@
 use std::io::{prelude::Read, Cursor};
 
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::*;
 
 use crate::components::shellout::ShellOut;
