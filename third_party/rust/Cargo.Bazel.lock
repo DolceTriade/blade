@@ -1,5 +1,5 @@
 {
-  "checksum": "3b339b7502a20fd4028c053b2806b83a61a6403100318fefd71cb70e8a933128",
+  "checksum": "9df4c2eec9b8bf01804cf6c00efddc79b17a82f82f8fbb65b9bc83296d7ebbe8",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -917,7 +917,7 @@
               "target": "socket2"
             },
             {
-              "id": "time 0.3.31",
+              "id": "time 0.3.36",
               "target": "time"
             },
             {
@@ -4826,7 +4826,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "time 0.3.31",
+              "id": "time 0.3.36",
               "target": "time"
             }
           ],
@@ -5742,7 +5742,7 @@
               "target": "serde_json"
             },
             {
-              "id": "time 0.3.31",
+              "id": "time 0.3.36",
               "target": "time"
             },
             {
@@ -6264,7 +6264,7 @@
               "target": "tikv_jemallocator"
             },
             {
-              "id": "time 0.3.31",
+              "id": "time 0.3.36",
               "target": "time"
             },
             {
@@ -12989,6 +12989,45 @@
         "MIT"
       ],
       "license_file": "LICENSE-APACHE"
+    },
+    "num-conv 0.1.0": {
+      "name": "num-conv",
+      "version": "0.1.0",
+      "package_url": "https://github.com/jhpratt/num-conv",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/num-conv/0.1.0/download",
+          "sha256": "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "num_conv",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": false,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "num_conv",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.1.0"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-Apache"
     },
     "num-integer 0.1.45": {
       "name": "num-integer",
@@ -20101,14 +20140,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "time 0.3.31": {
+    "time 0.3.36": {
       "name": "time",
-      "version": "0.3.31",
+      "version": "0.3.36",
       "package_url": "https://github.com/time-rs/time",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/time/0.3.31/download",
-          "sha256": "f657ba42c3f86e7680e53c8cd3af8abbe56b5491790b46e22e19c0d57463583e"
+          "url": "https://static.crates.io/crates/time/0.3.36/download",
+          "sha256": "5dfd88e563464686c916c7e46e623e520ddc6d79fa6641390f2e3fa86e83e885"
         }
       },
       "targets": [
@@ -20153,6 +20192,10 @@
               "target": "itoa"
             },
             {
+              "id": "num-conv 0.1.0",
+              "target": "num_conv"
+            },
+            {
               "id": "powerfmt 0.2.0",
               "target": "powerfmt"
             },
@@ -20171,13 +20214,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "time-macros 0.2.16",
+              "id": "time-macros 0.2.18",
               "target": "time_macros"
             }
           ],
           "selects": {}
         },
-        "version": "0.3.31"
+        "version": "0.3.36"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -20225,14 +20268,14 @@
       ],
       "license_file": "LICENSE-Apache"
     },
-    "time-macros 0.2.16": {
+    "time-macros 0.2.18": {
       "name": "time-macros",
-      "version": "0.2.16",
+      "version": "0.2.18",
       "package_url": "https://github.com/time-rs/time",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/time-macros/0.2.16/download",
-          "sha256": "26197e33420244aeb70c3e8c78376ca46571bc4e701e4791c2cd9f57dcb3a43f"
+          "url": "https://static.crates.io/crates/time-macros/0.2.18/download",
+          "sha256": "3f252a68540fde3a3877aeea552b832b40ab9a69e318efd078774a01ddee1ccf"
         }
       },
       "targets": [
@@ -20265,6 +20308,10 @@
         "deps": {
           "common": [
             {
+              "id": "num-conv 0.1.0",
+              "target": "num_conv"
+            },
+            {
               "id": "time-core 0.1.2",
               "target": "time_core"
             }
@@ -20272,7 +20319,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.16"
+        "version": "0.2.18"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -25217,7 +25264,7 @@
               "target": "flate2"
             },
             {
-              "id": "time 0.3.31",
+              "id": "time 0.3.36",
               "target": "time"
             }
           ],
@@ -25979,7 +26026,7 @@
     "serde_json 1.0.108",
     "tempdir 0.3.7",
     "tikv-jemallocator 0.5.4",
-    "time 0.3.31",
+    "time 0.3.36",
     "tokio 1.32.0",
     "tokio-stream 0.1.14",
     "tonic 0.10.2",
