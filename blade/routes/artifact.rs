@@ -1,7 +1,8 @@
 use std::io::{prelude::Read, Cursor};
 
 use leptos::prelude::*;
-use leptos_router::*;
+use leptos_router::hooks::use_query;
+use leptos_router::params::Params;
 
 use crate::components::shellout::ShellOut;
 
@@ -18,23 +19,21 @@ fn stringify(e: impl std::fmt::Debug) -> String {
 #[component]
 pub fn Artifact() -> impl IntoView {
     let params = use_query::<ArtifactParams>();
-    let artifact = Resource::local(
-        move || params.get(),
-        move |params| async move {
-            let uri = params
-                .as_ref()
-                .map_err(stringify)?
-                .uri
-                .clone()
-                .ok_or("missing params".to_string())?;
-            let zip = params.as_ref().map_err(stringify)?.zip.as_ref();
+    let artifact = LocalResource::new(
+        move || async move {
+            let Ok(ArtifactParams { uri, zip }) = params.get() else {
+                return Err("error parsing query string".into());
+            };
+            let Some(uri) = uri else {
+                return Err("empty uri".into());
+            };
             let bytes = crate::routes::test::get_artifact(uri)
                 .await
                 .map_err(stringify)?;
             if let Some(zip) = zip {
                 let cur = Cursor::new(bytes);
                 let mut arc = zip::ZipArchive::new(cur).map_err(stringify)?;
-                let mut file = arc.by_name(zip).map_err(stringify)?;
+                let mut file = arc.by_name(&zip).map_err(stringify)?;
                 let mut out = "".to_string();
                 file.read_to_string(&mut out).map_err(stringify)?;
                 return Ok::<String, String>(out);
@@ -45,11 +44,12 @@ pub fn Artifact() -> impl IntoView {
     view! {
         <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto overflow-x-auto">
             <Suspense fallback=move || view! { <div>Loading...</div> }>
-                <ShellOut text=match artifact.get() {
+                <ShellOut text={move || async move {
+                    match artifact.await {
                     Some(Ok(t)) => t,
                     Some(Err(t)) => t,
                     None => "RIP".into(),
-                }/>
+                }}}/>
             </Suspense>
         </div>
     }

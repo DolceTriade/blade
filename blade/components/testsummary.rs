@@ -7,7 +7,7 @@ use crate::components::statusicon::StatusIcon;
 #[component]
 fn SummaryItem<S>(num: usize, suffix: S) -> impl IntoView
 where
-    S: std::fmt::Display + 'static,
+    S: std::fmt::Display + std::marker::Send + 'static,
 {
     view! {
         <div class="pl-4 pr-4">
@@ -92,17 +92,17 @@ fn RunSummary() -> impl IntoView {
                                                             }
                                                         })}
                                                 }
-                                                    .into_view()
+                                                    .into_any()
                                             })
-                                            .unwrap_or_default()
+                                            .unwrap_or(view!{<div/>}.into_any())
                                     })
                                 }}
 
                             </div>
                         }
-                            .into_view()
+                            .into_any()
                     })
-                    .unwrap_or_default()
+                    .unwrap_or(view!{<div/>}.into_any())
             })
         }}
     }
@@ -158,9 +158,9 @@ where
                                     <RunSummary/>
                                 </div>
                             }
-                                .into_view()
+                                .into_any()
                         })
-                        .unwrap_or_default()
+                        .unwrap_or(view!{<div/>}.into_any())
                 })
             }}
 

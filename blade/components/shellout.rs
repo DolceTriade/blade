@@ -10,7 +10,7 @@ pub fn scroll_bottom(el: HtmlElement<Div>) {
 #[allow(non_snake_case)]
 #[component]
 pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
-    let nr = NodeRef::new::<Div>();
+    let nr = NodeRef::<Div>::new();
     let t = text.clone();
     Effect::new(move |_| {
         // Empty callback so this is called on update.
@@ -20,10 +20,10 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
         }
     });
     view! {
-        <div _ref=nr class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto">
-            {move || match ansi_to_html::convert_escaped(&text.get()) {
-                Err(err) => view! { <div>{format!("mistake: {:#?}", err)}</div> },
-                Ok(t) => view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> },
+        <div node_ref=nr class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto">
+            {move || match ansi_to_html::convert_escaped(&text.read()) {
+                Err(err) => view! { <div>{format!("mistake: {:#?}", err)}</div> }.into_any(),
+                Ok(t) => view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> }.into_any(),
             }}
 
         </div>

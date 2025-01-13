@@ -1,13 +1,12 @@
 use crate::components::statusicon::StatusIcon;
 use leptos::prelude::*;
-use leptos_router::A;
 use time::macros::format_description;
 
 #[allow(non_snake_case)]
 #[component]
 fn SummaryItem<S>(num: Signal<usize>, suffix: S) -> impl IntoView
 where
-    S: AsRef<str> + std::fmt::Display + 'static,
+    S: AsRef<str> + std::fmt::Display + std::marker::Send + 'static,
 {
     view! {
         <div class="pl-4 pr-4">
@@ -110,9 +109,9 @@ pub fn SummaryHeader() -> impl IntoView {
                         <span class="text-grey-400 text-sm">{start}</span>
                     </div>
                     <div class="flex gap-2 items-center">
-                        {duration} <A class="text-blue-500 underline" href="details">
+                        {duration} <a class="text-blue-500 underline" href="details">
                             (details)
-                        </A>
+                        </a>
                     </div>
                 </div>
                 <div class="p-4">

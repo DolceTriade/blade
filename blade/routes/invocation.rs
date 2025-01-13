@@ -1,6 +1,8 @@
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::nested_router::Outlet;
+use leptos_router::hooks::use_params;
+use leptos_router::params::Params;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -42,48 +44,7 @@ pub fn Invocation() -> impl IntoView {
         load_invocation,
     );
 
-    let local = Resource::local(
-        move || {
-            params.with(|p| {
-                p.as_ref()
-                    .map(|p| p.id.clone())
-                    .unwrap_or_default()
-                    .unwrap_or_default()
-            })
-        },
-        load_invocation,
-    );
-
-    let refetch = Resource::local(
-        move || (),
-        move |_| async move {
-            set_interval_with_handle(
-                move || {
-                    local.refetch();
-                },
-                Duration::from_secs(5),
-            )
-            .ok()
-        },
-    );
-
-    Effect::new(move |_| {
-        local.with(move |i| {
-            if let Some(Ok(i)) = i {
-                invocation.set(i.clone());
-            }
-        });
-        invocation.with_untracked(move |i| match i.status {
-            state::Status::Success | state::Status::Fail => {
-                refetch.map(|refetch| {
-                    if let Some(refetch) = refetch {
-                        refetch.clear();
-                    }
-                });
-            }
-            _ => {}
-        });
-    });
+    // TODO: Fix refetch
 
     view! {
         <Title text=move || {
@@ -95,12 +56,12 @@ pub fn Invocation() -> impl IntoView {
         }>
             {move || {
                 res.with(|i| match i {
-                    None => view! { <div>"Loading..."</div> }.into_view(),
+                    None => view! { <div>"Loading..."</div> }.into_any(),
                     Some(Ok(i)) => {
                         invocation.set(i.clone());
-                        view! { <Outlet/> }
+                        view! { <Outlet/> }.into_any()
                     }
-                    Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_view(),
+                    Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_any(),
                 })
             }}
 
