@@ -153,19 +153,22 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
                 features = ["ssr"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
                 features = ["ssr"],
+            ),
+            "leptos_dom": crate.spec(
+                version = "0.7.3",
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -260,6 +263,13 @@ def rust_dependencies():
             "walkdir": crate.spec(
                 version = "2.4.0",
             ),
+            "wasm-bindgen": crate.spec(
+                version = "0.2.100",
+            ),
+            "web-sys": crate.spec(
+                version = "0.3.77",
+                features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+            ),
             "zip": crate.spec(
                 version = "0.6.6",
                 default_features = False,
@@ -318,14 +328,17 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
                 features = ["hydrate", "tracing"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
             ),
             "leptos_router": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.3",
+            ),
+            "leptos_dom": crate.spec(
+                version = "0.7.3",
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",
@@ -352,7 +365,7 @@ def rust_dependencies():
                 features = ["std"],
             ),
             "wasm-bindgen": crate.spec(
-                version = "0.2.87",
+                version = "0.2.100",
             ),
             "console_log": crate.spec(
                 version = "1",
@@ -401,6 +414,10 @@ def rust_dependencies():
             ),
             "url-escape": crate.spec(
                 version = "0.1.1",
+            ),
+            "web-sys": crate.spec(
+                version = "0.3.77",
+                features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",

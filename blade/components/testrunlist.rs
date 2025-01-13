@@ -1,5 +1,4 @@
 use leptos::prelude::*;
-use leptos_router::*;
 use web_sys::KeyboardEvent;
 
 use crate::components::accordion::*;
@@ -226,11 +225,11 @@ pub fn TestRunList() -> impl IntoView {
                                                             && !id.with(|id| id.contains(&filter.get()))
                                                     })>
                                                         <div
-                                                            on:click=move |_| {
+                                                            on:click={move |_| {
                                                                 click(id.get());
-                                                            }
+                                                            }}
 
-                                                            test=id
+                                                            attr:test={id}
                                                             class="flex items-center justify-start w-full"
                                                         >
                                                             <span class="float-left">
@@ -261,9 +260,9 @@ pub fn TestRunList() -> impl IntoView {
 
                                     </List>
                                 }
-                                    .into_view()
+                                    .into_any()
                             }
-                            _ => view! { <div>Loading...</div> }.into_view(),
+                            _ => view! { <div>Loading...</div> }.into_any(),
                         })
                     }}
 

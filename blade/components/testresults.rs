@@ -156,9 +156,9 @@ pub fn TestResults() -> impl IntoView {
 
                         </Accordion>
                     }
-                        .into_view()
+                        .into_any()
                 }
-                _ => Default::default(),
+                _ => view!{<div/>}.into_any(),
             }}
 
         </Suspense>

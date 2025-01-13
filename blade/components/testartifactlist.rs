@@ -16,10 +16,9 @@ struct UndeclaredOutput {
 #[component]
 pub fn TestArtifactList() -> impl IntoView {
     let test_run = expect_context::<Memo<Option<state::TestRun>>>();
-    let manifest = Resource::local(
-        move || test_run.with(|test_run| test_run.as_ref().map(|test_run| test_run.files.clone())),
-        move |files| async move {
-            let files = files?;
+    let manifest = LocalResource::new(
+        move || async move {
+            let files = test_run.with(|test_run| test_run.as_ref().map(|test_run| test_run.files.clone()))?;
             let uri = files.get("test.outputs_manifest__MANIFEST")?.uri.clone();
             let zip_uri = &files.get("test.outputs__outputs.zip")?.uri;
             crate::routes::test::get_artifact(uri)
@@ -55,17 +54,15 @@ pub fn TestArtifactList() -> impl IntoView {
 
     view! {
         <Suspense>
-            {move || match manifest.with(|manifest| manifest.as_ref().map(|o| o.is_some())) {
-                Some(true) => {
+            {move || async move {
+                match manifest.await {
+                Some(outs) => {
                     view! {
                         <h1 class="font-bold text-lg">Undeclared Outputs</h1>
                         <List>
                             <For
-                                each=move || {
-                                    manifest.with(|manifest| manifest.clone().flatten().unwrap())
-                                }
-
-                                key=move |r| r.name.clone()
+                                each=move || outs
+                                key=move |r: &UndeclaredOutput| r.name.clone()
                                 children=move |r| {
                                     let query = format!(
                                         "../artifact?{}",
@@ -85,10 +82,10 @@ pub fn TestArtifactList() -> impl IntoView {
 
                         </List>
                     }
-                        .into_view()
+                        .into_any()
                 }
-                _ => view! {}.into_view(),
-            }}
+                _ => view!{<div/>}.into_any(),
+            }}}
 
         </Suspense>
 

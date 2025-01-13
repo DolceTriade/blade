@@ -41,7 +41,7 @@ pub fn Details() -> impl IntoView {
                     }>
                         {move || {
                             res.with(|res| match res {
-                                None => view! { <div>Loading...</div> }.into_view(),
+                                None => view! { <div>Loading...</div> }.into_any(),
                                 Some(Ok(opts)) => {
                                     let opts = opts.clone();
                                     view! {
@@ -108,9 +108,9 @@ pub fn Details() -> impl IntoView {
 
                                         </Accordion>
                                     }
-                                        .into_view()
+                                        .into_any()
                                 }
-                                Some(Err(e)) => view! { <div>{format!("{e:#?}")}</div> }.into_view(),
+                                Some(Err(e)) => view! { <div>{format!("{e:#?}")}</div> }.into_any(),
                             })
                         }}
 
@@ -172,8 +172,8 @@ fn linkify(link: String) -> impl IntoView {
                 {link}
             </a>
         }
-        .into_view()
+        .into_any()
     } else {
-        view! { <span class="text-sm font-mono">{link}</span> }.into_view()
+        view! { <span class="text-sm font-mono">{link}</span> }.into_any()
     }
 }

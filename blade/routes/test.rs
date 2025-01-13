@@ -1,5 +1,6 @@
 use leptos::prelude::*;
-use leptos_router::*;
+use leptos_router::params::Params;
+use leptos_router::hooks::use_query;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
@@ -140,13 +141,11 @@ pub fn Test() -> impl IntoView {
         })
     });
 
-    let test_xml = Resource::local(
-        move || {
-            with!(|test_run| test_run
-                .as_ref()
-                .and_then(|test_run| test_run.files.get("test.xml").map(|a| a.uri.clone())))
-        },
-        move |uri| async move {
+    let uri = test_run.with(|tr| tr.as_ref().and_then(|tr| tr.files.get("test.xml").map(|a| a.uri.clone())));
+
+
+    let test_xml = LocalResource::new(
+        move || async move {
             match uri {
                 None => None,
                 Some(uri) => get_artifact(uri.to_string())

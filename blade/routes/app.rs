@@ -7,7 +7,8 @@ use crate::routes::summary::Summary;
 use crate::routes::test::Test;
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::components::*;
+
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -27,12 +28,12 @@ pub fn App() -> impl IntoView {
                 <Nav name="Blade" logo="/pkg/static/logo.svg"/>
                 <main>
                     <Routes>
-                        <Route path="invocation/:id" view=Invocation>
+                        <ParentRoute path="invocation/:id" view=Invocation>
                             <Route path="*any" view=Summary/>
                             <Route path="test" view=Test/>
                             <Route path="details" view=Details/>
                             <Route path="artifact" view=Artifact/>
-                        </Route>
+                        </ParentRoute>
                         <Route path="*" view=Empty/>
                     </Routes>
                 </main>

@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::html;
 
 #[allow(non_snake_case)]
 #[component]
@@ -7,7 +8,7 @@ where
     F: Fn() -> IV,
     IV: IntoView,
 {
-    let tel = NodeRef::new::<html::Span>();
+    let tel = NodeRef::<html::Span>::new();
     let hover = move |_| {
         if let Some(el) = tel.get() {
             el.parent_element()
@@ -21,7 +22,7 @@ where
     view! {
         <div on:mouseenter=hover class="group">
             <span
-                _ref=tel
+                node_ref=tel
                 class="pointer-events-none absolute top-0 left-auto w-max bg-black text-white rounded-lg opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-hover:z-50"
             >
                 {tooltip()}
