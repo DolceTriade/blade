@@ -43,14 +43,17 @@ pub fn Artifact() -> impl IntoView {
     );
     view! {
         <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto overflow-x-auto">
-            <Suspense fallback=move || view! { <div>Loading...</div> }>
-            {move||Suspend::new(async move {
-                let t: String = match artifact.await {
-                    Ok(t) => t.into(),
-                    Err(t) => t.into(),
-                };
-                view!{ <ShellOut text={t} /> }
-            })}
+            <Suspense fallback=move || {
+                view! { <div>Loading...</div> }
+            }>
+                {move || Suspend::new(async move {
+                    let t: String = match artifact.await {
+                        Ok(t) => t.into(),
+                        Err(t) => t.into(),
+                    };
+                    view! { <ShellOut text=t/> }
+                })}
+
             </Suspense>
         </div>
     }

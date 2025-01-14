@@ -158,7 +158,7 @@ pub fn TestResults() -> impl IntoView {
                     }
                         .into_any()
                 }
-                _ => view!{<div/>}.into_any(),
+                _ => view! { <div></div> }.into_any(),
             }}
 
         </Suspense>

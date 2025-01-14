@@ -1,6 +1,7 @@
 use leptos::prelude::*;
 use web_sys::KeyboardEvent;
 use leptos_router::hooks::use_location;
+use leptos_router::components::A;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
@@ -109,8 +110,8 @@ pub fn TestRunList() -> impl IntoView {
                                             ))
                                         }
 
-                                        key={move |r| (r.run, r.shard, r.attempt)}
-                                        children={move |run| {
+                                        key=move |r| (r.run, r.shard, r.attempt)
+                                        children=move |run| {
                                             let mut q = use_location().query.get();
                                             let path = use_location().pathname;
                                             let link = path
@@ -128,7 +129,7 @@ pub fn TestRunList() -> impl IntoView {
                                             );
                                             view! {
                                                 <ListItem hide=Signal::derive(|| false)>
-                                                    <a href=link>
+                                                    <A href=link>
                                                         <div class="flex items-center justify-start w-full">
                                                             <span class="float-left">
                                                                 <StatusIcon
@@ -160,10 +161,10 @@ pub fn TestRunList() -> impl IntoView {
                                                             </span>
 
                                                         </div>
-                                                    </a>
+                                                    </A>
                                                 </ListItem>
                                             }
-                                        }}
+                                        }
                                     />
 
                                 </List>
@@ -214,11 +215,12 @@ pub fn TestRunList() -> impl IntoView {
                                                             && !id.with(|id| id.contains(&filter.get()))
                                                     })>
                                                         <div
-                                                            on:click={move |_| {
+                                                            on:click=move |_| {
                                                                 click(id.get());
-                                                            }}
-                                                            //TODO: Fix
-                                                            //attr:test=move||id
+                                                            }
+
+                                                            // TODO: Fix
+                                                            // attr:test=move||id
                                                             class="flex items-center justify-start w-full"
                                                         >
                                                             <span class="float-left">
@@ -251,7 +253,15 @@ pub fn TestRunList() -> impl IntoView {
                                 }
                                     .into_any()
                             }
-                            _ => view! { <div>Loading...</div> }.into_any(),
+                            _ => {
+                                view! {
+                                    // TODO: Fix
+                                    // attr:test=move||id
+
+                                    <div>Loading...</div>
+                                }
+                                    .into_any()
+                            }
                         })
                     }}
 

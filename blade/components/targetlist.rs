@@ -4,6 +4,7 @@ use crate::components::searchbar::Searchbar;
 use crate::components::statusicon::StatusIcon;
 use crate::components::tooltip::Tooltip;
 use leptos::prelude::*;
+use leptos_router::components::A;
 use std::collections::HashMap;
 use web_sys::KeyboardEvent;
 
@@ -97,7 +98,7 @@ pub fn TargetList() -> impl IntoView {
                                                     <ListItem hide=Signal::derive(move || {
                                                         !filter.get().is_empty() && !label.contains(&filter.get())
                                                     })>
-                                                        <a href=link>
+                                                        <A href=link>
                                                             <div class="flex items-center justify-start w-full">
                                                                 <span class="float-left">
                                                                     <StatusIcon
@@ -119,7 +120,7 @@ pub fn TargetList() -> impl IntoView {
                                                                     {format!("{}", humantime::format_duration(t.duration))}
                                                                 </span>
                                                             </div>
-                                                        </a>
+                                                        </A>
                                                     </ListItem>
                                                 }
                                             }

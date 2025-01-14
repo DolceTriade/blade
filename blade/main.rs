@@ -240,7 +240,7 @@ cfg_if! {
             let cleanup_state = state.clone();
             tracing::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
-                let leptos_options = &conf.leptos_options;
+                let leptos_options = conf.leptos_options.clone();
                 let rt_state = actix_state.clone();
                 let routes = generate_route_list(App);
                 let app = App::new()
@@ -253,24 +253,25 @@ cfg_if! {
                     .leptos_routes_with_context(
                         routes,
                         move|| provide_context(rt_state.clone()),
-                        move|| view! {
+                        move|| {
+                            view! {
                             <!DOCTYPE html>
                             <html lang="en">
                                 <head>
                                     <meta charset="utf-8"/>
                                     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                                    <AutoReload options=leptos_options.clone() />
-                                    <HydrationScripts options=leptos_options.clone()/>
+                                    <AutoReload options=leptos_options.to_owned() />
+                                    <HydrationScripts options=leptos_options.to_owned()/>
                                     <MetaTags/>
                                 </head>
                                 <body>
                                     <App/>
                                 </body>
                             </html>
-                        },
-                    )
-                    .app_data(web::Data::new(leptos_options.to_owned()))
-                    .wrap(TracingLogger::<BladeRootSpanBuilder>::new())
+                        }})
+                    .app_data(web::Data::new(conf.leptos_options.to_owned()))
+                    .wrap(TracingLogger::<BladeRootSpanBuilder>::new());
+                app
             })
             .disable_signals()
             .bind(&addr)?

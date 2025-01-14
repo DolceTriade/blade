@@ -95,6 +95,7 @@ struct TestParams {
 pub fn Test() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
     let params = use_query::<TestParams>();
+    tracing::info!("Got params: {:#?}", params);
     let test = Memo::new(move |_| match &*params.read() {
         Ok(params) => match &params.target {
             Some(target) => {
@@ -189,45 +190,71 @@ pub fn Test() -> impl IntoView {
                     test_xml_signal.set(test_xml.get());
                     view! {
                         <div class="flex flex-col">
-                        <Card class="p-0 m-0">
-                            <TestSummary/>
-                        </Card>
+                            <Card class="p-0 m-0">
+                                <TestSummary/>
+                            </Card>
 
-                        <div class="h-[80vh] flex items-start justify-start justify-items-center">
-                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
-                                <TestRunList />
-                            </Card>
-                            <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            <TestResults/>
-                            <Suspense
-                            fallback=move||view!{<div>Loading...</div>}>
-                                {move||match test_out.get() {
-                                    Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> }.into_any(),
-                                    _ => view!{ <div>No test output</div> }.into_any(),
-                                }}
-                            </Suspense>
-                            <TestArtifactList />
-                            </Card>
-                        </div>
+                            <div class="h-[80vh] flex items-start justify-start justify-items-center">
+                                <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
+                                    <TestRunList/>
+                                </Card>
+                                <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                                    <TestResults/>
+                                    <Suspense fallback=move || {
+                                        view! { <div>Loading...</div> }
+                                    }>
+                                        {move || match test_out.get() {
+                                            Some(Some(s)) => {
+                                                view! {
+                                                    <div>
+                                                        <ShellOut text=s/>
+                                                    </div>
+                                                }
+                                                    .into_any()
+                                            }
+                                            _ => view! { <div>No test output</div> }.into_any(),
+                                        }}
+
+                                    </Suspense>
+                                    <TestArtifactList/>
+                                </Card>
+                            </div>
                         </div>
                     }.into_any()
                 }
                 None => view! {
                     <div>
-                        {move|| if let Ok(test) = test.read().as_ref() {
-                            if test.runs.is_empty() {
-                                return view!{<div> RIP </div>}.into_any();
+                        {move || {
+                            if let Ok(test) = test.read().as_ref() {
+                                if test.runs.is_empty() {
+                                    return view! { <div>RIP</div> }.into_any();
+                                }
+                                let (r, s, a) = get_run(
+                                    &run.read(),
+                                    &shard.read(),
+                                    &attempt.read(),
+                                    &test.runs,
+                                );
+                                let mut q = use_location().query.get();
+                                let path = use_location().pathname;
+                                q.replace("run", r.to_string());
+                                q.replace("shard", s.to_string());
+                                q.replace("attempt", a.to_string());
+                                view! {
+                                    <Redirect
+                                        path=format!("{}{}", path.get(), q.to_query_string())
+                                        options=NavigateOptions {
+                                            replace: true,
+                                            ..Default::default()
+                                        }
+                                    />
+                                }
+                                    .into_any()
+                            } else {
+                                view! { <div>RIP</div> }.into_any()
                             }
-                            let (r, s, a) = get_run(&run.read(), &shard.read(), &attempt.read(), &test.runs);
-                            let mut q = use_location().query.get();
-                            let path = use_location().pathname;
-                            q.replace("run", r.to_string());
-                            q.replace("shard", s.to_string());
-                            q.replace("attempt", a.to_string());
-                            view!{<Redirect path=format!("{}{}", path.get(), q.to_query_string()) options={NavigateOptions {replace: true, ..Default::default()}}/>}.into_any()
-                        } else {
-                            view!{<div> RIP </div>}.into_any()
                         }}
+
                     </div>
                 }.into_any(),
             }
