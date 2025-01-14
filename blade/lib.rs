@@ -7,7 +7,6 @@ pub mod routes;
 // Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a lib. I may be wrong.
 cfg_if! {
     if #[cfg(feature = "hydrate")] {
-        use leptos::mount::mount_to_body;
         use wasm_bindgen::prelude::wasm_bindgen;
         use tracing_web::{MakeWebConsoleWriter};
         use tracing_subscriber::prelude::*;
@@ -23,7 +22,7 @@ cfg_if! {
             tracing_subscriber::registry()
                 .with(fmt_layer)
                 .init();
-            mount_to_body(App);
+            leptos::mount::hydrate_body(App);
         }
     }
 }
