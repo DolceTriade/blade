@@ -1,5 +1,4 @@
 use leptos::prelude::*;
-use leptos_router::*;
 
 use crate::components::list::*;
 
@@ -54,14 +53,14 @@ pub fn TestArtifactList() -> impl IntoView {
 
     view! {
         <Suspense>
-            {move || async move {
+            {move || Suspend::new(async move {
                 match manifest.await {
                 Some(outs) => {
                     view! {
                         <h1 class="font-bold text-lg">Undeclared Outputs</h1>
                         <List>
                             <For
-                                each=move || outs
+                                each=move || outs.clone()
                                 key=move |r: &UndeclaredOutput| r.name.clone()
                                 children=move |r| {
                                     let query = format!(
@@ -72,9 +71,9 @@ pub fn TestArtifactList() -> impl IntoView {
                                     );
                                     view! {
                                         <ListItem hide=Signal::derive(|| false)>
-                                            <A href=query>
+                                            <a href=query>
                                                 {format!("{} -- ({} bytes)", r.name, r.size)}
-                                            </A>
+                                            </a>
                                         </ListItem>
                                     }
                                 }
@@ -85,7 +84,7 @@ pub fn TestArtifactList() -> impl IntoView {
                         .into_any()
                 }
                 _ => view!{<div/>}.into_any(),
-            }}}
+            }})}
 
         </Suspense>
 
@@ -107,7 +106,7 @@ pub fn TestArtifactList() -> impl IntoView {
                     );
                     view! {
                         <ListItem hide=Signal::derive(|| false)>
-                            <A href=query>{r.0.clone()}</A>
+                            <a href=query>{r.0.clone()}</a>
                         </ListItem>
                     }
                 }

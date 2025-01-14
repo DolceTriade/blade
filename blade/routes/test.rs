@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 use leptos_router::params::Params;
 use leptos_router::hooks::use_query;
+use leptos_router::hooks::use_location;
+use leptos_router::NavigateOptions;
+use leptos_router::components::Redirect;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
@@ -92,60 +95,58 @@ struct TestParams {
 pub fn Test() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
     let params = use_query::<TestParams>();
-    let test = Memo::new(move |_| {
-        with!(|invocation, params| {
-            match params {
-                Ok(params) => match &params.target {
-                    Some(target) => {
-                        if let Some(test) = invocation.tests.get(target) {
-                            return Ok(test.clone());
-                        }
-                        return Err(format!("{} not found", target).to_string());
-                    }
-                    None => {
-                        return Err("No target specified in URL".to_string());
-                    }
-                },
-                Err(e) => return Err(format!("No target specified in the URL: {e}").to_string()),
+    let test = Memo::new(move |_| match &*params.read() {
+        Ok(params) => match &params.target {
+            Some(target) => {
+                if let Some(test) = invocation.read().tests.get(target) {
+                    return Ok(test.clone());
+                }
+                return Err(format!("{} not found", target).to_string());
             }
-        })
+            None => {
+                return Err("No target specified in URL".to_string());
+            }
+        },
+        Err(e) => return Err(format!("No target specified in the URL: {e}").to_string()),
     });
     let run = Memo::new(move |_| {
-        with!(|params| { params.as_ref().ok().and_then(|params| params.run) })
+        params.read().as_ref().ok().and_then(|params| params.run)
     });
     let shard = Memo::new(move |_| {
-        with!(|params| { params.as_ref().ok().and_then(|params| params.shard) })
+        params.read().as_ref().ok().and_then(|params| params.shard)
     });
     let attempt = Memo::new(move |_| {
-        with!(|params| { params.as_ref().ok().and_then(|params| params.attempt) })
+        params.read().as_ref().ok().and_then(|params| params.attempt)
     });
 
-    let test_run = Memo::new(move |_| {
-        with!(|run, shard, attempt, test| {
-            if run.is_none() || shard.is_none() || attempt.is_none() {
-                return None;
+    let test_run = Memo::new(move|_| {
+        let run = run.read().clone();
+        let shard = shard.read().clone();
+        let attempt = attempt.read().clone();
+        let test = test.read();
+        let test = test.as_ref();
+        if run.is_none() || shard.is_none() || attempt.is_none() {
+            return Option::None;
+        }
+        if test.is_err() {
+            return Option::None;
+        }
+        let run = run.unwrap();
+        let shard = shard.unwrap();
+        let attempt = attempt.unwrap();
+        let test = test.as_ref().unwrap();
+        for test_run in &test.runs {
+            if test_run.run == run && test_run.shard == shard && test_run.attempt == attempt {
+                return Some(test_run.clone());
             }
-            if test.is_err() {
-                return None;
-            }
-            let run = run.unwrap();
-            let shard = shard.unwrap();
-            let attempt = attempt.unwrap();
-            let test = test.as_ref().unwrap();
-            for test_run in &test.runs {
-                if test_run.run == run && test_run.shard == shard && test_run.attempt == attempt {
-                    return Some(test_run.clone());
-                }
-            }
-            None
-        })
+        }
+        Option::None
     });
-
-    let uri = test_run.with(|tr| tr.as_ref().and_then(|tr| tr.files.get("test.xml").map(|a| a.uri.clone())));
-
 
     let test_xml = LocalResource::new(
-        move || async move {
+        move || {
+        let uri = test_run.with(|tr| tr.as_ref().and_then(|tr| tr.files.get("test.xml").map(|a| a.uri.clone())));
+        async move {
             match uri {
                 None => None,
                 Some(uri) => get_artifact(uri.to_string())
@@ -157,13 +158,13 @@ pub fn Test() -> impl IntoView {
                         junit_parser::from_reader(c).ok()
                     }),
             }
-        },
+        }},
     );
     let test_out = Resource::new(
         move || {
-            with!(|test_run| test_run
+            test_run.read()
                 .as_ref()
-                .and_then(|test_run| test_run.files.get("test.log").map(|a| a.uri.clone())))
+                .and_then(|test_run| test_run.files.get("test.log").map(|a| a.uri.clone()))
         },
         move |uri| async move {
             match uri {
@@ -183,9 +184,9 @@ pub fn Test() -> impl IntoView {
 
     {
         move || {
-            with!(|test_run, test_xml| match test_run {
+            match *test_run.read() {
                 Some(_) => {
-                    test_xml_signal.set(test_xml.clone());
+                    test_xml_signal.set(test_xml.get());
                     view! {
                         <div class="flex flex-col">
                         <Card class="p-0 m-0">
@@ -201,40 +202,35 @@ pub fn Test() -> impl IntoView {
                             <Suspense
                             fallback=move||view!{<div>Loading...</div>}>
                                 {move||match test_out.get() {
-                                    Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> },
-                                    _ => view!{ <div>No test output</div> },
+                                    Some(Some(s)) => view!{ <div><ShellOut text={s} /></div> }.into_any(),
+                                    _ => view!{ <div>No test output</div> }.into_any(),
                                 }}
                             </Suspense>
                             <TestArtifactList />
                             </Card>
                         </div>
                         </div>
-                    }
+                    }.into_any()
                 }
                 None => view! {
                     <div>
-                        {move||with!(|test, run, shard, attempt| if let Ok(test) = test {
+                        {move|| if let Ok(test) = test.read().as_ref() {
                             if test.runs.is_empty() {
-                                return view!{<div> RIP </div>}.into_view();
+                                return view!{<div> RIP </div>}.into_any();
                             }
-                            let (r, s, a) = get_run(run, shard, attempt, &test.runs);
+                            let (r, s, a) = get_run(&run.read(), &shard.read(), &attempt.read(), &test.runs);
                             let mut q = use_location().query.get();
                             let path = use_location().pathname;
-                            with!(move|path| {
-                                let run = q.0.entry("run".to_string()).or_insert("".to_string());
-                                *run = r.to_string();
-                                let shard = q.0.entry("shard".to_string()).or_insert("".to_string());
-                                *shard = s.to_string();
-                                let attempt = q.0.entry("attempt".to_string()).or_insert("".to_string());
-                                *attempt = a.to_string();
-                                view!{<Redirect path=format!("{}{}", path, q.to_query_string()) options={NavigateOptions {replace: true, ..Default::default()}}/>}
-                            })
+                            q.replace("run", r.to_string());
+                            q.replace("shard", s.to_string());
+                            q.replace("attempt", a.to_string());
+                            view!{<Redirect path=format!("{}{}", path.get(), q.to_query_string()) options={NavigateOptions {replace: true, ..Default::default()}}/>}.into_any()
                         } else {
-                            view!{<div> RIP </div>}.into_view()
-                        })}
+                            view!{<div> RIP </div>}.into_any()
+                        }}
                     </div>
-                },
-            })
+                }.into_any(),
+            }
         }
     }
 }

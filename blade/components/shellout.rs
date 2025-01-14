@@ -1,7 +1,7 @@
 use leptos::prelude::*;
-use leptos_dom::html::*;
+use leptos::html::*;
 
-pub fn scroll_bottom(el: HtmlElement<Div>) {
+pub fn scroll_bottom(el: web_sys::HtmlElement) {
     if let Some(c) = el.last_element_child() {
         c.scroll_into_view_with_bool(false)
     }
@@ -16,7 +16,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
         // Empty callback so this is called on update.
         t.with(|_| {});
         if let Some(nr) = nr.get() {
-            scroll_bottom(nr);
+            scroll_bottom(nr.into());
         }
     });
     view! {

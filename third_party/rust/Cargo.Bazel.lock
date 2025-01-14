@@ -1,5 +1,5 @@
 {
-  "checksum": "bcdbf10603b728f02679e2ab5a9eabf45080b19e3fba3e678f8bee4f8fb5336c",
+  "checksum": "611ffae5a8ad944ff7fb7453262d85ca5b6351a644e9636b0f1924e2ac4d33f7",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -1839,7 +1839,7 @@
               "target": "tokio"
             },
             {
-              "id": "wasm-bindgen-futures 0.4.50",
+              "id": "wasm-bindgen-futures 0.4.45",
               "target": "wasm_bindgen_futures"
             }
           ],
@@ -5974,23 +5974,23 @@
               "target": "lazy_static"
             },
             {
-              "id": "leptos 0.7.3",
+              "id": "leptos 0.7.0",
               "target": "leptos"
             },
             {
-              "id": "leptos_actix 0.7.3",
+              "id": "leptos_actix 0.7.0",
               "target": "leptos_actix"
             },
             {
-              "id": "leptos_dom 0.7.3",
+              "id": "leptos_dom 0.7.0",
               "target": "leptos_dom"
             },
             {
-              "id": "leptos_meta 0.7.3",
+              "id": "leptos_meta 0.7.0",
               "target": "leptos_meta"
             },
             {
-              "id": "leptos_router 0.7.3",
+              "id": "leptos_router 0.7.0",
               "target": "leptos_router"
             },
             {
@@ -6102,11 +6102,11 @@
               "target": "walkdir"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             },
             {
@@ -7777,7 +7777,7 @@
               "target": "http"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -7797,15 +7797,15 @@
               "target": "thiserror"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "wasm-bindgen-futures 0.4.50",
+              "id": "wasm-bindgen-futures 0.4.45",
               "target": "wasm_bindgen_futures"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -7859,7 +7859,7 @@
         "deps": {
           "common": [
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -7871,11 +7871,11 @@
               "target": "serde_json"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -8646,14 +8646,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "hydration_context 0.2.1": {
+    "hydration_context 0.2.0": {
       "name": "hydration_context",
-      "version": "0.2.1",
+      "version": "0.2.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/hydration_context/0.2.1/download",
-          "sha256": "d35485b3dcbf7e044b8f28c73f04f13e7b509c2466fd10cb2a8a447e38f8a93a"
+          "url": "https://static.crates.io/crates/hydration_context/0.2.0/download",
+          "sha256": "ef13071fe13b55c85fe2b70246d2e3b49d2c6a764fd3e0edaf262cc385ff1854"
         }
       },
       "targets": [
@@ -8688,7 +8688,7 @@
               "target": "futures"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -8712,14 +8712,14 @@
               "target": "throw_error"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.1"
+        "version": "0.2.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -8956,11 +8956,11 @@
             ],
             "cfg(target_arch = \"wasm32\")": [
               {
-                "id": "js-sys 0.3.77",
+                "id": "js-sys 0.3.72",
                 "target": "js_sys"
               },
               {
-                "id": "wasm-bindgen 0.2.100",
+                "id": "wasm-bindgen 0.2.95",
                 "target": "wasm_bindgen"
               }
             ],
@@ -9702,14 +9702,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "js-sys 0.3.77": {
+    "js-sys 0.3.72": {
       "name": "js-sys",
-      "version": "0.3.77",
+      "version": "0.3.72",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/js-sys",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/js-sys/0.3.77/download",
-          "sha256": "1cfaf33c695fc6e08064efbc1f72ec937429614f25eef83af942d0e227c3a28f"
+          "url": "https://static.crates.io/crates/js-sys/0.3.72/download",
+          "sha256": "6a88f1bda2bd75b0452a14784937d796722fdebfe50df998aeb3f0b7603019a9"
         }
       },
       "targets": [
@@ -9731,28 +9731,17 @@
         "compile_data_glob": [
           "**"
         ],
-        "crate_features": {
-          "common": [
-            "default",
-            "std"
-          ],
-          "selects": {}
-        },
         "deps": {
           "common": [
             {
-              "id": "once_cell 1.20.2",
-              "target": "once_cell"
-            },
-            {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.3.77"
+        "version": "0.3.72"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -9909,14 +9898,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "leptos 0.7.3": {
+    "leptos 0.7.0": {
       "name": "leptos",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos/0.7.3/download",
-          "sha256": "a8a90c679094979aa12927e8e925fe8eead1420d69420b2d8c6540863937ca75"
+          "url": "https://static.crates.io/crates/leptos/0.7.0/download",
+          "sha256": "ba5046c590aea121f6ad5e71fcb75453a933425d39527b9a3b1b295235afc8df"
         }
       },
       "targets": [
@@ -9971,7 +9960,7 @@
               "target": "futures"
             },
             {
-              "id": "hydration_context 0.2.1",
+              "id": "hydration_context 0.2.0",
               "target": "hydration_context"
             },
             {
@@ -9979,7 +9968,7 @@
               "target": "leptos_config"
             },
             {
-              "id": "leptos_dom 0.7.3",
+              "id": "leptos_dom 0.7.0",
               "target": "leptos_dom"
             },
             {
@@ -9987,7 +9976,7 @@
               "target": "leptos_hot_reload"
             },
             {
-              "id": "leptos_server 0.7.3",
+              "id": "leptos_server 0.7.0",
               "target": "leptos_server"
             },
             {
@@ -10023,7 +10012,7 @@
               "target": "serde_qs"
             },
             {
-              "id": "server_fn 0.7.3",
+              "id": "server_fn 0.7.0",
               "target": "server_fn"
             },
             {
@@ -10031,7 +10020,7 @@
               "target": "slotmap"
             },
             {
-              "id": "tachys 0.1.3",
+              "id": "tachys 0.1.0",
               "target": "tachys"
             },
             {
@@ -10047,11 +10036,11 @@
               "target": "typed_builder"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -10075,7 +10064,7 @@
           ],
           "selects": {}
         },
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10083,14 +10072,14 @@
       ],
       "license_file": null
     },
-    "leptos_actix 0.7.3": {
+    "leptos_actix 0.7.0": {
       "name": "leptos_actix",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_actix/0.7.3/download",
-          "sha256": "2a75b2f7d0bbacfd3a92f2d7c04c01b1c0d828a0a5eae58d2ab56a141f661194"
+          "url": "https://static.crates.io/crates/leptos_actix/0.7.0/download",
+          "sha256": "0d1babe3599368d0b39e4f7907ddef36d53c54ef310c491d65ff2948ba11ef77"
         }
       },
       "targets": [
@@ -10139,23 +10128,23 @@
               "target": "futures"
             },
             {
-              "id": "hydration_context 0.2.1",
+              "id": "hydration_context 0.2.0",
               "target": "hydration_context"
             },
             {
-              "id": "leptos 0.7.3",
+              "id": "leptos 0.7.0",
               "target": "leptos"
             },
             {
-              "id": "leptos_integration_utils 0.7.3",
+              "id": "leptos_integration_utils 0.7.0",
               "target": "leptos_integration_utils"
             },
             {
-              "id": "leptos_meta 0.7.3",
+              "id": "leptos_meta 0.7.0",
               "target": "leptos_meta"
             },
             {
-              "id": "leptos_router 0.7.3",
+              "id": "leptos_router 0.7.0",
               "target": "leptos_router"
             },
             {
@@ -10175,7 +10164,7 @@
               "target": "serde_json"
             },
             {
-              "id": "server_fn 0.7.3",
+              "id": "server_fn 0.7.0",
               "target": "server_fn"
             },
             {
@@ -10195,7 +10184,7 @@
           ],
           "selects": {}
         },
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10266,14 +10255,14 @@
       ],
       "license_file": null
     },
-    "leptos_dom 0.7.3": {
+    "leptos_dom 0.7.0": {
       "name": "leptos_dom",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_dom/0.7.3/download",
-          "sha256": "99803be421344a2184fd5796e1a7645c2090738b2ab5d1a856084816853ec322"
+          "url": "https://static.crates.io/crates/leptos_dom/0.7.0/download",
+          "sha256": "6c15aca81dc2edd040b51c46734f65c6f36e6ba8a31347c1354c94b958044ae0"
         }
       },
       "targets": [
@@ -10305,7 +10294,7 @@
         "deps": {
           "common": [
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -10321,22 +10310,22 @@
               "target": "send_wrapper"
             },
             {
-              "id": "tachys 0.1.3",
+              "id": "tachys 0.1.0",
               "target": "tachys"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10427,14 +10416,14 @@
       ],
       "license_file": null
     },
-    "leptos_integration_utils 0.7.3": {
+    "leptos_integration_utils 0.7.0": {
       "name": "leptos_integration_utils",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_integration_utils/0.7.3/download",
-          "sha256": "692fbf6dc5358d766932c6e58b30df53cfde916a9f4d20d4bb0cfc1bbf7f85a1"
+          "url": "https://static.crates.io/crates/leptos_integration_utils/0.7.0/download",
+          "sha256": "d293a2f64a558d4ca10ef01125d055134f3582f27c407102c4259bb54ca8b55b"
         }
       },
       "targets": [
@@ -10463,11 +10452,11 @@
               "target": "futures"
             },
             {
-              "id": "hydration_context 0.2.1",
+              "id": "hydration_context 0.2.0",
               "target": "hydration_context"
             },
             {
-              "id": "leptos 0.7.3",
+              "id": "leptos 0.7.0",
               "target": "leptos"
             },
             {
@@ -10475,11 +10464,11 @@
               "target": "leptos_config"
             },
             {
-              "id": "leptos_meta 0.7.3",
+              "id": "leptos_meta 0.7.0",
               "target": "leptos_meta"
             },
             {
-              "id": "leptos_router 0.7.3",
+              "id": "leptos_router 0.7.0",
               "target": "leptos_router"
             },
             {
@@ -10490,7 +10479,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10604,14 +10593,14 @@
       ],
       "license_file": null
     },
-    "leptos_meta 0.7.3": {
+    "leptos_meta 0.7.0": {
       "name": "leptos_meta",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_meta/0.7.3/download",
-          "sha256": "a54d4b942a474e38b606ff0bfe8712f093300bd053adb9dd7a028a14ca3fbfac"
+          "url": "https://static.crates.io/crates/leptos_meta/0.7.0/download",
+          "sha256": "7c651d788bbbf1c57ee95dd3835f9d433b85a409b6256f338c3c7146eb8b7f53"
         }
       },
       "targets": [
@@ -10651,7 +10640,7 @@
               "target": "indexmap"
             },
             {
-              "id": "leptos 0.7.3",
+              "id": "leptos 0.7.0",
               "target": "leptos"
             },
             {
@@ -10667,18 +10656,18 @@
               "target": "send_wrapper"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10686,14 +10675,14 @@
       ],
       "license_file": null
     },
-    "leptos_router 0.7.3": {
+    "leptos_router 0.7.0": {
       "name": "leptos_router",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_router/0.7.3/download",
-          "sha256": "69ff7d8c058b4bd7512fa58224b684d5da10d5f056171b8e27d516e0d36e1a5d"
+          "url": "https://static.crates.io/crates/leptos_router/0.7.0/download",
+          "sha256": "32a4f1784486ebf36805dac22faee21e3e610aa64b6662a7386f065eeec27ae8"
         }
       },
       "targets": [
@@ -10740,11 +10729,11 @@
               "target": "gloo_net"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
-              "id": "leptos 0.7.3",
+              "id": "leptos 0.7.0",
               "target": "leptos"
             },
             {
@@ -10768,7 +10757,7 @@
               "target": "send_wrapper"
             },
             {
-              "id": "tachys 0.1.3",
+              "id": "tachys 0.1.0",
               "target": "tachys"
             },
             {
@@ -10780,11 +10769,11 @@
               "target": "url"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -10800,7 +10789,7 @@
           ],
           "selects": {}
         },
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10863,14 +10852,14 @@
       ],
       "license_file": null
     },
-    "leptos_server 0.7.3": {
+    "leptos_server 0.7.0": {
       "name": "leptos_server",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_server/0.7.3/download",
-          "sha256": "0fb23bd110ac04c7276aae3d8ba523f94cf06989d00b4e76eaee89451b06b494"
+          "url": "https://static.crates.io/crates/leptos_server/0.7.0/download",
+          "sha256": "93450589df3b3e398c7f5ea64d8f1c8369b1ba9b90e1f70f6cb996b8d443ca3e"
         }
       },
       "targets": [
@@ -10919,7 +10908,7 @@
               "target": "futures"
             },
             {
-              "id": "hydration_context 0.2.1",
+              "id": "hydration_context 0.2.0",
               "target": "hydration_context"
             },
             {
@@ -10943,18 +10932,18 @@
               "target": "serde_json"
             },
             {
-              "id": "server_fn 0.7.3",
+              "id": "server_fn 0.7.0",
               "target": "server_fn"
             },
             {
-              "id": "tachys 0.1.3",
+              "id": "tachys 0.1.0",
               "target": "tachys"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -16717,7 +16706,7 @@
               "target": "guardian"
             },
             {
-              "id": "hydration_context 0.2.1",
+              "id": "hydration_context 0.2.0",
               "target": "hydration_context"
             },
             {
@@ -16752,7 +16741,7 @@
           "selects": {
             "cfg(all(target_arch = \"wasm32\", target_os = \"unknown\"))": [
               {
-                "id": "web-sys 0.3.77",
+                "id": "web-sys 0.3.72",
                 "target": "web_sys"
               }
             ]
@@ -18655,14 +18644,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "server_fn 0.7.3": {
+    "server_fn 0.7.0": {
       "name": "server_fn",
-      "version": "0.7.3",
+      "version": "0.7.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/server_fn/0.7.3/download",
-          "sha256": "d0b9f0d2eecb2bf4f909661acc731009e3657574dec93a0ec9f114e250f74bc4"
+          "url": "https://static.crates.io/crates/server_fn/0.7.0/download",
+          "sha256": "033cb8014aa86a7ce0c6ee58d23dce1a078b2e320dc6c53bb439663993199b1f"
         }
       },
       "targets": [
@@ -18732,7 +18721,7 @@
               "target": "inventory"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -18772,11 +18761,11 @@
               "target": "url"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "wasm-bindgen-futures 0.4.50",
+              "id": "wasm-bindgen-futures 0.4.45",
               "target": "wasm_bindgen_futures"
             },
             {
@@ -18784,7 +18773,7 @@
               "target": "wasm_streams"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             },
             {
@@ -18804,7 +18793,7 @@
           ],
           "selects": {}
         },
-        "version": "0.7.3"
+        "version": "0.7.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -19866,14 +19855,14 @@
       ],
       "license_file": "LICENSE"
     },
-    "tachys 0.1.3": {
+    "tachys 0.1.0": {
       "name": "tachys",
-      "version": "0.1.3",
+      "version": "0.1.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/tachys/0.1.3/download",
-          "sha256": "761f12c13d74f1b723e3c53ff70fe291d15fe51cc4b6586aafea974f0b647043"
+          "url": "https://static.crates.io/crates/tachys/0.1.0/download",
+          "sha256": "8be68dfd4abf192e11a1bdd484239daa84ffa6fcd27c25cf4f011b2b0fb27ddb"
         }
       },
       "targets": [
@@ -19941,7 +19930,7 @@
               "target": "itertools"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
@@ -19993,11 +19982,11 @@
               "target": "throw_error"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -20013,7 +20002,7 @@
           ],
           "selects": {}
         },
-        "version": "0.1.3"
+        "version": "0.1.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -23909,14 +23898,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen 0.2.100": {
+    "wasm-bindgen 0.2.95": {
       "name": "wasm-bindgen",
-      "version": "0.2.100",
+      "version": "0.2.95",
       "package_url": "https://github.com/rustwasm/wasm-bindgen",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen/0.2.100/download",
-          "sha256": "1edc8929d7499fc4e8f0be2262a241556cfc54a0bea223790e71446f2aab1ef5"
+          "url": "https://static.crates.io/crates/wasm-bindgen/0.2.95/download",
+          "sha256": "128d1e363af62632b8eb57219c8fd7877144af57558fb2ef0368d0087bddeb2e"
         }
       },
       "targets": [
@@ -23953,8 +23942,7 @@
         "crate_features": {
           "common": [
             "default",
-            "msrv",
-            "rustversion",
+            "spans",
             "std"
           ],
           "selects": {}
@@ -23970,7 +23958,7 @@
               "target": "once_cell"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "build_script_build"
             }
           ],
@@ -23980,17 +23968,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "rustversion 1.0.14",
-              "target": "rustversion"
-            },
-            {
-              "id": "wasm-bindgen-macro 0.2.100",
+              "id": "wasm-bindgen-macro 0.2.95",
               "target": "wasm_bindgen_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.2.100"
+        "version": "0.2.95"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -24004,14 +23988,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen-backend 0.2.100": {
+    "wasm-bindgen-backend 0.2.95": {
       "name": "wasm-bindgen-backend",
-      "version": "0.2.100",
+      "version": "0.2.95",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/backend",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen-backend/0.2.100/download",
-          "sha256": "2f0a0651a5c2bc21487bde11ee802ccaf4c51935d0d3d42a6101f98161700bc6"
+          "url": "https://static.crates.io/crates/wasm-bindgen-backend/0.2.95/download",
+          "sha256": "cb6dd4d3ca0ddffd1dd1c9c04f94b868c37ff5fac97c30b97cff2d74fce3a358"
         }
       },
       "targets": [
@@ -24033,6 +24017,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -24042,6 +24032,10 @@
             {
               "id": "log 0.4.20",
               "target": "log"
+            },
+            {
+              "id": "once_cell 1.20.2",
+              "target": "once_cell"
             },
             {
               "id": "proc-macro2 1.0.89",
@@ -24056,14 +24050,14 @@
               "target": "syn"
             },
             {
-              "id": "wasm-bindgen-shared 0.2.100",
+              "id": "wasm-bindgen-shared 0.2.95",
               "target": "wasm_bindgen_shared"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.100"
+        "version": "0.2.95"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -24072,14 +24066,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen-futures 0.4.50": {
+    "wasm-bindgen-futures 0.4.45": {
       "name": "wasm-bindgen-futures",
-      "version": "0.4.50",
+      "version": "0.4.45",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/futures",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen-futures/0.4.50/download",
-          "sha256": "555d470ec0bc3bb57890405e5d4322cc9ea83cebb085523ced7be4144dac1e61"
+          "url": "https://static.crates.io/crates/wasm-bindgen-futures/0.4.45/download",
+          "sha256": "cc7ec4f8827a71586374db3e87abdb5a2bb3a15afed140221307c3ec06b1f63b"
         }
       },
       "targets": [
@@ -24101,13 +24095,6 @@
         "compile_data_glob": [
           "**"
         ],
-        "crate_features": {
-          "common": [
-            "default",
-            "std"
-          ],
-          "selects": {}
-        },
         "deps": {
           "common": [
             {
@@ -24115,29 +24102,25 @@
               "target": "cfg_if"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
-              "id": "once_cell 1.20.2",
-              "target": "once_cell"
-            },
-            {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {
             "cfg(target_feature = \"atomics\")": [
               {
-                "id": "web-sys 0.3.77",
+                "id": "web-sys 0.3.72",
                 "target": "web_sys"
               }
             ]
           }
         },
         "edition": "2021",
-        "version": "0.4.50"
+        "version": "0.4.45"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -24146,14 +24129,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen-macro 0.2.100": {
+    "wasm-bindgen-macro 0.2.95": {
       "name": "wasm-bindgen-macro",
-      "version": "0.2.100",
+      "version": "0.2.95",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/macro",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen-macro/0.2.100/download",
-          "sha256": "7fe63fc6d09ed3792bd0897b314f53de8e16568c2b3f7982f468c0bf9bd0b407"
+          "url": "https://static.crates.io/crates/wasm-bindgen-macro/0.2.95/download",
+          "sha256": "e79384be7f8f5a9dd5d7167216f022090cf1f9ec128e6e6a482a2cb5c5422c56"
         }
       },
       "targets": [
@@ -24175,6 +24158,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -24182,14 +24171,14 @@
               "target": "quote"
             },
             {
-              "id": "wasm-bindgen-macro-support 0.2.100",
+              "id": "wasm-bindgen-macro-support 0.2.95",
               "target": "wasm_bindgen_macro_support"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.100"
+        "version": "0.2.95"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -24198,14 +24187,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen-macro-support 0.2.100": {
+    "wasm-bindgen-macro-support 0.2.95": {
       "name": "wasm-bindgen-macro-support",
-      "version": "0.2.100",
+      "version": "0.2.95",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/macro-support",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen-macro-support/0.2.100/download",
-          "sha256": "8ae87ea40c9f689fc23f209965b6fb8a99ad69aeeb0231408be24920604395de"
+          "url": "https://static.crates.io/crates/wasm-bindgen-macro-support/0.2.95/download",
+          "sha256": "26c6ab57572f7a24a4985830b120de1594465e5d500f24afe89e16b4e833ef68"
         }
       },
       "targets": [
@@ -24227,6 +24216,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "spans"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -24242,18 +24237,18 @@
               "target": "syn"
             },
             {
-              "id": "wasm-bindgen-backend 0.2.100",
+              "id": "wasm-bindgen-backend 0.2.95",
               "target": "wasm_bindgen_backend"
             },
             {
-              "id": "wasm-bindgen-shared 0.2.100",
+              "id": "wasm-bindgen-shared 0.2.95",
               "target": "wasm_bindgen_shared"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.100"
+        "version": "0.2.95"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -24262,14 +24257,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "wasm-bindgen-shared 0.2.100": {
+    "wasm-bindgen-shared 0.2.95": {
       "name": "wasm-bindgen-shared",
-      "version": "0.2.100",
+      "version": "0.2.95",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/shared",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/wasm-bindgen-shared/0.2.100/download",
-          "sha256": "1a05d73b933a847d6cccdda8f838a22ff101ad9bf93e33684f39c1f5f0eece3d"
+          "url": "https://static.crates.io/crates/wasm-bindgen-shared/0.2.95/download",
+          "sha256": "65fc09f10666a9f147042251e0dda9c18f166ff7de300607007e96bdebc1068d"
         }
       },
       "targets": [
@@ -24306,18 +24301,14 @@
         "deps": {
           "common": [
             {
-              "id": "unicode-ident 1.0.11",
-              "target": "unicode_ident"
-            },
-            {
-              "id": "wasm-bindgen-shared 0.2.100",
+              "id": "wasm-bindgen-shared 0.2.95",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.100"
+        "version": "0.2.95"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -24368,19 +24359,19 @@
               "target": "futures_util"
             },
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             },
             {
-              "id": "wasm-bindgen-futures 0.4.50",
+              "id": "wasm-bindgen-futures 0.4.45",
               "target": "wasm_bindgen_futures"
             },
             {
-              "id": "web-sys 0.3.77",
+              "id": "web-sys 0.3.72",
               "target": "web_sys"
             }
           ],
@@ -24396,14 +24387,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "web-sys 0.3.77": {
+    "web-sys 0.3.72": {
       "name": "web-sys",
-      "version": "0.3.77",
+      "version": "0.3.72",
       "package_url": "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/web-sys",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/web-sys/0.3.77/download",
-          "sha256": "33b6dd2ef9186f1f2072e409e99cd22a975331a6b3591b12c764e0e55c60d5d2"
+          "url": "https://static.crates.io/crates/web-sys/0.3.72/download",
+          "sha256": "f6488b90108c040df0fe62fa815cbdee25124641df01814dd7282749234c6112"
         }
       },
       "targets": [
@@ -24591,27 +24582,25 @@
             "WritableStream",
             "WritableStreamDefaultController",
             "WritableStreamDefaultWriter",
-            "console",
-            "default",
-            "std"
+            "console"
           ],
           "selects": {}
         },
         "deps": {
           "common": [
             {
-              "id": "js-sys 0.3.77",
+              "id": "js-sys 0.3.72",
               "target": "js_sys"
             },
             {
-              "id": "wasm-bindgen 0.2.100",
+              "id": "wasm-bindgen 0.2.95",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.3.77"
+        "version": "0.3.72"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -27363,11 +27352,11 @@
     "humantime 2.1.0",
     "junit-parser 1.0.0",
     "lazy_static 1.4.0",
-    "leptos 0.7.3",
-    "leptos_actix 0.7.3",
-    "leptos_dom 0.7.3",
-    "leptos_meta 0.7.3",
-    "leptos_router 0.7.3",
+    "leptos 0.7.0",
+    "leptos_actix 0.7.0",
+    "leptos_dom 0.7.0",
+    "leptos_meta 0.7.0",
+    "leptos_router 0.7.0",
     "log 0.4.20",
     "prometheus-client 0.22.2",
     "prost 0.12.3",
@@ -27395,8 +27384,8 @@
     "url-escape 0.1.1",
     "uuid 1.11.0",
     "walkdir 2.5.0",
-    "wasm-bindgen 0.2.100",
-    "web-sys 0.3.77",
+    "wasm-bindgen 0.2.95",
+    "web-sys 0.3.72",
     "zip 0.6.6"
   ],
   "direct_dev_deps": []

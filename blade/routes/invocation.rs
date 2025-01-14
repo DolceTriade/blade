@@ -6,7 +6,6 @@ use leptos_router::params::Params;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
-use std::time::Duration;
 
 #[cfg(feature = "ssr")]
 pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
