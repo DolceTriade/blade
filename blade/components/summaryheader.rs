@@ -80,23 +80,20 @@ pub fn SummaryHeader() -> impl IntoView {
         })
     });
     move || {
-        let num_targets = Signal::derive(move || with!(|counts| counts.num_targets));
-        let passing_targets = Signal::derive(move || with!(|counts| counts.passing_targets));
-        let failing_targets = Signal::derive(move || with!(|counts| counts.failing_targets));
-        let num_tests = Signal::derive(move || with!(|counts| counts.num_tests));
-        let passing_tests = Signal::derive(move || with!(|counts| counts.passing_tests));
-        let failing_tests = Signal::derive(move || with!(|counts| counts.failing_tests));
-        let status = Signal::derive(move || with!(|counts| counts.status));
-        let cmd = with!(|invocation| ucfirst(&invocation.command));
-        let patterns = with!(|invocation| invocation.pattern.join(","));
-        let start = with!(|invocation| format_time(&invocation.start));
-        let duration = with!(|invocation| {
-            let Some(end) = invocation.end else {
-                return "".to_string();
-            };
-            let duration = end.duration_since(invocation.start).unwrap_or_default();
+        let num_targets = Signal::derive(move || counts.read().num_targets);
+        let passing_targets = Signal::derive(move || counts.read().passing_targets);
+        let failing_targets = Signal::derive(move || counts.read().failing_targets);
+        let num_tests = Signal::derive(move || counts.read().num_tests);
+        let passing_tests = Signal::derive(move || counts.read().passing_tests);
+        let failing_tests = Signal::derive(move || counts.read().failing_tests);
+        let status = Signal::derive(move || counts.read().status);
+        let cmd = ucfirst(&invocation.read().command);
+        let patterns = invocation.read().pattern.join(",");
+        let start = format_time(&invocation.read().start);
+        let duration = invocation.read().end.map(|end| {
+            let duration = end.duration_since(invocation.read().start).unwrap_or_default();
             format!("Took {}", humantime::format_duration(duration))
-        });
+        }).unwrap_or_default();
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
                 <div class="absolute">

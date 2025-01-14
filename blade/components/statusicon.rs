@@ -18,21 +18,21 @@ pub fn StatusIcon(
                      <Tooltip tooltip=move || view! { <span class="p-2">Success</span> }>
                          <img class=c src="/pkg/static/success.svg"/>
                      </Tooltip>
-                 }.into_view()
+                 }.into_any()
             }
             state::Status::Fail => {
                view! {
                    <Tooltip tooltip=move || view! { <span class="p-2">Fail</span> }>
                        <img class=c src="/pkg/static/fail.svg"/>
                    </Tooltip>
-               }.into_view()
+               }.into_any()
             }
             state::Status::Skip => {
                 view! {
                     <Tooltip tooltip=move || view! { <span class="p-2">Skip</span> }>
                         <img class=c src="/pkg/static/skip.svg"/>
                     </Tooltip>
-                }.into_view()
+                }.into_any()
              }
             _ => {
                  view! {
@@ -61,7 +61,7 @@ pub fn StatusIcon(
                              <span class="sr-only">Loading...</span>
                          </div>
                      </Tooltip>
-                 }.into_view()
+                 }.into_any()
             }
         }
     }

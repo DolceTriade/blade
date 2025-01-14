@@ -33,6 +33,7 @@ cfg_if! {
         use clap::*;
         use futures::join;
         use leptos::prelude::*;
+        use leptos_meta::MetaTags;
         use leptos_actix::{generate_route_list, LeptosRoutes};
         use std::sync::Arc;
         use runfiles::Runfiles;
@@ -224,10 +225,9 @@ cfg_if! {
             let leptos_toml = r.rlocation("_main/blade/leptos.toml");
             let assets = r.rlocation("_main/blade/static");
             let pkg = r.rlocation("_main/blade");
-            let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).await.unwrap();
+            let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
-            let routes = generate_route_list(App);
             let mut bs = bytestream::Client::new();
             for o in &args.bytestream_overrides {
                 if let Some(s) = o.split_once('=') {
@@ -241,10 +241,9 @@ cfg_if! {
             tracing::info!("Starting blade server at: {}", addr.to_string());
             let fut1 = HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
-                let fn_state = actix_state.clone();
                 let rt_state = actix_state.clone();
-                App::new()
-                    .route("/api/{tail:.*}", leptos_actix::handle_server_fns_with_context(move|| provide_context(fn_state.clone())))
+                let routes = generate_route_list(App);
+                let app = App::new()
                     // serve JS/WASM/CSS from `pkg`
                     .service(Files::new("/pkg", pkg.clone()))
                     // serve other assets from the `assets` directory
@@ -252,10 +251,23 @@ cfg_if! {
                     // serve the favicon from /favicon.ico
                     .service(favicon)
                     .leptos_routes_with_context(
-                        leptos_options.to_owned(),
-                        routes.to_owned(),
+                        routes,
                         move|| provide_context(rt_state.clone()),
-                        App,
+                        move|| view! {
+                            <!DOCTYPE html>
+                            <html lang="en">
+                                <head>
+                                    <meta charset="utf-8"/>
+                                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                                    <AutoReload options=leptos_options.clone() />
+                                    <HydrationScripts options=leptos_options.clone()/>
+                                    <MetaTags/>
+                                </head>
+                                <body>
+                                    <App/>
+                                </body>
+                            </html>
+                        },
                     )
                     .app_data(web::Data::new(leptos_options.to_owned()))
                     .wrap(TracingLogger::<BladeRootSpanBuilder>::new())
@@ -313,7 +325,7 @@ cfg_if! {
                 DefaultRootSpanBuilder::on_request_start(request)
             }
 
-            fn on_request_end<B: MessageBody>(span: Span, outcome: &Result<ServiceResponse<B>, actix_web::error::Error>) {
+            fn on_request_end<B: MessageBody>(span: Span, outcome: &core::result::Result<ServiceResponse<B>, actix_web::error::Error>) {
                 match &outcome {
                     Ok(response) => {
                         let method = response.request().method().clone();

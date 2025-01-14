@@ -90,6 +90,11 @@ def rust_dependencies():
                     crate_features = ["process"],
                 ),
             ],
+            "wasm-bindgen": [
+                crate.annotation(
+                    version = "=0.2.95",
+                ),
+            ],
         },
         packages = {
             "ahash": crate.spec(
@@ -153,22 +158,22 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
                 features = ["ssr"],
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -264,10 +269,10 @@ def rust_dependencies():
                 version = "2.4.0",
             ),
             "wasm-bindgen": crate.spec(
-                version = "0.2.100",
+                version = "=0.2.95",
             ),
             "web-sys": crate.spec(
-                version = "0.3.77",
+                version = "0.3.72",
                 features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
             ),
             "zip": crate.spec(
@@ -319,6 +324,11 @@ def rust_dependencies():
                     patch_args = ["-p1"],
                 ),
             ],
+            "wasm-bindgen": [
+                crate.annotation(
+                    version = "=0.2.95",
+                ),
+            ],
         },
         packages = {
             "ansi-to-html": crate.spec(
@@ -328,17 +338,17 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
                 features = ["hydrate", "tracing"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
             ),
             "leptos_router": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.3",
+                version = "0.7.0-rc1",
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",
@@ -365,7 +375,7 @@ def rust_dependencies():
                 features = ["std"],
             ),
             "wasm-bindgen": crate.spec(
-                version = "0.2.100",
+                version = "=0.2.95",
             ),
             "console_log": crate.spec(
                 version = "1",
@@ -416,7 +426,7 @@ def rust_dependencies():
                 version = "0.1.1",
             ),
             "web-sys": crate.spec(
-                version = "0.3.77",
+                version = "0.3.72",
                 features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
             ),
             "zip": crate.spec(
