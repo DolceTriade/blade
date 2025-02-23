@@ -1,7 +1,9 @@
+use std::ops::Deref;
+
 use leptos::prelude::*;
-use web_sys::KeyboardEvent;
-use leptos_router::hooks::use_location;
 use leptos_router::components::A;
+use leptos_router::hooks::use_location;
+use web_sys::KeyboardEvent;
 
 use crate::components::accordion::*;
 use crate::components::list::*;
@@ -80,7 +82,7 @@ fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
 #[component]
 pub fn TestRunList() -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
-    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
+    let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
     let click = move |test: String| {
         document()
             .get_element_by_id(&test)
@@ -176,32 +178,31 @@ pub fn TestRunList() -> impl IntoView {
                 <Suspense fallback=move || {
                     view! { <div>Loading...</div> }
                 }>
-                    {move || {
-                        xml.with(|x| match x.as_ref() {
-                            Some(Some(_)) => {
+                    {move || match xml.read().as_ref().and_then(|sw| sw.deref().as_ref().map(|_| true)) {
+                            Some(_) => {
                                 view! {
                                     <List>
                                         <For
                                             each=move || {
-                                                xml.with(|x| {
-                                                    x.clone()
-                                                        .flatten()
-                                                        .as_ref()
-                                                        .and_then(|x| x.suites.first())
-                                                        .map(|c| {
-                                                            c.cases
-                                                                .iter()
-                                                                .map(|i| (
-                                                                    c.name.clone(),
-                                                                    i.name.clone(),
-                                                                    i.status.clone(),
-                                                                    std::time::Duration::from_secs_f64(i.time),
-                                                                ))
-                                                                .collect::<Vec<_>>()
-                                                        })
-                                                        .map(|c| sort_tests(&c))
-                                                        .unwrap_or_default()
-                                                })
+                                                xml.try_read()
+                                                    .as_ref()
+                                                    .and_then(|rg| rg.deref().as_ref())
+                                                    .and_then(|sw| {
+                                                        sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
+                                                    })
+                                                    .map(|c| {
+                                                        c.cases
+                                                            .iter()
+                                                            .map(|i| (
+                                                                c.name.clone(),
+                                                                i.name.clone(),
+                                                                i.status.clone(),
+                                                                std::time::Duration::from_secs_f64(i.time),
+                                                            ))
+                                                            .collect::<Vec<_>>()
+                                                    })
+                                                    .map(|c| sort_tests(&c))
+                                                    .unwrap_or_default()
                                             }
 
                                             key=move |c| (c.0.clone(), c.1.clone())
@@ -258,12 +259,24 @@ pub fn TestRunList() -> impl IntoView {
                                     // TODO: Fix
                                     // attr:test=move||id
 
+                                    // TODO: Fix
+                                    // attr:test=move||id
+
+                                    // TODO: Fix
+                                    // attr:test=move||id
+
+                                    // TODO: Fix
+                                    // attr:test=move||id
+
+                                    // TODO: Fix
+                                    // attr:test=move||id
+
                                     <div>Loading...</div>
                                 }
                                     .into_any()
                             }
-                        })
-                    }}
+                        }
+                    }
 
                 </Suspense>
             </AccordionItem>
