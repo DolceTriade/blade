@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::nested_router::Outlet;
 use leptos_router::hooks::use_params;
+use leptos_router::nested_router::Outlet;
 use leptos_router::params::Params;
 
 #[cfg(feature = "ssr")]

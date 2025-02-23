@@ -90,10 +90,16 @@ pub fn SummaryHeader() -> impl IntoView {
         let cmd = ucfirst(&invocation.read().command);
         let patterns = invocation.read().pattern.join(",");
         let start = format_time(&invocation.read().start);
-        let duration = invocation.read().end.map(|end| {
-            let duration = end.duration_since(invocation.read().start).unwrap_or_default();
-            format!("Took {}", humantime::format_duration(duration))
-        }).unwrap_or_default();
+        let duration = invocation
+            .read()
+            .end
+            .map(|end| {
+                let duration = end
+                    .duration_since(invocation.read().start)
+                    .unwrap_or_default();
+                format!("Took {}", humantime::format_duration(duration))
+            })
+            .unwrap_or_default();
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
                 <div class="absolute">

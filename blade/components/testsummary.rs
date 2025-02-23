@@ -1,6 +1,8 @@
+use std::ops::Deref;
+
 use leptos::prelude::*;
-use leptos_router::*;
 use leptos_router::components::A;
+use leptos_router::*;
 
 use crate::components::statusicon::StatusIcon;
 
@@ -40,7 +42,7 @@ fn get_test_counts(cases: &[junit_parser::TestCase]) -> TestCounts {
 #[component]
 fn RunSummary() -> impl IntoView {
     let run = expect_context::<Memo<Option<state::TestRun>>>();
-    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
+    let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
     view! {
         {move || {
             run.with(|run| {
@@ -58,45 +60,45 @@ fn RunSummary() -> impl IntoView {
                                 </div>
                                 <div class="pl-1 text-s">{format!("in {:#?}", run.duration)}</div>
                                 {move || {
-                                    xml.with(|ts| {
-                                        ts.clone()
-                                            .flatten()
-                                            .and_then(|ts| {
-                                                ts.suites.first().map(|s| get_test_counts(&s.cases))
-                                            })
-                                            .map(|tc| {
-                                                view! {
-                                                    {(tc.passing > 0)
-                                                        .then(|| {
-                                                            view! {
-                                                                <span>
-                                                                    <SummaryItem num=tc.passing suffix="Passing"/>
-                                                                </span>
-                                                            }
-                                                        })}
+                                    xml.try_read()
+                                    .as_ref()
+                                    .and_then(|rg| rg.deref().as_ref())
+                                    .and_then(|sw| {
+                                            sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
+                                        })
+                                        .map(|s| get_test_counts(&s.cases))
+                                        .map(|tc| {
+                                            view! {
+                                                {(tc.passing > 0)
+                                                    .then(|| {
+                                                        view! {
+                                                            <span>
+                                                                <SummaryItem num=tc.passing suffix="Passing"/>
+                                                            </span>
+                                                        }
+                                                    })}
 
-                                                    {(tc.failing > 0)
-                                                        .then(|| {
-                                                            view! {
-                                                                <span>
-                                                                    <SummaryItem num=tc.failing suffix="Failing"/>
-                                                                </span>
-                                                            }
-                                                        })}
+                                                {(tc.failing > 0)
+                                                    .then(|| {
+                                                        view! {
+                                                            <span>
+                                                                <SummaryItem num=tc.failing suffix="Failing"/>
+                                                            </span>
+                                                        }
+                                                    })}
 
-                                                    {(tc.skipped > 0)
-                                                        .then(|| {
-                                                            view! {
-                                                                <span>
-                                                                    <SummaryItem num=tc.skipped suffix="Skipped"/>
-                                                                </span>
-                                                            }
-                                                        })}
-                                                }
-                                                    .into_any()
-                                            })
-                                            .unwrap_or(view! { <div></div> }.into_any())
-                                    })
+                                                {(tc.skipped > 0)
+                                                    .then(|| {
+                                                        view! {
+                                                            <span>
+                                                                <SummaryItem num=tc.skipped suffix="Skipped"/>
+                                                            </span>
+                                                        }
+                                                    })}
+                                            }
+                                                .into_any()
+                                        })
+                                        .unwrap_or(view! { <div></div> }.into_any())
                                 }}
 
                             </div>
@@ -133,7 +135,8 @@ where
                         .map(|test| {
                             view! {
                                 <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
-                                    <A attr:class="absolute float-left" href=move || link.get()>
+                                    <div class="absolute float-left">
+                                    <A  href=move || link.get()>
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             class="h-8 w-8"
@@ -145,6 +148,7 @@ where
                                             <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
                                         </svg>
                                     </A>
+                                    </div>
                                     <div>
                                         <StatusIcon class="h-8 w-8" status=test.status.into()/>
                                     </div>

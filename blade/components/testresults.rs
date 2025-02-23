@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use leptos::prelude::*;
 
 use crate::components::accordion::*;
@@ -89,23 +91,20 @@ fn merge_skip(e: &junit_parser::TestSkipped) -> String {
 #[allow(non_snake_case)]
 #[component]
 pub fn TestResults() -> impl IntoView {
-    let xml = expect_context::<RwSignal<Option<Option<junit_parser::TestSuites>>>>();
+    let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
     let sorted_tests = move || {
-        xml.with(|x| {
-            x.clone()
-                .flatten()
-                .as_ref()
-                .and_then(|x| x.suites.first())
-                .map(|c| sort_tests(&c.cases))
+        xml.read().as_ref()
+        .and_then(|sw| {
+            sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
+        }).map(|c| sort_tests(&c.cases))
                 .unwrap_or_default()
-        })
     };
     view! {
         <Suspense fallback=move || {
             view! { <div>Loading...</div> }
         }>
-            {move || match xml.with(|x| x.as_ref().map(|x| x.as_ref().map(|_| true))) {
-                Some(Some(_)) => {
+            {move || match xml.read().as_ref().and_then(|sw| sw.deref().as_ref().map(|_| true)) {
+                Some(_) => {
                     view! {
                         <Accordion>
                             <For
@@ -150,7 +149,7 @@ pub fn TestResults() -> impl IntoView {
                                                 <ShellOut text=message/>
                                             </div>
                                         </AccordionItem>
-                                    }
+                                    }.into_any()
                                 }
                             />
 
