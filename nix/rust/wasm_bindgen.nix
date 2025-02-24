@@ -28,16 +28,16 @@ let
   };
 in
   wasm-bindgen-cli'.overrideAttrs (self: super: rec {
-    version = "0.2.95";
+    version = "0.2.100";
     src = with self;
       pkgs.fetchCrate {
         inherit pname;
-        version = "0.2.95";
-        hash = "sha256-prMIreQeAcbJ8/g3+pMp1Wp9H5u+xLqxRxL+34hICss=";
+        version = "0.2.100";
+        hash = "sha256-3RJzK7mkYFrs7C/WkhW9Rr4LdP5ofb2FdYGz1P7Uxog=";
       };
     cargoDeps = super.cargoDeps.overrideAttrs (_: {
       inherit src;
-      outputHash = "sha256-00AJAu45ggJPm77CtExcQGU542oqx31kj0pBqeqMR+0=";
+      outputHash = "sha256-uLT2eN5HE7RGLOOD3d+y2TcyXFp8Ol02jGlJZvOvMq0=";
     });
     doCheck = false;
   })
