@@ -1,7 +1,7 @@
-load("@rules_rust//bindgen:defs.bzl", "rust_bindgen_toolchain")
+load("@rules_rust_wasm_bindgen//:defs.bzl", "rust_wasm_bindgen_toolchain")
 load("@rules_rust//rust:toolchain.bzl", "rust_analyzer_toolchain", "rustfmt_toolchain")
 
-rust_bindgen_toolchain(
+rust_wasm_bindgen_toolchain(
     name = "wasm_bindgen_toolchain_impl",
     bindgen = "@wasm-bindgen-cli",
 )
@@ -9,7 +9,7 @@ rust_bindgen_toolchain(
 toolchain(
     name = "wasm_bindgen_toolchain",
     toolchain = "wasm_bindgen_toolchain_impl",
-    toolchain_type = "@rules_rust//wasm_bindgen:toolchain_type",
+    toolchain_type = "@rules_rust_wasm_bindgen//:toolchain_type",
 )
 
 rust_analyzer_toolchain(
