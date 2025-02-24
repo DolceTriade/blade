@@ -92,7 +92,7 @@ def rust_dependencies():
             ],
             "wasm-bindgen": [
                 crate.annotation(
-                    version = "=0.2.95",
+                    version = "=0.2.100",
                 ),
             ],
         },
@@ -158,22 +158,22 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
                 features = ["ssr"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
                 features = ["ssr"],
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -269,7 +269,7 @@ def rust_dependencies():
                 version = "2.4.0",
             ),
             "wasm-bindgen": crate.spec(
-                version = "=0.2.95",
+                version = "=0.2.100",
             ),
             "web-sys": crate.spec(
                 version = "0.3.72",
@@ -326,7 +326,7 @@ def rust_dependencies():
             ],
             "wasm-bindgen": [
                 crate.annotation(
-                    version = "=0.2.95",
+                    version = "=0.2.100",
                 ),
             ],
         },
@@ -338,17 +338,17 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
                 features = ["hydrate", "tracing"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
             ),
             "leptos_router": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.0-rc1",
+                version = "0.7.7",
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",
@@ -375,7 +375,7 @@ def rust_dependencies():
                 features = ["std"],
             ),
             "wasm-bindgen": crate.spec(
-                version = "=0.2.95",
+                version = "=0.2.100",
             ),
             "console_log": crate.spec(
                 version = "1",
