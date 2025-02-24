@@ -1,7 +1,7 @@
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
-load("@rules_rust//wasm_bindgen/rules_js:defs.bzl", "js_rust_wasm_bindgen")
+load("@rules_rust_wasm_bindgen//rules_js:defs.bzl", "js_rust_wasm_bindgen")
 load("//nix/bazel:runfiles.bzl", "runfiles")
 
 rust_binary(
