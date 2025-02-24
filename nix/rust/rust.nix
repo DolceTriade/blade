@@ -24,12 +24,12 @@
     then true
     else false;
   ogRust = pkgs.rust;
-  os = ogRust.toTargetOs pkgs.stdenv.targetPlatform;
-  build-triple = ogRust.toRustTargetSpec pkgs.stdenv.buildPlatform;
+  os = pkgs.stdenv.targetPlatform.rust.platform.os;
+  build-triple = pkgs.stdenv.buildPlatform.rust.rustcTargetSpec;
   target-triple =
     if target != ""
     then target
-    else ogRust.toRustTargetSpec pkgs.stdenv.targetPlatform;
+    else pkgs.stdenv.targetPlatform.rust.rustcTargetSpec;
   binary-ext =
     if wasm
     then ".wasm"

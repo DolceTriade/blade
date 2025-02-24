@@ -1,6 +1,7 @@
 """Nix deps."""
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_package")
+load("@rules_rust//crate_universe/private:srcs.bzl", "CARGO_BAZEL_SRCS")
 
 def third_party_nix_deps():
     nixpkgs_package(
@@ -61,4 +62,16 @@ def third_party_nix_deps():
         repository = "@nixpkgs",
         nix_file = "//third_party/nix/oci_base:default.nix",
         nixopts = ["--show-trace"],
+    )
+    nixpkgs_package(
+        name = "cargo-bazel",
+        repositories = {
+            "nixpkgs": "@nixpkgs",
+            "fenix": "@fenix",
+        },
+        nix_file = "//third_party/nix/cargo-bazel:bazel.nix",
+        nix_file_deps = [
+            "//third_party/nix/cargo-bazel:default.nix",
+            "//nix/rust:rust_platform.nix",
+        ]
     )

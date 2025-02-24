@@ -74,12 +74,6 @@ def rust_dependencies():
                     ],
                 ),
             ],
-            "diesel-tracing": [
-                crate.annotation(
-                    patches = ["@//third_party/rust/patches/diesel-tracing:fix-pgmetadata.patch"],
-                    patch_args = ["-p1"],
-                ),
-            ],
             "linux-raw-sys": [
                 crate.annotation(
                     crate_features = ["prctl"],
@@ -127,15 +121,15 @@ def rust_dependencies():
                 version = "2.2.0",
             ),
             "diesel": crate.spec(
-                version = "2.1.4",
+                version = "2.2.6",
                 features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35", "r2d2"],
             ),
             "diesel_migrations": crate.spec(
-                version = "2.1.0",
+                version = "2.2.0",
                 features = ["sqlite", "postgres"],
             ),
             "diesel-tracing": crate.spec(
-                version = "0.2.2",
+                version = "0.3.1",
                 features = ["sqlite", "postgres", "r2d2"],
             ),
             "futures": crate.spec(
@@ -159,7 +153,7 @@ def rust_dependencies():
             ),
             "leptos": crate.spec(
                 version = "0.7.7",
-                features = ["ssr"],
+                features = ["ssr", "nightly"],
             ),
             "leptos_actix": crate.spec(
                 version = "0.7.7",
@@ -174,6 +168,9 @@ def rust_dependencies():
             ),
             "leptos_dom": crate.spec(
                 version = "0.7.7",
+            ),
+            "either_of": crate.spec(
+                version = "0.1.5",
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -289,7 +286,7 @@ def rust_dependencies():
         ),
         rust_toolchain_cargo_template = "@nix_rust//:bin/{tool}",
         rust_toolchain_rustc_template = "@nix_rust//:bin/{tool}",
-        generator = "@cargo_bazel_bootstrap//:cargo-bazel",
+        generator = "@cargo-bazel//:bin/cargo-bazel",
     )
     crates_repository(
         name = "wasm_crate",
@@ -339,7 +336,7 @@ def rust_dependencies():
             ),
             "leptos": crate.spec(
                 version = "0.7.7",
-                features = ["hydrate", "tracing"],
+                features = ["hydrate", "tracing", "nightly"],
             ),
             "leptos_meta": crate.spec(
                 version = "0.7.7",
@@ -373,6 +370,9 @@ def rust_dependencies():
                 version = "0.8.11",
                 default_features = False,
                 features = ["std"],
+            ),
+            "either_of": crate.spec(
+                version = "0.1.5",
             ),
             "wasm-bindgen": crate.spec(
                 version = "=0.2.100",
@@ -443,5 +443,5 @@ def rust_dependencies():
         ),
         rust_toolchain_cargo_template = "@nix_rust_wasm//:bin/{tool}",
         rust_toolchain_rustc_template = "@nix_rust_wasm//:bin/{tool}",
-        generator = "@cargo_bazel_bootstrap//:cargo-bazel",
+        generator = "@cargo-bazel//:bin/cargo-bazel",
     )

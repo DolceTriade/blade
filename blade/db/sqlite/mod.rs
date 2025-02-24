@@ -34,7 +34,7 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
         .execute(&mut me)
         .context("failed to enable foreign keys")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
-    let path = r.rlocation("_main/blade/db/sqlite/migrations");
+    let path = r.rlocation("_main/blade/db/sqlite/migrations").unwrap();
     let finder: FileBasedMigrations = FileBasedMigrations::from_path(
         path.to_str()
             .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
@@ -409,7 +409,7 @@ impl state::DB for Sqlite {
     }
 }
 
-sql_function! {
+define_sql_function! {
     fn unixepoch(ts: diesel::sql_types::TimestamptzSqlite) -> diesel::sql_types::Integer;
 }
 

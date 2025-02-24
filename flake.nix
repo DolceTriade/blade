@@ -1,7 +1,7 @@
 {
   description = "BLADE";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-24.11";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/latest";
     fenix = {
@@ -41,7 +41,7 @@
         rustc = rust;
       };
       leptosfmt = pkgs.callPackage ./third_party/nix/leptosfmt {inherit rustPlatform;};
-      diesel-cli' = pkgs.callPackage ./third_party/nix/diesel_cli {inherit rustPlatform;};
+      diesel-cli' = pkgs.callPackage ./third_party/nix/diesel_cli {inherit rustPlatform; mysqlSupport = false;};
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;

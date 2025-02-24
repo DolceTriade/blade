@@ -1,5 +1,5 @@
 {
-  "checksum": "b3e23d9897d01f473e0e82345c5757edb661d61447d5a6adb7c460a608942501",
+  "checksum": "36e676a0776d74083d21211507e73de7531c06e24c6832fa7b0fd0e6abbd5c1c",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -483,7 +483,7 @@
               "target": "event_listener_strategy"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -2151,6 +2151,10 @@
               "target": "console_log"
             },
             {
+              "id": "either_of 0.1.5",
+              "target": "either_of"
+            },
+            {
               "id": "futures 0.3.31",
               "target": "futures"
             },
@@ -2388,14 +2392,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "either_of 0.1.0": {
+    "either_of 0.1.5": {
       "name": "either_of",
-      "version": "0.1.0",
+      "version": "0.1.5",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/either_of/0.1.0/download",
-          "sha256": "d6e22feb4d5cacf9f2c64902a1c35ef0f2d766e42db316a98b93992bbce669cb"
+          "url": "https://static.crates.io/crates/either_of/0.1.5/download",
+          "sha256": "169ae1dd00fb612cf27fd069b3b10f325ea60ac551f08e5b931b4413972a847d"
         }
       },
       "targets": [
@@ -2417,17 +2421,33 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "default",
+            "no_std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.0"
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "paste 1.0.15",
+              "target": "paste"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.1.5"
       },
       "license": "MIT",
       "license_ids": [
@@ -2517,7 +2537,7 @@
               "target": "concurrent_queue"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -2606,7 +2626,7 @@
               "target": "event_listener"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -3314,7 +3334,7 @@
               "target": "memchr"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -4305,7 +4325,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -4792,6 +4812,7 @@
           "common": [
             "hydrate",
             "hydration",
+            "nightly",
             "tracing"
           ],
           "selects": {}
@@ -4807,7 +4828,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -4913,7 +4934,7 @@
               "target": "leptos_macro"
             },
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             },
             {
@@ -5192,6 +5213,7 @@
         "crate_features": {
           "common": [
             "hydrate",
+            "nightly",
             "tracing"
           ],
           "selects": {}
@@ -5387,7 +5409,7 @@
               "target": "any_spawner"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -6885,14 +6907,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "paste 1.0.14": {
+    "paste 1.0.15": {
       "name": "paste",
-      "version": "1.0.14",
+      "version": "1.0.15",
       "package_url": "https://github.com/dtolnay/paste",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/paste/1.0.14/download",
-          "sha256": "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+          "url": "https://static.crates.io/crates/paste/1.0.15/download",
+          "sha256": "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
         }
       },
       "targets": [
@@ -6929,14 +6951,14 @@
         "deps": {
           "common": [
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.14"
+        "version": "1.0.15"
       },
       "build_script_attrs": {
         "compile_data_glob": [
@@ -7143,14 +7165,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "pin-project-lite 0.2.15": {
+    "pin-project-lite 0.2.16": {
       "name": "pin-project-lite",
-      "version": "0.2.15",
+      "version": "0.2.16",
       "package_url": "https://github.com/taiki-e/pin-project-lite",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/pin-project-lite/0.2.15/download",
-          "sha256": "915a1e146535de9163f3987b8944ed8cf49a18bb0056bcebcdcece385cece4ff"
+          "url": "https://static.crates.io/crates/pin-project-lite/0.2.16/download",
+          "sha256": "3b3cff922bd51709b605d9ead9aa71031d81447142d828eb4a6eba76fe619f9b"
         }
       },
       "targets": [
@@ -7173,7 +7195,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "0.2.15"
+        "version": "0.2.16"
       },
       "license": "Apache-2.0 OR MIT",
       "license_ids": [
@@ -8163,6 +8185,7 @@
           "common": [
             "effects",
             "hydration",
+            "nightly",
             "serde",
             "tracing"
           ],
@@ -8195,7 +8218,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -8299,7 +8322,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             },
             {
@@ -9491,7 +9514,7 @@
               "target": "once_cell"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -9592,6 +9615,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "nightly"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -10309,6 +10338,7 @@
           "common": [
             "default",
             "hydrate",
+            "nightly",
             "oco",
             "reactive_graph",
             "reactive_stores",
@@ -10336,7 +10366,7 @@
               "target": "dyn_clone"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -10430,7 +10460,7 @@
               "target": "async_trait"
             },
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             }
           ],
@@ -10801,7 +10831,7 @@
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -11171,7 +11201,7 @@
               "target": "parking_lot"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -11366,7 +11396,7 @@
               "target": "futures_core"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -11620,7 +11650,7 @@
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -14758,6 +14788,7 @@
     "console_error_panic_hook 0.1.7",
     "console_log 1.0.0",
     "const_format_proc_macros 0.2.33",
+    "either_of 0.1.5",
     "futures 0.3.31",
     "futures-core 0.3.31",
     "futures-util 0.3.31",

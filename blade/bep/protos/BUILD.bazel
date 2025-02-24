@@ -2,6 +2,12 @@ load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
 load("//blade/bep/protos:descriptors.bzl", "transitive_proto_descriptors")
 
 rust_prost_library(
+    name = "empty_proto",
+    proto = "@com_google_protobuf//:empty_proto",
+    visibility = ["//visibility:public"],
+)
+
+rust_prost_library(
     name = "bep_proto",
     proto = "@googleapis//google/devtools/build/v1:build_proto",
     visibility = ["//visibility:public"],

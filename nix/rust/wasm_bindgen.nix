@@ -10,14 +10,14 @@ let
     ];
   };
   rust = with pkgs.fenix;
-  with stable;
+  with latest;
     combine [
       cargo
       clippy
       rust-src
       rustc
       rustfmt
-      targets.wasm32-unknown-unknown.stable.rust-std
+      targets.wasm32-unknown-unknown.latest.rust-std
     ];
   rustPlatform = pkgs.makeRustPlatform {
     cargo = rust;
@@ -37,7 +37,7 @@ in
       };
     cargoDeps = super.cargoDeps.overrideAttrs (_: {
       inherit src;
-      outputHash = "sha256-uLT2eN5HE7RGLOOD3d+y2TcyXFp8Ol02jGlJZvOvMq0=";
+      outputHash = "sha256-/8T0FGhPMQoUM5/M8lZkTGAc9ul+/Xe59xe0Z/l/RsI=";
     });
     doCheck = false;
   })
