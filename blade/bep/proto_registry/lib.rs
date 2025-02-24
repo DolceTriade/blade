@@ -15,7 +15,7 @@ lazy_static! {
 fn load() -> FileDescriptorSet {
     let mut hs = HashMap::new();
     let r = Runfiles::create().expect("Must run using bazel with runfiles");
-    let root = r.rlocation("");
+    let root = r.rlocation("").unwrap();
     for entry in WalkDir::new(root).follow_links(true) {
         let p = entry.expect("invalid entry when walking runfiles");
         if p.path().to_string_lossy().ends_with("proto.bin") {

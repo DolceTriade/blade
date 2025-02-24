@@ -5,5 +5,4 @@ in
   with platform;
     pkgs.callPackage ./default.nix {
       inherit rustPlatform;
-      mysqlSupport = false;
     }

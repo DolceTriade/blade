@@ -6,11 +6,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "platforms",
+    sha256 = "29742e87275809b5e598dc2f04d86960cc7a55b3067d97221c9abbc9926bff0f",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/platforms/releases/download/0.0.11/platforms-0.0.11.tar.gz",
         "https://github.com/bazelbuild/platforms/releases/download/0.0.11/platforms-0.0.11.tar.gz",
     ],
-    sha256 = "29742e87275809b5e598dc2f04d86960cc7a55b3067d97221c9abbc9926bff0f",
 )
 
 ################################################
@@ -18,10 +18,10 @@ http_archive(
 ################################################
 http_archive(
     name = "bazel_skylib",
-    sha256 = "66ffd9315665bfaafc96b52278f57c7e2dd09f5ede279ea6d39b2be471e7e3aa",
+    sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.4.2/bazel-skylib-1.4.2.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
     ],
 )
 
@@ -30,24 +30,47 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
 http_archive(
+    name = "com_google_protobuf",
+    integrity = "sha256-AIoRzFb5uWZ5tMKF/QX0bTF9aFvjq1JLKjEL4PutmH4=",
+    strip_prefix = "protobuf-29.3",
+    urls = [
+        "https://github.com/protocolbuffers/protobuf/archive/v29.3.tar.gz",
+    ],
+)
+
+http_archive(
     name = "rules_pkg",
+    sha256 = "d20c951960ed77cb7b341c2a59488534e494d5ad1d30c4818c736d57772a9fef",
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/1.0.1/rules_pkg-1.0.1.tar.gz",
         "https://github.com/bazelbuild/rules_pkg/releases/download/1.0.1/rules_pkg-1.0.1.tar.gz",
     ],
-    sha256 = "d20c951960ed77cb7b341c2a59488534e494d5ad1d30c4818c736d57772a9fef",
 )
+
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
+
 rules_pkg_dependencies()
 
 # load rules_cc first so nothing else can override it but we need to load the
 # tools *after* we register the Nix toolchains.
 http_archive(
     name = "rules_cc",
-    urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.1.1/rules_cc-0.1.1.tar.gz"],
     sha256 = "712d77868b3152dd618c4d64faaddefcc5965f90f5de6e6dd1d5ddcd0be82d42",
     strip_prefix = "rules_cc-0.1.1",
+    urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.1.1/rules_cc-0.1.1.tar.gz"],
 )
+
+http_archive(
+    name = "rules_java",
+    urls = [
+        "https://github.com/bazelbuild/rules_java/releases/download/8.9.0/rules_java-8.9.0.tar.gz",
+    ],
+    sha256 = "8daa0e4f800979c74387e4cd93f97e576ec6d52beab8ac94710d2931c57f8d8b",
+)
+
+load("@rules_java//java:rules_java_deps.bzl", "rules_java_dependencies")
+rules_java_dependencies()
+
 
 http_archive(
     name = "rules_proto",
@@ -57,10 +80,16 @@ http_archive(
 )
 
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+
 rules_proto_dependencies()
 
 load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
+
 rules_proto_toolchains()
+
+load("@rules_proto//proto:setup.bzl", "rules_proto_setup")
+
+rules_proto_setup()
 
 http_archive(
     name = "rules_rust",
@@ -84,9 +113,9 @@ http_archive(
 
 http_archive(
     name = "io_tweag_rules_nixpkgs",
-    sha256 = "532634d78c35a42745bc1ceb02193c1505e676ed55746947061c2b6bb37b85fb",
-    strip_prefix = "rules_nixpkgs-c871abcedf5734513f7ab731ea6ba541636f4df6",
-    urls = ["https://github.com/tweag/rules_nixpkgs/archive/c871abcedf5734513f7ab731ea6ba541636f4df6.tar.gz"],
+    sha256 = "30271f7bd380e4e20e4d7132c324946c4fdbc31ebe0bbb6638a0f61a37e74397",
+    strip_prefix = "rules_nixpkgs-0.13.0",
+    urls = ["https://github.com/tweag/rules_nixpkgs/releases/download/v0.13.0/rules_nixpkgs-0.13.0.tar.gz"],
 )
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:repositories.bzl", "rules_nixpkgs_dependencies")
@@ -116,8 +145,8 @@ nixpkgs_local_repository(
 # rules_rust also uses the cc compiler
 nixpkgs_cc_configure(
     name = "nixpkgs_config_cc",
-    nix_file_deps = ["//nix/cc:cc.nix"],
     nix_file_content = "import ./nix/cc/cc.nix {}",
+    nix_file_deps = ["//nix/cc:cc.nix"],
     repository = "@nixpkgs",
 )
 
@@ -165,7 +194,6 @@ rules_rust_dependencies()
 load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
 crate_universe_dependencies(
-    bootstrap = True,
     rust_toolchain_cargo_template = "@nix_rust//:bin/{tool}",
     rust_toolchain_rustc_template = "@nix_rust//:bin/{tool}",
 )
@@ -221,9 +249,9 @@ register_toolchains("//prost:prost_toolchain")
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "76a04ef2120ee00231d85d1ff012ede23963733339ad8db81f590791a031f643",
-    strip_prefix = "rules_js-1.34.1",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v1.34.1/rules_js-v1.34.1.tar.gz",
+    sha256 = "d66f8abf914a0454a69181b7b17acaae56d7b0e2784cb26b40cb3273c4d836d1",
+    strip_prefix = "rules_js-2.2.0",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v2.2.0/rules_js-v2.2.0.tar.gz",
 )
 
 http_archive(

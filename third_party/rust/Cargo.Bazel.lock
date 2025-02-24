@@ -1,5 +1,5 @@
 {
-  "checksum": "ac84e42ba08895117a2bddeb12497ee12f5bbd41f2f6deccc9cefc86ab32e030",
+  "checksum": "1f33763f43e2441b5954513b64dccb48069aac5d331551d673be340e588b043c",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -53,7 +53,7 @@
               "target": "memchr"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -161,7 +161,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -322,7 +322,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -684,7 +684,7 @@
               "target": "futures_core"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -694,7 +694,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             }
           ],
@@ -745,7 +745,7 @@
               "target": "local_waker"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -893,7 +893,7 @@
               "target": "once_cell"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -1979,7 +1979,7 @@
               "target": "event_listener_strategy"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -2031,7 +2031,7 @@
               "target": "futures_core"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -2455,7 +2455,7 @@
               "target": "percent_encoding"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -5007,6 +5007,198 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
+    "darling 0.20.10": {
+      "name": "darling",
+      "version": "0.20.10",
+      "package_url": "https://github.com/TedDriggs/darling",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/darling/0.20.10/download",
+          "sha256": "6f63b86c8a8826a49b8c21f08a2d07338eec8d900540f8630dc76284be802989"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "darling",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "darling",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "suggestions"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "darling_core 0.20.10",
+              "target": "darling_core"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "darling_macro 0.20.10",
+              "target": "darling_macro"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.20.10"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
+    "darling_core 0.20.10": {
+      "name": "darling_core",
+      "version": "0.20.10",
+      "package_url": "https://github.com/TedDriggs/darling",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/darling_core/0.20.10/download",
+          "sha256": "95133861a8032aaea082871032f5815eb9e98cef03fa916ab4500513994df9e5"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "darling_core",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "darling_core",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "strsim",
+            "suggestions"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "fnv 1.0.7",
+              "target": "fnv"
+            },
+            {
+              "id": "ident_case 1.0.1",
+              "target": "ident_case"
+            },
+            {
+              "id": "proc-macro2 1.0.89",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.37",
+              "target": "quote"
+            },
+            {
+              "id": "strsim 0.11.1",
+              "target": "strsim"
+            },
+            {
+              "id": "syn 2.0.87",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.20.10"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
+    "darling_macro 0.20.10": {
+      "name": "darling_macro",
+      "version": "0.20.10",
+      "package_url": "https://github.com/TedDriggs/darling",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/darling_macro/0.20.10/download",
+          "sha256": "d336a2a514f6ccccaa3e09b02d41d35330c07ddf03a62165fcec10bb561c7806"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "darling_macro",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "darling_macro",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "darling_core 0.20.10",
+              "target": "darling_core"
+            },
+            {
+              "id": "quote 1.0.37",
+              "target": "quote"
+            },
+            {
+              "id": "syn 2.0.87",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.20.10"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
     "dashmap 6.1.0": {
       "name": "dashmap",
       "version": "6.1.0",
@@ -5337,14 +5529,14 @@
       ],
       "license_file": "LICENSE"
     },
-    "diesel 2.1.4": {
+    "diesel 2.2.7": {
       "name": "diesel",
-      "version": "2.1.4",
+      "version": "2.2.7",
       "package_url": "https://github.com/diesel-rs/diesel",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel/2.1.4/download",
-          "sha256": "62c6fcf842f17f8c78ecf7c81d75c5ce84436b41ee07e03f490fbb5f5a8731d8"
+          "url": "https://static.crates.io/crates/diesel/2.2.7/download",
+          "sha256": "04001f23ba8843dc315804fa324000376084dfb1c30794ff68dd279e6e5696d5"
         }
       },
       "targets": [
@@ -5369,25 +5561,14 @@
         "crate_features": {
           "common": [
             "32-column-tables",
-            "bigdecimal",
-            "bitflags",
-            "byteorder",
             "chrono",
             "default",
             "extras",
             "i-implement-a-third-party-backend-and-opt-into-breaking-changes",
-            "ipnetwork",
-            "itoa",
-            "libc",
-            "libsqlite3-sys",
             "network-address",
-            "num-bigint",
-            "num-integer",
-            "num-traits",
             "numeric",
             "postgres",
             "postgres_backend",
-            "pq-sys",
             "r2d2",
             "returning_clauses_for_sqlite_3_35",
             "serde_json",
@@ -5478,13 +5659,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "diesel_derives 2.1.2",
+              "id": "diesel_derives 2.2.3",
               "target": "diesel_derives"
             }
           ],
           "selects": {}
         },
-        "version": "2.1.4"
+        "version": "2.2.7"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -5493,20 +5674,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "diesel-tracing 0.2.2": {
+    "diesel-tracing 0.3.1": {
       "name": "diesel-tracing",
-      "version": "0.2.2",
+      "version": "0.3.1",
       "package_url": "https://github.com/CQCL/diesel-tracing",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel-tracing/0.2.2/download",
-          "sha256": "00d6e99b5ecad02a26e089cc275caf2b0cea2b0d9ace41e4972dadf62c1c72dd",
-          "patch_args": [
-            "-p1"
-          ],
-          "patches": [
-            "@//third_party/rust/patches/diesel-tracing:fix-pgmetadata.patch"
-          ]
+          "url": "https://static.crates.io/crates/diesel-tracing/0.3.1/download",
+          "sha256": "fff0de9eb6d150e5cb2b552bfb894a198289e21a71eec1eb0db972f55de9c9d2"
         }
       },
       "targets": [
@@ -5541,7 +5716,7 @@
         "deps": {
           "common": [
             {
-              "id": "diesel 2.1.4",
+              "id": "diesel 2.2.7",
               "target": "diesel"
             },
             {
@@ -5556,7 +5731,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.2"
+        "version": "0.3.1"
       },
       "license": "MIT",
       "license_ids": [
@@ -5564,14 +5739,14 @@
       ],
       "license_file": "LICENSE"
     },
-    "diesel_derives 2.1.2": {
+    "diesel_derives 2.2.3": {
       "name": "diesel_derives",
-      "version": "2.1.2",
-      "package_url": "https://github.com/diesel-rs/diesel/tree/master/diesel_derives",
+      "version": "2.2.3",
+      "package_url": "https://github.com/diesel-rs/diesel/",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel_derives/2.1.2/download",
-          "sha256": "ef8337737574f55a468005a83499da720f20c65586241ffea339db9ecdfd2b44"
+          "url": "https://static.crates.io/crates/diesel_derives/2.2.3/download",
+          "sha256": "e7f2c3de51e2ba6bf2a648285696137aaf0f5f487bcbea93972fe8a364e131a4"
         }
       },
       "targets": [
@@ -5609,8 +5784,12 @@
         "deps": {
           "common": [
             {
-              "id": "diesel_table_macro_syntax 0.1.0",
+              "id": "diesel_table_macro_syntax 0.2.0",
               "target": "diesel_table_macro_syntax"
+            },
+            {
+              "id": "dsl_auto_type 0.1.3",
+              "target": "dsl_auto_type"
             },
             {
               "id": "proc-macro2 1.0.89",
@@ -5628,7 +5807,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "2.1.2"
+        "version": "2.2.3"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -5637,14 +5816,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "diesel_migrations 2.1.0": {
+    "diesel_migrations 2.2.0": {
       "name": "diesel_migrations",
-      "version": "2.1.0",
-      "package_url": "https://diesel.rs",
+      "version": "2.2.0",
+      "package_url": "https://github.com/diesel-rs/diesel",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel_migrations/2.1.0/download",
-          "sha256": "6036b3f0120c5961381b570ee20a02432d7e2d27ea60de9578799cf9156914ac"
+          "url": "https://static.crates.io/crates/diesel_migrations/2.2.0/download",
+          "sha256": "8a73ce704bad4231f001bff3314d91dce4aba0770cee8b233991859abc15c1f6"
         }
       },
       "targets": [
@@ -5677,11 +5856,11 @@
         "deps": {
           "common": [
             {
-              "id": "diesel 2.1.4",
+              "id": "diesel 2.2.7",
               "target": "diesel"
             },
             {
-              "id": "migrations_internals 2.1.0",
+              "id": "migrations_internals 2.2.0",
               "target": "migrations_internals"
             }
           ],
@@ -5691,13 +5870,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "migrations_macros 2.1.0",
+              "id": "migrations_macros 2.2.0",
               "target": "migrations_macros"
             }
           ],
           "selects": {}
         },
-        "version": "2.1.0"
+        "version": "2.2.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -5706,14 +5885,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "diesel_table_macro_syntax 0.1.0": {
+    "diesel_table_macro_syntax 0.2.0": {
       "name": "diesel_table_macro_syntax",
-      "version": "0.1.0",
-      "package_url": "https://github.com/diesel-rs/diesel/tree/master/diesel_table_macro_syntax",
+      "version": "0.2.0",
+      "package_url": "https://github.com/diesel-rs/diesel/",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel_table_macro_syntax/0.1.0/download",
-          "sha256": "fc5557efc453706fed5e4fa85006fe9817c224c3f480a34c7e5959fd700921c5"
+          "url": "https://static.crates.io/crates/diesel_table_macro_syntax/0.2.0/download",
+          "sha256": "209c735641a413bc68c4923a9d6ad4bcb3ca306b794edaa7eb0b3228a99ffb25"
         }
       },
       "targets": [
@@ -5745,7 +5924,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.0"
+        "version": "0.2.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -5879,16 +6058,20 @@
               "target": "clap"
             },
             {
-              "id": "diesel 2.1.4",
+              "id": "diesel 2.2.7",
               "target": "diesel"
             },
             {
-              "id": "diesel-tracing 0.2.2",
+              "id": "diesel-tracing 0.3.1",
               "target": "diesel_tracing"
             },
             {
-              "id": "diesel_migrations 2.1.0",
+              "id": "diesel_migrations 2.2.0",
               "target": "diesel_migrations"
+            },
+            {
+              "id": "either_of 0.1.5",
+              "target": "either_of"
             },
             {
               "id": "futures 0.3.31",
@@ -6108,6 +6291,74 @@
       ],
       "license_file": null
     },
+    "dsl_auto_type 0.1.3": {
+      "name": "dsl_auto_type",
+      "version": "0.1.3",
+      "package_url": "https://diesel.rs",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/dsl_auto_type/0.1.3/download",
+          "sha256": "139ae9aca7527f85f26dd76483eb38533fd84bd571065da1739656ef71c5ff5b"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "dsl_auto_type",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "dsl_auto_type",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "darling 0.20.10",
+              "target": "darling"
+            },
+            {
+              "id": "either 1.9.0",
+              "target": "either"
+            },
+            {
+              "id": "heck 0.5.0",
+              "target": "heck"
+            },
+            {
+              "id": "proc-macro2 1.0.89",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.37",
+              "target": "quote"
+            },
+            {
+              "id": "syn 2.0.87",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.1.3"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
     "dtoa 1.0.9": {
       "name": "dtoa",
       "version": "1.0.9",
@@ -6232,14 +6483,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "either_of 0.1.0": {
+    "either_of 0.1.5": {
       "name": "either_of",
-      "version": "0.1.0",
+      "version": "0.1.5",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/either_of/0.1.0/download",
-          "sha256": "d6e22feb4d5cacf9f2c64902a1c35ef0f2d766e42db316a98b93992bbce669cb"
+          "url": "https://static.crates.io/crates/either_of/0.1.5/download",
+          "sha256": "169ae1dd00fb612cf27fd069b3b10f325ea60ac551f08e5b931b4413972a847d"
         }
       },
       "targets": [
@@ -6261,17 +6512,33 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "default",
+            "no_std"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.0"
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "paste 1.0.15",
+              "target": "paste"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.1.5"
       },
       "license": "MIT",
       "license_ids": [
@@ -6571,7 +6838,7 @@
               "target": "concurrent_queue"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -6660,7 +6927,7 @@
               "target": "event_listener"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -7490,7 +7757,7 @@
               "target": "memchr"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -8197,6 +8464,45 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
+    "heck 0.5.0": {
+      "name": "heck",
+      "version": "0.5.0",
+      "package_url": "https://github.com/withoutboats/heck",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/heck/0.5.0/download",
+          "sha256": "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "heck",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "heck",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.5.0"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
     "hermit-abi 0.3.9": {
       "name": "hermit-abi",
       "version": "0.3.9",
@@ -8449,7 +8755,7 @@
               "target": "http"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -8709,7 +9015,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -8824,7 +9130,7 @@
               "target": "itoa"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -8895,7 +9201,7 @@
               "target": "hyper"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -9079,6 +9385,45 @@
         "MIT"
       ],
       "license_file": "LICENSE-APACHE"
+    },
+    "ident_case 1.0.1": {
+      "name": "ident_case",
+      "version": "1.0.1",
+      "package_url": "https://github.com/TedDriggs/ident_case",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/ident_case/1.0.1/download",
+          "sha256": "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "ident_case",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "ident_case",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "1.0.1"
+      },
+      "license": "MIT/Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE"
     },
     "idna 0.5.0": {
       "name": "idna",
@@ -9957,6 +10302,7 @@
           "common": [
             "base64",
             "hydration",
+            "nightly",
             "nonce",
             "rand",
             "ssr"
@@ -9978,7 +10324,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -10080,7 +10426,7 @@
               "target": "leptos_macro"
             },
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             },
             {
@@ -10545,6 +10891,7 @@
         "crate_features": {
           "common": [
             "actix",
+            "nightly",
             "ssr"
           ],
           "selects": {}
@@ -10744,7 +11091,7 @@
               "target": "any_spawner"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -12056,14 +12403,14 @@
       ],
       "license_file": "LICENSE-MIT"
     },
-    "migrations_internals 2.1.0": {
+    "migrations_internals 2.2.0": {
       "name": "migrations_internals",
-      "version": "2.1.0",
-      "package_url": "https://diesel.rs",
+      "version": "2.2.0",
+      "package_url": "https://github.com/diesel-rs/diesel",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/migrations_internals/2.1.0/download",
-          "sha256": "0f23f71580015254b020e856feac3df5878c2c7a8812297edd6c0a485ac9dada"
+          "url": "https://static.crates.io/crates/migrations_internals/2.2.0/download",
+          "sha256": "fd01039851e82f8799046eabbb354056283fb265c8ec0996af940f4e85a380ff"
         }
       },
       "targets": [
@@ -12092,14 +12439,14 @@
               "target": "serde"
             },
             {
-              "id": "toml 0.7.8",
+              "id": "toml 0.8.12",
               "target": "toml"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "2.1.0"
+        "version": "2.2.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -12108,14 +12455,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "migrations_macros 2.1.0": {
+    "migrations_macros 2.2.0": {
       "name": "migrations_macros",
-      "version": "2.1.0",
-      "package_url": "https://diesel.rs",
+      "version": "2.2.0",
+      "package_url": "https://github.com/diesel-rs/diesel",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/migrations_macros/2.1.0/download",
-          "sha256": "cce3325ac70e67bbab5bd837a31cae01f1a6db64e0e744a33cb03a543469ef08"
+          "url": "https://static.crates.io/crates/migrations_macros/2.2.0/download",
+          "sha256": "ffb161cc72176cb37aa47f1fc520d3ef02263d67d661f44f05d05a079e1237fd"
         }
       },
       "targets": [
@@ -12146,7 +12493,7 @@
         "deps": {
           "common": [
             {
-              "id": "migrations_internals 2.1.0",
+              "id": "migrations_internals 2.2.0",
               "target": "migrations_internals"
             },
             {
@@ -12161,7 +12508,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "2.1.0"
+        "version": "2.2.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -13753,14 +14100,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "paste 1.0.14": {
+    "paste 1.0.15": {
       "name": "paste",
-      "version": "1.0.14",
+      "version": "1.0.15",
       "package_url": "https://github.com/dtolnay/paste",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/paste/1.0.14/download",
-          "sha256": "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
+          "url": "https://static.crates.io/crates/paste/1.0.15/download",
+          "sha256": "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
         }
       },
       "targets": [
@@ -13797,14 +14144,14 @@
         "deps": {
           "common": [
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.14"
+        "version": "1.0.15"
       },
       "build_script_attrs": {
         "compile_data_glob": [
@@ -14063,14 +14410,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "pin-project-lite 0.2.15": {
+    "pin-project-lite 0.2.16": {
       "name": "pin-project-lite",
-      "version": "0.2.15",
+      "version": "0.2.16",
       "package_url": "https://github.com/taiki-e/pin-project-lite",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/pin-project-lite/0.2.15/download",
-          "sha256": "915a1e146535de9163f3987b8944ed8cf49a18bb0056bcebcdcece385cece4ff"
+          "url": "https://static.crates.io/crates/pin-project-lite/0.2.16/download",
+          "sha256": "3b3cff922bd51709b605d9ead9aa71031d81447142d828eb4a6eba76fe619f9b"
         }
       },
       "targets": [
@@ -14093,7 +14440,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "0.2.15"
+        "version": "0.2.16"
       },
       "license": "Apache-2.0 OR MIT",
       "license_ids": [
@@ -16758,6 +17105,7 @@
         "crate_features": {
           "common": [
             "hydration",
+            "nightly",
             "sandboxed-arenas",
             "serde"
           ],
@@ -16790,7 +17138,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -16890,7 +17238,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             },
             {
@@ -18760,7 +19108,7 @@
               "target": "once_cell"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -18864,6 +19212,7 @@
         "crate_features": {
           "common": [
             "actix",
+            "nightly",
             "ssr"
           ],
           "selects": {}
@@ -19563,6 +19912,44 @@
       ],
       "license_file": "LICENSE"
     },
+    "strsim 0.11.1": {
+      "name": "strsim",
+      "version": "0.11.1",
+      "package_url": "https://github.com/rapidfuzz/strsim-rs",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/strsim/0.11.1/download",
+          "sha256": "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "strsim",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "strsim",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.11.1"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
     "syn 1.0.109": {
       "name": "syn",
       "version": "1.0.109",
@@ -19894,6 +20281,7 @@
         "crate_features": {
           "common": [
             "default",
+            "nightly",
             "oco",
             "reactive_graph",
             "reactive_stores",
@@ -19921,7 +20309,7 @@
               "target": "dyn_clone"
             },
             {
-              "id": "either_of 0.1.0",
+              "id": "either_of 0.1.5",
               "target": "either_of"
             },
             {
@@ -20011,7 +20399,7 @@
               "target": "async_trait"
             },
             {
-              "id": "paste 1.0.14",
+              "id": "paste 1.0.15",
               "target": "paste"
             }
           ],
@@ -20561,7 +20949,7 @@
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -21083,7 +21471,7 @@
               "target": "parking_lot"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             }
           ],
@@ -21212,7 +21600,7 @@
         "deps": {
           "common": [
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -21331,7 +21719,7 @@
               "target": "futures_core"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -21403,7 +21791,7 @@
               "target": "futures_sink"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -21425,74 +21813,6 @@
         "MIT"
       ],
       "license_file": "LICENSE"
-    },
-    "toml 0.7.8": {
-      "name": "toml",
-      "version": "0.7.8",
-      "package_url": "https://github.com/toml-rs/toml",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/toml/0.7.8/download",
-          "sha256": "dd79e69d3b627db300ff956027cc6c3798cef26d22526befdfcd12feeb6d2257"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "toml",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "toml",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "default",
-            "display",
-            "parse"
-          ],
-          "selects": {}
-        },
-        "deps": {
-          "common": [
-            {
-              "id": "serde 1.0.193",
-              "target": "serde"
-            },
-            {
-              "id": "serde_spanned 0.6.5",
-              "target": "serde_spanned"
-            },
-            {
-              "id": "toml_datetime 0.6.5",
-              "target": "toml_datetime"
-            },
-            {
-              "id": "toml_edit 0.19.15",
-              "target": "toml_edit"
-            }
-          ],
-          "selects": {}
-        },
-        "edition": "2021",
-        "version": "0.7.8"
-      },
-      "license": "MIT OR Apache-2.0",
-      "license_ids": [
-        "Apache-2.0",
-        "MIT"
-      ],
-      "license_file": "LICENSE-APACHE"
     },
     "toml 0.8.12": {
       "name": "toml",
@@ -21608,77 +21928,6 @@
         },
         "edition": "2021",
         "version": "0.6.5"
-      },
-      "license": "MIT OR Apache-2.0",
-      "license_ids": [
-        "Apache-2.0",
-        "MIT"
-      ],
-      "license_file": "LICENSE-APACHE"
-    },
-    "toml_edit 0.19.15": {
-      "name": "toml_edit",
-      "version": "0.19.15",
-      "package_url": "https://github.com/toml-rs/toml",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/toml_edit/0.19.15/download",
-          "sha256": "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "toml_edit",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "toml_edit",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "default",
-            "serde"
-          ],
-          "selects": {}
-        },
-        "deps": {
-          "common": [
-            {
-              "id": "indexmap 2.6.0",
-              "target": "indexmap"
-            },
-            {
-              "id": "serde 1.0.193",
-              "target": "serde"
-            },
-            {
-              "id": "serde_spanned 0.6.5",
-              "target": "serde_spanned"
-            },
-            {
-              "id": "toml_datetime 0.6.5",
-              "target": "toml_datetime"
-            },
-            {
-              "id": "winnow 0.5.30",
-              "target": "winnow"
-            }
-          ],
-          "selects": {}
-        },
-        "edition": "2021",
-        "version": "0.19.15"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -22101,7 +22350,7 @@
               "target": "pin_project"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -22266,7 +22515,7 @@
               "target": "log"
             },
             {
-              "id": "pin-project-lite 0.2.15",
+              "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
             },
             {
@@ -26420,52 +26669,6 @@
       ],
       "license_file": "license-apache-2.0"
     },
-    "winnow 0.5.30": {
-      "name": "winnow",
-      "version": "0.5.30",
-      "package_url": "https://github.com/winnow-rs/winnow",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/winnow/0.5.30/download",
-          "sha256": "9b5c3db89721d50d0e2a673f5043fc4722f76dcc352d7b1ab8b8288bed4ed2c5"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "winnow",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "winnow",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "alloc",
-            "default",
-            "std"
-          ],
-          "selects": {}
-        },
-        "edition": "2021",
-        "version": "0.5.30"
-      },
-      "license": "MIT",
-      "license_ids": [
-        "MIT"
-      ],
-      "license_file": "LICENSE-MIT"
-    },
     "winnow 0.6.20": {
       "name": "winnow",
       "version": "0.6.20",
@@ -27194,9 +27397,10 @@
     "cfg-if 1.0.0",
     "clap 4.4.10",
     "derivative 2.2.0",
-    "diesel 2.1.4",
-    "diesel-tracing 0.2.2",
-    "diesel_migrations 2.1.0",
+    "diesel 2.2.7",
+    "diesel-tracing 0.3.1",
+    "diesel_migrations 2.2.0",
+    "either_of 0.1.5",
     "futures 0.3.31",
     "futures-core 0.3.31",
     "humantime 2.1.0",
