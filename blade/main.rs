@@ -222,9 +222,9 @@ cfg_if! {
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
-            let leptos_toml = r.rlocation("_main/blade/leptos.toml");
-            let assets = r.rlocation("_main/blade/static");
-            let pkg = r.rlocation("_main/blade");
+            let leptos_toml = r.rlocation("_main/blade/leptos.toml").unwrap();
+            let assets = r.rlocation("_main/blade/static").unwrap();
+            let pkg = r.rlocation("_main/blade").unwrap();
             let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
@@ -296,7 +296,7 @@ cfg_if! {
         #[instrument]
         async fn favicon() -> actix_web::Result<actix_files::NamedFile> {
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
-            Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico"))?)
+            Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico").unwrap())?)
         }
 
         #[instrument]
