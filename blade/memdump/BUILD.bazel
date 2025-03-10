@@ -1,0 +1,12 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "memdump",
+    srcs = glob(["**/*.rs"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crate//:anyhow",
+        "@crate//:tikv-jemallocator",
+        "@crate//:tokio",
+    ],
+)
