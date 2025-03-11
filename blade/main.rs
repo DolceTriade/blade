@@ -31,7 +31,6 @@ cfg_if! {
         use actix_web::*;
         use tracing_actix_web::TracingLogger;
         use clap::*;
-        use futures::join;
         use leptos::prelude::*;
         use leptos_meta::MetaTags;
         use leptos_actix::{generate_route_list, LeptosRoutes};
@@ -277,8 +276,16 @@ cfg_if! {
             let fut3 = periodic_cleanup(cleanup_state);
             let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx, re_handle);
 
-            let res = join!(fut1, fut2, fut3, fut4);
-            return res.0.context("hi");
+            tokio::select! {
+                e = fut1 => { tracing::info!("Main HTTP server finished: {e:#?}"); },
+                e = fut2 => { tracing::info!("gRPC server finished: {e:#?}"); },
+                e = fut3 => { tracing::info!("periodic cleanup finished: {e:#?}"); },
+                e = fut4 => { tracing::info!("Admin HTTP server finished: {e:#?}"); },
+                _ = set_filter_fut => {},
+                _ = set_span_fut => {},
+            }
+
+            Ok(())
         }
 
         #[actix_web::get("favicon.ico")]
