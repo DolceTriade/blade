@@ -1,7 +1,6 @@
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
-load("@rules_rust_wasm_bindgen//rules_js:defs.bzl", "js_rust_wasm_bindgen")
 load("//nix/bazel:runfiles.bzl", "runfiles")
 
 rust_binary(
@@ -19,7 +18,6 @@ rust_binary(
     crate_features = ["ssr"],
     data = [
         "leptos.toml",
-        ":blade_wasm",
         "//blade/static",
     ],
     rustc_env = {
@@ -118,12 +116,6 @@ rust_shared_library(
         "@wasm_crate//:web-sys",
         "@wasm_crate//:zip",
     ],
-)
-
-js_rust_wasm_bindgen(
-    name = "blade_wasm",
-    target = "web",
-    wasm_file = ":blade.wasm",
 )
 
 runfiles(

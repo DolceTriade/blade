@@ -39,7 +39,7 @@ impl Drop for PgHarness {
 #[allow(unused_assignments)]
 pub fn new(p: &str) -> anyhow::Result<PgHarness> {
     let r = runfiles::Runfiles::create()?;
-    let bin_path = r.rlocation("postgresql-bin/bin");
+    let bin_path = r.rlocation("postgresql-bin/bin").unwrap();
     let initdb_path = bin_path.join("initdb").read_link().unwrap();
     let initdb = std::process::Command::new(initdb_path).arg(p).status()?;
     if !initdb.success() {
@@ -94,7 +94,7 @@ mod test {
     #[test]
     fn test_new() {
         let r = runfiles::Runfiles::create().unwrap();
-        let bin_path = r.rlocation("postgresql-bin/bin");
+        let bin_path = r.rlocation("postgresql-bin/bin").unwrap();
         let psql_path = bin_path.join("psql").read_link().unwrap();
         let tmp = tempdir::TempDir::new("test_new").unwrap();
         let path = tmp.path().to_str().unwrap();

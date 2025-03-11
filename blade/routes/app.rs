@@ -22,10 +22,10 @@ pub fn App() -> impl IntoView {
     };
     view! {
         <Title formatter/>
-        <Stylesheet id="leptos" href="/pkg/static/style.css"/>
+        <Stylesheet id="leptos" href="/assets/style.css"/>
         <Router>
             <div id="root" class="h-screen w-screen max-h-screen max-w-screen overflow-hidden">
-                <Nav name="Blade" logo="/pkg/static/logo.svg"/>
+                <Nav name="Blade" logo="/assets/logo.svg"/>
                 <main>
                     <Routes fallback=|| "Not Found.">
                         <ParentRoute path=path!("invocation/:id") view=Invocation>

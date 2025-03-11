@@ -1,3 +1,5 @@
+load("@rules_rust_wasm_bindgen//rules_js:defs.bzl", "js_rust_wasm_bindgen")
+load("//nix/bazel:flatten.bzl", "flatten")
 load("//tailwindcss:tailwindcss.bzl", "tailwindcss")
 
 tailwindcss(
@@ -7,7 +9,25 @@ tailwindcss(
 )
 
 filegroup(
+    name = "static_files",
+    srcs = glob(
+        ["*"],
+        exclude = ["BUILD.bazel"],
+    ) + [":style"],
+    visibility = ["//visibility:public"],
+)
+
+js_rust_wasm_bindgen(
+    name = "blade_wasm",
+    target = "web",
+    wasm_file = "//blade:blade.wasm",
+)
+
+flatten(
     name = "static",
-    srcs = glob(["*"]) + [":style"],
+    srcs = [
+        ":blade_wasm",
+        ":static_files",
+    ],
     visibility = ["//visibility:public"],
 )

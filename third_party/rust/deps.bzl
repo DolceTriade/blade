@@ -215,7 +215,7 @@ def rust_dependencies():
             ),
             "tikv-jemallocator": crate.spec(
                 version = "0.6.0",
-                features = ["profiling"],
+                features = ["profiling", "stats"],
             ),
             "time": crate.spec(
                 version = "0.3.37",
