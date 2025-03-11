@@ -219,7 +219,7 @@ def rust_dependencies():
             ),
             "tikv-jemalloc-ctl": crate.spec(
                 version = "0.6.0",
-                features = ["profiling", "stats"],
+                features = ["profiling", "stats", "use_std"],
             ),
             "time": crate.spec(
                 version = "0.3.37",

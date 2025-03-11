@@ -30,6 +30,7 @@ rust_binary(
         "//blade/metrics",
         "//blade/state",
         "//blade/tailwindmerge",
+        "//blade/memdump",
         "@crate//:actix-files",
         "@crate//:actix-web",
         "@crate//:ansi-to-html",

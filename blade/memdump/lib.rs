@@ -1,5 +1,6 @@
 use anyhow::{Context, anyhow};
 use std::ffi::{CString, c_char};
+use std::io::Write;
 use std::path::PathBuf;
 use tokio::io::AsyncReadExt;
 
@@ -37,5 +38,13 @@ pub async fn dump_profile() -> anyhow::Result<Vec<u8>> {
         .read_to_end(&mut buf)
         .await
         .context("failed to read profile")?;
+    Ok(buf)
+}
+
+pub async fn stats() -> anyhow::Result<Vec<u8>> {
+    let mut opts = tikv_jemalloc_ctl::stats_print::Options::default();
+    opts.json_format = true;
+    let mut buf = Vec::<u8>::new();
+    tikv_jemalloc_ctl::stats_print::stats_print(&mut buf, opts).context("failed to print stats")?;
     Ok(buf)
 }
