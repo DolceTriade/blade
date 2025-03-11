@@ -11,11 +11,11 @@ use std::io::IsTerminal;
 use tracing::Span;
 use tracing::{instrument, level_filters::LevelFilter};
 use tracing_actix_web::{DefaultRootSpanBuilder, RootSpanBuilder};
+use tracing_subscriber::Registry;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::Registry;
 use tracing_subscriber::{
-    prelude::__tracing_subscriber_SubscriberExt, reload::Handle, EnvFilter, Layer,
+    EnvFilter, Layer, prelude::__tracing_subscriber_SubscriberExt, reload::Handle,
 };
 #[allow(clippy::empty_docs)]
 pub mod components;
