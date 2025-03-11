@@ -178,105 +178,111 @@ pub fn TestRunList() -> impl IntoView {
                 <Suspense fallback=move || {
                     view! { <div>Loading...</div> }
                 }>
-                    {move || match xml.read().as_ref().and_then(|sw| sw.deref().as_ref().map(|_| true)) {
-                            Some(_) => {
-                                view! {
-                                    <List>
-                                        <For
-                                            each=move || {
-                                                xml.try_read()
-                                                    .as_ref()
-                                                    .and_then(|rg| rg.deref().as_ref())
-                                                    .and_then(|sw| {
-                                                        sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
-                                                    })
-                                                    .map(|c| {
-                                                        c.cases
-                                                            .iter()
-                                                            .map(|i| (
-                                                                c.name.clone(),
-                                                                i.name.clone(),
-                                                                i.status.clone(),
-                                                                std::time::Duration::from_secs_f64(i.time),
-                                                            ))
-                                                            .collect::<Vec<_>>()
-                                                    })
-                                                    .map(|c| sort_tests(&c))
-                                                    .unwrap_or_default()
+                    {move || match xml
+                        .read()
+                        .as_ref()
+                        .and_then(|sw| sw.deref().as_ref().map(|_| true))
+                    {
+                        Some(_) => {
+                            view! {
+                                <List>
+                                    <For
+                                        each=move || {
+                                            xml.try_read()
+                                                .as_ref()
+                                                .and_then(|rg| rg.deref().as_ref())
+                                                .and_then(|sw| {
+                                                    sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
+                                                })
+                                                .map(|c| {
+                                                    c.cases
+                                                        .iter()
+                                                        .map(|i| (
+                                                            c.name.clone(),
+                                                            i.name.clone(),
+                                                            i.status.clone(),
+                                                            std::time::Duration::from_secs_f64(i.time),
+                                                        ))
+                                                        .collect::<Vec<_>>()
+                                                })
+                                                .map(|c| sort_tests(&c))
+                                                .unwrap_or_default()
+                                        }
+
+                                        key=move |c| (c.0.clone(), c.1.clone())
+                                        children=move |c| {
+                                            let tooltip = c.1.clone();
+                                            let id_memo = c.1.clone();
+                                            let id = Memo::new(move |_| id_memo.clone());
+                                            view! {
+                                                <ListItem hide=Signal::derive(move || {
+                                                    !filter.get().is_empty()
+                                                        && !id.with(|id| id.contains(&filter.get()))
+                                                })>
+                                                    <div
+                                                        on:click=move |_| {
+                                                            click(id.get());
+                                                        }
+
+                                                        // TODO: Fix
+                                                        // attr:test=move||id
+                                                        class="flex items-center justify-start w-full"
+                                                    >
+                                                        <span class="float-left">
+                                                            <StatusIcon
+                                                                class="h-4 w-4 max-w-fit"
+                                                                status=junit_status_to_status(c.2).into()
+                                                            />
+
+                                                        </span>
+                                                        <span class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                            <Tooltip tooltip=move || {
+                                                                view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                            }>
+                                                                <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                    {c.1.clone()}
+                                                                </span>
+                                                            </Tooltip>
+                                                        </span>
+                                                        <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
+                                                            {format!("{}", humantime::format_duration(c.3))}
+                                                        </span>
+                                                    </div>
+
+                                                </ListItem>
                                             }
+                                        }
+                                    />
 
-                                            key=move |c| (c.0.clone(), c.1.clone())
-                                            children=move |c| {
-                                                let tooltip = c.1.clone();
-                                                let id_memo = c.1.clone();
-                                                let id = Memo::new(move |_| id_memo.clone());
-                                                view! {
-                                                    <ListItem hide=Signal::derive(move || {
-                                                        !filter.get().is_empty()
-                                                            && !id.with(|id| id.contains(&filter.get()))
-                                                    })>
-                                                        <div
-                                                            on:click=move |_| {
-                                                                click(id.get());
-                                                            }
-
-                                                            // TODO: Fix
-                                                            // attr:test=move||id
-                                                            class="flex items-center justify-start w-full"
-                                                        >
-                                                            <span class="float-left">
-                                                                <StatusIcon
-                                                                    class="h-4 w-4 max-w-fit"
-                                                                    status=junit_status_to_status(c.2).into()
-                                                                />
-
-                                                            </span>
-                                                            <span class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                                <Tooltip tooltip=move || {
-                                                                    view! { <span class="p-2">{tooltip.clone()}</span> }
-                                                                }>
-                                                                    <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                                        {c.1.clone()}
-                                                                    </span>
-                                                                </Tooltip>
-                                                            </span>
-                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
-                                                                {format!("{}", humantime::format_duration(c.3))}
-                                                            </span>
-                                                        </div>
-
-                                                    </ListItem>
-                                                }
-                                            }
-                                        />
-
-                                    </List>
-                                }
-                                    .into_any()
+                                </List>
                             }
-                            _ => {
-                                view! {
-                                    // TODO: Fix
-                                    // attr:test=move||id
-
-                                    // TODO: Fix
-                                    // attr:test=move||id
-
-                                    // TODO: Fix
-                                    // attr:test=move||id
-
-                                    // TODO: Fix
-                                    // attr:test=move||id
-
-                                    // TODO: Fix
-                                    // attr:test=move||id
-
-                                    <div>Loading...</div>
-                                }
-                                    .into_any()
-                            }
+                                .into_any()
                         }
-                    }
+                        _ => {
+                            view! {
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                // TODO: Fix
+                                // attr:test=move||id
+
+                                <div>Loading...</div>
+                            }
+                                .into_any()
+                        }
+                    }}
 
                 </Suspense>
             </AccordionItem>
