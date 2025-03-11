@@ -26,7 +26,6 @@ pub mod routes;
 cfg_if! {
     // server-only stuff
     if #[cfg(feature = "ssr")] {
-        use anyhow::Context;
         use actix_files::Files;
         use actix_web::*;
         use tracing_actix_web::TracingLogger;
@@ -145,7 +144,7 @@ cfg_if! {
         }
 
         type SpanHandle = Handle<Box<dyn Layer<Registry> + Send + Sync>, Registry>;
-        fn init_logging(flame: Option<&String>, json: bool) -> (Handle<EnvFilter, impl Sized>, SpanHandle, Option<impl Drop>) {
+        fn init_logging(flame: Option<String>, json: bool) -> (Handle<EnvFilter, impl Sized>, SpanHandle, Option<impl Drop>) {
             let env_filter = tracing_subscriber::EnvFilter::builder().with_default_directive(LevelFilter::INFO.into()).from_env_lossy();
             let fmt_layer = fmt_layer(false, json);
             let (layer, span_handle) = tracing_subscriber::reload::Layer::new(fmt_layer);
@@ -171,7 +170,7 @@ cfg_if! {
         async fn main() -> anyhow::Result<()> {
             let args = Args::parse();
             // install global subscriber configured based on RUST_LOG envvar.
-            let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.as_ref(), args.json);
+            let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.clone(), args.json);
 
 
             let (filter_tx, mut filter_rx) = tokio::sync::mpsc::channel::<String>(3);
@@ -297,11 +296,14 @@ cfg_if! {
 
         #[instrument]
         async fn periodic_cleanup(global: Arc<state::Global>) {
-            let Some(interval) = global.retention else { return; };
             let day = std::time::Duration::from_secs(60 * 60 * 24);
+            let interval = global.retention.unwrap_or(day);
             let check_interval = std::cmp::min(day, interval/7);
             loop {
                 tokio::time::sleep(check_interval).await;
+                if global.retention.is_none() {
+                    continue;
+                }
                 let Ok(mut db) = global.db_manager.get() else {
                     tracing::warn!("Failed to get DB handle for cleanup");
                     continue;

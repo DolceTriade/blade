@@ -114,7 +114,7 @@ def rust_dependencies():
                 version = "1",
             ),
             "clap": crate.spec(
-                version = "4.4.10",
+                version = "4.5.32",
                 features = ["derive", "wrap_help"],
             ),
             "derivative": crate.spec(
@@ -239,7 +239,7 @@ def rust_dependencies():
                 version = "0.10.2",
             ),
             "tracing": crate.spec(
-                version = "0.1.40",
+                version = "0.1.41",
             ),
             "tracing-subscriber": crate.spec(
                 version = "0.3.18",

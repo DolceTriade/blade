@@ -140,7 +140,7 @@ in
           dylib_ext = "${dylib-ext}",
           exec_triple = "${build-triple}",
           target_triple = "${target-triple}",
-          default_edition = "2021",
+          default_edition = "2024",
           stdlib_linkflags = ["-lpthread", "-ldl"],
           visibility = ["//visibility:public"],
       )
