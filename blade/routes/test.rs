@@ -1,9 +1,9 @@
 use leptos::prelude::*;
+use leptos_router::NavigateOptions;
 use leptos_router::components::Redirect;
 use leptos_router::hooks::use_location;
 use leptos_router::hooks::use_query;
 use leptos_router::params::Params;
-use leptos_router::NavigateOptions;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
@@ -143,8 +143,10 @@ pub fn Test() -> impl IntoView {
     });
 
     let test_xml = LocalResource::new(move || {
-        let uri = test_run.read().as_ref()
-                .and_then(|tr| tr.files.get("test.xml").map(|a| a.uri.clone()));
+        let uri = test_run
+            .read()
+            .as_ref()
+            .and_then(|tr| tr.files.get("test.xml").map(|a| a.uri.clone()));
         async move {
             match uri {
                 None => None,
@@ -182,7 +184,8 @@ pub fn Test() -> impl IntoView {
     provide_context(test_xml);
 
     {
-        move || match *test_run.read() {
+        move || {
+            match *test_run.read() {
             Some(_) => {
                 view! {
                     <div class="flex flex-col">
@@ -253,6 +256,7 @@ pub fn Test() -> impl IntoView {
                 </div>
             }
             .into_any(),
+        }
         }
     }
 }

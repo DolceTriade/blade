@@ -1,4 +1,4 @@
-use std::io::{prelude::Read, Cursor};
+use std::io::{Cursor, prelude::Read};
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_query;

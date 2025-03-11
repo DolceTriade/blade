@@ -93,11 +93,11 @@ fn merge_skip(e: &junit_parser::TestSkipped) -> String {
 pub fn TestResults() -> impl IntoView {
     let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
     let sorted_tests = move || {
-        xml.read().as_ref()
-        .and_then(|sw| {
-            sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
-        }).map(|c| sort_tests(&c.cases))
-                .unwrap_or_default()
+        xml.read()
+            .as_ref()
+            .and_then(|sw| sw.deref().clone().and_then(|ts| ts.suites.first().cloned()))
+            .map(|c| sort_tests(&c.cases))
+            .unwrap_or_default()
     };
     view! {
         <Suspense fallback=move || {

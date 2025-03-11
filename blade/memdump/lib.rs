@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use std::ffi::{CString, c_char};
+use std::path::PathBuf;
 use tokio::io::AsyncReadExt;
 
 const PROF_DUMP: &[u8] = b"prof.dump\0";
