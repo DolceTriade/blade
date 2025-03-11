@@ -1,5 +1,5 @@
 {
-  "checksum": "36e676a0776d74083d21211507e73de7531c06e24c6832fa7b0fd0e6abbd5c1c",
+  "checksum": "c08e44be3e16bf2e50ab6d69d702b8b1c3fb5dd0d47d4494363104708c41e9ab",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -2548,13 +2548,175 @@
                 "target": "parking"
               }
             ],
+            "aarch64-apple-ios": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-apple-ios-sim": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-linux-android": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-pc-windows-msvc": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-unknown-fuchsia": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
             "aarch64-unknown-linux-gnu": [
               {
                 "id": "parking 2.2.1",
                 "target": "parking"
               }
             ],
+            "aarch64-unknown-nixos-gnu": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "aarch64-unknown-uefi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "arm-unknown-linux-gnueabi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "armv7-linux-androideabi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "armv7-unknown-linux-gnueabi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "i686-apple-darwin": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "i686-linux-android": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "i686-pc-windows-msvc": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "i686-unknown-freebsd": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "i686-unknown-linux-gnu": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "powerpc-unknown-linux-gnu": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "riscv32imc-unknown-none-elf": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "riscv64gc-unknown-none-elf": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "s390x-unknown-linux-gnu": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "thumbv7em-none-eabi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "thumbv8m.main-none-eabi": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-apple-darwin": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-apple-ios": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-linux-android": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
             "x86_64-pc-windows-msvc": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-unknown-freebsd": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-unknown-fuchsia": [
               {
                 "id": "parking 2.2.1",
                 "target": "parking"
@@ -2567,6 +2729,18 @@
               }
             ],
             "x86_64-unknown-nixos-gnu": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "parking 2.2.1",
+                "target": "parking"
+              }
+            ],
+            "x86_64-unknown-uefi": [
               {
                 "id": "parking 2.2.1",
                 "target": "parking"
@@ -10012,10 +10186,37 @@
             "aarch64-apple-darwin": [
               "const_generics"
             ],
+            "aarch64-pc-windows-msvc": [
+              "const_generics"
+            ],
             "aarch64-unknown-linux-gnu": [
               "const_generics"
             ],
+            "aarch64-unknown-nixos-gnu": [
+              "const_generics"
+            ],
+            "arm-unknown-linux-gnueabi": [
+              "const_generics"
+            ],
+            "i686-pc-windows-msvc": [
+              "const_generics"
+            ],
+            "i686-unknown-linux-gnu": [
+              "const_generics"
+            ],
+            "powerpc-unknown-linux-gnu": [
+              "const_generics"
+            ],
+            "s390x-unknown-linux-gnu": [
+              "const_generics"
+            ],
+            "x86_64-apple-darwin": [
+              "const_generics"
+            ],
             "x86_64-pc-windows-msvc": [
+              "const_generics"
+            ],
+            "x86_64-unknown-freebsd": [
               "const_generics"
             ],
             "x86_64-unknown-linux-gnu": [
@@ -11177,6 +11378,12 @@
             "tokio-macros"
           ],
           "selects": {
+            "aarch64-pc-windows-msvc": [
+              "windows-sys"
+            ],
+            "i686-pc-windows-msvc": [
+              "windows-sys"
+            ],
             "x86_64-pc-windows-msvc": [
               "windows-sys"
             ]
@@ -11220,7 +11427,149 @@
                 "target": "socket2"
               }
             ],
+            "aarch64-apple-ios": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-apple-ios-sim": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-linux-android": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-pc-windows-msvc": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              },
+              {
+                "id": "windows-sys 0.48.0",
+                "target": "windows_sys"
+              }
+            ],
+            "aarch64-unknown-fuchsia": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
             "aarch64-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-unknown-nixos-gnu": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-unknown-nto-qnx710": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "aarch64-unknown-uefi": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "arm-unknown-linux-gnueabi": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "armv7-linux-androideabi": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "armv7-unknown-linux-gnueabi": [
               {
                 "id": "libc 0.2.147",
                 "target": "libc"
@@ -11240,6 +11589,166 @@
                 "target": "backtrace"
               }
             ],
+            "i686-apple-darwin": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "i686-linux-android": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "i686-pc-windows-msvc": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              },
+              {
+                "id": "windows-sys 0.48.0",
+                "target": "windows_sys"
+              }
+            ],
+            "i686-unknown-freebsd": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "i686-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "powerpc-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "riscv32imc-unknown-none-elf": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "riscv64gc-unknown-none-elf": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "s390x-unknown-linux-gnu": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "thumbv7em-none-eabi": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "thumbv8m.main-none-eabi": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-apple-darwin": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-apple-ios": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-linux-android": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
             "x86_64-pc-windows-msvc": [
               {
                 "id": "socket2 0.5.3",
@@ -11248,6 +11757,34 @@
               {
                 "id": "windows-sys 0.48.0",
                 "target": "windows_sys"
+              }
+            ],
+            "x86_64-unknown-freebsd": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-fuchsia": [
+              {
+                "id": "libc 0.2.147",
+                "target": "libc"
+              },
+              {
+                "id": "signal-hook-registry 1.4.1",
+                "target": "signal_hook_registry"
+              },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
               }
             ],
             "x86_64-unknown-linux-gnu": [
@@ -11273,6 +11810,18 @@
                 "id": "signal-hook-registry 1.4.1",
                 "target": "signal_hook_registry"
               },
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-none": [
+              {
+                "id": "socket2 0.5.3",
+                "target": "socket2"
+              }
+            ],
+            "x86_64-unknown-uefi": [
               {
                 "id": "socket2 0.5.3",
                 "target": "socket2"
@@ -14705,16 +15254,56 @@
     "aarch64-apple-darwin": [
       "aarch64-apple-darwin"
     ],
-    "aarch64-pc-windows-gnullvm": [],
-    "aarch64-unknown-linux-gnu": [
-      "aarch64-unknown-linux-gnu"
+    "aarch64-apple-ios": [
+      "aarch64-apple-ios"
     ],
-    "cfg(all(target_arch = \"aarch64\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
+    "aarch64-apple-ios-sim": [
+      "aarch64-apple-ios-sim"
+    ],
+    "aarch64-linux-android": [
+      "aarch64-linux-android"
+    ],
+    "aarch64-pc-windows-gnullvm": [],
+    "aarch64-pc-windows-msvc": [
+      "aarch64-pc-windows-msvc"
+    ],
+    "aarch64-unknown-fuchsia": [
+      "aarch64-unknown-fuchsia"
+    ],
+    "aarch64-unknown-linux-gnu": [
+      "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu"
+    ],
+    "aarch64-unknown-nixos-gnu": [
+      "aarch64-unknown-nixos-gnu"
+    ],
+    "aarch64-unknown-nto-qnx710": [
+      "aarch64-unknown-nto-qnx710"
+    ],
+    "aarch64-unknown-uefi": [
+      "aarch64-unknown-uefi"
+    ],
+    "arm-unknown-linux-gnueabi": [
+      "arm-unknown-linux-gnueabi"
+    ],
+    "armv7-linux-androideabi": [
+      "armv7-linux-androideabi"
+    ],
+    "armv7-unknown-linux-gnueabi": [
+      "armv7-unknown-linux-gnueabi"
+    ],
+    "cfg(all(target_arch = \"aarch64\", target_env = \"msvc\", not(windows_raw_dylib)))": [
+      "aarch64-pc-windows-msvc"
+    ],
     "cfg(all(target_arch = \"wasm32\", target_os = \"unknown\"))": [
       "wasm32-unknown-unknown"
     ],
-    "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(windows_raw_dylib)))": [],
-    "cfg(all(target_arch = \"x86\", target_env = \"msvc\", not(windows_raw_dylib)))": [],
+    "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(windows_raw_dylib)))": [
+      "i686-unknown-linux-gnu"
+    ],
+    "cfg(all(target_arch = \"x86\", target_env = \"msvc\", not(windows_raw_dylib)))": [
+      "i686-pc-windows-msvc"
+    ],
     "cfg(all(target_arch = \"x86_64\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": [
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-nixos-gnu"
@@ -14723,23 +15312,84 @@
       "x86_64-pc-windows-msvc"
     ],
     "cfg(any())": [],
-    "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [],
+    "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "powerpc-unknown-linux-gnu",
+      "thumbv7em-none-eabi",
+      "thumbv8m.main-none-eabi"
+    ],
     "cfg(not(all(target_arch = \"arm\", target_os = \"none\")))": [
       "aarch64-apple-darwin",
+      "aarch64-apple-ios",
+      "aarch64-apple-ios-sim",
+      "aarch64-linux-android",
+      "aarch64-pc-windows-msvc",
+      "aarch64-unknown-fuchsia",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
+      "aarch64-unknown-uefi",
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "i686-apple-darwin",
+      "i686-linux-android",
+      "i686-pc-windows-msvc",
+      "i686-unknown-freebsd",
+      "i686-unknown-linux-gnu",
+      "powerpc-unknown-linux-gnu",
+      "riscv32imc-unknown-none-elf",
+      "riscv64gc-unknown-none-elf",
+      "s390x-unknown-linux-gnu",
       "wasm32-unknown-unknown",
       "wasm32-wasip1",
+      "x86_64-apple-darwin",
+      "x86_64-apple-ios",
+      "x86_64-linux-android",
       "x86_64-pc-windows-msvc",
+      "x86_64-unknown-freebsd",
+      "x86_64-unknown-fuchsia",
       "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-nixos-gnu"
+      "x86_64-unknown-nixos-gnu",
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
     ],
     "cfg(not(windows))": [
       "aarch64-apple-darwin",
+      "aarch64-apple-ios",
+      "aarch64-apple-ios-sim",
+      "aarch64-linux-android",
+      "aarch64-unknown-fuchsia",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
+      "aarch64-unknown-uefi",
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "i686-apple-darwin",
+      "i686-linux-android",
+      "i686-unknown-freebsd",
+      "i686-unknown-linux-gnu",
+      "powerpc-unknown-linux-gnu",
+      "riscv32imc-unknown-none-elf",
+      "riscv64gc-unknown-none-elf",
+      "s390x-unknown-linux-gnu",
+      "thumbv7em-none-eabi",
+      "thumbv8m.main-none-eabi",
       "wasm32-unknown-unknown",
       "wasm32-wasip1",
+      "x86_64-apple-darwin",
+      "x86_64-apple-ios",
+      "x86_64-linux-android",
+      "x86_64-unknown-freebsd",
+      "x86_64-unknown-fuchsia",
       "x86_64-unknown-linux-gnu",
-      "x86_64-unknown-nixos-gnu"
+      "x86_64-unknown-nixos-gnu",
+      "x86_64-unknown-none",
+      "x86_64-unknown-uefi"
     ],
     "cfg(target_feature = \"atomics\")": [],
     "cfg(target_os = \"hermit\")": [],
@@ -14748,29 +15398,101 @@
       "wasm32-wasip1"
     ],
     "cfg(target_os = \"windows\")": [
+      "aarch64-pc-windows-msvc",
+      "i686-pc-windows-msvc",
       "x86_64-pc-windows-msvc"
     ],
     "cfg(tokio_taskdump)": [],
     "cfg(unix)": [
       "aarch64-apple-darwin",
+      "aarch64-apple-ios",
+      "aarch64-apple-ios-sim",
+      "aarch64-linux-android",
+      "aarch64-unknown-fuchsia",
       "aarch64-unknown-linux-gnu",
+      "aarch64-unknown-nixos-gnu",
+      "aarch64-unknown-nto-qnx710",
+      "arm-unknown-linux-gnueabi",
+      "armv7-linux-androideabi",
+      "armv7-unknown-linux-gnueabi",
+      "i686-apple-darwin",
+      "i686-linux-android",
+      "i686-unknown-freebsd",
+      "i686-unknown-linux-gnu",
+      "powerpc-unknown-linux-gnu",
+      "s390x-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "x86_64-apple-ios",
+      "x86_64-linux-android",
+      "x86_64-unknown-freebsd",
+      "x86_64-unknown-fuchsia",
       "x86_64-unknown-linux-gnu",
       "x86_64-unknown-nixos-gnu"
     ],
     "cfg(windows)": [
+      "aarch64-pc-windows-msvc",
+      "i686-pc-windows-msvc",
       "x86_64-pc-windows-msvc"
     ],
+    "i686-apple-darwin": [
+      "i686-apple-darwin"
+    ],
+    "i686-linux-android": [
+      "i686-linux-android"
+    ],
     "i686-pc-windows-gnu": [],
+    "i686-pc-windows-msvc": [
+      "i686-pc-windows-msvc"
+    ],
+    "i686-unknown-freebsd": [
+      "i686-unknown-freebsd"
+    ],
+    "i686-unknown-linux-gnu": [
+      "i686-unknown-linux-gnu"
+    ],
+    "powerpc-unknown-linux-gnu": [
+      "powerpc-unknown-linux-gnu"
+    ],
+    "riscv32imc-unknown-none-elf": [
+      "riscv32imc-unknown-none-elf"
+    ],
+    "riscv64gc-unknown-none-elf": [
+      "riscv64gc-unknown-none-elf"
+    ],
+    "s390x-unknown-linux-gnu": [
+      "s390x-unknown-linux-gnu"
+    ],
+    "thumbv7em-none-eabi": [
+      "thumbv7em-none-eabi"
+    ],
+    "thumbv8m.main-none-eabi": [
+      "thumbv8m.main-none-eabi"
+    ],
     "wasm32-unknown-unknown": [
       "wasm32-unknown-unknown"
     ],
     "wasm32-wasip1": [
       "wasm32-wasip1"
     ],
+    "x86_64-apple-darwin": [
+      "x86_64-apple-darwin"
+    ],
+    "x86_64-apple-ios": [
+      "x86_64-apple-ios"
+    ],
+    "x86_64-linux-android": [
+      "x86_64-linux-android"
+    ],
     "x86_64-pc-windows-gnu": [],
     "x86_64-pc-windows-gnullvm": [],
     "x86_64-pc-windows-msvc": [
       "x86_64-pc-windows-msvc"
+    ],
+    "x86_64-unknown-freebsd": [
+      "x86_64-unknown-freebsd"
+    ],
+    "x86_64-unknown-fuchsia": [
+      "x86_64-unknown-fuchsia"
     ],
     "x86_64-unknown-linux-gnu": [
       "x86_64-unknown-linux-gnu",
@@ -14778,6 +15500,12 @@
     ],
     "x86_64-unknown-nixos-gnu": [
       "x86_64-unknown-nixos-gnu"
+    ],
+    "x86_64-unknown-none": [
+      "x86_64-unknown-none"
+    ],
+    "x86_64-unknown-uefi": [
+      "x86_64-unknown-uefi"
     ]
   },
   "direct_deps": [

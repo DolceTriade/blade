@@ -277,7 +277,7 @@ cfg_if! {
             let fut3 = periodic_cleanup(cleanup_state);
             let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx, re_handle);
 
-            let res = join!(fut1);
+            let res = join!(fut1, fut2, fut3, fut4);
             return res.0.context("hi");
         }
 

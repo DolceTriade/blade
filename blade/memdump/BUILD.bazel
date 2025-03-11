@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
     name = "memdump",
@@ -6,7 +6,9 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         "@crate//:anyhow",
+        "@crate//:tikv-jemalloc-ctl",
         "@crate//:tikv-jemallocator",
         "@crate//:tokio",
+        "@crate//:tempdir",
     ],
 )
