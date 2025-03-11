@@ -57,6 +57,7 @@
                 pkg-config
                 rust
                 grpcurl
+		git
                 leptosfmt
                 diesel-cli'
                 wabt
