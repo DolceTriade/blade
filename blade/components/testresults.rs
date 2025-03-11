@@ -149,7 +149,8 @@ pub fn TestResults() -> impl IntoView {
                                                 <ShellOut text=message/>
                                             </div>
                                         </AccordionItem>
-                                    }.into_any()
+                                    }
+                                        .into_any()
                                 }
                             />
 

@@ -61,9 +61,9 @@ fn RunSummary() -> impl IntoView {
                                 <div class="pl-1 text-s">{format!("in {:#?}", run.duration)}</div>
                                 {move || {
                                     xml.try_read()
-                                    .as_ref()
-                                    .and_then(|rg| rg.deref().as_ref())
-                                    .and_then(|sw| {
+                                        .as_ref()
+                                        .and_then(|rg| rg.deref().as_ref())
+                                        .and_then(|sw| {
                                             sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
                                         })
                                         .map(|s| get_test_counts(&s.cases))
@@ -136,18 +136,18 @@ where
                             view! {
                                 <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
                                     <div class="absolute float-left">
-                                    <A  href=move || link.get()>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class="h-8 w-8"
-                                            height="24"
-                                            viewBox="0 0 24 24"
-                                            width="24"
-                                        >
-                                            <path d="M0 0h24v24H0z" fill="none"></path>
-                                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
-                                        </svg>
-                                    </A>
+                                        <A href=move || link.get()>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-8 w-8"
+                                                height="24"
+                                                viewBox="0 0 24 24"
+                                                width="24"
+                                            >
+                                                <path d="M0 0h24v24H0z" fill="none"></path>
+                                                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+                                            </svg>
+                                        </A>
                                     </div>
                                     <div>
                                         <StatusIcon class="h-8 w-8" status=test.status.into()/>
