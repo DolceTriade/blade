@@ -1,5 +1,5 @@
 {
-  "checksum": "1f33763f43e2441b5954513b64dccb48069aac5d331551d673be340e588b043c",
+  "checksum": "665f30e789b9bdae767ba2eb3962f06aea980e6812e8bdadf4a3feb087ee5421",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -21008,7 +21008,8 @@
         "crate_features": {
           "common": [
             "background_threads_runtime_support",
-            "profiling"
+            "profiling",
+            "stats"
           ],
           "selects": {}
         },
@@ -21086,7 +21087,8 @@
           "common": [
             "background_threads_runtime_support",
             "default",
-            "profiling"
+            "profiling",
+            "stats"
           ],
           "selects": {}
         },

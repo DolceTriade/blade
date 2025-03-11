@@ -222,9 +222,8 @@ cfg_if! {
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
-            let leptos_toml = r.rlocation("_main/blade/leptos.toml").unwrap();
-            let assets = r.rlocation("_main/blade/static").unwrap();
-            let pkg = r.rlocation("_main/blade").unwrap();
+            let leptos_toml = r.rlocation("blade/blade/leptos.toml").unwrap();
+            let assets = r.rlocation("blade/blade/static/static").unwrap();
             let mut conf = get_configuration(Some(leptos_toml.to_str().unwrap())).unwrap();
             conf.leptos_options.site_addr = args.http_host;
             let addr = conf.leptos_options.site_addr;
@@ -244,9 +243,7 @@ cfg_if! {
                 let rt_state = actix_state.clone();
                 let routes = generate_route_list(App);
                 let app = App::new()
-                    // serve JS/WASM/CSS from `pkg`
-                    .service(Files::new("/pkg", pkg.clone()))
-                    // serve other assets from the `assets` directory
+                    // serve JS/WASM/CSS and other assets from `/assets`
                     .service(Files::new("/assets", assets.clone()))
                     // serve the favicon from /favicon.ico
                     .service(favicon)
@@ -273,7 +270,6 @@ cfg_if! {
                     .wrap(TracingLogger::<BladeRootSpanBuilder>::new());
                 app
             })
-            .disable_signals()
             .bind(&addr)?
             .run();
             let re_handle = Arc::new(Mutex::new(regex::Regex::new(&args.debug_message_pattern)?));
@@ -281,22 +277,15 @@ cfg_if! {
             let fut3 = periodic_cleanup(cleanup_state);
             let fut4 = admin::run_admin_server(args.admin_host, filter_tx, span_tx, re_handle);
 
-            let res = join!(fut1, fut2, fut3, fut4, set_filter_fut, set_span_fut);
-            if res.0.is_ok() && res.1.is_ok() {
-                return Ok(());
-            }
-            if res.0.is_err() {
-                return res.0.context("server failed");
-            } else {
-                return res.1.context("grpc failed");
-            }
+            let res = join!(fut1);
+            return res.0.context("hi");
         }
 
         #[actix_web::get("favicon.ico")]
         #[instrument]
         async fn favicon() -> actix_web::Result<actix_files::NamedFile> {
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
-            Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/favicon.ico").unwrap())?)
+            Ok(actix_files::NamedFile::open(r.rlocation("blade/blade/static/static/favicon.ico").unwrap())?)
         }
 
         #[instrument]

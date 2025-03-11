@@ -20,7 +20,7 @@ impl Sqlite {
     pub fn new(
         mut conn: PooledConnection<ConnectionManager<InstrumentedSqliteConnection>>,
     ) -> anyhow::Result<Self> {
-        diesel::sql_query("PRAGMA foreign_keys = ON;")
+        diesel::sql_query("PRAGMA foreign_keys = ON;PRAGMA journal_mode = WAL;")
             .execute(&mut conn)
             .context("failed to enable foreign keys")?;
         Ok(Self { conn })
@@ -34,7 +34,7 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
         .execute(&mut me)
         .context("failed to enable foreign keys")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
-    let path = r.rlocation("_main/blade/db/sqlite/migrations").unwrap();
+    let path = r.rlocation("blade/blade/db/sqlite/migrations").unwrap();
     let finder: FileBasedMigrations = FileBasedMigrations::from_path(
         path.to_str()
             .ok_or(anyhow!("failed to convert path to str: {path:#?}"))?,
