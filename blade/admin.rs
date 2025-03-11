@@ -23,6 +23,8 @@ pub async fn run_admin_server(
             .service(set_span)
             .service(metrics_handler)
             .service(debug_message_handler)
+            .service(debug_mem_stats_handler)
+            .service(debug_mem_profile_handler)
             .wrap(tracing_actix_web::TracingLogger::<
                 super::BladeRootSpanBuilder,
             >::new())
@@ -90,4 +92,27 @@ async fn debug_message_handler(
             .map_err(|e| error::ErrorInternalServerError(format!("{e}")))?;
     }
     HttpResponse::Ok().await
+}
+
+#[get("/admin/mem/stats")]
+#[instrument]
+async fn debug_mem_stats_handler(body: String) -> Result<HttpResponse> {
+    let buf = memdump::stats().await.map_err(|e| {
+        error::ErrorInternalServerError(format!("error getting memdump stats: {e:#?}"))
+    })?;
+    Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(buf))
+}
+
+#[get("/admin/mem/dump")]
+#[instrument]
+async fn debug_mem_profile_handler(body: String) -> Result<HttpResponse> {
+    let buf = memdump::dump_profile().await.map_err(|e| {
+        error::ErrorInternalServerError(format!("error getting memdump profile: {e:#?}"))
+    })?;
+
+    Ok(HttpResponse::Ok()
+        .content_type("application/octet-stream")
+        .body(buf))
 }

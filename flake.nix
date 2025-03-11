@@ -41,7 +41,10 @@
         rustc = rust;
       };
       leptosfmt = pkgs.callPackage ./third_party/nix/leptosfmt {inherit rustPlatform;};
-      diesel-cli' = pkgs.callPackage ./third_party/nix/diesel_cli {inherit rustPlatform; mysqlSupport = false;};
+      diesel-cli' = pkgs.callPackage ./third_party/nix/diesel_cli {
+        inherit rustPlatform;
+        mysqlSupport = false;
+      };
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;
@@ -57,12 +60,13 @@
                 pkg-config
                 rust
                 grpcurl
-		git
+                git
                 leptosfmt
                 diesel-cli'
                 wabt
                 postgresql
                 jemalloc
+                flamegraph
                 (import ./nix/cc/cc.nix {inherit pkgs;})
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;

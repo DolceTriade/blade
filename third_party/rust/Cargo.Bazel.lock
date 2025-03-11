@@ -1,5 +1,5 @@
 {
-  "checksum": "28be285c37631d4faf2efbf54b55d049f2289292d148a980ffbb679c8c2d200a",
+  "checksum": "f9749ca474b96dd16c34e3c20655e7d9671adb45a2769dc40e9bdfb026b4456b",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -11791,7 +11791,8 @@
         "crate_features": {
           "common": [
             "default",
-            "std"
+            "std",
+            "use_std"
           ],
           "selects": {
             "aarch64-apple-darwin": [
@@ -22225,7 +22226,8 @@
           "common": [
             "default",
             "profiling",
-            "stats"
+            "stats",
+            "use_std"
           ],
           "selects": {}
         },
