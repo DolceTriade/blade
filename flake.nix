@@ -59,6 +59,7 @@
                 bazel-buildtools
                 pkg-config
                 rust
+                rustfilt
                 grpcurl
                 git
                 leptosfmt

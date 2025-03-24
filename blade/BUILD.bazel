@@ -2,9 +2,10 @@ load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
 load("//nix/bazel:runfiles.bzl", "runfiles")
+load("//nix/rust:global_allocator.bzl", "rust_global_allocator_binary")
 
 rust_binary(
-    name = "blade",
+    name = "blade_bin",
     srcs = [
         "admin.rs",
         "components.rs",
@@ -23,14 +24,17 @@ rust_binary(
     rustc_env = {
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
+    tags = ["manual"],
     deps = [
         "//blade/bep",
+        "//blade/bep/protos:bep_proto",
+        "//blade/bep/protos:build_event_stream_rust_proto",
         "//blade/bytestream",
         "//blade/db",
+        "//blade/memdump",
         "//blade/metrics",
         "//blade/state",
         "//blade/tailwindmerge",
-        "//blade/memdump",
         "@crate//:actix-files",
         "@crate//:actix-web",
         "@crate//:ansi-to-html",
@@ -69,6 +73,11 @@ rust_binary(
     ],
 )
 
+rust_global_allocator_binary(
+    name = "blade",
+    binary = "blade_bin",
+)
+
 rust_shared_library(
     name = "blade.wasm",
     srcs = [
@@ -81,7 +90,7 @@ rust_shared_library(
         "components/**/*.rs",
     ]),
     crate_features = ["hydrate"],
-    crate_name = "blade",
+    crate_name = "blade_wasm",
     rustc_env = {
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },

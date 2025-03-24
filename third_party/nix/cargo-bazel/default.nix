@@ -11,11 +11,11 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "bazelbuild";
     repo = "rules_rust";
-    rev = "09472f70de8ce1e8899239e677e12ceb64d05d90";
-    hash = "sha256-t9vRRLRHzdIOGHZcCmYmFVHW4wXLXEaxDauJ0sNgumk=";
+    rev = "633e56db6dd2e5f9a0502ee068aa450baec51e7c";
+    hash = "sha256-CuZlNmRR26YuRHOWVudf045RvQnNePMde0KrXLfLPX8=";
   };
 
-  cargoHash = "sha256-1oxqe0Ce/E3qCYAqklA/ByrIjtpcRlync9pa+1mHxSE=";
+  cargoHash = "sha256-Bu3mLlxC6i4wXSs4KNGEc15Qdr92dJfYbmY50NyM3nk=";
 
   sourceRoot = "source/crate_universe";
 

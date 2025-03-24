@@ -8,22 +8,21 @@
       })
     ];
   };
+  lib = pkgs.lib;
+  wasm =
+    if target == "wasm32-unknown-unknown"
+    then true
+    else false;
   rust = with pkgs.fenix;
   with latest;
-    combine [
+    combine ([
       cargo
       clippy
       rust-src
       rustc
       rustfmt
-      targets.wasm32-unknown-unknown.latest.rust-std
       rust-analyzer
-    ];
-  wasm =
-    if target == "wasm32-unknown-unknown"
-    then true
-    else false;
-  ogRust = pkgs.rust;
+    ] ++ lib.optional wasm targets.wasm32-unknown-unknown.latest.rust-std);
   os = pkgs.stdenv.targetPlatform.rust.platform.os;
   build-triple = pkgs.stdenv.buildPlatform.rust.rustcTargetSpec;
   target-triple =
