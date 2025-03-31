@@ -45,6 +45,9 @@
         inherit rustPlatform;
         mysqlSupport = false;
       };
+      jemalloc' = pkgs.callPackage ./third_party/nix/jemalloc {
+        libunwind = pkgs.pkgsStatic.libunwind;
+      };
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;
@@ -59,13 +62,14 @@
                 bazel-buildtools
                 pkg-config
                 rust
+                rustfilt
                 grpcurl
                 git
                 leptosfmt
+                jemalloc'
                 diesel-cli'
                 wabt
                 postgresql
-                jemalloc
                 flamegraph
                 (import ./nix/cc/cc.nix {inherit pkgs;})
               ]

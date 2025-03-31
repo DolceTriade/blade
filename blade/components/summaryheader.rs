@@ -114,7 +114,7 @@ pub fn SummaryHeader() -> impl IntoView {
                         <span class="text-grey-400 text-sm">{start}</span>
                     </div>
                     <div class="flex gap-2 items-center">
-                        {duration} <a class="text-blue-500 underline" href="details">
+                        {duration} <a class="text-blue-500 underline" href="/./details">
                             (details)
                         </a>
                     </div>

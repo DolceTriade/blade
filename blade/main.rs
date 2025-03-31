@@ -40,12 +40,13 @@ cfg_if! {
         use prometheus_client::metrics::counter::Counter;
         use tikv_jemallocator::Jemalloc;
 
+        #[global_allocator]
+        static GLOBAL: Jemalloc = Jemalloc;
+
+
         pub mod admin;
 
         use crate::routes::app::App;
-
-        #[global_allocator]
-        static GLOBAL: Jemalloc = Jemalloc;
 
         lazy_static! {
             static ref API_ERRORS: Family::<APIErrorLabels, Counter> = metrics::register_metric("blade_http_errors", "Actix API requests errors", Family::default());
@@ -210,12 +211,15 @@ cfg_if! {
                             }
                         },
                         None => {
-                            tracing::error!("None filter received by set_span");
+                            tracing::error!("`None` filter received by set_span");
                             break;
                         },
                     }
                 }
             });
+            let cur = std::env::current_dir().unwrap();
+            let ld_preload = std::env::var("LD_PRELOAD").unwrap_or("".to_string());
+            tracing::info!("LD_PRELOAD is {ld_preload}; pwd is {cur:?}");
 
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")

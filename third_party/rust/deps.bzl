@@ -89,6 +89,15 @@ def rust_dependencies():
                     version = "=0.2.100",
                 ),
             ],
+            "tikv-jemalloc-sys": [
+                crate.annotation(
+                    build_script_data = ["@jemalloc//:lib/libjemalloc_pic.a"],
+                    deps = ["@jemalloc"],
+                    build_script_env = {
+                        "JEMALLOC_OVERRIDE": "$(location @jemalloc//:lib/libjemalloc_pic.a)",
+                    },
+                ),
+            ],
         },
         packages = {
             "ahash": crate.spec(
@@ -215,7 +224,7 @@ def rust_dependencies():
             ),
             "tikv-jemallocator": crate.spec(
                 version = "0.6.0",
-                features = ["profiling", "stats"],
+                features = ["profiling", "stats", "unprefixed_malloc_on_supported_platforms"],
             ),
             "tikv-jemalloc-ctl": crate.spec(
                 version = "0.6.0",
