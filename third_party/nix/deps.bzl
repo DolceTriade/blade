@@ -73,5 +73,14 @@ def third_party_nix_deps():
         nix_file_deps = [
             "//third_party/nix/cargo-bazel:default.nix",
             "//nix/rust:rust_platform.nix",
-        ]
+        ],
+    )
+    nixpkgs_package(
+        name = "jemalloc",
+        repository = "@nixpkgs",
+        nix_file = "//third_party/nix/jemalloc:bazel.nix",
+        nix_file_deps = [
+            "//third_party/nix/jemalloc:default.nix",
+        ],
+        build_file = "//third_party/nix/jemalloc:BUILD.jemalloc",
     )

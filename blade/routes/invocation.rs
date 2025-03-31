@@ -4,6 +4,9 @@ use leptos_router::hooks::use_params;
 use leptos_router::nested_router::Outlet;
 use leptos_router::params::Params;
 
+use anyhow::anyhow;
+use anyhow::Context;
+
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
@@ -31,17 +34,15 @@ pub fn Invocation() -> impl IntoView {
     let invocation = RwSignal::new(state::InvocationResults::default());
     provide_context(invocation);
     let load_invocation = move |id: String| async move { get_invocation(id).await };
-    let res = Resource::new(
-        move || {
-            params.with(|p| {
-                p.as_ref()
-                    .map(|p| p.id.clone())
-                    .unwrap_or_default()
-                    .unwrap_or_default()
-            })
-        },
-        load_invocation,
-    );
+    let res = LocalResource::new(move || {
+        let id = params.with(|p| p.as_ref().map(|p| p.id.clone()).unwrap_or_default());
+        async move {
+            match id {
+                None => Err(anyhow!("no id")),
+                Some(id) => load_invocation(id).await.map_err(|e| anyhow!("failed to get invocation: {e:#?}")),
+            }
+        }
+    });
 
     // TODO: Fix refetch
 
@@ -56,11 +57,13 @@ pub fn Invocation() -> impl IntoView {
             {move || {
                 res.with(|i| match i {
                     None => view! { <div>"Loading..."</div> }.into_any(),
-                    Some(Ok(i)) => {
-                        invocation.set(i.clone());
-                        view! { <Outlet/> }.into_any()
+                    Some(i) => match &**i {
+                        Ok(i) => {
+                            invocation.set(i.clone());
+                            view! { <Outlet/> }.into_any()
+                        },
+                        Err(e) => view! { <div><pre>{ format!("{e:#?}") }</pre></div> }.into_any(),
                     }
-                    Some(Err(e)) => view! { <div>{format!("{:#?}", e)}</div> }.into_any(),
                 })
             }}
 

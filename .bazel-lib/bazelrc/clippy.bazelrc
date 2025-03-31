@@ -4,3 +4,4 @@ build --output_groups=+default
 build --show_result=0
 # Nix passes this in for us?
 build --@rules_rust//rust/settings:toolchain_generated_sysroot=false
+build --@rules_rust//rust/settings:pipelined_compilation=true

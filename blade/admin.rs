@@ -25,6 +25,7 @@ pub async fn run_admin_server(
             .service(debug_message_handler)
             .service(debug_mem_stats_handler)
             .service(debug_mem_profile_handler)
+            .service(debug_mem_profile_enable_handler)
             .wrap(tracing_actix_web::TracingLogger::<
                 super::BladeRootSpanBuilder,
             >::new())
@@ -96,7 +97,7 @@ async fn debug_message_handler(
 
 #[get("/admin/mem/stats")]
 #[instrument]
-async fn debug_mem_stats_handler(body: String) -> Result<HttpResponse> {
+async fn debug_mem_stats_handler() -> Result<HttpResponse> {
     let buf = memdump::stats().await.map_err(|e| {
         error::ErrorInternalServerError(format!("error getting memdump stats: {e:#?}"))
     })?;
@@ -107,7 +108,7 @@ async fn debug_mem_stats_handler(body: String) -> Result<HttpResponse> {
 
 #[get("/admin/mem/dump")]
 #[instrument]
-async fn debug_mem_profile_handler(body: String) -> Result<HttpResponse> {
+async fn debug_mem_profile_handler() -> Result<HttpResponse> {
     let buf = memdump::dump_profile().await.map_err(|e| {
         error::ErrorInternalServerError(format!("error getting memdump profile: {e:#?}"))
     })?;
@@ -115,4 +116,18 @@ async fn debug_mem_profile_handler(body: String) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("application/octet-stream")
         .body(buf))
+}
+
+#[derive(Debug,serde::Deserialize)]
+struct MemdumpEnableQuery {
+    enable: bool,
+}
+
+#[get("/admin/mem/enable")]
+#[instrument]
+async fn debug_mem_profile_enable_handler(info: web::Query<MemdumpEnableQuery>) -> Result<HttpResponse> {
+    memdump::enable_profiling(info.enable).await.map_err(|e| {
+        error::ErrorInternalServerError(format!("error setting memdump status: {e:#?}"))
+    })?;
+    Ok(HttpResponse::Ok().into())
 }
