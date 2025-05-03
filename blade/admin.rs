@@ -118,14 +118,16 @@ async fn debug_mem_profile_handler() -> Result<HttpResponse> {
         .body(buf))
 }
 
-#[derive(Debug,serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 struct MemdumpEnableQuery {
     enable: bool,
 }
 
 #[get("/admin/mem/enable")]
 #[instrument]
-async fn debug_mem_profile_enable_handler(info: web::Query<MemdumpEnableQuery>) -> Result<HttpResponse> {
+async fn debug_mem_profile_enable_handler(
+    info: web::Query<MemdumpEnableQuery>,
+) -> Result<HttpResponse> {
     memdump::enable_profiling(info.enable).await.map_err(|e| {
         error::ErrorInternalServerError(format!("error setting memdump status: {e:#?}"))
     })?;

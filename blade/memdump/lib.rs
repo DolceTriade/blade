@@ -1,5 +1,5 @@
-use anyhow::{Context, anyhow};
-use std::ffi::{CString, c_char};
+use anyhow::{anyhow, Context};
+use std::ffi::{c_char, CString};
 use std::path::PathBuf;
 use tokio::io::AsyncReadExt;
 
@@ -12,7 +12,7 @@ const PROF_ACTIVE: &[u8] = b"prof.active\0";
 
 pub fn is_profiling_active() -> bool {
     unsafe {
-        let Ok(e ) = tikv_jemalloc_ctl::raw::read(PROF_ACTIVE) else {
+        let Ok(e) = tikv_jemalloc_ctl::raw::read(PROF_ACTIVE) else {
             return false;
         };
         e
@@ -70,7 +70,8 @@ pub async fn enable_profiling(enable: bool) -> anyhow::Result<()> {
         return Err(anyhow!("profiling not enabled!"));
     }
     unsafe {
-        _ = tikv_jemalloc_ctl::raw::update(PROF_ACTIVE, enable).context("failed to set profiling status")?;
+        _ = tikv_jemalloc_ctl::raw::update(PROF_ACTIVE, enable)
+            .context("failed to set profiling status")?;
     }
     Ok(())
 }
@@ -122,5 +123,4 @@ mod test {
 
         dump_profile().await.unwrap_err();
     }
-
 }

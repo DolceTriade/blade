@@ -49,7 +49,7 @@ fn RunSummary() -> impl IntoView {
                         view! {
                             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
                                 <div>
-                                    <StatusIcon class="h-5 w-5" status=run.status.into()/>
+                                    <StatusIcon class="h-5 w-5" status=run.status.into() />
                                 </div>
                                 <div class="w-fit h-fit grid grid-rows-1 grid-flow-col items-center justify-center text-s">
                                     <span class="pl-4">{format!("Run #{}", run.run)}</span>
@@ -71,7 +71,7 @@ fn RunSummary() -> impl IntoView {
                                                     .then(|| {
                                                         view! {
                                                             <span>
-                                                                <SummaryItem num=tc.passing suffix="Passing"/>
+                                                                <SummaryItem num=tc.passing suffix="Passing" />
                                                             </span>
                                                         }
                                                     })}
@@ -80,7 +80,7 @@ fn RunSummary() -> impl IntoView {
                                                     .then(|| {
                                                         view! {
                                                             <span>
-                                                                <SummaryItem num=tc.failing suffix="Failing"/>
+                                                                <SummaryItem num=tc.failing suffix="Failing" />
                                                             </span>
                                                         }
                                                     })}
@@ -89,7 +89,7 @@ fn RunSummary() -> impl IntoView {
                                                     .then(|| {
                                                         view! {
                                                             <span>
-                                                                <SummaryItem num=tc.skipped suffix="Skipped"/>
+                                                                <SummaryItem num=tc.skipped suffix="Skipped" />
                                                             </span>
                                                         }
                                                     })}
@@ -148,7 +148,7 @@ where
                                         </A>
                                     </div>
                                     <div>
-                                        <StatusIcon class="h-8 w-8" status=test.status.into()/>
+                                        <StatusIcon class="h-8 w-8" status=test.status.into() />
                                     </div>
                                     <div class="pl-4">
                                         <b>{test.name.clone()}</b>
@@ -158,7 +158,7 @@ where
                                     </div>
                                 </div>
                                 <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
-                                    <RunSummary/>
+                                    <RunSummary />
                                 </div>
                             }
                                 .into_any()

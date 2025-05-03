@@ -118,34 +118,42 @@ pub fn SummaryHeader() -> impl IntoView {
                     </div>
 
                     <div class="flex gap-2 items-center">
-                        {duration} <A href=move|| location.pathname.read().strip_suffix("/details").unwrap_or("details").to_string()>
+                        {duration}
+                        <A href=move || {
+                            location
+                                .pathname
+                                .read()
+                                .strip_suffix("/details")
+                                .unwrap_or("details")
+                                .to_string()
+                        }>
                             <span class="text-blue-500 underline">(details)</span>
                         </A>
                     </div>
                 </div>
                 <div class="p-4">
-                    <StatusIcon class="h-8 w-8" status=status/>
+                    <StatusIcon class="h-8 w-8" status=status />
                 </div>
-                <SummaryItem num=num_targets suffix="Total Target"/>
-                <SummaryItem num=passing_targets suffix="Passing Target"/>
+                <SummaryItem num=num_targets suffix="Total Target" />
+                <SummaryItem num=passing_targets suffix="Passing Target" />
                 {(failing_targets.get() > 0)
                     .then(|| {
-                        view! { <SummaryItem num=failing_targets suffix="Failing Target"/> }
+                        view! { <SummaryItem num=failing_targets suffix="Failing Target" /> }
                     })}
 
                 {(num_tests.get() > 0)
                     .then(|| {
-                        view! { <SummaryItem num=num_tests suffix="Total Test"/> }
+                        view! { <SummaryItem num=num_tests suffix="Total Test" /> }
                     })}
 
                 {(passing_tests.get() > 0)
                     .then(|| {
-                        view! { <SummaryItem num=passing_tests suffix="Passing Test"/> }
+                        view! { <SummaryItem num=passing_tests suffix="Passing Test" /> }
                     })}
 
                 {(failing_tests.get() > 0)
                     .then(|| {
-                        view! { <SummaryItem num=failing_tests suffix="Failing Test"/> }
+                        view! { <SummaryItem num=failing_tests suffix="Failing Test" /> }
                     })}
 
             </div>

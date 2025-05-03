@@ -21,20 +21,20 @@ pub fn App() -> impl IntoView {
         )
     };
     view! {
-        <Title formatter/>
-        <Stylesheet id="leptos" href="/assets/style.css"/>
+        <Title formatter />
+        <Stylesheet id="leptos" href="/assets/style.css" />
         <Router>
             <div id="root" class="h-screen w-screen max-h-screen max-w-screen overflow-hidden">
-                <Nav name="Blade" logo="/assets/logo.svg"/>
+                <Nav name="Blade" logo="/assets/logo.svg" />
                 <main>
                     <Routes fallback=|| "Not Found.">
                         <ParentRoute path=path!("invocation/:id") view=Invocation>
-                            <Route path=path!("test") view=Test/>
-                            <Route path=path!("details") view=Details/>
-                            <Route path=path!("artifact") view=Artifact/>
-                            <Route path=path!("*any") view=Summary/>
+                            <Route path=path!("test") view=Test />
+                            <Route path=path!("details") view=Details />
+                            <Route path=path!("artifact") view=Artifact />
+                            <Route path=path!("*any") view=Summary />
                         </ParentRoute>
-                        <Route path=path!("*any") view=Empty/>
+                        <Route path=path!("*any") view=Empty />
                     </Routes>
                 </main>
             </div>

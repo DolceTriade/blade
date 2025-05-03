@@ -9,7 +9,7 @@ pub fn Nav(
         <nav class="border-gray-200 bg-gray-50">
             <div class="flex flex-wrap items-center justify-between mx-auto p-4">
                 <a href="" class="flex items-center rtl:space-x-reverse">
-                    <img class="hover:animate-spin w-14" src=move || logo.get() alt="Logo"/>
+                    <img class="hover:animate-spin w-14" src=move || logo.get() alt="Logo" />
                     <span class="self-center text-4xl font-semibold whitespace-nowrap">
                         {move || name.get()}
                     </span>

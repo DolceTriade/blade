@@ -15,21 +15,21 @@ pub fn StatusIcon(
             state::Status::Success => {
                  view! {
                      <Tooltip tooltip=move || view! { <span class="p-2">Success</span> }>
-                         <img class=c src="/assets/success.svg"/>
+                         <img class=c src="/assets/success.svg" />
                      </Tooltip>
                  }.into_any()
             }
             state::Status::Fail => {
                view! {
                    <Tooltip tooltip=move || view! { <span class="p-2">Fail</span> }>
-                       <img class=c src="/assets/fail.svg"/>
+                       <img class=c src="/assets/fail.svg" />
                    </Tooltip>
                }.into_any()
             }
             state::Status::Skip => {
                 view! {
                     <Tooltip tooltip=move || view! { <span class="p-2">Skip</span> }>
-                        <img class=c src="/assets/skip.svg"/>
+                        <img class=c src="/assets/skip.svg" />
                     </Tooltip>
                 }.into_any()
              }

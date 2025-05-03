@@ -64,11 +64,11 @@ mod test {
     use std::net::SocketAddr;
     use tokio::net::TcpListener;
     use tokio::sync::mpsc;
-    use tokio_stream::StreamExt;
     use tokio_stream::wrappers::ReceiverStream;
     use tokio_stream::wrappers::TcpListenerStream;
+    use tokio_stream::StreamExt;
     use tonic::transport::Server;
-    use tonic::{Request, Response, Status, async_trait};
+    use tonic::{async_trait, Request, Response, Status};
 
     use bytestream_proto::google::bytestream::*;
 

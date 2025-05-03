@@ -1,4 +1,4 @@
-use std::io::{Cursor, prelude::Read};
+use std::io::{prelude::Read, Cursor};
 
 use leptos::prelude::*;
 use leptos_router::hooks::use_query;
@@ -49,7 +49,7 @@ pub fn Artifact() -> impl IntoView {
                         Ok(t) => t,
                         Err(t) => t,
                     };
-                    view! { <ShellOut text=t/> }
+                    view! { <ShellOut text=t /> }
                 })}
 
             </Suspense>
