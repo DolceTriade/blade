@@ -15,7 +15,7 @@ pub fn is_profiling_active() -> bool {
         let Ok(e ) = tikv_jemalloc_ctl::raw::read(PROF_ACTIVE) else {
             return false;
         };
-        return e;
+        e
     }
 }
 
@@ -90,7 +90,7 @@ mod test {
     #[tokio::test]
     async fn test_stats() {
         let s = stats().await.unwrap();
-        assert!(s.len() > 0);
+        assert!(!s.is_empty());
     }
 
     #[tokio::test]

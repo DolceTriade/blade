@@ -46,8 +46,8 @@ pub fn Artifact() -> impl IntoView {
             }>
                 {move || Suspend::new(async move {
                     let t: String = match artifact.await {
-                        Ok(t) => t.into(),
-                        Err(t) => t.into(),
+                        Ok(t) => t,
+                        Err(t) => t,
                     };
                     view! { <ShellOut text=t/> }
                 })}

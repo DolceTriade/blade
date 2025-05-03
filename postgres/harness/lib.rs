@@ -102,7 +102,7 @@ mod test {
         let uri = h.uri();
         let u = uri.split('/').collect::<Vec<_>>();
         let db_name = u.last().unwrap();
-        let port = u[2].split(':').last().unwrap();
+        let port = u[2].split(':').next_back().unwrap();
         let o = std::process::Command::new(psql_path)
             .arg("-l")
             .arg("-p")
