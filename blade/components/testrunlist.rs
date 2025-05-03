@@ -217,10 +217,8 @@ pub fn TestRunList() -> impl IntoView {
                                                         on:click=move |_| {
                                                             click(id.get());
                                                         }
-
-                                                        // TODO: Fix
-                                                        // attr:test=move||id
                                                         class="flex items-center justify-start w-full"
+                                                        id=move||id
                                                     >
                                                         <span class="float-left">
                                                             <StatusIcon
@@ -254,27 +252,6 @@ pub fn TestRunList() -> impl IntoView {
                         }
                         _ => {
                             view! {
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
-                                // TODO: Fix
-                                // attr:test=move||id
-
                                 <div>Loading...</div>
                             }
                                 .into_any()
