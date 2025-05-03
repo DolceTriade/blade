@@ -1,13 +1,14 @@
 use leptos::prelude::*;
-use leptos_router::components::A;
-use leptos_router::hooks::use_location;
+use leptos_router::{components::A, hooks::use_location};
 use web_sys::KeyboardEvent;
 
-use crate::components::accordion::*;
-use crate::components::list::*;
-use crate::components::searchbar::Searchbar;
-use crate::components::statusicon::StatusIcon;
-use crate::components::tooltip::Tooltip;
+use crate::components::{
+    accordion::*,
+    list::*,
+    searchbar::Searchbar,
+    statusicon::StatusIcon,
+    tooltip::Tooltip,
+};
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {

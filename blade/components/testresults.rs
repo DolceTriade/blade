@@ -1,8 +1,6 @@
 use leptos::prelude::*;
 
-use crate::components::accordion::*;
-use crate::components::shellout::ShellOut;
-use crate::components::statusicon::StatusIcon;
+use crate::components::{accordion::*, shellout::ShellOut, statusicon::StatusIcon};
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {

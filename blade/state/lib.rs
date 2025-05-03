@@ -1,7 +1,7 @@
+use std::{collections::HashMap, default::Default};
+
 use cfg_if::cfg_if;
 use serde::*;
-use std::collections::HashMap;
-use std::default::Default;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Status {
@@ -13,9 +13,7 @@ pub enum Status {
 }
 
 impl std::fmt::Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, "{:?}", self) }
 }
 
 impl Status {

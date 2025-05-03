@@ -16,7 +16,7 @@ fn target_label(
         Some(build_event_stream::build_event_id::Id::TestResult(t)) => &t.label,
         _ => {
             return None;
-        }
+        },
     };
     Some(label.to_string())
 }
@@ -41,7 +41,7 @@ fn test_run_info(
         ),
         _ => {
             return None;
-        }
+        },
     };
     Some(label)
 }
@@ -94,7 +94,7 @@ impl crate::EventHandler for Handler {
                     },
                 )
                 .context("failed to insert target")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::Completed(t)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label = target_label(event).ok_or(anyhow::anyhow!("target not found"))?;
@@ -109,7 +109,7 @@ impl crate::EventHandler for Handler {
                     std::time::SystemTime::now(),
                 )
                 .context("failed to update target result")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::Aborted(a)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label =
@@ -120,13 +120,13 @@ impl crate::EventHandler for Handler {
                     match build_event_stream::aborted::AbortReason::try_from(a.reason) {
                         Ok(build_event_stream::aborted::AbortReason::Skipped) => {
                             state::Status::Skip
-                        }
+                        },
                         _ => state::Status::Fail,
                     },
                     std::time::SystemTime::now(),
                 )
                 .context("failed to update target result")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let label =
@@ -148,7 +148,7 @@ impl crate::EventHandler for Handler {
                 };
                 db.upsert_test(invocation_id, &test)
                     .context("failed to insert test")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::TestResult(r)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let mut info =
@@ -190,8 +190,8 @@ impl crate::EventHandler for Handler {
                     .context("failed to update test")?;
                 db.upsert_test_run(invocation_id, &test_id, &info.1)
                     .context("error inserting test run")?;
-            }
-            _ => {}
+            },
+            _ => {},
         }
         Ok(())
     }

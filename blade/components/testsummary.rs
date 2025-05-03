@@ -1,6 +1,5 @@
 use leptos::prelude::*;
-use leptos_router::components::A;
-use leptos_router::*;
+use leptos_router::{components::A, *};
 
 use crate::components::statusicon::StatusIcon;
 

@@ -1,8 +1,8 @@
-use crate::components::statusicon::StatusIcon;
 use leptos::prelude::*;
-use leptos_router::components::A;
-use leptos_router::hooks::use_location;
+use leptos_router::{components::A, hooks::use_location};
 use time::macros::format_description;
+
+use crate::components::statusicon::StatusIcon;
 
 #[allow(non_snake_case)]
 #[component]
@@ -59,14 +59,14 @@ pub fn SummaryHeader() -> impl IntoView {
             invocation.targets.values().for_each(|t| match t.status {
                 state::Status::Success => passing_targets += 1,
                 state::Status::Fail => failing_targets += 1,
-                _ => {}
+                _ => {},
             });
             let num_tests = invocation.tests.len();
             let mut passing_tests: usize = 0;
             let mut failing_tests: usize = 0;
             invocation.tests.values().for_each(|t| match t.status {
                 state::Status::Success => passing_tests += 1,
-                state::Status::InProgress => {}
+                state::Status::InProgress => {},
                 _ => failing_tests += 1,
             });
 

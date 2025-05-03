@@ -20,7 +20,7 @@ impl crate::EventHandler for Handler {
                 };
                 db.insert_options(invocation_id, &o)
                     .context("failed to insert unstructured command line")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::OptionsParsed(opts)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let o = state::BuildOptions {
@@ -32,7 +32,7 @@ impl crate::EventHandler for Handler {
                 };
                 db.insert_options(invocation_id, &o)
                     .context("failed to insert parsed options")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::BuildMetadata(md)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let o = state::BuildOptions {
@@ -41,8 +41,8 @@ impl crate::EventHandler for Handler {
                 };
                 db.insert_options(invocation_id, &o)
                     .context("failed to insert parsed options")?;
-            }
-            _ => {}
+            },
+            _ => {},
         }
         Ok(())
     }

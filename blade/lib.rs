@@ -4,7 +4,8 @@ pub mod components;
 #[allow(clippy::empty_docs)]
 pub mod routes;
 
-// Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a lib. I may be wrong.
+// Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a
+// lib. I may be wrong.
 cfg_if! {
     if #[cfg(feature = "hydrate")] {
         use wasm_bindgen::prelude::wasm_bindgen;

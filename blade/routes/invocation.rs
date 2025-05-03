@@ -1,13 +1,10 @@
-use leptos::prelude::*;
-use leptos_meta::*;
-use leptos_router::hooks::use_params;
-use leptos_router::nested_router::Outlet;
-use leptos_router::params::Params;
-
-use anyhow::anyhow;
-
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
+
+use anyhow::anyhow;
+use leptos::prelude::*;
+use leptos_meta::*;
+use leptos_router::{hooks::use_params, nested_router::Outlet, params::Params};
 
 #[cfg(feature = "ssr")]
 pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
