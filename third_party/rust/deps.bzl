@@ -161,25 +161,22 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
                 features = ["ssr", "nightly"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
                 features = ["ssr"],
             ),
             "leptos_router": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
                 features = ["ssr"],
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.7",
-            ),
-            "either_of": crate.spec(
-                version = "0.1.5",
+                version = "0.8.0",
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -348,17 +345,17 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
                 features = ["hydrate", "tracing", "nightly"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
             ),
             "leptos_router": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
             ),
             "leptos_dom": crate.spec(
-                version = "0.7.7",
+                version = "0.8.0",
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",
@@ -383,9 +380,6 @@ def rust_dependencies():
                 version = "0.8.11",
                 default_features = False,
                 features = ["std"],
-            ),
-            "either_of": crate.spec(
-                version = "0.1.5",
             ),
             "wasm-bindgen": crate.spec(
                 version = "=0.2.100",

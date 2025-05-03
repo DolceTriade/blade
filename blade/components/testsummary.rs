@@ -62,9 +62,9 @@ fn RunSummary() -> impl IntoView {
                                 {move || {
                                     xml.try_read()
                                         .as_ref()
-                                        .and_then(|rg| rg.deref().as_ref())
+                                        .and_then(|rg| rg.as_ref())
                                         .and_then(|sw| {
-                                            sw.deref().clone().and_then(|ts| ts.suites.first().cloned())
+                                            sw.clone().and_then(|ts| ts.suites.first().cloned())
                                         })
                                         .map(|s| get_test_counts(&s.cases))
                                         .map(|tc| {
