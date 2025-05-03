@@ -75,7 +75,7 @@ pub fn TargetList() -> impl IntoView {
     view! {
         <div>
             <div class="p-xs">
-                <Searchbar id="search" placeholder="Filter targets..." keyup=search_key/>
+                <Searchbar id="search" placeholder="Filter targets..." keyup=search_key />
             </div>
             <Accordion>
 
@@ -130,8 +130,7 @@ pub fn TargetList() -> impl IntoView {
                                 </AccordionItem>
                             }
                         })
-                }}
-                <AccordionItem header=move || view! { <h3>Targets</h3> }>
+                }} <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
                             each=move || targets.with(sorted_targets)

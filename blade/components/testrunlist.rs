@@ -94,7 +94,7 @@ pub fn TestRunList() -> impl IntoView {
 
     view! {
         <div class="p-xs">
-            <Searchbar id="search" placeholder="Filter tests..." keyup=search_key/>
+            <Searchbar id="search" placeholder="Filter tests..." keyup=search_key />
         </div>
         <Accordion>
             {move || {
@@ -145,11 +145,11 @@ pub fn TestRunList() -> impl IntoView {
                                                                     <div class="flex items-center max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden text-sm">
                                                                         <span class="pl-4">{format!("Run {}", run.run)}</span>
                                                                         <span class="flex items-center  pl-1">
-                                                                            <img class="h-4 w-4" src="/assets/shard.svg"/>
+                                                                            <img class="h-4 w-4" src="/assets/shard.svg" />
                                                                             {run.shard}
                                                                         </span>
                                                                         <span class="flex items-center pl-1">
-                                                                            <img class="h-4 w-4" src="/assets/number.svg"/>
+                                                                            <img class="h-4 w-4" src="/assets/number.svg" />
                                                                             {run.attempt}
                                                                         </span>
 
@@ -171,16 +171,11 @@ pub fn TestRunList() -> impl IntoView {
                             </AccordionItem>
                         }
                     })
-            }}
-            <AccordionItem header=move || view! { <h3>Tests</h3> }>
+            }} <AccordionItem header=move || view! { <h3>Tests</h3> }>
                 <Suspense fallback=move || {
                     view! { <div>Loading...</div> }
                 }>
-                    {move || match xml
-                        .read()
-                        .as_ref()
-                        .and_then(|sw| sw.as_ref().map(|_| true))
-                    {
+                    {move || match xml.read().as_ref().and_then(|sw| sw.as_ref().map(|_| true)) {
                         Some(_) => {
                             view! {
                                 <List>

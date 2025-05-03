@@ -38,7 +38,9 @@ pub fn Invocation() -> impl IntoView {
         async move {
             match id {
                 None => Err(anyhow!("no id")),
-                Some(id) => load_invocation(id).await.map_err(|e| anyhow!("failed to get invocation: {e:#?}")),
+                Some(id) => load_invocation(id)
+                    .await
+                    .map_err(|e| anyhow!("failed to get invocation: {e:#?}")),
             }
         }
     });
@@ -49,19 +51,28 @@ pub fn Invocation() -> impl IntoView {
         <Title text=move || {
             params
                 .with(|p| p.as_ref().map(|p| p.id.clone().unwrap_or_default()).unwrap_or_default())
-        }/>
+        } />
         <Transition fallback=move || {
             view! { <p>"Loading..."</p> }
         }>
             {move || {
                 res.with(|i| match i {
                     None => view! { <div>"Loading..."</div> }.into_any(),
-                    Some(i) => match i {
-                        Ok(i) => {
-                            invocation.set(i.clone());
-                            view! { <Outlet/> }.into_any()
-                        },
-                        Err(e) => view! { <div><pre>{ format!("{e:#?}") }</pre></div> }.into_any(),
+                    Some(i) => {
+                        match i {
+                            Ok(i) => {
+                                invocation.set(i.clone());
+                                view! { <Outlet /> }.into_any()
+                            }
+                            Err(e) => {
+                                view! {
+                                    <div>
+                                        <pre>{format!("{e:#?}")}</pre>
+                                    </div>
+                                }
+                                    .into_any()
+                            }
+                        }
                     }
                 })
             }}

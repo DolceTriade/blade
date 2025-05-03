@@ -132,7 +132,7 @@ pub fn TestResults() -> impl IntoView {
                                                         class="flex justify-between items-center"
                                                     >
                                                         <span class="flex items-center">
-                                                            <StatusIcon class="h-4 w-4" status=status.into()/>
+                                                            <StatusIcon class="h-4 w-4" status=status.into() />
                                                             <h3 class="p-2">{header.clone()}</h3>
                                                         </span>
                                                         <div class="text-gray-400 text-xs pl-2 float-right">
@@ -144,7 +144,7 @@ pub fn TestResults() -> impl IntoView {
                                         >
 
                                             <div>
-                                                <ShellOut text=message/>
+                                                <ShellOut text=message />
                                             </div>
                                         </AccordionItem>
                                     }

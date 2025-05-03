@@ -31,7 +31,7 @@ pub fn Details() -> impl IntoView {
     view! {
         <div class="flex flex-col">
             <Card>
-                <SummaryHeader/>
+                <SummaryHeader />
             </Card>
 
             <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto">
@@ -56,7 +56,7 @@ pub fn Details() -> impl IntoView {
                                                             }
                                                         >
 
-                                                            <BuildMetadata md=opts.build_metadata/>
+                                                            <BuildMetadata md=opts.build_metadata />
                                                         </AccordionItem>
                                                     }
                                                 })}
@@ -67,7 +67,7 @@ pub fn Details() -> impl IntoView {
                                                 }
                                             >
 
-                                                <OptionsList opts=opts.explicit_cmd_line/>
+                                                <OptionsList opts=opts.explicit_cmd_line />
                                             </AccordionItem>
                                             <AccordionItem
                                                 hide=false
@@ -76,7 +76,7 @@ pub fn Details() -> impl IntoView {
                                                 }
                                             >
 
-                                                <OptionsList opts=opts.cmd_line/>
+                                                <OptionsList opts=opts.cmd_line />
                                             </AccordionItem>
                                             <AccordionItem
                                                 hide=false
@@ -85,7 +85,7 @@ pub fn Details() -> impl IntoView {
                                                 }
                                             >
 
-                                                <OptionsList opts=opts.unstructured/>
+                                                <OptionsList opts=opts.unstructured />
                                             </AccordionItem>
                                             <AccordionItem
                                                 hide=false
@@ -94,7 +94,7 @@ pub fn Details() -> impl IntoView {
                                                 }
                                             >
 
-                                                <OptionsList opts=opts.explicit_startup/>
+                                                <OptionsList opts=opts.explicit_startup />
                                             </AccordionItem>
                                             <AccordionItem
                                                 hide=false
@@ -103,7 +103,7 @@ pub fn Details() -> impl IntoView {
                                                 }
                                             >
 
-                                                <OptionsList opts=opts.startup/>
+                                                <OptionsList opts=opts.startup />
                                             </AccordionItem>
 
                                         </Accordion>

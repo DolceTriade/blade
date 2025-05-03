@@ -1,9 +1,9 @@
 use leptos::prelude::*;
-use leptos_router::NavigateOptions;
 use leptos_router::components::Redirect;
 use leptos_router::hooks::use_location;
 use leptos_router::hooks::use_query;
 use leptos_router::params::Params;
+use leptos_router::NavigateOptions;
 
 use crate::components::card::Card;
 use crate::components::shellout::ShellOut;
@@ -102,13 +102,9 @@ pub fn Test() -> impl IntoView {
                 }
                 Err(format!("{} not found", target).to_string())
             }
-            None => {
-                Err("No target specified in URL".to_string())
-            }
+            None => Err("No target specified in URL".to_string()),
         },
-        Err(e) => {
-            Err(format!("No target specified in the URL: {e}").to_string())
-        },
+        Err(e) => Err(format!("No target specified in the URL: {e}").to_string()),
     });
     let run = Memo::new(move |_| params.read().as_ref().ok().and_then(|params| params.run));
     let shard = Memo::new(move |_| params.read().as_ref().ok().and_then(|params| params.shard));
@@ -192,15 +188,15 @@ pub fn Test() -> impl IntoView {
                 view! {
                     <div class="flex flex-col">
                         <Card class="p-0 m-0">
-                            <TestSummary/>
+                            <TestSummary />
                         </Card>
 
                         <div class="h-[80vh] flex items-start justify-start justify-items-center">
                             <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
-                                <TestRunList/>
+                                <TestRunList />
                             </Card>
                             <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                <TestResults/>
+                                <TestResults />
                                 <Suspense fallback=move || {
                                     view! { <div>Loading...</div> }
                                 }>
@@ -208,7 +204,7 @@ pub fn Test() -> impl IntoView {
                                         Some(Some(s)) => {
                                             view! {
                                                 <div>
-                                                    <ShellOut text=s/>
+                                                    <ShellOut text=s />
                                                 </div>
                                             }
                                                 .into_any()
@@ -217,7 +213,7 @@ pub fn Test() -> impl IntoView {
                                     }}
 
                                 </Suspense>
-                                <TestArtifactList/>
+                                <TestArtifactList />
                             </Card>
                         </div>
                     </div>
