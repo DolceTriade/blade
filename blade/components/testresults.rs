@@ -95,7 +95,7 @@ pub fn TestResults() -> impl IntoView {
     let sorted_tests = move || {
         xml.read()
             .as_ref()
-            .and_then(|sw| sw.deref().clone().and_then(|ts| ts.suites.first().cloned()))
+            .and_then(|sw| sw.clone().and_then(|ts| ts.suites.first().cloned()))
             .map(|c| sort_tests(&c.cases))
             .unwrap_or_default()
     };
@@ -103,7 +103,7 @@ pub fn TestResults() -> impl IntoView {
         <Suspense fallback=move || {
             view! { <div>Loading...</div> }
         }>
-            {move || match xml.read().as_ref().and_then(|sw| sw.deref().as_ref().map(|_| true)) {
+            {move || match xml.read().as_ref().and_then(|sw| sw.as_ref().map(|_| true)) {
                 Some(_) => {
                     view! {
                         <Accordion>

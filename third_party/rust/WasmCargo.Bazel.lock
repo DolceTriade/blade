@@ -1,5 +1,5 @@
 {
-  "checksum": "b7cf09b28083177974575646a7ac9e98b1ee294a10e3c48ccf79dfa0388cf445",
+  "checksum": "33c0a2d7d28c244bccd544dfbef0c73657d086811eec1f04b22262aa1121c33f",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -302,14 +302,14 @@
       ],
       "license_file": "LICENSE"
     },
-    "any_spawner 0.2.0": {
+    "any_spawner 0.3.0": {
       "name": "any_spawner",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/any_spawner/0.2.0/download",
-          "sha256": "41058deaa38c9d9dd933d6d238d825227cffa668e2839b52879f6619c63eee3b"
+          "url": "https://static.crates.io/crates/any_spawner/0.3.0/download",
+          "sha256": "1384d3fe1eecb464229fcf6eebb72306591c56bf27b373561489458a7c73027d"
         }
       },
       "targets": [
@@ -345,7 +345,7 @@
               "target": "futures"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
@@ -356,7 +356,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.0"
+        "version": "0.3.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -1286,7 +1286,7 @@
               "target": "serde_json"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             }
           ],
@@ -1394,14 +1394,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "config 0.14.1": {
+    "config 0.15.11": {
       "name": "config",
-      "version": "0.14.1",
+      "version": "0.15.11",
       "package_url": "https://github.com/rust-cli/config-rs",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/config/0.14.1/download",
-          "sha256": "68578f196d2a33ff61b27fae256c3164f65e36382648e30666dde05b8cc9dfdf"
+          "url": "https://static.crates.io/crates/config/0.15.11/download",
+          "sha256": "595aae20e65c3be792d05818e8c63025294ac3cb7e200f11459063a352a6ef80"
         }
       },
       "targets": [
@@ -1438,10 +1438,6 @@
               "target": "convert_case"
             },
             {
-              "id": "nom 7.1.3",
-              "target": "nom"
-            },
-            {
               "id": "pathdiff 0.2.1",
               "target": "pathdiff"
             },
@@ -1452,12 +1448,16 @@
             {
               "id": "toml 0.8.19",
               "target": "toml"
+            },
+            {
+              "id": "winnow 0.7.9",
+              "target": "winnow"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.14.1"
+        "version": "0.15.11"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -1575,6 +1575,50 @@
         "MIT"
       ],
       "license_file": "LICENSE-APACHE"
+    },
+    "const-str 0.6.2": {
+      "name": "const-str",
+      "version": "0.6.2",
+      "package_url": "https://github.com/Nugine/const-str",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/const-str/0.6.2/download",
+          "sha256": "9e991226a70654b49d34de5ed064885f0bef0348a8e70018b8ff1ac80aa984a2"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "const_str",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "const_str",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default"
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.6.2"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
     },
     "const_format 0.2.33": {
       "name": "const_format",
@@ -1768,6 +1812,53 @@
         },
         "edition": "2018",
         "version": "0.6.0"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE"
+    },
+    "convert_case 0.8.0": {
+      "name": "convert_case",
+      "version": "0.8.0",
+      "package_url": "https://github.com/rutrum/convert-case",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/convert_case/0.8.0/download",
+          "sha256": "baaaa0ecca5b51987b9423ccdc971514dd8b0bb7b4060b983d3664dad3f1f89f"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "convert_case",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "convert_case",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "unicode-segmentation 1.10.1",
+              "target": "unicode_segmentation"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -2169,10 +2260,6 @@
               "target": "console_log"
             },
             {
-              "id": "either_of 0.1.5",
-              "target": "either_of"
-            },
-            {
               "id": "futures 0.3.31",
               "target": "futures"
             },
@@ -2201,19 +2288,19 @@
               "target": "junit_parser"
             },
             {
-              "id": "leptos 0.7.7",
+              "id": "leptos 0.8.0",
               "target": "leptos"
             },
             {
-              "id": "leptos_dom 0.7.7",
+              "id": "leptos_dom 0.8.0",
               "target": "leptos_dom"
             },
             {
-              "id": "leptos_meta 0.7.7",
+              "id": "leptos_meta 0.8.0",
               "target": "leptos_meta"
             },
             {
-              "id": "leptos_router 0.7.7",
+              "id": "leptos_router 0.8.0",
               "target": "leptos_router"
             },
             {
@@ -2325,45 +2412,6 @@
         "MIT"
       ],
       "license_file": null
-    },
-    "dyn-clone 1.0.18": {
-      "name": "dyn-clone",
-      "version": "1.0.18",
-      "package_url": "https://github.com/dtolnay/dyn-clone",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/dyn-clone/1.0.18/download",
-          "sha256": "feeef44e73baff3a26d371801df019877a9866a8c493d315ab00177843314f35"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "dyn_clone",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "dyn_clone",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "edition": "2018",
-        "version": "1.0.18"
-      },
-      "license": "MIT OR Apache-2.0",
-      "license_ids": [
-        "Apache-2.0",
-        "MIT"
-      ],
-      "license_file": "LICENSE-APACHE"
     },
     "either 1.9.0": {
       "name": "either",
@@ -2511,6 +2559,44 @@
         "MIT"
       ],
       "license_file": "LICENSE-APACHE"
+    },
+    "erased 0.1.2": {
+      "name": "erased",
+      "version": "0.1.2",
+      "package_url": "https://github.com/JonathanBrouwer/erased",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/erased/0.1.2/download",
+          "sha256": "a1731451909bde27714eacba19c2566362a7f35224f52b153d3f42cf60f72472"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "erased",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "erased",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.1.2"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": null
     },
     "event-listener 5.3.1": {
       "name": "event-listener",
@@ -3416,9 +3502,7 @@
         ],
         "crate_features": {
           "common": [
-            "js",
-            "js-sys",
-            "wasm-bindgen"
+            "js"
           ],
           "selects": {}
         },
@@ -3440,16 +3524,6 @@
               {
                 "id": "libc 0.2.147",
                 "target": "libc"
-              }
-            ],
-            "wasm32-unknown-unknown": [
-              {
-                "id": "js-sys 0.3.77",
-                "target": "js_sys"
-              },
-              {
-                "id": "wasm-bindgen 0.2.100",
-                "target": "wasm_bindgen"
               }
             ]
           }
@@ -4289,14 +4363,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "hydration_context 0.2.0": {
+    "hydration_context 0.3.0": {
       "name": "hydration_context",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/hydration_context/0.2.0/download",
-          "sha256": "ef13071fe13b55c85fe2b70246d2e3b49d2c6a764fd3e0edaf262cc385ff1854"
+          "url": "https://static.crates.io/crates/hydration_context/0.3.0/download",
+          "sha256": "e8714ae4adeaa846d838f380fbd72f049197de629948f91bf045329e0cf0a283"
         }
       },
       "targets": [
@@ -4351,7 +4425,7 @@
               "target": "serde"
             },
             {
-              "id": "throw_error 0.2.0",
+              "id": "throw_error 0.3.0",
               "target": "throw_error"
             },
             {
@@ -4362,7 +4436,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.0"
+        "version": "0.3.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -4534,14 +4608,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "itertools 0.13.0": {
+    "itertools 0.14.0": {
       "name": "itertools",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "package_url": "https://github.com/rust-itertools/itertools",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/itertools/0.13.0/download",
-          "sha256": "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+          "url": "https://static.crates.io/crates/itertools/0.14.0/download",
+          "sha256": "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
         }
       },
       "targets": [
@@ -4581,7 +4655,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.13.0"
+        "version": "0.14.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -4797,14 +4871,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "leptos 0.7.7": {
+    "leptos 0.8.0": {
       "name": "leptos",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos/0.7.7/download",
-          "sha256": "88613d81f70f4e267473b2ee107e1ee70cf765a3c3dfee945929c8e9c520b957"
+          "url": "https://static.crates.io/crates/leptos/0.8.0/download",
+          "sha256": "7ebeea243876c96655d064a28af6d9918f226fed14af9f781e3778bcf7fed66e"
         }
       },
       "targets": [
@@ -4812,6 +4886,18 @@
           "Library": {
             "crate_name": "leptos",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -4838,7 +4924,7 @@
         "deps": {
           "common": [
             {
-              "id": "any_spawner 0.2.0",
+              "id": "any_spawner 0.3.0",
               "target": "any_spawner"
             },
             {
@@ -4854,27 +4940,27 @@
               "target": "futures"
             },
             {
-              "id": "getrandom 0.2.10",
-              "target": "getrandom"
-            },
-            {
-              "id": "hydration_context 0.2.0",
+              "id": "hydration_context 0.3.0",
               "target": "hydration_context"
             },
             {
-              "id": "leptos_config 0.7.7",
+              "id": "leptos 0.8.0",
+              "target": "build_script_build"
+            },
+            {
+              "id": "leptos_config 0.8.0",
               "target": "leptos_config"
             },
             {
-              "id": "leptos_dom 0.7.7",
+              "id": "leptos_dom 0.8.0",
               "target": "leptos_dom"
             },
             {
-              "id": "leptos_hot_reload 0.7.7",
+              "id": "leptos_hot_reload 0.8.0",
               "target": "leptos_hot_reload"
             },
             {
-              "id": "leptos_server 0.7.7",
+              "id": "leptos_server 0.8.0",
               "target": "leptos_server"
             },
             {
@@ -4886,7 +4972,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
@@ -4902,11 +4988,11 @@
               "target": "serde"
             },
             {
-              "id": "serde_qs 0.13.0",
+              "id": "serde_qs 0.14.0",
               "target": "serde_qs"
             },
             {
-              "id": "server_fn 0.7.7",
+              "id": "server_fn 0.8.0",
               "target": "server_fn"
             },
             {
@@ -4914,15 +5000,15 @@
               "target": "slotmap"
             },
             {
-              "id": "tachys 0.1.7",
+              "id": "tachys 0.2.0",
               "target": "tachys"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
-              "id": "throw_error 0.2.0",
+              "id": "throw_error 0.3.0",
               "target": "throw_error"
             },
             {
@@ -4930,7 +5016,7 @@
               "target": "tracing"
             },
             {
-              "id": "typed-builder 0.20.0",
+              "id": "typed-builder 0.21.0",
               "target": "typed_builder"
             },
             {
@@ -4948,7 +5034,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "leptos_macro 0.7.7",
+              "id": "leptos_macro 0.8.0",
               "target": "leptos_macro"
             },
             {
@@ -4956,13 +5042,33 @@
               "target": "paste"
             },
             {
-              "id": "typed-builder-macro 0.20.0",
+              "id": "typed-builder-macro 0.21.0",
               "target": "typed_builder_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.7.7"
+        "version": "0.8.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -4970,14 +5076,14 @@
       ],
       "license_file": null
     },
-    "leptos_config 0.7.7": {
+    "leptos_config 0.8.0": {
       "name": "leptos_config",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_config/0.7.7/download",
-          "sha256": "4172cfee12576224775ccfbb9d3e76625017a8b4207c4641a2f9b96a70e6d524"
+          "url": "https://static.crates.io/crates/leptos_config/0.8.0/download",
+          "sha256": "4c811cf9507f4a0399f5eb5914e1e94f3b255a2ba3637de63fe68ddf42a47eff"
         }
       },
       "targets": [
@@ -5002,7 +5108,7 @@
         "deps": {
           "common": [
             {
-              "id": "config 0.14.1",
+              "id": "config 0.15.11",
               "target": "config"
             },
             {
@@ -5014,18 +5120,18 @@
               "target": "serde"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
-              "id": "typed-builder 0.20.0",
+              "id": "typed-builder 0.21.0",
               "target": "typed_builder"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -5033,14 +5139,14 @@
       ],
       "license_file": null
     },
-    "leptos_dom 0.7.7": {
+    "leptos_dom 0.8.0": {
       "name": "leptos_dom",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_dom/0.7.7/download",
-          "sha256": "a41f6dc3ddaa09d876d7015f08f4f3905787da4ea5460cef130c365419483a89"
+          "url": "https://static.crates.io/crates/leptos_dom/0.8.0/download",
+          "sha256": "e50558217ef975ac3bec7d72a52bf95bc03c5dcc60d6f89ce15874e9d3c142c7"
         }
       },
       "targets": [
@@ -5081,7 +5187,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
@@ -5089,7 +5195,7 @@
               "target": "send_wrapper"
             },
             {
-              "id": "tachys 0.1.7",
+              "id": "tachys 0.2.0",
               "target": "tachys"
             },
             {
@@ -5108,7 +5214,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -5116,14 +5222,14 @@
       ],
       "license_file": null
     },
-    "leptos_hot_reload 0.7.7": {
+    "leptos_hot_reload 0.8.0": {
       "name": "leptos_hot_reload",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_hot_reload/0.7.7/download",
-          "sha256": "31f5c961e5d9b2aa6deab39d5d842272e8b1b165744b5caf674770d5cf0daa04"
+          "url": "https://static.crates.io/crates/leptos_hot_reload/0.8.0/download",
+          "sha256": "f62f95f3deb52e84d008c68136f6f91a484cf75249d888e6cdda1ae8674ba2cc"
         }
       },
       "targets": [
@@ -5191,7 +5297,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -5199,14 +5305,14 @@
       ],
       "license_file": null
     },
-    "leptos_macro 0.7.7": {
+    "leptos_macro 0.8.0": {
       "name": "leptos_macro",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_macro/0.7.7/download",
-          "sha256": "2b9165909eabb02188a4b33b0ab6acff408bdf440018bf65b30bba0d38d61b19"
+          "url": "https://static.crates.io/crates/leptos_macro/0.8.0/download",
+          "sha256": "4a7905c8937da27d55cbfc6c5983bc166af7863c4ecdd6f1c5b9880dca1b1082"
         }
       },
       "targets": [
@@ -5214,6 +5320,18 @@
           "ProcMacro": {
             "crate_name": "leptos_macro",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -5247,7 +5365,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "convert_case 0.6.0",
+              "id": "convert_case 0.8.0",
               "target": "convert_case"
             },
             {
@@ -5255,12 +5373,16 @@
               "target": "html_escape"
             },
             {
-              "id": "itertools 0.13.0",
+              "id": "itertools 0.14.0",
               "target": "itertools"
             },
             {
-              "id": "leptos_hot_reload 0.7.7",
+              "id": "leptos_hot_reload 0.8.0",
               "target": "leptos_hot_reload"
+            },
+            {
+              "id": "leptos_macro 0.8.0",
+              "target": "build_script_build"
             },
             {
               "id": "prettyplease 0.2.25",
@@ -5283,7 +5405,7 @@
               "target": "rstml"
             },
             {
-              "id": "server_fn_macro 0.7.7",
+              "id": "server_fn_macro 0.8.0",
               "target": "server_fn_macro"
             },
             {
@@ -5302,7 +5424,36 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        },
+        "link_deps": {
+          "common": [
+            {
+              "id": "prettyplease 0.2.25",
+              "target": "prettyplease"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -5310,14 +5461,14 @@
       ],
       "license_file": null
     },
-    "leptos_meta 0.7.7": {
+    "leptos_meta 0.8.0": {
       "name": "leptos_meta",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_meta/0.7.7/download",
-          "sha256": "4566969810e3f29cfdafd6dd430382e42f72f4cdebfbfa263bd98f75feaf166d"
+          "url": "https://static.crates.io/crates/leptos_meta/0.8.0/download",
+          "sha256": "3e9f7283b9b203d93f8f9489aa284945888825815712a3fcba7ab29eb4031471"
         }
       },
       "targets": [
@@ -5356,7 +5507,7 @@
               "target": "indexmap"
             },
             {
-              "id": "leptos 0.7.7",
+              "id": "leptos 0.8.0",
               "target": "leptos"
             },
             {
@@ -5383,7 +5534,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -5391,14 +5542,14 @@
       ],
       "license_file": null
     },
-    "leptos_router 0.7.7": {
+    "leptos_router 0.8.0": {
       "name": "leptos_router",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_router/0.7.7/download",
-          "sha256": "e83cf6033f987f366be6ffa556ee22fa6f9f433cbffd173826fd67327c3ae7ed"
+          "url": "https://static.crates.io/crates/leptos_router/0.8.0/download",
+          "sha256": "0771d6ba21829a331f8f0f0ebfa8a58b8d2bb959295592e02b26445f08a3ce8d"
         }
       },
       "targets": [
@@ -5406,6 +5557,18 @@
           "Library": {
             "crate_name": "leptos_router",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -5423,7 +5586,7 @@
         "deps": {
           "common": [
             {
-              "id": "any_spawner 0.2.0",
+              "id": "any_spawner 0.3.0",
               "target": "any_spawner"
             },
             {
@@ -5443,8 +5606,12 @@
               "target": "js_sys"
             },
             {
-              "id": "leptos 0.7.7",
+              "id": "leptos 0.8.0",
               "target": "leptos"
+            },
+            {
+              "id": "leptos_router 0.8.0",
+              "target": "build_script_build"
             },
             {
               "id": "once_cell 1.20.2",
@@ -5455,7 +5622,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
@@ -5463,11 +5630,11 @@
               "target": "send_wrapper"
             },
             {
-              "id": "tachys 0.1.7",
+              "id": "tachys 0.2.0",
               "target": "tachys"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
@@ -5489,13 +5656,33 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "leptos_router_macro 0.7.7",
+              "id": "leptos_router_macro 0.8.0",
               "target": "leptos_router_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.7.7"
+        "version": "0.8.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -5503,14 +5690,14 @@
       ],
       "license_file": null
     },
-    "leptos_router_macro 0.7.7": {
+    "leptos_router_macro 0.8.0": {
       "name": "leptos_router_macro",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_router_macro/0.7.7/download",
-          "sha256": "84f580227933b49028cd3b6d7cd29ab7c6d30f9777cf0ac774eda2aab000a912"
+          "url": "https://static.crates.io/crates/leptos_router_macro/0.8.0/download",
+          "sha256": "868cfbeac2500896687857aac6df6cbe81a6bf8f5aa2ab950f5f3d1513c1b127"
         }
       },
       "targets": [
@@ -5554,7 +5741,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -5562,14 +5749,14 @@
       ],
       "license_file": null
     },
-    "leptos_server 0.7.7": {
+    "leptos_server 0.8.0": {
       "name": "leptos_server",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/leptos_server/0.7.7/download",
-          "sha256": "4fee9ed4526484b17561bc8ce1532c613e37be2c01788fed3d1c4104db674dd9"
+          "url": "https://static.crates.io/crates/leptos_server/0.8.0/download",
+          "sha256": "6bfdc78e05acacb767c24ce87e5393b76467ae568d4eac181e20c04f434713bf"
         }
       },
       "targets": [
@@ -5602,7 +5789,7 @@
         "deps": {
           "common": [
             {
-              "id": "any_spawner 0.2.0",
+              "id": "any_spawner 0.3.0",
               "target": "any_spawner"
             },
             {
@@ -5618,7 +5805,7 @@
               "target": "futures"
             },
             {
-              "id": "hydration_context 0.2.0",
+              "id": "hydration_context 0.3.0",
               "target": "hydration_context"
             },
             {
@@ -5626,7 +5813,7 @@
               "target": "or_poisoned"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
@@ -5642,11 +5829,11 @@
               "target": "serde_json"
             },
             {
-              "id": "server_fn 0.7.7",
+              "id": "server_fn 0.8.0",
               "target": "server_fn"
             },
             {
-              "id": "tachys 0.1.7",
+              "id": "tachys 0.2.0",
               "target": "tachys"
             },
             {
@@ -5657,7 +5844,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -6097,51 +6284,6 @@
       ],
       "license_file": "LICENSE-MIT"
     },
-    "minimal-lexical 0.2.1": {
-      "name": "minimal-lexical",
-      "version": "0.2.1",
-      "package_url": "https://github.com/Alexhuszagh/minimal-lexical",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/minimal-lexical/0.2.1/download",
-          "sha256": "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "minimal_lexical",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "minimal_lexical",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "std"
-          ],
-          "selects": {}
-        },
-        "edition": "2018",
-        "version": "0.2.1"
-      },
-      "license": "MIT/Apache-2.0",
-      "license_ids": [
-        "Apache-2.0",
-        "MIT"
-      ],
-      "license_file": "LICENSE-APACHE"
-    },
     "miniz_oxide 0.7.1": {
       "name": "miniz_oxide",
       "version": "0.7.1",
@@ -6307,65 +6449,6 @@
         "MIT"
       ],
       "license_file": null
-    },
-    "nom 7.1.3": {
-      "name": "nom",
-      "version": "7.1.3",
-      "package_url": "https://github.com/Geal/nom",
-      "repository": {
-        "Http": {
-          "url": "https://static.crates.io/crates/nom/7.1.3/download",
-          "sha256": "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
-        }
-      },
-      "targets": [
-        {
-          "Library": {
-            "crate_name": "nom",
-            "crate_root": "src/lib.rs",
-            "srcs": {
-              "allow_empty": true,
-              "include": [
-                "**/*.rs"
-              ]
-            }
-          }
-        }
-      ],
-      "library_target_name": "nom",
-      "common_attrs": {
-        "compile_data_glob": [
-          "**"
-        ],
-        "crate_features": {
-          "common": [
-            "alloc",
-            "default",
-            "std"
-          ],
-          "selects": {}
-        },
-        "deps": {
-          "common": [
-            {
-              "id": "memchr 2.7.4",
-              "target": "memchr"
-            },
-            {
-              "id": "minimal-lexical 0.2.1",
-              "target": "minimal_lexical"
-            }
-          ],
-          "selects": {}
-        },
-        "edition": "2018",
-        "version": "7.1.3"
-      },
-      "license": "MIT",
-      "license_ids": [
-        "MIT"
-      ],
-      "license_file": "LICENSE"
     },
     "nu-ansi-term 0.46.0": {
       "name": "nu-ansi-term",
@@ -8197,14 +8280,14 @@
       ],
       "license_file": null
     },
-    "reactive_graph 0.1.7": {
+    "reactive_graph 0.2.0": {
       "name": "reactive_graph",
-      "version": "0.1.7",
+      "version": "0.2.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/reactive_graph/0.1.7/download",
-          "sha256": "9996b4c0f501d64a755ff3dfbe9276e9f834d105d7d45059ad4bd6d2a56477d0"
+          "url": "https://static.crates.io/crates/reactive_graph/0.2.0/download",
+          "sha256": "72a2b7d6c997a1d0024142726a6a044cd061827dd25709429fdc99ca294dedc8"
         }
       },
       "targets": [
@@ -8212,6 +8295,18 @@
           "Library": {
             "crate_name": "reactive_graph",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -8239,7 +8334,7 @@
         "deps": {
           "common": [
             {
-              "id": "any_spawner 0.2.0",
+              "id": "any_spawner 0.3.0",
               "target": "any_spawner"
             },
             {
@@ -8255,7 +8350,7 @@
               "target": "guardian"
             },
             {
-              "id": "hydration_context 0.2.0",
+              "id": "hydration_context 0.3.0",
               "target": "hydration_context"
             },
             {
@@ -8265,6 +8360,10 @@
             {
               "id": "pin-project-lite 0.2.16",
               "target": "pin_project_lite"
+            },
+            {
+              "id": "reactive_graph 0.2.0",
+              "target": "build_script_build"
             },
             {
               "id": "rustc-hash 2.0.0",
@@ -8283,7 +8382,7 @@
               "target": "slotmap"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
@@ -8301,7 +8400,27 @@
           }
         },
         "edition": "2021",
-        "version": "0.1.7"
+        "version": "0.2.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -8309,14 +8428,14 @@
       ],
       "license_file": null
     },
-    "reactive_stores 0.1.7": {
+    "reactive_stores 0.2.0": {
       "name": "reactive_stores",
-      "version": "0.1.7",
+      "version": "0.2.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/reactive_stores/0.1.7/download",
-          "sha256": "74c3d2a20d8edd8ac6628718209f743da86349d7f10a4458304666c2ddfc082e"
+          "url": "https://static.crates.io/crates/reactive_stores/0.2.0/download",
+          "sha256": "a19194e9cd482f92fa24fac9b96e0b0295af0b519b1ebc2df9f048ea95fff1e9"
         }
       },
       "targets": [
@@ -8341,11 +8460,15 @@
         "deps": {
           "common": [
             {
+              "id": "dashmap 6.1.0",
+              "target": "dashmap"
+            },
+            {
               "id": "guardian 1.2.0",
               "target": "guardian"
             },
             {
-              "id": "itertools 0.13.0",
+              "id": "itertools 0.14.0",
               "target": "itertools"
             },
             {
@@ -8353,12 +8476,16 @@
               "target": "or_poisoned"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
               "id": "rustc-hash 2.0.0",
               "target": "rustc_hash"
+            },
+            {
+              "id": "send_wrapper 0.6.0",
+              "target": "send_wrapper"
             }
           ],
           "selects": {}
@@ -8371,13 +8498,13 @@
               "target": "paste"
             },
             {
-              "id": "reactive_stores_macro 0.1.7",
+              "id": "reactive_stores_macro 0.2.0",
               "target": "reactive_stores_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.1.7"
+        "version": "0.2.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -8385,14 +8512,14 @@
       ],
       "license_file": null
     },
-    "reactive_stores_macro 0.1.7": {
+    "reactive_stores_macro 0.2.0": {
       "name": "reactive_stores_macro",
-      "version": "0.1.7",
+      "version": "0.2.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/reactive_stores_macro/0.1.7/download",
-          "sha256": "6d4d8e40112b8ee1424e5ec636fcbc9764c1a099e81f8fa818f6762b43cc10cd"
+          "url": "https://static.crates.io/crates/reactive_stores_macro/0.2.0/download",
+          "sha256": "69f5d6b557ce3b0ac9644faf1677b8f45253c02fa69e14acc55d9695955e4af9"
         }
       },
       "targets": [
@@ -8417,7 +8544,7 @@
         "deps": {
           "common": [
             {
-              "id": "convert_case 0.6.0",
+              "id": "convert_case 0.8.0",
               "target": "convert_case"
             },
             {
@@ -8440,7 +8567,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.7"
+        "version": "0.2.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -8882,6 +9009,54 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
+    "rustc_version 0.4.1": {
+      "name": "rustc_version",
+      "version": "0.4.1",
+      "package_url": "https://github.com/djc/rustc-version-rs",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/rustc_version/0.4.1/download",
+          "sha256": "cfcb3a22ef46e85b45de6ee7e79d063319ebb6594faafcf1c225ea92ab6e9b92"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "rustc_version",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "rustc_version",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "semver 1.0.26",
+              "target": "semver"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.4.1"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
     "rustversion 1.0.19": {
       "name": "rustversion",
       "version": "1.0.19",
@@ -9073,6 +9248,84 @@
         ],
         "edition": "2015",
         "version": "1.2.0"
+      },
+      "license": "MIT OR Apache-2.0",
+      "license_ids": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_file": "LICENSE-APACHE"
+    },
+    "semver 1.0.26": {
+      "name": "semver",
+      "version": "1.0.26",
+      "package_url": "https://github.com/dtolnay/semver",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/semver/1.0.26/download",
+          "sha256": "56e6fa9c48d24d85fb3de5ad847117517440f6beceb7798af16b4a87d616b8d0"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "semver",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "semver",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "deps": {
+          "common": [
+            {
+              "id": "semver 1.0.26",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.26"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ]
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -9378,14 +9631,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "serde_qs 0.13.0": {
+    "serde_qs 0.14.0": {
       "name": "serde_qs",
-      "version": "0.13.0",
+      "version": "0.14.0",
       "package_url": "https://github.com/samscott89/serde_qs",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/serde_qs/0.13.0/download",
-          "sha256": "cd34f36fe4c5ba9654417139a9b3a20d2e1de6012ee678ad14d240c22c78d8d6"
+          "url": "https://static.crates.io/crates/serde_qs/0.14.0/download",
+          "sha256": "8b417bedc008acbdf6d6b4bc482d29859924114bbe2650b7921fb68a261d0aa6"
         }
       },
       "targets": [
@@ -9424,14 +9677,14 @@
               "target": "serde"
             },
             {
-              "id": "thiserror 1.0.69",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.13.0"
+        "version": "0.14.0"
       },
       "license": "MIT/Apache-2.0",
       "license_ids": [
@@ -9494,14 +9747,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "server_fn 0.7.7": {
+    "server_fn 0.8.0": {
       "name": "server_fn",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/server_fn/0.7.7/download",
-          "sha256": "055476c2a42c9a98a69e3f0ce29b86aa3acbdef19a84e0523330f095097defcf"
+          "url": "https://static.crates.io/crates/server_fn/0.8.0/download",
+          "sha256": "e058e6709b0ffb2976e03230916219d1ad50746686681beaf9b42b1beca0e298"
         }
       },
       "targets": [
@@ -9526,18 +9779,23 @@
         "crate_features": {
           "common": [
             "browser",
-            "default",
-            "form-redirects",
-            "json",
-            "url"
+            "form-redirects"
           ],
           "selects": {}
         },
         "deps": {
           "common": [
             {
+              "id": "base64 0.22.1",
+              "target": "base64"
+            },
+            {
               "id": "bytes 1.9.0",
               "target": "bytes"
+            },
+            {
+              "id": "const-str 0.6.2",
+              "target": "const_str"
             },
             {
               "id": "const_format 0.2.33",
@@ -9584,15 +9842,15 @@
               "target": "serde_json"
             },
             {
-              "id": "serde_qs 0.13.0",
+              "id": "serde_qs 0.14.0",
               "target": "serde_qs"
             },
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             },
             {
-              "id": "throw_error 0.2.0",
+              "id": "throw_error 0.3.0",
               "target": "throw_error"
             },
             {
@@ -9626,13 +9884,17 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "server_fn_macro_default 0.7.7",
+              "id": "rustversion 1.0.19",
+              "target": "rustversion"
+            },
+            {
+              "id": "server_fn_macro_default 0.8.0",
               "target": "server_fn_macro_default"
             }
           ],
           "selects": {}
         },
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -9640,14 +9902,14 @@
       ],
       "license_file": null
     },
-    "server_fn_macro 0.7.7": {
+    "server_fn_macro 0.8.0": {
       "name": "server_fn_macro",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/server_fn_macro/0.7.7/download",
-          "sha256": "e65737414a9583ce3b43dddd4e5dfb33fe385a6933ed79a9b539b8eb0767cd07"
+          "url": "https://static.crates.io/crates/server_fn_macro/0.8.0/download",
+          "sha256": "24ed61a2cbd3d1fd9cd84b5eedcf9168ace43da68273b5e3055e5aafc0b0860a"
         }
       },
       "targets": [
@@ -9655,6 +9917,18 @@
           "Library": {
             "crate_name": "server_fn_macro",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -9682,7 +9956,7 @@
               "target": "const_format"
             },
             {
-              "id": "convert_case 0.6.0",
+              "id": "convert_case 0.8.0",
               "target": "convert_case"
             },
             {
@@ -9692,6 +9966,10 @@
             {
               "id": "quote 1.0.37",
               "target": "quote"
+            },
+            {
+              "id": "server_fn_macro 0.8.0",
+              "target": "build_script_build"
             },
             {
               "id": "syn 2.0.87",
@@ -9711,7 +9989,27 @@
           },
           "selects": {}
         },
-        "version": "0.7.7"
+        "version": "0.8.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -9719,14 +10017,14 @@
       ],
       "license_file": null
     },
-    "server_fn_macro_default 0.7.7": {
+    "server_fn_macro_default 0.8.0": {
       "name": "server_fn_macro_default",
-      "version": "0.7.7",
+      "version": "0.8.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/server_fn_macro_default/0.7.7/download",
-          "sha256": "563909a43390341403ab76fbc33fde306712613da02244e692eabeae8ffde949"
+          "url": "https://static.crates.io/crates/server_fn_macro_default/0.8.0/download",
+          "sha256": "36c87b8d55da875a8b16fbe4992cc0ab6d2524b1fb1a0e488f16922f7c46b82f"
         }
       },
       "targets": [
@@ -9751,7 +10049,7 @@
         "deps": {
           "common": [
             {
-              "id": "server_fn_macro 0.7.7",
+              "id": "server_fn_macro 0.8.0",
               "target": "server_fn_macro"
             },
             {
@@ -9762,7 +10060,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.7.7"
+        "version": "0.8.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -10368,14 +10666,14 @@
       ],
       "license_file": null
     },
-    "tachys 0.1.7": {
+    "tachys 0.2.0": {
       "name": "tachys",
-      "version": "0.1.7",
+      "version": "0.2.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/tachys/0.1.7/download",
-          "sha256": "4c05fed41ed4e334257090500510df21bb1611680c0cfd3be14acec7ffdf3d95"
+          "url": "https://static.crates.io/crates/tachys/0.2.0/download",
+          "sha256": "cd309a35ec8282f0793ff8b58ebd4764779fd056f447c58a026331443b77ddae"
         }
       },
       "targets": [
@@ -10383,6 +10681,18 @@
           "Library": {
             "crate_name": "tachys",
             "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
             "srcs": {
               "allow_empty": true,
               "include": [
@@ -10413,7 +10723,7 @@
         "deps": {
           "common": [
             {
-              "id": "any_spawner 0.2.0",
+              "id": "any_spawner 0.3.0",
               "target": "any_spawner"
             },
             {
@@ -10425,12 +10735,12 @@
               "target": "drain_filter_polyfill"
             },
             {
-              "id": "dyn-clone 1.0.18",
-              "target": "dyn_clone"
-            },
-            {
               "id": "either_of 0.1.5",
               "target": "either_of"
+            },
+            {
+              "id": "erased 0.1.2",
+              "target": "erased"
             },
             {
               "id": "futures 0.3.31",
@@ -10445,7 +10755,7 @@
               "target": "indexmap"
             },
             {
-              "id": "itertools 0.13.0",
+              "id": "itertools 0.14.0",
               "target": "itertools"
             },
             {
@@ -10477,11 +10787,11 @@
               "target": "parking_lot"
             },
             {
-              "id": "reactive_graph 0.1.7",
+              "id": "reactive_graph 0.2.0",
               "target": "reactive_graph"
             },
             {
-              "id": "reactive_stores 0.1.7",
+              "id": "reactive_stores 0.2.0",
               "target": "reactive_stores"
             },
             {
@@ -10497,7 +10807,11 @@
               "target": "slotmap"
             },
             {
-              "id": "throw_error 0.2.0",
+              "id": "tachys 0.2.0",
+              "target": "build_script_build"
+            },
+            {
+              "id": "throw_error 0.3.0",
               "target": "throw_error"
             },
             {
@@ -10529,7 +10843,27 @@
           ],
           "selects": {}
         },
-        "version": "0.1.7"
+        "version": "0.2.0"
+      },
+      "build_script_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "compile_data_glob_excludes": [
+          "**/*.rs"
+        ],
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "rustc_version 0.4.1",
+              "target": "rustc_version"
+            }
+          ],
+          "selects": {}
+        }
       },
       "license": "MIT",
       "license_ids": [
@@ -10617,14 +10951,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "thiserror 2.0.11": {
+    "thiserror 2.0.12": {
       "name": "thiserror",
-      "version": "2.0.11",
+      "version": "2.0.12",
       "package_url": "https://github.com/dtolnay/thiserror",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/thiserror/2.0.11/download",
-          "sha256": "d452f284b73e6d76dd36758a0c8684b1d5be31f92b89d07fd5822175732206fc"
+          "url": "https://static.crates.io/crates/thiserror/2.0.12/download",
+          "sha256": "567b8a2dae586314f7be2a752ec7474332959c6460e02bde30d702a66d488708"
         }
       },
       "targets": [
@@ -10668,7 +11002,7 @@
         "deps": {
           "common": [
             {
-              "id": "thiserror 2.0.11",
+              "id": "thiserror 2.0.12",
               "target": "build_script_build"
             }
           ],
@@ -10678,13 +11012,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "thiserror-impl 2.0.11",
+              "id": "thiserror-impl 2.0.12",
               "target": "thiserror_impl"
             }
           ],
           "selects": {}
         },
-        "version": "2.0.11"
+        "version": "2.0.12"
       },
       "build_script_attrs": {
         "compile_data_glob": [
@@ -10760,14 +11094,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "thiserror-impl 2.0.11": {
+    "thiserror-impl 2.0.12": {
       "name": "thiserror-impl",
-      "version": "2.0.11",
+      "version": "2.0.12",
       "package_url": "https://github.com/dtolnay/thiserror",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/thiserror-impl/2.0.11/download",
-          "sha256": "26afc1baea8a989337eeb52b6e72a039780ce45c3edfcc9c5b9d112feeb173c2"
+          "url": "https://static.crates.io/crates/thiserror-impl/2.0.12/download",
+          "sha256": "7f7cf42b4507d8ea322120659672cf1b9dbb93f8f2d4ecfd6e51350ff5b17a1d"
         }
       },
       "targets": [
@@ -10807,7 +11141,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "2.0.11"
+        "version": "2.0.12"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -10868,14 +11202,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "throw_error 0.2.0": {
+    "throw_error 0.3.0": {
       "name": "throw_error",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "package_url": "https://github.com/leptos-rs/leptos",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/throw_error/0.2.0/download",
-          "sha256": "e4ef8bf264c6ae02a065a4a16553283f0656bd6266fc1fcb09fd2e6b5e91427b"
+          "url": "https://static.crates.io/crates/throw_error/0.3.0/download",
+          "sha256": "41e42a6afdde94f3e656fae18f837cb9bbe500a5ac5de325b09f3ec05b9c28e3"
         }
       },
       "targets": [
@@ -10907,7 +11241,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.2.0"
+        "version": "0.3.0"
       },
       "license": "MIT",
       "license_ids": [
@@ -11515,8 +11849,6 @@
         ],
         "crate_features": {
           "common": [
-            "default",
-            "display",
             "parse"
           ],
           "selects": {}
@@ -11637,7 +11969,6 @@
         ],
         "crate_features": {
           "common": [
-            "display",
             "parse",
             "serde"
           ],
@@ -12066,14 +12397,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "typed-builder 0.20.0": {
+    "typed-builder 0.21.0": {
       "name": "typed-builder",
-      "version": "0.20.0",
+      "version": "0.21.0",
       "package_url": "https://github.com/idanarye/rust-typed-builder",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/typed-builder/0.20.0/download",
-          "sha256": "7e14ed59dc8b7b26cacb2a92bad2e8b1f098806063898ab42a3bd121d7d45e75"
+          "url": "https://static.crates.io/crates/typed-builder/0.21.0/download",
+          "sha256": "ce63bcaf7e9806c206f7d7b9c1f38e0dce8bb165a80af0898161058b19248534"
         }
       },
       "targets": [
@@ -12099,13 +12430,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "typed-builder-macro 0.20.0",
+              "id": "typed-builder-macro 0.21.0",
               "target": "typed_builder_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.20.0"
+        "version": "0.21.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -12114,14 +12445,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "typed-builder-macro 0.20.0": {
+    "typed-builder-macro 0.21.0": {
       "name": "typed-builder-macro",
-      "version": "0.20.0",
+      "version": "0.21.0",
       "package_url": "https://github.com/idanarye/rust-typed-builder",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/typed-builder-macro/0.20.0/download",
-          "sha256": "560b82d656506509d43abe30e0ba64c56b1953ab3d4fe7ba5902747a7a3cedd5"
+          "url": "https://static.crates.io/crates/typed-builder-macro/0.21.0/download",
+          "sha256": "60d8d828da2a3d759d3519cdf29a5bac49c77d039ad36d0782edadbf9cd5415b"
         }
       },
       "targets": [
@@ -12161,7 +12492,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.20.0"
+        "version": "0.21.0"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -14525,6 +14856,52 @@
       ],
       "license_file": "LICENSE-MIT"
     },
+    "winnow 0.7.9": {
+      "name": "winnow",
+      "version": "0.7.9",
+      "package_url": "https://github.com/winnow-rs/winnow",
+      "repository": {
+        "Http": {
+          "url": "https://static.crates.io/crates/winnow/0.7.9/download",
+          "sha256": "d9fb597c990f03753e08d3c29efbfcf2019a003b4bf4ba19225c158e1549f0f3"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "winnow",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "allow_empty": true,
+              "include": [
+                "**/*.rs"
+              ]
+            }
+          }
+        }
+      ],
+      "library_target_name": "winnow",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": {
+          "common": [
+            "alloc",
+            "default",
+            "std"
+          ],
+          "selects": {}
+        },
+        "edition": "2021",
+        "version": "0.7.9"
+      },
+      "license": "MIT",
+      "license_ids": [
+        "MIT"
+      ],
+      "license_file": "LICENSE-MIT"
+    },
     "xxhash-rust 0.8.12": {
       "name": "xxhash-rust",
       "version": "0.8.12",
@@ -14896,7 +15273,6 @@
     "console_error_panic_hook 0.1.7",
     "console_log 1.0.0",
     "const_format_proc_macros 0.2.33",
-    "either_of 0.1.5",
     "futures 0.3.31",
     "futures-core 0.3.31",
     "futures-util 0.3.31",
@@ -14904,10 +15280,10 @@
     "gloo-net 0.4.0",
     "humantime 2.1.0",
     "junit-parser 1.0.0",
-    "leptos 0.7.7",
-    "leptos_dom 0.7.7",
-    "leptos_meta 0.7.7",
-    "leptos_router 0.7.7",
+    "leptos 0.8.0",
+    "leptos_dom 0.8.0",
+    "leptos_meta 0.8.0",
+    "leptos_router 0.8.0",
     "log 0.4.20",
     "serde 1.0.193",
     "time 0.3.37",
