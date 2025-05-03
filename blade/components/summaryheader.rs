@@ -1,5 +1,7 @@
 use crate::components::statusicon::StatusIcon;
 use leptos::prelude::*;
+use leptos_router::components::A;
+use leptos_router::hooks::use_location;
 use time::macros::format_description;
 
 #[allow(non_snake_case)]
@@ -90,6 +92,7 @@ pub fn SummaryHeader() -> impl IntoView {
         let cmd = ucfirst(&invocation.read().command);
         let patterns = invocation.read().pattern.join(",");
         let start = format_time(&invocation.read().start);
+        let location = use_location();
         let duration = invocation
             .read()
             .end
@@ -113,10 +116,11 @@ pub fn SummaryHeader() -> impl IntoView {
                         <span>@</span>
                         <span class="text-grey-400 text-sm">{start}</span>
                     </div>
+
                     <div class="flex gap-2 items-center">
-                        {duration} <a class="text-blue-500 underline" href="/./details">
-                            (details)
-                        </a>
+                        {duration} <A href=move|| location.pathname.read().strip_suffix("/details").unwrap_or("details").to_string()>
+                            <span class="text-blue-500 underline">(details)</span>
+                        </A>
                     </div>
                 </div>
                 <div class="p-4">
