@@ -1,12 +1,10 @@
-use leptos::prelude::*;
-
-use crate::components::accordion::*;
-use crate::components::card::Card;
-use crate::components::list::*;
-use crate::components::summaryheader::SummaryHeader;
 use std::collections::HashMap;
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
+
+use leptos::prelude::*;
+
+use crate::components::{accordion::*, card::Card, list::*, summaryheader::SummaryHeader};
 
 #[server]
 pub async fn get_options(uuid: String) -> Result<state::BuildOptions, ServerFnError> {

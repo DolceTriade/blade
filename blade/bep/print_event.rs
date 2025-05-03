@@ -24,7 +24,7 @@ impl crate::EventHandler for Handler {
         let oneof = match desc.oneofs().next() {
             None => {
                 return Ok(());
-            }
+            },
             Some(o) => o,
         };
         let _ = oneof.fields().try_for_each(|f| {

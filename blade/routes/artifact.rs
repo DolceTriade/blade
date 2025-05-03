@@ -1,8 +1,7 @@
-use std::io::{prelude::Read, Cursor};
+use std::io::{Cursor, prelude::Read};
 
 use leptos::prelude::*;
-use leptos_router::hooks::use_query;
-use leptos_router::params::Params;
+use leptos_router::{hooks::use_query, params::Params};
 
 use crate::components::shellout::ShellOut;
 
@@ -12,9 +11,7 @@ struct ArtifactParams {
     zip: Option<String>,
 }
 
-fn stringify(e: impl std::fmt::Debug) -> String {
-    format!("{e:#?}")
-}
+fn stringify(e: impl std::fmt::Debug) -> String { format!("{e:#?}") }
 
 #[component]
 pub fn Artifact() -> impl IntoView {

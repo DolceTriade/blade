@@ -1,11 +1,11 @@
+use std::{collections::HashMap, fs};
+
 use anyhow::{Context, Result};
 use lazy_static::lazy_static;
 use prost::Message;
 use prost_reflect::DescriptorPool;
 use prost_types::FileDescriptorSet;
 use runfiles::Runfiles;
-use std::collections::HashMap;
-use std::fs;
 use walkdir::WalkDir;
 
 lazy_static! {
@@ -43,9 +43,10 @@ pub fn init_global_descriptor_pool() -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use build_event_stream_proto::*;
     use prost_reflect::ReflectMessage;
+
+    use super::*;
 
     #[test]
     fn test_load() {

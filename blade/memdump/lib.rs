@@ -1,6 +1,9 @@
-use anyhow::{anyhow, Context};
-use std::ffi::{c_char, CString};
-use std::path::PathBuf;
+use std::{
+    ffi::{CString, c_char},
+    path::PathBuf,
+};
+
+use anyhow::{Context, anyhow};
 use tokio::io::AsyncReadExt;
 
 #[cfg(test)]

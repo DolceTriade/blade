@@ -1,7 +1,8 @@
 pub mod duration {
+    use std::time::Duration;
+
     use anyhow::anyhow;
     use duration_proto::google::protobuf::Duration as DurationProto;
-    use std::time::Duration;
 
     #[allow(dead_code)]
     pub fn from_proto(d: &DurationProto) -> anyhow::Result<std::time::Duration> {
@@ -29,9 +30,9 @@ pub mod duration {
 }
 
 pub mod timestamp {
+    use std::time::{Duration, UNIX_EPOCH};
+
     use anyhow::anyhow;
-    use std::time::Duration;
-    use std::time::UNIX_EPOCH;
     use timestamp_proto::google::protobuf::Timestamp as TimestampProto;
 
     #[allow(dead_code)]

@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
-use anyhow::{anyhow, Context};
-use diesel::prelude::*;
-use diesel::r2d2::ConnectionManager;
+use anyhow::{Context, anyhow};
+use diesel::{prelude::*, r2d2::ConnectionManager};
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use diesel_tracing::sqlite::InstrumentedSqliteConnection;
 use r2d2::PooledConnection;
@@ -397,13 +396,13 @@ impl state::DB for Sqlite {
                     return;
                 };
                 opts.build_metadata.insert(k.to_string(), v.to_string());
-            }
+            },
             _ => {
                 opts.structured
                     .entry(kind)
                     .or_insert_with(Vec::new)
                     .push(keyval);
-            }
+            },
         });
         Ok(opts)
     }

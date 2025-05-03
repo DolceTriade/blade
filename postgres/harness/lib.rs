@@ -1,5 +1,4 @@
-use std::io::Write;
-use std::{fs::OpenOptions, net::TcpListener};
+use std::{fs::OpenOptions, io::Write, net::TcpListener};
 
 use anyhow::anyhow;
 
@@ -11,13 +10,9 @@ pub struct PgHarness {
 }
 
 impl PgHarness {
-    pub fn uri(&self) -> String {
-        format!("postgres://localhost:{}/{}", self.port, self.db_name)
-    }
+    pub fn uri(&self) -> String { format!("postgres://localhost:{}/{}", self.port, self.db_name) }
 
-    pub fn data_path(&self) -> std::path::PathBuf {
-        self.data_path.clone()
-    }
+    pub fn data_path(&self) -> std::path::PathBuf { self.data_path.clone() }
 
     pub fn close(&mut self) -> anyhow::Result<()> {
         self.postgres.wait()?;

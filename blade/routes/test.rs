@@ -1,19 +1,22 @@
-use leptos::prelude::*;
-use leptos_router::components::Redirect;
-use leptos_router::hooks::use_location;
-use leptos_router::hooks::use_query;
-use leptos_router::params::Params;
-use leptos_router::NavigateOptions;
-
-use crate::components::card::Card;
-use crate::components::shellout::ShellOut;
-use crate::components::testartifactlist::TestArtifactList;
-use crate::components::testresults::TestResults;
-use crate::components::testrunlist::TestRunList;
-use crate::components::testsummary::TestSummary;
-
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
+
+use leptos::prelude::*;
+use leptos_router::{
+    NavigateOptions,
+    components::Redirect,
+    hooks::{use_location, use_query},
+    params::Params,
+};
+
+use crate::components::{
+    card::Card,
+    shellout::ShellOut,
+    testartifactlist::TestArtifactList,
+    testresults::TestResults,
+    testrunlist::TestRunList,
+    testsummary::TestSummary,
+};
 
 #[server]
 pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError<String>> {
@@ -29,7 +32,7 @@ pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError<String>>
                 .to_file_path()
                 .map_err(|e| ServerFnError::<String>::ServerError(format!("{e:#?}")))?;
             std::fs::read(path).map_err(|_| ServerFnError::<String>::ServerError("bad path".into()))
-        }
+        },
         "bytestream" | "http" | "https" => global
             .bytestream_client
             .download_file(&uri)
@@ -101,7 +104,7 @@ pub fn Test() -> impl IntoView {
                     return Ok(test.clone());
                 }
                 Err(format!("{} not found", target).to_string())
-            }
+            },
             None => Err("No target specified in URL".to_string()),
         },
         Err(e) => Err(format!("No target specified in the URL: {e}").to_string()),

@@ -1,10 +1,11 @@
-use actix_web::*;
-use anyhow::Context;
-use futures::prelude::future::FutureExt;
 use std::{
     net::SocketAddr,
     sync::{Arc, Mutex},
 };
+
+use actix_web::*;
+use anyhow::Context;
+use futures::prelude::future::FutureExt;
 use tracing::instrument;
 
 #[instrument]

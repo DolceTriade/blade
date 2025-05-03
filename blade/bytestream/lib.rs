@@ -1,11 +1,9 @@
-use futures::StreamExt;
 use std::collections::HashMap;
 
 use bytestream_proto::google::bytestream::*;
+use futures::StreamExt;
 
-fn stringify<E: std::fmt::Debug>(e: E) -> String {
-    format!("{e:#?}")
-}
+fn stringify<E: std::fmt::Debug>(e: E) -> String { format!("{e:#?}") }
 pub struct Client {
     overrides: HashMap<String, String>,
 }
@@ -43,7 +41,7 @@ impl Client {
             match stream.next().await.as_mut() {
                 Some(Ok(r)) => {
                     v.append(&mut r.data);
-                }
+                },
                 Some(Err(e)) => return Err(stringify(e)),
                 _ => break,
             }
@@ -53,24 +51,20 @@ impl Client {
 }
 
 impl Default for Client {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 #[cfg(test)]
 mod test {
-    use std::future::Future;
-    use std::net::SocketAddr;
-    use tokio::net::TcpListener;
-    use tokio::sync::mpsc;
-    use tokio_stream::wrappers::ReceiverStream;
-    use tokio_stream::wrappers::TcpListenerStream;
-    use tokio_stream::StreamExt;
-    use tonic::transport::Server;
-    use tonic::{async_trait, Request, Response, Status};
+    use std::{future::Future, net::SocketAddr};
 
     use bytestream_proto::google::bytestream::*;
+    use tokio::{net::TcpListener, sync::mpsc};
+    use tokio_stream::{
+        StreamExt,
+        wrappers::{ReceiverStream, TcpListenerStream},
+    };
+    use tonic::{Request, Response, Status, async_trait, transport::Server};
 
     struct ServerStub {}
 
@@ -97,12 +91,13 @@ mod test {
                 while let Some(item) = stream.next().await {
                     match tx.send(Result::<_, Status>::Ok(item)).await {
                         Ok(_) => {
-                            // item (server response) was queued to be send to client
-                        }
+                            // item (server response) was queued to be send to
+                            // client
+                        },
                         Err(_item) => {
                             // output_stream was build from rx and both are dropped
                             break;
-                        }
+                        },
                     }
                 }
             });

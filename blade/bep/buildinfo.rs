@@ -26,7 +26,7 @@ impl crate::EventHandler for Handler {
                 };
                 db.upsert_shallow_invocation(&invocation)
                     .context("failed to insert invocation")?;
-            }
+            },
             Some(build_event_stream::build_event::Payload::Expanded(_)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
                 let pattern = event
@@ -47,8 +47,8 @@ impl crate::EventHandler for Handler {
                         Ok(())
                     }),
                 )?;
-            }
-            _ => {}
+            },
+            _ => {},
         }
 
         Ok(())

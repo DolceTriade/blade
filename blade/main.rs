@@ -1,21 +1,22 @@
-use std::fmt::Write;
-use std::net::SocketAddr;
-use std::sync::Mutex;
+use std::{fmt::Write, io::IsTerminal, net::SocketAddr, sync::Mutex};
 
-use actix_web::body::MessageBody;
-use actix_web::dev::ServiceResponse;
-use actix_web::http::{Method, StatusCode};
+use actix_web::{
+    body::MessageBody,
+    dev::ServiceResponse,
+    http::{Method, StatusCode},
+};
 use cfg_if::cfg_if;
 use prometheus_client::encoding::{EncodeLabelSet, EncodeLabelValue};
-use std::io::IsTerminal;
-use tracing::Span;
-use tracing::{instrument, level_filters::LevelFilter};
+use tracing::{Span, instrument, level_filters::LevelFilter};
 use tracing_actix_web::{DefaultRootSpanBuilder, RootSpanBuilder};
-use tracing_subscriber::fmt::format::FmtSpan;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::Registry;
 use tracing_subscriber::{
-    prelude::__tracing_subscriber_SubscriberExt, reload::Handle, EnvFilter, Layer,
+    EnvFilter,
+    Layer,
+    Registry,
+    fmt::format::FmtSpan,
+    prelude::__tracing_subscriber_SubscriberExt,
+    reload::Handle,
+    util::SubscriberInitExt,
 };
 #[allow(clippy::empty_docs)]
 pub mod components;

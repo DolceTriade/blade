@@ -1,5 +1,4 @@
-use leptos::html;
-use leptos::prelude::*;
+use leptos::{html, prelude::*};
 
 #[allow(non_snake_case)]
 #[component]

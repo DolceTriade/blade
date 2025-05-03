@@ -1,29 +1,25 @@
-use anyhow::Context;
-use anyhow::Result;
+use std::{
+    fmt::Write,
+    net::SocketAddr,
+    sync::{Arc, Mutex, atomic::AtomicU32},
+};
+
+use anyhow::{Context, Result};
 use build_event_stream_proto::*;
 use build_proto::google::devtools::build::v1::*;
 use lazy_static::lazy_static;
-use prometheus_client::encoding::EncodeLabelSet;
-use prometheus_client::encoding::EncodeLabelValue;
-use prometheus_client::metrics::counter::Counter;
-use prometheus_client::metrics::family::Family;
-use prometheus_client::metrics::gauge::Gauge;
+use prometheus_client::{
+    encoding::{EncodeLabelSet, EncodeLabelValue},
+    metrics::{counter::Counter, family::Family, gauge::Gauge},
+};
 use prost::Message;
 use regex::Regex;
 use scopeguard::defer;
 use state::DBManager;
-use std::fmt::Write;
-use std::net::SocketAddr;
-use std::sync::atomic::AtomicU32;
-use std::sync::Arc;
-use std::sync::Mutex;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
-use tonic::{transport::Server, Response, Status};
-use tracing::instrument;
-use tracing::span;
-use tracing::Instrument;
-use tracing::Level;
+use tonic::{Response, Status, transport::Server};
+use tracing::{Instrument, Level, instrument, span};
 
 mod buildinfo;
 mod options;
@@ -76,8 +72,8 @@ fn unexpected_cleanup_session(db_mgr: &dyn DBManager, invocation_id: &str) -> an
             match i.status {
                 state::Status::InProgress | state::Status::Unknown => {
                     i.status = state::Status::Fail
-                }
-                _ => {}
+                },
+                _ => {},
             }
             i.end = Some(std::time::SystemTime::now());
             Ok(())
@@ -390,7 +386,5 @@ impl EncodeLabelValue for StatusCode {
 }
 
 impl From<tonic::Code> for StatusCode {
-    fn from(value: tonic::Code) -> Self {
-        Self(value)
-    }
+    fn from(value: tonic::Code) -> Self { Self(value) }
 }

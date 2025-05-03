@@ -1,14 +1,18 @@
-use crate::components::nav::Nav;
-use crate::routes::artifact::Artifact;
-use crate::routes::details::Details;
-use crate::routes::empty::Empty;
-use crate::routes::invocation::Invocation;
-use crate::routes::summary::Summary;
-use crate::routes::test::Test;
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::components::*;
-use leptos_router::path;
+use leptos_router::{components::*, path};
+
+use crate::{
+    components::nav::Nav,
+    routes::{
+        artifact::Artifact,
+        details::Details,
+        empty::Empty,
+        invocation::Invocation,
+        summary::Summary,
+        test::Test,
+    },
+};
 
 #[component]
 pub fn App() -> impl IntoView {

@@ -88,9 +88,7 @@ pub struct Target {
 }
 
 impl Target {
-    pub fn gen_id(invocation_id: &str, name: &str) -> String {
-        [invocation_id, name].join("|")
-    }
+    pub fn gen_id(invocation_id: &str, name: &str) -> String { [invocation_id, name].join("|") }
 
     pub fn from_state(invocation_id: &str, t: &state::Target) -> anyhow::Result<Self> {
         Ok(Self {
@@ -132,9 +130,7 @@ pub struct Test {
 }
 
 impl Test {
-    pub fn gen_id(invocation_id: &str, name: &str) -> String {
-        [invocation_id, name].join("|")
-    }
+    pub fn gen_id(invocation_id: &str, name: &str) -> String { [invocation_id, name].join("|") }
 
     pub fn from_state(invocation_id: &str, t: &state::Test) -> anyhow::Result<Self> {
         Ok(Self {

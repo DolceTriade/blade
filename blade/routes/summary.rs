@@ -1,9 +1,11 @@
 use leptos::prelude::*;
 
-use crate::components::card::Card;
-use crate::components::shellout::ShellOut;
-use crate::components::summaryheader::SummaryHeader;
-use crate::components::targetlist::TargetList;
+use crate::components::{
+    card::Card,
+    shellout::ShellOut,
+    summaryheader::SummaryHeader,
+    targetlist::TargetList,
+};
 
 #[allow(non_snake_case)]
 #[component]

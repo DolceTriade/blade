@@ -1,8 +1,6 @@
 use anyhow::Context;
-use diesel::r2d2::ConnectionManager;
-use diesel::r2d2::Pool;
-use diesel_tracing::pg::InstrumentedPgConnection;
-use diesel_tracing::sqlite::InstrumentedSqliteConnection;
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel_tracing::{pg::InstrumentedPgConnection, sqlite::InstrumentedSqliteConnection};
 
 pub struct SqliteManager {
     pool: Pool<ConnectionManager<InstrumentedSqliteConnection>>,
