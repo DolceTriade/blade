@@ -124,7 +124,7 @@ pub fn SummaryHeader() -> impl IntoView {
                     </div>
                 </div>
                 <div class="p-4">
-                    <StatusIcon class="h-8 w-8" status=status.into()/>
+                    <StatusIcon class="h-8 w-8" status=status/>
                 </div>
                 <SummaryItem num=num_targets suffix="Total Target"/>
                 <SummaryItem num=passing_targets suffix="Passing Target"/>

@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use leptos::prelude::*;
 
 use crate::components::accordion::*;

@@ -10,8 +10,7 @@ pub fn StatusIcon(
     #[prop(into, default = "".into())] class: Signal<String>,
 ) -> impl IntoView {
     move || {
-        let cc = class.clone();
-        let c = move || cc.get();
+        let c = move || class.get();
         match status.get() {
             state::Status::Success => {
                  view! {

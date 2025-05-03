@@ -244,7 +244,7 @@ cfg_if! {
                 let leptos_options = conf.leptos_options.clone();
                 let rt_state = actix_state.clone();
                 let routes = generate_route_list(App);
-                let app = App::new()
+                App::new()
                     // serve JS/WASM/CSS and other assets from `/assets`
                     .service(Files::new("/assets", assets.clone()))
                     // serve the favicon from /favicon.ico
@@ -269,8 +269,7 @@ cfg_if! {
                             </html>
                         }})
                     .app_data(web::Data::new(conf.leptos_options.to_owned()))
-                    .wrap(TracingLogger::<BladeRootSpanBuilder>::new());
-                app
+                    .wrap(TracingLogger::<BladeRootSpanBuilder>::new())
             })
             .bind(&addr)?
             .run();
@@ -363,8 +362,8 @@ cfg_if! {
             // pre-formatting errors is a workaround for https://github.com/tokio-rs/tracing/issues/1565
             let display = format!("{response_error}");
             let debug = format!("{response_error:?}");
-            span.record("exception.message", &tracing::field::display(display));
-            span.record("exception.details", &tracing::field::display(debug));
+            span.record("exception.message", tracing::field::display(display));
+            span.record("exception.details", tracing::field::display(debug));
             let code: i32 = status_code.as_u16().into();
 
             span.record("http.status_code", code);

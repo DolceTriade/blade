@@ -100,13 +100,15 @@ pub fn Test() -> impl IntoView {
                 if let Some(test) = invocation.read().tests.get(target) {
                     return Ok(test.clone());
                 }
-                return Err(format!("{} not found", target).to_string());
+                Err(format!("{} not found", target).to_string())
             }
             None => {
-                return Err("No target specified in URL".to_string());
+                Err("No target specified in URL".to_string())
             }
         },
-        Err(e) => return Err(format!("No target specified in the URL: {e}").to_string()),
+        Err(e) => {
+            Err(format!("No target specified in the URL: {e}").to_string())
+        },
     });
     let run = Memo::new(move |_| params.read().as_ref().ok().and_then(|params| params.run));
     let shard = Memo::new(move |_| params.read().as_ref().ok().and_then(|params| params.shard));
@@ -119,9 +121,9 @@ pub fn Test() -> impl IntoView {
     });
 
     let test_run = Memo::new(move |_| {
-        let run = run.read().clone();
-        let shard = shard.read().clone();
-        let attempt = attempt.read().clone();
+        let run = *run.read();
+        let shard = *shard.read();
+        let attempt = *attempt.read();
         let test = test.read();
         let test = test.as_ref();
         if run.is_none() || shard.is_none() || attempt.is_none() {
@@ -250,7 +252,7 @@ pub fn Test() -> impl IntoView {
                             }
                                 .into_any()
                         }
-                        Err(e) => view! { <div>{format!("{e}")}</div> }.into_any(),
+                        Err(e) => view! { <div>{e.to_string()}</div> }.into_any(),
                     }}
 
                 </div>

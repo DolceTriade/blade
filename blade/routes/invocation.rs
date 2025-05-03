@@ -5,7 +5,6 @@ use leptos_router::nested_router::Outlet;
 use leptos_router::params::Params;
 
 use anyhow::anyhow;
-use anyhow::Context;
 
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
@@ -57,7 +56,7 @@ pub fn Invocation() -> impl IntoView {
             {move || {
                 res.with(|i| match i {
                     None => view! { <div>"Loading..."</div> }.into_any(),
-                    Some(i) => match &*i {
+                    Some(i) => match i {
                         Ok(i) => {
                             invocation.set(i.clone());
                             view! { <Outlet/> }.into_any()

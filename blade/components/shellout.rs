@@ -11,10 +11,9 @@ pub fn scroll_bottom(el: web_sys::HtmlElement) {
 #[component]
 pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
     let nr = NodeRef::<Div>::new();
-    let t = text.clone();
     Effect::new(move |_| {
         // Empty callback so this is called on update.
-        t.with(|_| {});
+        text.with(|_| {});
         if let Some(nr) = nr.get() {
             scroll_bottom(nr.into());
         }
