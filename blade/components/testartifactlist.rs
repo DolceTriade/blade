@@ -1,6 +1,4 @@
 use leptos::prelude::*;
-use leptos_router::components::A;
-
 use crate::components::list::*;
 
 #[derive(Debug, Clone)]
@@ -64,16 +62,16 @@ pub fn TestArtifactList() -> impl IntoView {
                                     key=move |r: &UndeclaredOutput| r.name.clone()
                                     children=move |r| {
                                         let query = format!(
-                                            "../artifact?{}",
+                                            "artifact?{}",
                                             url_escape::encode_query(
                                                 &format!("uri={}&zip={}", r.uri, r.name),
                                             ),
                                         );
                                         view! {
                                             <ListItem hide=Signal::derive(|| false)>
-                                                <A href=query>
+                                                <a href=query>
                                                     {format!("{} -- ({} bytes)", r.name, r.size)}
-                                                </A>
+                                                </a>
                                             </ListItem>
                                         }
                                     }
@@ -102,7 +100,7 @@ pub fn TestArtifactList() -> impl IntoView {
                 key=move |r| r.1.uri.clone()
                 children=move |r| {
                     let query = format!(
-                        "../artifact?{}",
+                        "artifact?{}",
                         url_escape::encode_query(&format!("uri={}", r.1.uri)),
                     );
                     view! {
