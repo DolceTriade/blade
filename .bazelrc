@@ -7,7 +7,5 @@ import %workspace%/.bazel-lib/bazelrc/clippy.bazelrc
 import %workspace%/.bazel-lib/bazelrc/osx.bazelrc
 import %workspace%/.bazel-lib/bazelrc/release.bazelrc
 
-common --noenable_bzlmod
-
 try-import %workspace%/.bazelenvrc
 try-import %workspace%/user.bazelrc

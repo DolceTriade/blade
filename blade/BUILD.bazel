@@ -1,4 +1,4 @@
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_load")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
 load("//nix/bazel:runfiles.bzl", "runfiles")
@@ -132,7 +132,7 @@ pkg_tar(
 
 oci_image(
     name = "blade_image",
-    base = "@distroless_base",
+    base = "@distroless_base_linux_amd64",
     entrypoint = ["/app/blade/blade"],
     tags = ["noosx"],
     tars = [
@@ -142,8 +142,8 @@ oci_image(
     workdir = "/app/blade/blade.runfiles/blade",
 )
 
-oci_tarball(
-    name = "blade_image_tarball",
+oci_load(
+    name = "blade_image_load",
     image = ":blade_image",
     repo_tags = ["ghcr.io/dolcetriade/blade:latest"],
     tags = ["noosx"],

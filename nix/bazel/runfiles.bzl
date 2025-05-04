@@ -7,10 +7,10 @@ See https://github.com/bazelbuild/rules_pkg/issues/153
 """
 
 load("@rules_pkg//pkg:providers.bzl", "PackageFilegroupInfo", "PackageFilesInfo", "PackageSymlinkInfo")
-load("@aspect_bazel_lib//lib:paths.bzl", "to_manifest_path")
+load("@aspect_bazel_lib//lib:paths.bzl", "to_rlocation_path")
 
 def _runfile_path(ctx, file, runfiles_dir):
-    return "/".join([runfiles_dir, to_manifest_path(ctx, file)])
+    return "/".join([runfiles_dir, to_rlocation_path(ctx, file)])
 
 def _should_include(destination, include, exclude):
     included = include in destination or include == ""

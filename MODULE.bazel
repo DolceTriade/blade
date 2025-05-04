@@ -1,0 +1,54 @@
+"""Bzlmod Configuration for Blade"""
+
+module(
+    name = "blade",
+    repo_name = "blade",
+)
+
+bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "protobuf", version = "30.2")
+bazel_dep(name = "rules_pkg", version = "1.1.0")
+bazel_dep(name = "aspect_bazel_lib", version = "2.15.3")
+bazel_dep(name = "googleapis", version = "0.0.0-20241220-5e258e33.bcr.1")
+bazel_dep(name = "aspect_rules_js", version = "2.3.7")
+bazel_dep(name = "rules_cc", version = "0.1.1")
+
+#
+# rules_rust setup
+#
+bazel_dep(name = "rules_rust", version = "0.61.0")
+single_version_override(
+    module_name = "rules_rust",
+    patch_strip = 1,
+    # https://github.com/bazelbuild/rules_rust/issues/3429
+    patches = ["//third_party/rust/patches/rules_rust:0001-Revert-Update-runfiles-to-work-with-directory-embedd.patch"],
+)
+
+bazel_dep(name = "rules_rust_prost", version = "0.61.0")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.61.0")
+
+register_toolchains("@rules_rust//rust/private/dummy_cc_toolchain:dummy_cc_wasm32_toolchain")
+# Third party crates setup is still in the WORKSPACE.bazel file...
+
+#
+# rules_oci setup
+#
+bazel_dep(name = "rules_oci", version = "2.2.6")
+# For testing, we also recommend https://registry.bazel.build/modules/container_structure_test
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# Declare external images you need to pull, for example:
+oci.pull(
+    name = "distroless_base",
+    image = "gcr.io/distroless/base",
+    platforms = ["linux/amd64"],
+    # 'latest' is not reproducible, but it's convenient.
+    # During the build we print a WARNING message that includes recommended 'digest' and 'platforms'
+    # values which you can use here in place of 'tag' to pin for reproducibility.
+    tag = "latest",
+)
+
+# For each oci.pull call, repeat the "name" here to expose them as dependencies.
+use_repo(oci, "distroless_base", "distroless_base_linux_amd64")
