@@ -3,6 +3,7 @@ use leptos_router::{components::A, hooks::use_location};
 use time::macros::format_description;
 
 use crate::components::statusicon::StatusIcon;
+use crate::components::clipboard::CopyToClipboard;
 
 #[allow(non_snake_case)]
 #[component]
@@ -111,7 +112,10 @@ pub fn SummaryHeader() -> impl IntoView {
                             <b>{cmd}</b>
                         </span>
                         <span class="inline-flex max-w-1/2 overflow-auto whitespace-nowrap">
-                            {patterns}
+                            {patterns.clone()}
+                        </span>
+                        <span>
+                        <CopyToClipboard text=patterns attr:class="h-3 w-3"/>
                         </span>
                         <span>@</span>
                         <span class="text-grey-400 text-sm">{start}</span>

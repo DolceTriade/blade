@@ -57,7 +57,7 @@ def rust_dependencies():
             ],
             "web-sys": [
                 crate.annotation(
-                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob"],
+                    crate_features = ["Cllipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "Navigator", "Window"],
                 ),
             ],
             "junit-parser": [
@@ -280,7 +280,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.72",
-                features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
@@ -317,7 +317,7 @@ def rust_dependencies():
             ],
             "web-sys": [
                 crate.annotation(
-                    crate_features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+                    crate_features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
                 ),
             ],
             "quick-xml": [
@@ -434,7 +434,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.72",
-                features = ["DomRectList", "DomRect", "DomRectReadOnly", "DomQuad"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
