@@ -23,7 +23,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
             class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto"
         >
             {move || match ansi_to_html::convert_escaped(&text.read()) {
-                Err(err) => view! { <div>{format!("mistake: {:#?}", err)}</div> }.into_any(),
+                Err(err) => view! { <div>{format!("mistake: {err:#?}")}</div> }.into_any(),
                 Ok(t) => {
                     view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> }
                         .into_any()

@@ -266,7 +266,7 @@ impl TestArtifact {
         Self {
             id: uuid::Uuid::new_v5(
                 &uuid::Uuid::nil(),
-                format!("{}/{}/{}", invocation_id, test_run_id, artifact_name).as_bytes(),
+                format!("{invocation_id}/{test_run_id}/{artifact_name}").as_bytes(),
             )
             .to_string(),
             invocation_id: invocation_id.to_string(),

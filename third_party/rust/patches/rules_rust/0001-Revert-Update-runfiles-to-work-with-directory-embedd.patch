@@ -1,0 +1,32 @@
+From 621bd86d299b5ae0b9a2f2941ad93e6ff0724cb5 Mon Sep 17 00:00:00 2001
+From: DolceTriade <vcelestialragev@gmail.com>
+Date: Sat, 3 May 2025 23:31:21 -0700
+Subject: [PATCH] Revert "Update runfiles to work with directory embedded
+ manifests (#3399)"
+
+This reverts commit 8de8f2b89f71819c1d226ff0b87a62bdb3f13c32.
+---
+ rust/runfiles/runfiles.rs | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/rust/runfiles/runfiles.rs b/rust/runfiles/runfiles.rs
+index e0568ae7..fe8c6282 100644
+--- a/rust/runfiles/runfiles.rs
++++ b/rust/runfiles/runfiles.rs
+@@ -158,12 +158,7 @@ impl Runfiles {
+         let mode = if let Some(manifest_file) = std::env::var_os(MANIFEST_FILE_ENV_VAR) {
+             Self::create_manifest_based(Path::new(&manifest_file))?
+         } else {
+-            let dir = find_runfiles_dir()?;
+-            let manifest_path = dir.join("MANIFEST");
+-            match manifest_path.exists() {
+-                true => Self::create_manifest_based(&manifest_path)?,
+-                false => Mode::DirectoryBased(dir),
+-            }
++            Mode::DirectoryBased(find_runfiles_dir()?)
+         };
+ 
+         let repo_mapping = raw_rlocation(&mode, "_repo_mapping")
+-- 
+2.49.0
+

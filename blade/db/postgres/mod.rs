@@ -314,7 +314,7 @@ impl state::DB for Postgres {
         let ot: time::OffsetDateTime = (*ts).into();
         diesel::delete(schema::invocations::table.filter(schema::invocations::start.le(ot)))
             .execute(&mut self.conn)
-            .context(format!("failed to delete invocation since {:#?}", ot))
+            .context(format!("failed to delete invocation since {ot:#?}"))
     }
 
     fn insert_options(&mut self, inv_id: &str, opts: &state::BuildOptions) -> anyhow::Result<()> {
@@ -325,7 +325,7 @@ impl state::DB for Postgres {
                 let uid = uuid::Uuid::new_v4().to_string();
                 vec.iter().enumerate().for_each(|(i, v)| {
                     vals.push((
-                        id.eq(format!("{}-{:04}", uid, i)),
+                        id.eq(format!("{uid}-{i:04}")),
                         invocation_id.eq(inv_id.to_string()),
                         kind.eq(kind_.to_string()),
                         keyval.eq(crate::envscrub::scrub(v)),
@@ -713,7 +713,7 @@ mod tests {
         let day = Duration::from_secs(60 * 60 * 24);
         for i in 0..5 {
             db.upsert_shallow_invocation(&state::InvocationResults {
-                id: format!("id{}", i),
+                id: format!("id{i}"),
                 start: curr.checked_add(day).unwrap(),
                 ..Default::default()
             })

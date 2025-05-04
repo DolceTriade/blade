@@ -145,7 +145,7 @@ mod test {
 
         let request_future = async {
             let c = crate::Client::new();
-            let uri = format!("bytestream://{}/path/to/real_resource", addr);
+            let uri = format!("bytestream://{addr}/path/to/real_resource");
             let bytes = c.download_file(&uri).await.unwrap();
             // Validate server response with assertions
             assert_eq!(bytes.len(), 100);

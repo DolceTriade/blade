@@ -1,7 +1,5 @@
 use leptos::prelude::*;
 
-use crate::components::tooltip::Tooltip;
-
 #[component]
 pub fn CopyToClipboard(#[prop(into)] text: Signal<String>) -> impl IntoView {
     let clipboard = window().navigator().clipboard();

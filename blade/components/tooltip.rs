@@ -15,7 +15,7 @@ where
                     let body = document().body().unwrap().get_bounding_client_rect();
                     s.get_bounding_client_rect().y() - body.y()
                 })
-                .map(|t| el.set_attribute("style", &format!("top: {}px", t)).ok());
+                .map(|t| el.set_attribute("style", &format!("top: {t}px")).ok());
         }
     };
     view! {

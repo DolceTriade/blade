@@ -12,7 +12,7 @@ where
     view! {
         <div class="pl-4 pr-4">
             <span class="text-m">{move || num.to_string()}</span>
-            <span class="text-xs">{move || format!("{}", suffix)}</span>
+            <span class="text-xs">{move || format!("{suffix}")}</span>
         </div>
     }
 }

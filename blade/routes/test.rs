@@ -103,7 +103,7 @@ pub fn Test() -> impl IntoView {
                 if let Some(test) = invocation.read().tests.get(target) {
                     return Ok(test.clone());
                 }
-                Err(format!("{} not found", target).to_string())
+                Err(format!("{target} not found").to_string())
             },
             None => Err("No target specified in URL".to_string()),
         },
