@@ -3,7 +3,6 @@
   stdenv,
   fetchurl,
   fetchpatch,
-  libunwind,
   disableInitExecTls ? false,
   enableProf ? true,
   # By default, jemalloc puts a je_ prefix onto all its symbols on OSX, which
@@ -52,15 +51,12 @@ stdenv.mkDerivation rec {
       "je_cv_thp=no"
     ]
     ++ lib.optional enableProf "--enable-prof"
-    ++ lib.optional (libunwind != null && !stdenv.hostPlatform.isDarwin) "--enable-prof-libunwind"
     # AArch64 has configurable page size up to 64k. The default configuration
     # for jemalloc only supports 4k page sizes.
     ++ lib.optional stdenv.hostPlatform.isAarch64 "--with-lg-page=16"
     # See https://github.com/jemalloc/jemalloc/issues/1997
     # Using a value of 48 should work on both emulated and native x86_64-darwin.
     ++ lib.optional (stdenv.hostPlatform.isDarwin && stdenv.hostPlatform.isx86_64) "--with-lg-vaddr=48";
-
-  buildInputs = lib.optional (libunwind != null) libunwind;
 
   env.NIX_CFLAGS_COMPILE =
     (lib.optionalString stdenv.hostPlatform.isDarwin "-Wno-error=array-bounds")
