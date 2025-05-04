@@ -1,5 +1,5 @@
 {
-  "checksum": "33c0a2d7d28c244bccd544dfbef0c73657d086811eec1f04b22262aa1121c33f",
+  "checksum": "31e28ae8140225e1678e653e9c4e74e5fe0cfc862e5f58f0547e5f6a14d0e1f6",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -13678,6 +13678,7 @@
             "Blob",
             "BlobPropertyBag",
             "CharacterData",
+            "Clipboard",
             "ClipboardEvent",
             "CloseEvent",
             "CloseEventInit",
@@ -13783,6 +13784,7 @@
             "Location",
             "MessageEvent",
             "MouseEvent",
+            "Navigator",
             "Node",
             "ObserverCallback",
             "PageTransitionEvent",

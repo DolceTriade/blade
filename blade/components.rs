@@ -1,5 +1,6 @@
 pub mod accordion;
 pub mod card;
+pub mod clipboard;
 pub mod list;
 pub mod nav;
 pub mod searchbar;

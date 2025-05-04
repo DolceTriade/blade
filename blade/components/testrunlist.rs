@@ -218,7 +218,7 @@ pub fn TestRunList() -> impl IntoView {
                                                             click(id.get());
                                                         }
                                                         class="flex items-center justify-start w-full"
-                                                        id=move||id
+                                                        id=move || id
                                                     >
                                                         <span class="float-left">
                                                             <StatusIcon
@@ -250,12 +250,7 @@ pub fn TestRunList() -> impl IntoView {
                             }
                                 .into_any()
                         }
-                        _ => {
-                            view! {
-                                <div>Loading...</div>
-                            }
-                                .into_any()
-                        }
+                        _ => view! { <div>Loading...</div> }.into_any(),
                     }}
 
                 </Suspense>

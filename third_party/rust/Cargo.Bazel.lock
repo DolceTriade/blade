@@ -1,5 +1,5 @@
 {
-  "checksum": "7b3440233a958031acc6d54866869d9c3e632b23864cd1ab9eee3d5114007e75",
+  "checksum": "e3891cf4cc26af408d0cc3dc2157d95c03b2800eda938be21fd067d5da0cc447",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -25399,7 +25399,9 @@
             "BinaryType",
             "Blob",
             "CharacterData",
+            "Clipboard",
             "ClipboardEvent",
+            "Cllipboard",
             "CloseEvent",
             "CloseEventInit",
             "Comment",
@@ -25501,6 +25503,7 @@
             "Location",
             "MessageEvent",
             "MouseEvent",
+            "Navigator",
             "Node",
             "ObserverCallback",
             "PageTransitionEvent",

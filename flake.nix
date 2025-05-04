@@ -48,6 +48,9 @@
       jemalloc' = pkgs.callPackage ./third_party/nix/jemalloc {
         libunwind = pkgs.pkgsStatic.libunwind;
       };
+      ibazel = pkgs.writeShellScriptBin "ibazel" ''
+        ${pkgs.bazel-watcher}/bin/ibazel -bazel_path ${pkgs.bazel_7}/bin/bazel "$@"
+      '';
     in {
       packages.rust = rust;
       formatter.default = pkgs.alejandra;
@@ -59,6 +62,7 @@
               [
                 alejandra
                 bazel_7
+                ibazel
                 bazel-buildtools
                 pkg-config
                 rust
