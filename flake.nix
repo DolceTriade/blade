@@ -45,9 +45,7 @@
         inherit rustPlatform;
         mysqlSupport = false;
       };
-      jemalloc' = pkgs.callPackage ./third_party/nix/jemalloc {
-        libunwind = pkgs.pkgsStatic.libunwind;
-      };
+      jemalloc' = pkgs.callPackage ./third_party/nix/jemalloc {};
       ibazel = pkgs.writeShellScriptBin "ibazel" ''
         ${pkgs.bazel-watcher}/bin/ibazel -bazel_path ${pkgs.bazel_7}/bin/bazel "$@"
       '';
