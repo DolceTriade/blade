@@ -6,6 +6,12 @@
   libunwind,
   disableInitExecTls ? false,
   enableProf ? true,
+  # By default, jemalloc puts a je_ prefix onto all its symbols on OSX, which
+  # then stops downstream builds (mariadb in particular) from detecting it. This
+  # option should remove the prefix and give us a working jemalloc.
+  # Causes segfaults with some software (ex. rustc), but defaults to true for backward
+  # compatibility.
+  stripPrefix ? stdenv.hostPlatform.isDarwin,
 }:
 stdenv.mkDerivation rec {
   pname = "jemalloc";
@@ -31,7 +37,12 @@ stdenv.mkDerivation rec {
   ];
 
   configureFlags =
-    ["--with-private-namespace=" "--with-jemalloc-prefix=" "--enable-static" "--disable-cxx"]
+    (
+      if stdenv.hostPlatform.isDarwin
+      then ["--with-private-namespace=_rjem_" "--with-jemalloc-prefix=_rjem_"]
+      else ["--with-private-namespace=" "--with-jemalloc-prefix="]
+    )
+    ++ ["--enable-static" "--disable-cxx"]
     ++ lib.optional disableInitExecTls "--disable-initial-exec-tls"
     # jemalloc is unable to correctly detect transparent hugepage support on
     # ARM (https://github.com/jemalloc/jemalloc/issues/526), and the default
@@ -41,7 +52,7 @@ stdenv.mkDerivation rec {
       "je_cv_thp=no"
     ]
     ++ lib.optional enableProf "--enable-prof"
-    ++ lib.optional (libunwind != null) "--enable-prof-libunwind"
+    ++ lib.optional (libunwind != null && !stdenv.hostPlatform.isDarwin) "--enable-prof-libunwind"
     # AArch64 has configurable page size up to 64k. The default configuration
     # for jemalloc only supports 4k page sizes.
     ++ lib.optional stdenv.hostPlatform.isAarch64 "--with-lg-page=16"
@@ -51,11 +62,14 @@ stdenv.mkDerivation rec {
 
   buildInputs = lib.optional (libunwind != null) libunwind;
 
-  CFLAGS =
+  env.NIX_CFLAGS_COMPILE =
     (lib.optionalString stdenv.hostPlatform.isDarwin "-Wno-error=array-bounds")
     + (lib.optionalString (!stdenv.cc.isClang) "-static-libgcc -static-libstdc++");
 
-  LDFLAGS = "-Wl,--whole-archive -lpthread -Wl,--no-whole-archive";
+  LDFLAGS =
+    if stdenv.hostPlatform.isDarwin
+    then "-Wl,-all_load -lpthread -Wl,-noall_load"
+    else "-Wl,--whole-archive -lpthread -Wl,--no-whole-archive";
 
   # Tries to link test binaries binaries dynamically and fails
   doCheck = false;

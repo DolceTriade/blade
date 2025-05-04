@@ -23,7 +23,7 @@ def third_party_nix_deps():
     )
     nixpkgs_package(
         name = "tailwindcss",
-        attribute_path = "nodePackages.tailwindcss",
+        attribute_path = "tailwindcss",
         repository = "@nixpkgs",
         build_file = "//third_party/nix:BUILD.tailwindcss",
     )
