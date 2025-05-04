@@ -6,16 +6,16 @@
 }:
 rustPlatform.buildRustPackage rec {
   pname = "cargo-bazel";
-  version = "0.16.0";
+  version = "0.17.0";
 
   src = fetchFromGitHub {
     owner = "bazelbuild";
     repo = "rules_rust";
-    rev = "0.59.2";
-    hash = "sha256-N+O2/HxQ/zlscwA029wA9sl0MaCYqbv5ULPVCugbVL0=";
+    rev = "0.61.0";
+    hash = "sha256-2ggTytznXKUPoKWosj6glqEIwPXR6v2ceER68wYZziw=";
   };
 
-  cargoHash = "sha256-Bu3mLlxC6i4wXSs4KNGEc15Qdr92dJfYbmY50NyM3nk=";
+  cargoHash = "sha256-96GtAMnxWeN/ngv3aR20T/0XG+7+VdoEVo0k3RZVfs0=";
 
   sourceRoot = "source/crate_universe";
 

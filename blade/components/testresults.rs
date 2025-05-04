@@ -134,7 +134,7 @@ pub fn TestResults() -> impl IntoView {
                                                             <h3 class="p-2">{header.clone()}</h3>
                                                         </span>
                                                         <div class="text-gray-400 text-xs pl-2 float-right">
-                                                            {format!("{:.2}s", duration)}
+                                                            {format!("{duration:.2}s")}
                                                         </div>
                                                     </div>
                                                 }

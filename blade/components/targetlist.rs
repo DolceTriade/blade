@@ -96,7 +96,7 @@ pub fn TargetList() -> impl IntoView {
                                             children=move |t| {
                                                 let label = t.name.clone();
                                                 let tooltip = t.name.clone();
-                                                let query = format!("test?target={}", label);
+                                                let query = format!("test?target={label}");
                                                 let link = url_escape::encode_query(&query).to_string();
                                                 view! {
                                                     <ListItem hide=Signal::derive(move || {

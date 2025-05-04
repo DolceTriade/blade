@@ -1,8 +1,9 @@
 # We need to write a fancy nix file to handle the CC compiler due to OSX: https://github.com/tweag/rules_nixpkgs/issues/368
 # What this file is basically saying is: if OSX, change the CXX compiler to use a bunch of Apple frameworks, LLVM libs,
 # libc++ instead of libstdc++, and some additional compiler flags to ignore some warnings, otherwise, just use clang11
-{pkgs ? import <nixpkgs> {} }: let
+{pkgs ? import <nixpkgs> {}}: let
   clang = pkgs.clang;
+  path = builtins.storePath pkgs.path;
   darwinCC =
     # Work around https://github.com/NixOS/nixpkgs/issues/42059.
     # See also https://github.com/NixOS/nixpkgs/pull/41589.
@@ -26,7 +27,15 @@
     };
   linuxCC = pkgs.wrapCCWith rec {
     cc = clang;
-    bintools = pkgs.stdenv.cc.bintools;
+    bintools = pkgs.stdenv.cc.bintools.override {
+      extraBuildCommands = ''
+        wrap ${pkgs.stdenv.cc.bintools.targetPrefix}ld.lld ${path}/pkgs/build-support/bintools-wrapper/ld-wrapper.sh ${pkgs.lld}/bin/ld.lld
+        wrap ${pkgs.stdenv.cc.bintools.targetPrefix}ld ${path}/pkgs/build-support/bintools-wrapper/ld-wrapper.sh ${pkgs.lld}/bin/ld.lld
+        wrap ${pkgs.stdenv.cc.bintools.targetPrefix}lld ${path}/pkgs/build-support/bintools-wrapper/ld-wrapper.sh ${pkgs.lld}/bin/ld.lld
+        # Fake being gold because rules_nixpkgs forces this.
+        wrap ${pkgs.stdenv.cc.bintools.targetPrefix}ld.gold ${path}/pkgs/build-support/bintools-wrapper/ld-wrapper.sh ${pkgs.lld}/bin/ld.lld
+      '';
+    };
     extraPackages = [pkgs.glibc.static];
     extraBuildCommands = ''
       echo "-isystem ${pkgs.llvmPackages.clang-unwrapped.lib}/lib/clang/${cc.version}/include" >> $out/nix-support/cc-cflags
