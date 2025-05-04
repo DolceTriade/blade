@@ -139,7 +139,7 @@ pub fn TestRunList() -> impl IntoView {
                                                                 />
 
                                                             </span>
-                                                            <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-scroll whitespace-nowrap">
+                                                            <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-auto whitespace-nowrap">
                                                                 <Tooltip tooltip=move || {
                                                                     view! { <span class="p-1">{tooltip.clone()}</span> }
                                                                 }>
