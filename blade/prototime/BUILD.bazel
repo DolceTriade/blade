@@ -3,13 +3,13 @@ load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
 
 rust_prost_library(
     name = "timestamp_proto",
-    proto = "@com_google_protobuf//:timestamp_proto",
+    proto = "@protobuf//:timestamp_proto",
     visibility = ["//visibility:public"],
 )
 
 rust_prost_library(
     name = "duration_proto",
-    proto = "@com_google_protobuf//:duration_proto",
+    proto = "@protobuf//:duration_proto",
     visibility = ["//visibility:public"],
 )
 
