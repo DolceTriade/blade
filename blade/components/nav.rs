@@ -1,19 +1,30 @@
 use leptos::prelude::*;
+use leptos_router::hooks::use_location;
+
+fn extract_path(url_str: &str) -> Option<String> {
+    if !url_str.starts_with("/invocation/") {
+        return None;
+    }
+    let ret = Some(url_str.split("/").take(3).collect::<Vec<&str>>().join("/"));
+    ret
+}
 
 #[component]
 pub fn Nav(
     #[prop(into)] name: Signal<String>,
     #[prop(into)] logo: Signal<String>,
 ) -> impl IntoView {
+    let location = use_location();
     view! {
         <nav class="border-gray-200 bg-gray-50">
             <div class="flex flex-wrap items-center justify-between mx-auto p-4">
-                <a href="" class="flex items-center rtl:space-x-reverse">
+                <a href=move||extract_path(&location.pathname.read()).unwrap_or("".to_string()) class="flex items-center rtl:space-x-reverse">
                     <img class="hover:animate-spin w-14" src=move || logo.get() alt="Logo" />
                     <span class="self-center text-4xl font-semibold whitespace-nowrap">
                         {move || name.get()}
                     </span>
                 </a>
+
                 <button
                     data-collapse-toggle="navbar-hamburger"
                     type="button"
