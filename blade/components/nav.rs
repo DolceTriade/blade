@@ -5,8 +5,7 @@ fn extract_path(url_str: &str) -> Option<String> {
     if !url_str.starts_with("/invocation/") {
         return None;
     }
-    let ret = Some(url_str.split("/").take(3).collect::<Vec<&str>>().join("/"));
-    ret
+    Some(url_str.split("/").take(3).collect::<Vec<&str>>().join("/"))
 }
 
 #[component]
