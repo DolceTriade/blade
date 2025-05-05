@@ -28,7 +28,7 @@ pub fn App() -> impl IntoView {
         <Title formatter />
         <Stylesheet id="leptos" href="/assets/style.css" />
         <Router>
-            <div id="root" class="h-screen w-screen max-h-screen max-w-screen overflow-hidden">
+            <div id="root" class="h-screen w-screen">
                 <Nav name="Blade" logo="/assets/logo.svg" />
                 <main>
                     <Routes fallback=|| "Not Found.">
