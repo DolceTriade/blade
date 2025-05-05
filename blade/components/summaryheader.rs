@@ -91,7 +91,7 @@ pub fn SummaryHeader() -> impl IntoView {
         let failing_tests = Signal::derive(move || counts.read().failing_tests);
         let status = Signal::derive(move || counts.read().status);
         let cmd = ucfirst(&invocation.read().command);
-        let patterns = invocation.read().pattern.join(",");
+        let patterns = invocation.read().pattern.join(" ");
         let start = format_time(&invocation.read().start);
         let location = use_location();
         let duration = invocation
@@ -105,61 +105,78 @@ pub fn SummaryHeader() -> impl IntoView {
             })
             .unwrap_or_default();
         view! {
-            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center divide-x">
-                <div class="absolute">
-                    <div class="flex gap-2 items-center">
-                        <span class="text-lg">
-                            <b>{cmd}</b>
-                        </span>
-                        <span class="inline-flex max-w-1/2 overflow-auto whitespace-nowrap">
-                            {patterns.clone()}
-                        </span>
-                        <span>
-                        <CopyToClipboard text=patterns attr:class="h-3 w-3"/>
-                        </span>
-                        <span>@</span>
-                        <span class="text-grey-400 text-sm">{start}</span>
+            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x">
+                <div class="grid grid-rows-1 grid-flow-col place-content-start">
+                    <div class="p-4 place-content-center self-center">
+                        <StatusIcon class="h-8 w-8" status=status />
                     </div>
-
-                    <div class="flex gap-2 items-center">
-                        {duration}
-                        <A href=move || {
-                            location
-                                .pathname
-                                .read()
-                                .strip_suffix("/details")
-                                .unwrap_or("details")
-                                .to_string()
-                        }>
-                            <span class="text-blue-500 underline">(details)</span>
-                        </A>
+                    <div class="grid grid-rows-3 items-start self-center place-content-center">
+                        <div class="flex gap-3 content-start place-items-center">
+                            <div class="place-content-center">
+                                <img class="h-6 w-6" src="/assets/bazel.svg"/>
+                            </div>
+                            <span class="text-lg">
+                                <b>{cmd}</b>
+                            </span>
+                            <span class="inline-flex overflow-auto whitespace-nowrap">
+                                {patterns.clone()}
+                            </span>
+                            <span>
+                                <CopyToClipboard text=patterns attr:class="h-4 w-4 rounded-lg hover:bg-gray-500" />
+                            </span>
+                        </div>
+                        <div class="text-grey-400 text-sm self-center">{start}</div>
+                        <div class="flex gap-2 items-center">
+                            {duration}
+                            <A href=move || {
+                                location
+                                    .pathname
+                                    .read()
+                                    .strip_suffix("/details")
+                                    .unwrap_or("details")
+                                    .to_string()
+                            }>
+                                <span class="text-blue-500 underline">(details)</span>
+                            </A>
+                        </div>
                     </div>
                 </div>
-                <div class="p-4">
-                    <StatusIcon class="h-8 w-8" status=status />
+                <div class="content-center place-self-end self-center grid grid-rows-1 grid-flow-col">
+                    <div class="p-4 place-content-center">
+                        <img class="h-10 w-10" src="/assets/code.svg"/>
+                    </div>
+                    <div class="p-4 place-content-center">
+                        <SummaryItem num=num_targets suffix="Total Target" />
+                        <SummaryItem num=passing_targets suffix="Passing Target" />
+                        {(failing_targets.get() > 0)
+                            .then(|| {
+                                view! { <SummaryItem num=failing_targets suffix="Failing Target" /> }
+                            })}
+                    </div>
                 </div>
-                <SummaryItem num=num_targets suffix="Total Target" />
-                <SummaryItem num=passing_targets suffix="Passing Target" />
-                {(failing_targets.get() > 0)
-                    .then(|| {
-                        view! { <SummaryItem num=failing_targets suffix="Failing Target" /> }
-                    })}
+                <div class="content-center place-self-center self-center grid grid-rows-1 grid-flow-col">
+                    {{(num_tests.get() > 0).then(||view!{
+                        <div class="p-4 place-content-center">
+                            <img class="h-10 w-10" src="/assets/test.svg"/>
+                        </div>
+                    })}}
+                    <div class="p-4 place-content-center">
+                        {(num_tests.get() > 0)
+                            .then(|| {
+                                view! { <SummaryItem num=num_tests suffix="Total Test" /> }
+                            })}
 
-                {(num_tests.get() > 0)
-                    .then(|| {
-                        view! { <SummaryItem num=num_tests suffix="Total Test" /> }
-                    })}
+                        {(passing_tests.get() > 0)
+                            .then(|| {
+                                view! { <SummaryItem num=passing_tests suffix="Passing Test" /> }
+                            })}
 
-                {(passing_tests.get() > 0)
-                    .then(|| {
-                        view! { <SummaryItem num=passing_tests suffix="Passing Test" /> }
-                    })}
-
-                {(failing_tests.get() > 0)
-                    .then(|| {
-                        view! { <SummaryItem num=failing_tests suffix="Failing Test" /> }
-                    })}
-
+                        {(failing_tests.get() > 0)
+                            .then(|| {
+                                view! { <SummaryItem num=failing_tests suffix="Failing Test" /> }
+                            })}
+                    </div>
+                </div>
             </div>
         }
     }

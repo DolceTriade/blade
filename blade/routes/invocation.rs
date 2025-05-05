@@ -41,8 +41,17 @@ pub fn Invocation() -> impl IntoView {
             }
         }
     });
-
-    // TODO: Fix refetch
+    Effect::new(move || {
+        if res.read().is_none() {
+            return;
+        }
+        if res.read().as_ref().is_some_and(|ir| {
+            ir.as_ref().map_or(true, |i| matches!(i.status, state::Status::Success | state::Status::Fail))
+        }) {
+            return;
+        }
+        set_timeout(move || res.refetch(), std::time::Duration::from_secs(2));
+    });
 
     view! {
         <Title text=move || {
