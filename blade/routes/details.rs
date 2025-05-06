@@ -27,13 +27,13 @@ pub fn Details() -> impl IntoView {
     );
 
     view! {
-        <div class="flex flex-col">
-            <Card>
+        <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+            <Card class="p-3 m-2">
                 <SummaryHeader />
             </Card>
 
-            <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto">
-                <Card class="max-w-full w-full">
+            <div class="h-[73dvh] flex items-start justify-start justify-items-center overflow-auto">
+                <Card class="p-3 m-2 max-w-full w-full">
                     <Suspense fallback=move || {
                         view! { <div>Loading...</div> }
                     }>

@@ -37,7 +37,7 @@ pub fn Artifact() -> impl IntoView {
         Ok(String::from_utf8_lossy(&bytes).to_string())
     });
     view! {
-        <div class="h-[80vh] flex items-start justify-start justify-items-center overflow-auto overflow-x-auto">
+        <div class="h-[73dvh] flex items-start justify-start justify-items-center overflow-auto overflow-x-auto">
             <Suspense fallback=move || {
                 view! { <div>Loading...</div> }
             }>

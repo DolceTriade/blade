@@ -7,7 +7,7 @@ pub fn CopyToClipboard(#[prop(into)] text: Signal<String>) -> impl IntoView {
         <button on:click=move |_| {
             _ = clipboard.write_text(&text.read());
         }>
-            <img src="/assets/copy.svg" />
+            <img class="dark:invert" src="/assets/copy.svg" />
         </button>
     }
 }

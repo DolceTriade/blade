@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: { 
+  darkMode: "class",
+  content: {
     files: ["./**/*.rs"],
   },
   theme: {
@@ -16,5 +17,6 @@ module.exports = {
   variants: {
     "overflow": ["hover", "group-hover"],
     "visibility": ["hover", "group-hover"],
+    "invert": ["dark"],
   }
 }

@@ -55,11 +55,6 @@ def rust_dependencies():
                     ],
                 ),
             ],
-            "web-sys": [
-                crate.annotation(
-                    crate_features = ["Cllipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "Navigator", "Window"],
-                ),
-            ],
             "junit-parser": [
                 crate.annotation(
                     patches = ["@//third_party/rust/patches/junit-parser:cdata_parse.patch"],
@@ -279,8 +274,8 @@ def rust_dependencies():
                 version = "=0.2.100",
             ),
             "web-sys": crate.spec(
-                version = "0.3.72",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
+                version = "0.3.77",
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
@@ -313,11 +308,6 @@ def rust_dependencies():
                     rustc_env = {
                         "SERVER_FN_OVERRIDE_KEY": "bazel",
                     },
-                ),
-            ],
-            "web-sys": [
-                crate.annotation(
-                    crate_features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
                 ),
             ],
             "quick-xml": [
@@ -433,8 +423,8 @@ def rust_dependencies():
                 version = "0.1.1",
             ),
             "web-sys": crate.spec(
-                version = "0.3.72",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "Navigator", "Window"],
+                version = "0.3.77",
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",

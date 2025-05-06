@@ -124,7 +124,7 @@ where
 
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     view! {
-        <div class="w-screen h-fit grid grid-rows-2 grid-flow-col items-center justify-center divide-y">
+        <div class="w-screen h-fit grid grid-rows-2 grid-flow-col items-center justify-center divide-y dark:divide-gray-600">
             {move || {
                 test.with(|test| {
                     test.as_ref()
@@ -136,7 +136,7 @@ where
                                         <A href=move || link.get()>
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                class="h-8 w-8"
+                                                class="h-8 w-8 dark:invert"
                                                 height="24"
                                                 viewBox="0 0 24 24"
                                                 width="24"

@@ -105,7 +105,7 @@ pub fn SummaryHeader() -> impl IntoView {
             })
             .unwrap_or_default();
         view! {
-            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x">
+            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x overflow-hidden">
                 <div class="grid grid-rows-1 grid-flow-col place-content-start">
                     <div class="p-4 place-content-center self-center">
                         <StatusIcon class="h-8 w-8" status=status />
@@ -125,7 +125,7 @@ pub fn SummaryHeader() -> impl IntoView {
                                 <CopyToClipboard text=patterns attr:class="h-4 w-4 rounded-lg hover:bg-gray-500" />
                             </span>
                         </div>
-                        <div class="text-grey-400 text-sm self-center">{start}</div>
+                        <div class="text-gray-400 text-sm self-center">{start}</div>
                         <div class="flex gap-2 items-center">
                             {duration}
                             <A href=move || {
@@ -143,7 +143,7 @@ pub fn SummaryHeader() -> impl IntoView {
                 </div>
                 <div class="content-center place-self-end self-center grid grid-rows-1 grid-flow-col">
                     <div class="p-4 place-content-center">
-                        <img class="h-10 w-10" src="/assets/code.svg"/>
+                        <img class="h-10 w-10 dark:invert" src="/assets/code.svg"/>
                     </div>
                     <div class="p-4 place-content-center">
                         <SummaryItem num=num_targets suffix="Total Target" />
@@ -157,7 +157,7 @@ pub fn SummaryHeader() -> impl IntoView {
                 <div class="content-center place-self-center self-center grid grid-rows-1 grid-flow-col">
                     {{(num_tests.get() > 0).then(||view!{
                         <div class="p-4 place-content-center">
-                            <img class="h-10 w-10" src="/assets/test.svg"/>
+                            <img class="h-10 w-10 dark:invert" src="/assets/test.svg"/>
                         </div>
                     })}}
                     <div class="p-4 place-content-center">

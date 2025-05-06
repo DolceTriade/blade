@@ -11,6 +11,7 @@ rust_binary(
         "lib.rs",
         "main.rs",
         "routes.rs",
+        "darkmode.rs",
     ] + glob([
         "routes/**/*.rs",
         "components/**/*.rs",
@@ -76,6 +77,7 @@ rust_shared_library(
         "lib.rs",
         "main.rs",
         "routes.rs",
+        "darkmode.rs",
     ] + glob([
         "routes/**/*.rs",
         "components/**/*.rs",

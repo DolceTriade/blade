@@ -9,7 +9,7 @@ pub fn Card(
 ) -> impl IntoView {
     view! {
         <div class=move || tailwind_merge(
-            "max-w-max p-6 bg-white border border-gray-200 rounded-lg shadow",
+            "max-w-fit p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white",
             &class.get(),
         )>{children()}</div>
     }

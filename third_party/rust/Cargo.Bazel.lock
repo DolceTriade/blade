@@ -1,5 +1,5 @@
 {
-  "checksum": "83677a2fb098e10d3626085833517b367f803c78882cd657025da7372fe22b9b",
+  "checksum": "e1e5d2125c34c1b2b59cc6b1c0c9d03304d766fe7c34cd567ee299afaecc27fc",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -25401,7 +25401,6 @@
             "CharacterData",
             "Clipboard",
             "ClipboardEvent",
-            "Cllipboard",
             "CloseEvent",
             "CloseEventInit",
             "Comment",
@@ -25501,6 +25500,7 @@
             "InputEvent",
             "KeyboardEvent",
             "Location",
+            "MediaQueryList",
             "MessageEvent",
             "MouseEvent",
             "Navigator",
@@ -25537,6 +25537,7 @@
             "ShadowRoot",
             "ShadowRootInit",
             "ShadowRootMode",
+            "Storage",
             "StorageEvent",
             "StreamPipeOptions",
             "SubmitEvent",

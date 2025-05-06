@@ -146,11 +146,11 @@ pub fn TestRunList() -> impl IntoView {
                                                                     <div class="flex items-center max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden text-sm">
                                                                         <span class="pl-4">{format!("Run {}", run.run)}</span>
                                                                         <span class="flex items-center  pl-1">
-                                                                            <img class="h-4 w-4" src="/assets/shard.svg" />
+                                                                            <img class="h-4 w-4 dark:invert" src="/assets/shard.svg" />
                                                                             {run.shard}
                                                                         </span>
                                                                         <span class="flex items-center pl-1">
-                                                                            <img class="h-4 w-4" src="/assets/number.svg" />
+                                                                            <img class="h-4 w-4 dark:invert" src="/assets/number.svg" />
                                                                             {run.attempt}
                                                                         </span>
 
