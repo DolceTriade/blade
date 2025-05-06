@@ -2,9 +2,9 @@ use cfg_if::cfg_if;
 #[allow(clippy::empty_docs)]
 pub mod components;
 #[allow(clippy::empty_docs)]
-pub mod routes;
-#[allow(clippy::empty_docs)]
 pub mod darkmode;
+#[allow(clippy::empty_docs)]
+pub mod routes;
 
 // Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a
 // lib. I may be wrong.

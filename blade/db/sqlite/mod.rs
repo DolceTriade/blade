@@ -33,10 +33,8 @@ pub fn init_db(db_path: &str) -> anyhow::Result<()> {
         .context("failed to enable foreign keys")?;
     let r = runfiles::Runfiles::create().expect("Must run using bazel with runfiles");
     let path = r.rlocation("_main/blade/db/sqlite/migrations").unwrap();
-    let finder: FileBasedMigrations = FileBasedMigrations::from_path(
-        path
-    )
-    .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))?;
+    let finder: FileBasedMigrations = FileBasedMigrations::from_path(path)
+        .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))?;
     MigrationHarness::run_pending_migrations(&mut me, finder)
         .map(|_| {})
         .map_err(|e| anyhow!("failed to run migrations: {e:#?}"))

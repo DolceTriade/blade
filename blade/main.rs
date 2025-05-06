@@ -21,9 +21,9 @@ use tracing_subscriber::{
 #[allow(clippy::empty_docs)]
 pub mod components;
 #[allow(clippy::empty_docs)]
-pub mod routes;
-#[allow(clippy::empty_docs)]
 pub mod darkmode;
+#[allow(clippy::empty_docs)]
+pub mod routes;
 
 // boilerplate to run in different modes
 cfg_if! {

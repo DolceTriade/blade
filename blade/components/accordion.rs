@@ -50,7 +50,9 @@ where
                 if hide.get() { "max-h-0 absolute opacity-0 overflow-hidden" } else { "" },
             )
         }>
-            <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-600">{children()}</div>
+            <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-600">
+                {children()}
+            </div>
         </div>
     }
 }

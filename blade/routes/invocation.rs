@@ -46,7 +46,9 @@ pub fn Invocation() -> impl IntoView {
             return;
         }
         if res.read().as_ref().is_some_and(|ir| {
-            ir.as_ref().map_or(true, |i| matches!(i.status, state::Status::Success | state::Status::Fail))
+            ir.as_ref().map_or(true, |i| {
+                matches!(i.status, state::Status::Success | state::Status::Fail)
+            })
         }) {
             return;
         }

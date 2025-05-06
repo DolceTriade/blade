@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-
 #[cfg(feature = "hydrate")]
 use leptos::tachys::dom::window;
 

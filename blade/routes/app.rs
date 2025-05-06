@@ -3,14 +3,16 @@ use leptos_meta::*;
 use leptos_router::{components::*, path};
 
 use crate::{
-    components::nav::Nav, darkmode, routes::{
+    components::nav::Nav,
+    darkmode,
+    routes::{
         artifact::Artifact,
         details::Details,
         empty::Empty,
         invocation::Invocation,
         summary::Summary,
         test::Test,
-    }
+    },
 };
 
 pub(crate) struct DarkMode(pub bool);
@@ -20,7 +22,7 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
     let (dark_mode, set_dark_mode) = signal(DarkMode(false));
     provide_context((dark_mode, set_dark_mode));
-    Effect::new(move||{
+    Effect::new(move || {
         set_dark_mode.set(DarkMode(darkmode::get()));
     });
     let formatter = |text: String| {
@@ -33,9 +35,13 @@ pub fn App() -> impl IntoView {
     view! {
         <Title formatter />
         <Stylesheet id="leptos" href="/assets/style.css" />
-        <Html class:dark=move||dark_mode.read().0 />
+        <Html class:dark=move || dark_mode.read().0 />
         <Router>
-            <div id="root" class="h-screen w-screen max-w-screen max-h-screen dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white overflow-clip" class:dark=move||dark_mode.read().0>
+            <div
+                id="root"
+                class="h-screen w-screen max-w-screen max-h-screen dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white overflow-clip"
+                class:dark=move || dark_mode.read().0
+            >
                 <Nav name="Blade" logo="/assets/logo.svg" />
                 <main>
                     <Routes fallback=|| "Not Found.">

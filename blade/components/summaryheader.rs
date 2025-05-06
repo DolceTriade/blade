@@ -2,8 +2,7 @@ use leptos::prelude::*;
 use leptos_router::{components::A, hooks::use_location};
 use time::macros::format_description;
 
-use crate::components::statusicon::StatusIcon;
-use crate::components::clipboard::CopyToClipboard;
+use crate::components::{clipboard::CopyToClipboard, statusicon::StatusIcon};
 
 #[allow(non_snake_case)]
 #[component]
@@ -113,7 +112,7 @@ pub fn SummaryHeader() -> impl IntoView {
                     <div class="grid grid-rows-3 items-start self-center place-content-center">
                         <div class="flex gap-3 content-start place-items-center">
                             <div class="place-content-center">
-                                <img class="h-6 w-6" src="/assets/bazel.svg"/>
+                                <img class="h-6 w-6" src="/assets/bazel.svg" />
                             </div>
                             <span class="text-lg">
                                 <b>{cmd}</b>
@@ -122,7 +121,10 @@ pub fn SummaryHeader() -> impl IntoView {
                                 {patterns.clone()}
                             </span>
                             <span>
-                                <CopyToClipboard text=patterns attr:class="h-4 w-4 rounded-lg hover:bg-gray-500" />
+                                <CopyToClipboard
+                                    text=patterns
+                                    attr:class="h-4 w-4 rounded-lg hover:bg-gray-500"
+                                />
                             </span>
                         </div>
                         <div class="text-gray-400 text-sm self-center">{start}</div>
@@ -143,34 +145,39 @@ pub fn SummaryHeader() -> impl IntoView {
                 </div>
                 <div class="content-center place-self-end self-center grid grid-rows-1 grid-flow-col">
                     <div class="p-4 place-content-center">
-                        <img class="h-10 w-10 dark:invert" src="/assets/code.svg"/>
+                        <img class="h-10 w-10 dark:invert" src="/assets/code.svg" />
                     </div>
                     <div class="p-4 place-content-center">
                         <SummaryItem num=num_targets suffix="Total Target" />
                         <SummaryItem num=passing_targets suffix="Passing Target" />
                         {(failing_targets.get() > 0)
                             .then(|| {
-                                view! { <SummaryItem num=failing_targets suffix="Failing Target" /> }
+                                view! {
+                                    <SummaryItem num=failing_targets suffix="Failing Target" />
+                                }
                             })}
                     </div>
                 </div>
                 <div class="content-center place-self-center self-center grid grid-rows-1 grid-flow-col">
-                    {{(num_tests.get() > 0).then(||view!{
-                        <div class="p-4 place-content-center">
-                            <img class="h-10 w-10 dark:invert" src="/assets/test.svg"/>
-                        </div>
-                    })}}
+                    {{
+                        (num_tests.get() > 0)
+                            .then(|| {
+                                view! {
+                                    <div class="p-4 place-content-center">
+                                        <img class="h-10 w-10 dark:invert" src="/assets/test.svg" />
+                                    </div>
+                                }
+                            })
+                    }}
                     <div class="p-4 place-content-center">
                         {(num_tests.get() > 0)
                             .then(|| {
                                 view! { <SummaryItem num=num_tests suffix="Total Test" /> }
                             })}
-
                         {(passing_tests.get() > 0)
                             .then(|| {
                                 view! { <SummaryItem num=passing_tests suffix="Passing Test" /> }
                             })}
-
                         {(failing_tests.get() > 0)
                             .then(|| {
                                 view! { <SummaryItem num=failing_tests suffix="Failing Test" /> }
