@@ -16,7 +16,7 @@ where
         <button
             type="button"
             on:click=move |_| set_hide.set(!hide.get())
-            class="flex w-full grow items-center justify-between p-5 font-medium rtl:text-right text-gray-500 border first:border-t-0 border-gray-200 first:rounded-t-xl last:rounded-b-xl focus:ring-4 focus:ring-gray-200 hover:bg-gray-100 gap-3"
+            class="flex w-full grow items-center justify-between p-5 font-medium rtl:text-right text-gray-500 border first:border-t-0 border-gray-200 first:rounded-t-xl last:rounded-b-xl focus:ring-4 focus:ring-gray-200 hover:bg-gray-100 gap-3 dark:border-gray-600 dark:focus:ring-gray-800 dark:hover:bg-gray-900"
         >
             <span class=header_class>{header()}</span>
             <span>
@@ -50,7 +50,7 @@ where
                 if hide.get() { "max-h-0 absolute opacity-0 overflow-hidden" } else { "" },
             )
         }>
-            <div class="p-5 border border-b-0 border-gray-200">{children()}</div>
+            <div class="p-5 border border-b-0 border-gray-200 dark:border-gray-600">{children()}</div>
         </div>
     }
 }

@@ -14,13 +14,13 @@ pub fn Summary() -> impl IntoView {
     let (output, _) = slice!(invocation.output);
 
     view! {
-        <div class="flex flex-col">
-            <Card>
+        <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+            <Card class="p-3 m-2">
                 <SummaryHeader />
             </Card>
 
-            <div class="h-[80vh] flex items-start justify-start justify-items-center">
-                <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
+            <div class="h-[73dvh] flex items-start justify-start justify-items-center">
+                <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                     {TargetList()}
                 </Card>
                 <Card class="h-full max-w-full w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">

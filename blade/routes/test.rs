@@ -189,16 +189,16 @@ pub fn Test() -> impl IntoView {
             match *test_run.read() {
             Some(_) => {
                 view! {
-                    <div class="flex flex-col">
-                        <Card class="p-0 m-0">
+                    <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+                        <Card class="p-3 m-2">
                             <TestSummary />
                         </Card>
 
-                        <div class="h-[80vh] flex items-start justify-start justify-items-center">
-                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-0 m-0 flex-1 overflow-x-auto overflow-auto">
+                        <div class="h-[73dvh] flex items-start justify-start justify-items-center">
+                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                                 <TestRunList />
                             </Card>
-                            <Card class="h-full w-3/4 p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                                 <TestResults />
                                 <Suspense fallback=move || {
                                     view! { <div>Loading...</div> }
