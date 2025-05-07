@@ -190,7 +190,7 @@ pub fn Test() -> impl IntoView {
             Some(_) => {
                 view! {
                     <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
-                        <Card class="p-3 m-2">
+                        <Card class="flex p-3 m-2">
                             <TestSummary />
                         </Card>
 

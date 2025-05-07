@@ -46,7 +46,7 @@ fn RunSummary() -> impl IntoView {
                 run.as_ref()
                     .map(|run| {
                         view! {
-                            <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
+                            <div class="h-fit grid grid-rows-1 grid-flow-col items-center justify-center">
                                 <div>
                                     <StatusIcon class="h-5 w-5" status=run.status.into() />
                                 </div>
@@ -124,47 +124,49 @@ where
 
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     view! {
-        <div class="w-screen h-fit grid grid-rows-2 grid-flow-col items-center justify-center divide-y dark:divide-gray-600">
-            {move || {
-                test.with(|test| {
-                    test.as_ref()
-                        .ok()
-                        .map(|test| {
-                            view! {
-                                <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
-                                    <div class="absolute float-left">
-                                        <A href=move || link.get()>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-8 w-8 dark:invert"
-                                                height="24"
-                                                viewBox="0 0 24 24"
-                                                width="24"
-                                            >
-                                                <path d="M0 0h24v24H0z" fill="none"></path>
-                                                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
-                                            </svg>
-                                        </A>
+        <div class="w-screen h-fit">
+            <div class="absolute">
+                <A href=move || link.get()>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-8 w-8 dark:invert"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        width="24"
+                    >
+                        <path d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path>
+                    </svg>
+                </A>
+            </div>
+            <div class="grid grid-rows-2 grid-flow-col items-center justify-center divide-y dark:divide-gray-600">
+                {move || {
+                    test.with(|test| {
+                        test.as_ref()
+                            .ok()
+                            .map(|test| {
+                                view! {
+                                    <div class="h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
+                                        <div>
+                                            <StatusIcon class="h-8 w-8" status=test.status.into() />
+                                        </div>
+                                        <div class="pl-4">
+                                            <b>{test.name.clone()}</b>
+                                        </div>
+                                        <div class="pl-1 text-s">
+                                            {format!("in {:#?}", test.duration)}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <StatusIcon class="h-8 w-8" status=test.status.into() />
+                                    <div class="h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
+                                        <RunSummary />
                                     </div>
-                                    <div class="pl-4">
-                                        <b>{test.name.clone()}</b>
-                                    </div>
-                                    <div class="pl-1 text-s">
-                                        {format!("in {:#?}", test.duration)}
-                                    </div>
-                                </div>
-                                <div class="w-screen h-fit grid grid-rows-1 grid-flow-col items-center justify-center p-2">
-                                    <RunSummary />
-                                </div>
-                            }
-                                .into_any()
-                        })
-                        .unwrap_or(view! { <div></div> }.into_any())
-                })
-            }}
+                                }
+                                    .into_any()
+                            })
+                            .unwrap_or(view! { <div></div> }.into_any())
+                    })
+                }}
+            </div>
 
         </div>
     }
