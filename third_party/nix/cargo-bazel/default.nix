@@ -15,7 +15,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-2ggTytznXKUPoKWosj6glqEIwPXR6v2ceER68wYZziw=";
   };
 
-  cargoHash = "sha256-96GtAMnxWeN/ngv3aR20T/0XG+7+VdoEVo0k3RZVfs0=";
+  cargoHash = "sha256-beOFmmeAK2cNANxacv4GfJqEptvqD1/CNJ+Mmunb7/Y=";
 
   sourceRoot = "source/crate_universe";
 

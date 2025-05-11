@@ -9,12 +9,9 @@ def third_party_nix_deps():
     )
     nixpkgs_package(
         name = "wasm-bindgen-cli",
+        attribute_path = "wasm-bindgen-cli_0_2_100",
         build_file = "//third_party/nix:BUILD.wasm-bindgen-cli",
-        repositories = {
-            "nixpkgs": "@nixpkgs",
-            "fenix": "@fenix",
-        },
-        nix_file = "//nix/rust:wasm_bindgen.nix",
+        repository = "@nixpkgs",
     )
     nixpkgs_package(
         name = "zlib",

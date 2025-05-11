@@ -1,7 +1,7 @@
 {
   description = "BLADE";
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/release-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/latest";
     fenix = {
@@ -64,7 +64,6 @@
                 bazel-buildtools
                 pkg-config
                 rust
-                rustfilt
                 grpcurl
                 git
                 leptosfmt

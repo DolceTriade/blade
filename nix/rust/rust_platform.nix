@@ -17,13 +17,12 @@ let
       rust-src
       rustc
       rustfmt
-      targets.wasm32-unknown-unknown.latest.rust-std
       rust-analyzer
     ];
   rustPlatform = pkgs.makeRustPlatform {
     cargo = rust;
     rustc = rust;
   };
-  in {
-    inherit pkgs rustPlatform;
-  }
+in {
+  inherit pkgs rustPlatform;
+}
