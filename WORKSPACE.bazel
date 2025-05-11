@@ -44,6 +44,7 @@ nixpkgs_cc_configure(
 )
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:toolchains/rust.bzl", "nixpkgs_rust_configure")
+
 # Note that default_edition doesn't work.
 nixpkgs_rust_configure(
     name = "nix_rust",
@@ -102,3 +103,17 @@ register_toolchains("//nix/rust:rustfmt_toolchain")
 register_toolchains("//nix/rust:wasm_bindgen_toolchain")
 
 register_toolchains("//prost:prost_toolchain")
+
+http_archive(
+    name = "googleapis",
+    repo_mapping = {
+        "@com_google_protobuf": "@protobuf",
+    },
+    sha256 = "9094b43a8a8b6f05dd4868cb509fa934012725107995865b5c8eb9c67fbea35d",
+    strip_prefix = "googleapis-db5ce67d735d2ceb6fe925f3e317a3f30835cfd6",
+    urls = ["https://github.com/googleapis/googleapis/archive/db5ce67d735d2ceb6fe925f3e317a3f30835cfd6.tar.gz"],
+)
+
+load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language("com_google_googleapis_imports")
