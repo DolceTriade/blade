@@ -9,3 +9,5 @@ import %workspace%/.bazel-lib/bazelrc/release.bazelrc
 
 try-import %workspace%/.bazelenvrc
 try-import %workspace%/user.bazelrc
+
+common --incompatible_enable_proto_toolchain_resolution

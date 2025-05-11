@@ -1,0 +1,42 @@
+load("@rules_proto//proto:defs.bzl", "proto_library")
+
+GOOGLE_PROTOBUF_DEP_EDGES = {
+    "any": [],
+    "api": [
+        "source_context",
+        "type",
+    ],
+    "compiler/plugin": ["descriptor"],
+    "descriptor": [],
+    "duration": [],
+    "empty": [],
+    "field_mask": [],
+    "source_context": [],
+    "struct": [],
+    "timestamp": [],
+    "type": [
+        "any",
+        "source_context",
+    ],
+    "wrappers": [],
+}
+
+genrule(
+    name = "protoc",
+    srcs = ["bin/protoc"],
+    outs = ["protoc.bin"],
+    cmd = "cp $< $@",
+    executable = True,
+    visibility = ["//visibility:public"],
+)
+
+[
+    proto_library(
+        name = "%s_proto" % src,
+        srcs = ["include/google/protobuf/%s.proto" % src],
+        strip_import_prefix = "include",
+        visibility = ["//visibility:public"],
+        deps = [":%s_proto" % dep for dep in deps],
+    )
+    for src, deps in GOOGLE_PROTOBUF_DEP_EDGES.items()
+]

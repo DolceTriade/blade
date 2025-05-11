@@ -1,5 +1,6 @@
 load("@rules_rust//rust:defs.bzl", "rust_library_group")
 load("@rules_rust_prost//:defs.bzl", "rust_prost_toolchain")
+load("@rules_proto//proto:proto_toolchain.bzl", "proto_toolchain")
 
 rust_library_group(
     name = "prost_runtime",
@@ -36,4 +37,17 @@ toolchain(
     name = "prost_toolchain",
     toolchain = "prost_toolchain_impl",
     toolchain_type = "@rules_rust_prost//:toolchain_type",
+)
+
+proto_toolchain(
+    name = "nixprotoc_toolchain_impl",
+    proto_compiler = "@protobuf//:protoc",
+)
+
+toolchain(
+    name = "nixprotoc_toolchain",
+    # Bazel does not follow this attribute during analysis, so the referenced repo
+    # will only be fetched if this toolchain is selected.
+    toolchain = ":nixprotoc_toolchain_impl",
+    toolchain_type = "@rules_proto//proto:toolchain_type",
 )

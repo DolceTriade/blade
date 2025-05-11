@@ -1,7 +1,6 @@
 """Nix deps."""
 
 load("@io_tweag_rules_nixpkgs//nixpkgs:nixpkgs.bzl", "nixpkgs_package")
-load("@rules_rust//crate_universe/private:srcs.bzl", "CARGO_BAZEL_SRCS")
 
 def third_party_nix_deps():
     nixpkgs_package(
@@ -83,4 +82,10 @@ def third_party_nix_deps():
             "//third_party/nix/jemalloc:default.nix",
         ],
         build_file = "//third_party/nix/jemalloc:BUILD.jemalloc",
+    )
+    nixpkgs_package(
+        name = "protobuf",
+        attribute_path = "protobuf",
+        repository = "@nixpkgs",
+        build_file = "//third_party/nix:BUILD.protobuf",
     )
