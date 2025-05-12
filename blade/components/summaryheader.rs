@@ -121,10 +121,7 @@ pub fn SummaryHeader() -> impl IntoView {
                                 {patterns.clone()}
                             </span>
                             <span>
-                                <CopyToClipboard
-                                    text=patterns
-                                    attr:class="h-4 w-4 rounded-lg hover:bg-gray-500"
-                                />
+                                <CopyToClipboard text=patterns />
                             </span>
                         </div>
                         <div class="text-gray-400 text-sm self-center">{start}</div>

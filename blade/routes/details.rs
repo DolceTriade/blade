@@ -164,7 +164,6 @@ fn BuildMetadata(md: HashMap<String, String>) -> impl IntoView {
 fn linkify(link: String) -> impl IntoView {
     if url::Url::parse(&link).is_ok() {
         let href = link.clone();
-        println!("HREF = {href}");
         view! {
             <a href=href.clone() class="text-blue-500 underline">
                 {link}

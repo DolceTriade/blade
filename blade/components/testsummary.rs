@@ -151,7 +151,11 @@ where
                                             <StatusIcon class="h-8 w-8" status=test.status.into() />
                                         </div>
                                         <div class="pl-4">
-                                            <b>{test.name.clone()}</b> <CopyToClipboard attr:class="h-4 w-4 ml-2 rounded-lg hover:bg-gray-500" text=test.name.clone() />
+                                            <b>{test.name.clone()}</b>
+                                            <CopyToClipboard
+                                                class="h-4 w-4 ml-2 rounded-lg hover:bg-gray-500"
+                                                text=test.name.clone()
+                                            />
                                         </div>
                                         <div class="pl-1 text-s">
                                             {format!("in {:#?}", test.duration)}
