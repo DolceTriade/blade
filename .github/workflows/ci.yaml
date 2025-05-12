@@ -4,6 +4,7 @@ name: 'CI'
 "on": push
 
 permissions:
+  actions: write
   contents: write
   id-token: write
 
@@ -18,9 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: nixbuild/nix-quick-install-action@v30
         with:
-          extra-conf: |
+          nix_conf: |
             keep-env-derivations = true
             keep-outputs = true
       - name: Restore and save Nix store
@@ -33,7 +34,7 @@ jobs:
           # collect garbage until the Nix store size (in bytes) is at most this number
           # before trying to save a new cache
           # 1G = 1073741824
-          gc-max-store-size-linux: 4G
+          gc-max-store-size-linux: 1G
           # do purge caches
           purge: true
           # purge all versions of the cache
