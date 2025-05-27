@@ -166,18 +166,14 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                             span.record("session_uuid", &session_uuid);
                             tracing::info!("Stream started");
                             let mut already_over = false;
-                            if let Ok(mut db) = global.db_manager.as_ref().get() {
-                                if let Ok(inv) = db.get_shallow_invocation(&session_uuid) {
-                                    if let Some(end) = inv.end {
-                                        if std::time::SystemTime::now()
+                            if let Ok(mut db) = global.db_manager.as_ref().get()
+                                && let Ok(inv) = db.get_shallow_invocation(&session_uuid)
+                                && let Some(end) = inv.end
+                                && std::time::SystemTime::now()
                                             .duration_since(end)
                                             .unwrap_or(std::time::Duration::from_secs(0))
-                                            > global.session_lock_time
-                                        {
-                                            already_over = true;
-                                        }
-                                    }
-                                }
+                                            > global.session_lock_time {
+                                    already_over = true;
                             }
                             if already_over {
                                 tracing::warn!("session already ended");
