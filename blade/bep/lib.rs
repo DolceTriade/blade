@@ -50,6 +50,11 @@ lazy_static! {
     );
 }
 
+enum BuildState {
+    BuildInProgress(String),
+    BuildFinished(state::Status)
+}
+
 trait EventHandler {
     fn handle_event(
         &self,
@@ -102,6 +107,84 @@ fn session_result(
     Ok(())
 }
 
+fn extract_session_id(obe: OrderedBuildEvent) -> std::result::Result<String, tonic::Status> {
+    let id = obe
+        .stream_id
+        .as_ref()
+        .map(|sid| sid.invocation_id.clone())
+        .ok_or_else(|| Status::invalid_argument("Missing stream id"))?;
+    Ok(id)
+}
+
+fn validate_stream(global: Arc<state::Global>, session_uuid: &str) -> std::core::Result<(), tonic::Status> {
+    let db = global.db_manager.as_ref().get().map_err(|e|tonic::Status::internal(format!("{e:#?}")))?;
+    let inv = db.get_shallow_invocation(session_uuid).map_err(|e|tonic::Status::not_found(format!("{e:#?}")))?;
+    if let Some(end) = inv.end && std::time::SystemTime::now().duration_since(end).unwrap_or(std::time::Duration::from_sec(0)) > global.session_lock_time {
+        Err(tonic::Status::failed_precondition("session already ended"));
+    }
+    Ok(())
+}
+
+async fn handle_ordered_build_event(
+    global: Arc<Global>,
+    session_uuid: &str,
+    _obe: OrderedBuildEvent,
+) -> std::core::Result<BuildState, tonic::Status> {
+    let mut build_ended = false;
+    let Some(event) = obe.event.as_ref().and_then(|event| event.event.as_ref()) else {
+        // If there is no event for some reason, just read the next event.
+        Ok(BuildState::BuildInProgress)
+    };
+    match event {
+        build_event::Event::BazelEvent(any) => {
+            let be = build_event_stream::BuildEvent::decode(&any.value[..]).map_err(|e| tonic::Status::invalid_argument(format!("badly formatted BuildEvent: {e:#?}")))?;
+            match be.payload.as_ref() {
+                Some(build_event_stream::build_event::Payload::Finished(f)) => {
+                    let success = f
+                        .exit_code
+                        .as_ref()
+                        .unwrap_or(&build_event_stream::build_finished::ExitCode {
+                            name: "idk".into(),
+                            code: 1,
+                        })
+                        .code
+                        == 0;
+                    let _ =
+                        session_result(global.db_manager.as_ref(), &uuid, success).map_err(|e| {
+                            tracing::error!("{session_uuid}: error closing stream: {e:#?}")
+                        });
+                },
+                Some(_) => {
+                    for v in &*handlers {
+                        if let Err(e) = v.handle_event(global.db_manager.as_ref(), &uuid, &be) {
+                            tracing::warn!("{:#?}", e);
+                            MESSAGE_HANDLER_ERRORS.inc();
+                        }
+                    }
+                },
+                _ => {},
+            }
+        },
+        build_event::Event::ComponentStreamFinished(_) => {
+            build_ended = true;
+        },
+        _ => {},
+    }
+    let send_fail = tx
+        .send(Ok(PublishBuildToolEventStreamResponse {
+            sequence_number: obe.sequence_number,
+            stream_id: obe.stream_id.clone(),
+        }))
+        .await
+        .inspect_err(|e| tracing::warn!("failed to send message: {:#?}", e))
+        .map(|_| false)
+        .unwrap_or(true);
+    if build_ended || send_fail {
+        tracing::info!("Build over");
+        return;
+    }
+}
+
 #[tonic::async_trait]
 impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     type PublishBuildToolEventStreamStream =
@@ -137,165 +220,26 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                 ACTIVE_STREAMS.dec();
             }
             loop {
-                let maybe_message = in_stream
-                    .message()
-                    .await
-                    .and_then(|msg| {
-                        msg.ok_or(Status::invalid_argument(
-                            "empty PublishBuildToolEventStreamRequest",
-                        ))
-                    })
-                    .and_then(|msg| {
-                        msg.ordered_build_event
-                            .ok_or(Status::invalid_argument("empty OrderedBuildEvent"))
-                    });
-                match maybe_message {
+                let Ok(msg) = tokio::time::timeout(std::time::Duration::from_mins(1), in_stream.message()).await else {
+                    tx.send(Err((tonic::Status::deadline_exceeded("failed to wait for timeout"))));
+                    return;
+                };
+                let handle = msg.ok().flatten().ok_or_else(||tonic::Status::invalid_argument("bad input message")).and_then(|msg| self.process_message(msg));
+
+                match handle {
                     Ok(obe) => {
-                        let mut build_ended = false;
-                        let stream_id_or = obe.stream_id.as_ref();
-                        if stream_id_or.is_none() {
-                            tracing::warn!("missing stream id");
-                            TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::InvalidArgument.into() }).inc();
-                            return;
-                        }
-                        let Some(uuid) = stream_id_or.map(|id| id.invocation_id.clone()) else {
-                            continue;
-                        };
                         if session_uuid.is_empty() {
-                            session_uuid = uuid.clone();
+                            session_uuid = extract_session_id(obe)?;
                             span.record("session_uuid", &session_uuid);
                             tracing::info!("Stream started");
-                            let mut already_over = false;
-                            if let Ok(mut db) = global.db_manager.as_ref().get()
-                                && let Ok(inv) = db.get_shallow_invocation(&session_uuid)
-                                && let Some(end) = inv.end
-                                && std::time::SystemTime::now()
-                                            .duration_since(end)
-                                            .unwrap_or(std::time::Duration::from_secs(0))
-                                            > global.session_lock_time {
-                                    already_over = true;
-                            }
-                            if already_over {
-                                tracing::warn!("session already ended");
-
-                                let _ = tx
-                                    .send(Err(Status::new(
-                                        tonic::Code::FailedPrecondition,
-                                        "session already ended",
-                                    )))
-                                    .await
-                                    .ok();
-                                TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::FailedPrecondition.into() }).inc();
-                                return;
-                            }
-
-                            if let Ok(mut db) = global.db_manager.as_ref().get() {
-                                let _ = db
-                                    .update_shallow_invocation(
-                                        &session_uuid,
-                                        Box::new(|i: &mut state::InvocationResults| {
-                                            i.status = state::Status::InProgress;
-                                            Ok(())
-                                        }),
-                                    )
-                                    .ok();
-                            }
+                            validate_stream(global, &session_uuid)?;
+                            // Best effort attempt to mark it in progress.
+                            _ = global.db_manager.as_ref().get().map(|db|db.update_shallow_invocation(&session_uuid, Box::new(|i| {
+                                i.status = state::Status::InProgress;
+                                Ok(())
+                            }))).ok();
                         }
-
-                        let Some(event) = obe.event.as_ref().and_then(|event| event.event.as_ref())
-                        else {
-                            continue;
-                        };
-                        match event {
-                            build_event::Event::BazelEvent(any) => {
-                                let be_or = build_event_stream::BuildEvent::decode(&any.value[..]);
-                                if be_or.is_err() {
-                                    let err_str =  format!("invalid event: {:#?}", be_or.unwrap_err());
-                                    {
-                                        let _ = unexpected_cleanup_session(
-                                            global.db_manager.as_ref(),
-                                            &uuid,
-                                        )
-                                        .map_err(|e| {
-                                            tracing::error!(
-                                                "{session_uuid}: error closing stream: {e:#?}"
-                                            )
-                                        });
-                                    }
-                                    tracing::error!("{}", err_str);
-                                    let _ = tx
-                                    .send(Err(Status::new(tonic::Code::InvalidArgument, err_str)))
-                                    .await
-                                    .ok();
-                                    drop(tx);
-                                    TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::InvalidArgument.into() }).inc();
-                                    return;
-                                }
-                                let Ok(be) = be_or else {
-                                    continue;
-                                };
-                                match be.payload.as_ref() {
-                                    Some(build_event_stream::build_event::Payload::Finished(f)) => {
-                                        let success = f
-                                            .exit_code
-                                            .as_ref()
-                                            .unwrap_or(
-                                                &build_event_stream::build_finished::ExitCode {
-                                                    name: "idk".into(),
-                                                    code: 1,
-                                                },
-                                            )
-                                            .code
-                                            == 0;
-                                        let _ = session_result(
-                                            global.db_manager.as_ref(),
-                                            &uuid,
-                                            success,
-                                        )
-                                        .map_err(|e| {
-                                            tracing::error!(
-                                                "{session_uuid}: error closing stream: {e:#?}"
-                                            )
-                                        });
-                                        if !success {
-                                            TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::Unknown.into() }).inc();
-                                        }
-                                    }
-                                    Some(_) => {
-                                        for v in &*handlers {
-                                            if let Err(e) = v.handle_event(
-                                                global.db_manager.as_ref(),
-                                                &uuid,
-                                                &be,
-                                            ) {
-                                                tracing::warn!("{:#?}", e);
-                                                MESSAGE_HANDLER_ERRORS.inc();
-                                            }
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                            }
-                            build_event::Event::ComponentStreamFinished(_) => {
-                                build_ended = true;
-                            }
-                            _ => {}
-                        }
-                        let send_fail = tx
-                            .send(Ok(PublishBuildToolEventStreamResponse {
-                                sequence_number: obe.sequence_number,
-                                stream_id: obe.stream_id.clone(),
-                            }))
-                            .await
-                            .inspect_err(|e| {
-                                tracing::warn!("failed to send message: {:#?}", e)
-                            })
-                            .map(|_| false)
-                            .unwrap_or(true);
-                        if build_ended || send_fail {
-                            tracing::info!("Build over");
-                            return;
-                        }
+                        handle_ordered_build_event(global, &session_uuid, obe)?;
                     }
                     Err(err) => {
                         // Tonic gives us this scary message for disconnects. It's really just a disconnect.
@@ -324,6 +268,16 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
         }.instrument(span!(Level::INFO, "bep_grpc_stream", "session_uuid" = tracing::field::Empty)));
         let out_stream = ReceiverStream::new(rx);
         return Ok(Response::new(out_stream));
+    }
+}
+
+impl BuildEventService {
+    fn process_message(&self, msg: build_proto::google::devtools::build::v1::PublishBuildToolEventStreamRequest) -> std::result::Result<BuildState, tonic::Status> {
+        let Some(obe) = msg.ordered_build_event else {
+            // If its not there, just try the next message.
+            return Ok(BuildState::BuildInProgress);
+        };
+        handle_ordered_build_event(self.state.clone(), session_uuid, obe)
     }
 }
 
