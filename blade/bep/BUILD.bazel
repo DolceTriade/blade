@@ -8,6 +8,7 @@ rust_library(
         "options.rs",
         "print_event.rs",
         "progress.rs",
+        "session.rs",
         "target.rs",
     ],
     data = [
