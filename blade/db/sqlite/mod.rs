@@ -19,7 +19,7 @@ impl Sqlite {
     pub fn new(
         mut conn: PooledConnection<ConnectionManager<InstrumentedSqliteConnection>>,
     ) -> anyhow::Result<Self> {
-        diesel::sql_query("PRAGMA foreign_keys = ON;PRAGMA journal_mode = WAL;")
+        diesel::sql_query("PRAGMA foreign_keys = ON;")
             .execute(&mut conn)
             .context("failed to enable foreign keys")?;
         Ok(Self { conn })
@@ -28,6 +28,9 @@ impl Sqlite {
 
 pub fn init_db(db_path: &str) -> anyhow::Result<()> {
     let mut me = InstrumentedSqliteConnection::establish(db_path).context("creating sqlite db")?;
+    diesel::sql_query("PRAGMA journal_mode = WAL;")
+        .execute(&mut me)
+        .context("failed to set WAL mode")?;
     diesel::sql_query("PRAGMA foreign_keys = ON;")
         .execute(&mut me)
         .context("failed to enable foreign keys")?;
