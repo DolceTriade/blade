@@ -54,6 +54,8 @@ impl BESSession {
             span.record("session_uuid", &self.invocation_id);
             tracing::info!("Stream started");
             validate_stream(self.global.clone(), &self.invocation_id)?;
+            create_invocation(&*self.global.db_manager, &self.invocation_id)
+                .map_err(|e| tonic::Status::internal(format!("{e:#?}")))?;
         }
         let Some(obe) = msg.ordered_build_event else {
             return Err(tonic::Status::invalid_argument("Empty OBE"));
@@ -174,5 +176,16 @@ fn write_session_result(
             Ok(())
         }),
     )?;
+    Ok(())
+}
+
+fn create_invocation(db_mgr: &dyn DBManager, invocation_id: &str) -> anyhow::Result<()> {
+    let mut db = db_mgr.get()?;
+    db.upsert_shallow_invocation(&state::InvocationResults {
+        id: invocation_id.to_string(),
+        status: state::Status::InProgress,
+        start: std::time::SystemTime::now(),
+        ..Default::default()
+    })?;
     Ok(())
 }

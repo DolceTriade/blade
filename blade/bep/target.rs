@@ -11,6 +11,7 @@ fn target_label(
     let id = outer_id.id.as_ref();
     let label = match id {
         Some(build_event_stream::build_event_id::Id::TargetConfigured(t)) => &t.label,
+        Some(build_event_stream::build_event_id::Id::UnconfiguredLabel(t)) => &t.label,
         Some(build_event_stream::build_event_id::Id::TargetCompleted(t)) => &t.label,
         Some(build_event_stream::build_event_id::Id::TestSummary(t)) => &t.label,
         Some(build_event_stream::build_event_id::Id::TestResult(t)) => &t.label,
@@ -93,7 +94,7 @@ impl crate::EventHandler for Handler {
                         end: None,
                     },
                 )
-                .context("failed to insert target")?;
+                .context(format!("failed to insert target:{label}"))?;
             },
             Some(build_event_stream::build_event::Payload::Completed(t)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
@@ -108,7 +109,7 @@ impl crate::EventHandler for Handler {
                     },
                     std::time::SystemTime::now(),
                 )
-                .context("failed to update target result")?;
+                .context(format!("failed to update target result: {label}"))?;
             },
             Some(build_event_stream::build_event::Payload::Aborted(a)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
@@ -118,14 +119,26 @@ impl crate::EventHandler for Handler {
                     invocation_id,
                     &label,
                     match build_event_stream::aborted::AbortReason::try_from(a.reason) {
-                        Ok(build_event_stream::aborted::AbortReason::Skipped) => {
+                        Ok(build_event_stream::aborted::AbortReason::Skipped|build_event_stream::aborted::AbortReason::UserInterrupted) => {
                             state::Status::Skip
                         },
                         _ => state::Status::Fail,
                     },
                     std::time::SystemTime::now(),
-                )
-                .context("failed to update target result")?;
+                ).or_else(|_| {
+                    // If the target was not found, we can still log the abort
+                    db.upsert_target(
+                        invocation_id,
+                        &state::Target {
+                            name: label.to_string(),
+                            status: state::Status::Fail,
+                            kind: "unknown".to_string(),
+                            start: std::time::SystemTime::now(),
+                            end: Some(std::time::SystemTime::now()),
+                        },
+                    )
+                })
+                .context(format!("failed to update target result: {label}"))?;
             },
             Some(build_event_stream::build_event::Payload::TestSummary(summary)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
@@ -147,7 +160,7 @@ impl crate::EventHandler for Handler {
                     num_runs: summary.run_count as usize,
                 };
                 db.upsert_test(invocation_id, &test)
-                    .context("failed to insert test")?;
+                    .context(format!("failed to insert test: {label}"))?;
             },
             Some(build_event_stream::build_event::Payload::TestResult(r)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
@@ -187,9 +200,9 @@ impl crate::EventHandler for Handler {
                 test.num_runs = std::cmp::max(test.num_runs, info.1.run as usize);
                 let test_id = db
                     .upsert_test(invocation_id, &test)
-                    .context("failed to update test")?;
+                    .context(format!("failed to update test: {}", info.0))?;
                 db.upsert_test_run(invocation_id, &test_id, &info.1)
-                    .context("error inserting test run")?;
+                    .context(format!("error inserting test run: {}", info.0))?;
             },
             _ => {},
         }
