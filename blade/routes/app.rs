@@ -39,7 +39,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <div
                 id="root"
-                class="h-screen w-screen max-w-screen max-h-screen dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white overflow-clip"
+                class="h-screen w-screen max-w-screen max-h-screen dark:bg-gray-800 dark:placeholder-gray-400 dark:text-white"
                 class:dark=move || dark_mode.read().0
             >
                 <Nav name="Blade" logo="/assets/logo.svg" />
