@@ -1,5 +1,5 @@
 {
-  "checksum": "a76e19127f273f0981570e1ed069d68b12772bc3e1ff3e8315c4aed23adece30",
+  "checksum": "c497b5b8ebd6106464405aff20d986902fddef975e5177100ade6235c62706d7",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -5723,14 +5723,14 @@
       ],
       "license_file": "LICENSE"
     },
-    "diesel 2.2.7": {
+    "diesel 2.2.11": {
       "name": "diesel",
-      "version": "2.2.7",
+      "version": "2.2.11",
       "package_url": "https://github.com/diesel-rs/diesel",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/diesel/2.2.7/download",
-          "sha256": "04001f23ba8843dc315804fa324000376084dfb1c30794ff68dd279e6e5696d5"
+          "url": "https://static.crates.io/crates/diesel/2.2.11/download",
+          "sha256": "a917a9209950404d5be011c81d081a2692a822f73c3d6af586f0cab5ff50f614"
         }
       },
       "targets": [
@@ -5859,7 +5859,7 @@
           ],
           "selects": {}
         },
-        "version": "2.2.7"
+        "version": "2.2.11"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -5910,7 +5910,7 @@
         "deps": {
           "common": [
             {
-              "id": "diesel 2.2.7",
+              "id": "diesel 2.2.11",
               "target": "diesel"
             },
             {
@@ -6050,7 +6050,7 @@
         "deps": {
           "common": [
             {
-              "id": "diesel 2.2.7",
+              "id": "diesel 2.2.11",
               "target": "diesel"
             },
             {
@@ -6252,7 +6252,7 @@
               "target": "clap"
             },
             {
-              "id": "diesel 2.2.7",
+              "id": "diesel 2.2.11",
               "target": "diesel"
             },
             {
@@ -28220,7 +28220,7 @@
     "cfg-if 1.0.0",
     "clap 4.5.32",
     "derivative 2.2.0",
-    "diesel 2.2.7",
+    "diesel 2.2.11",
     "diesel-tracing 0.3.1",
     "diesel_migrations 2.2.0",
     "futures 0.3.31",

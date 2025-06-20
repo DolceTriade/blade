@@ -25,15 +25,15 @@ assert lib.assertMsg (lib.elem true [
 ]) "support for at least one database must be enabled";
   rustPlatform.buildRustPackage rec {
     pname = "diesel-cli";
-    version = "2.2.6";
+    version = "2.2.11";
 
     src = fetchCrate {
       inherit version;
       crateName = "diesel_cli";
-      hash = "sha256-jKTQxlmpTlb0eITwNbnYfONknGhHsO/nzdup04ikEB0=";
+      hash = "sha256-utiIuifPxHjvC0TkY2XLeOlqReaal/4T4hrJ7tmQ27k=";
     };
 
-    cargoHash = "sha256-mMXLivUWH5LIdFbAxgkha8oEYZFt0eUVCxtyPlBPpVI=";
+    cargoHash = "sha256-QHcH0jgBAYtyYJoaBJW92HR5ZBgdMLupe5+l22Wpfjg=";
 
     nativeBuildInputs = [
       installShellFiles

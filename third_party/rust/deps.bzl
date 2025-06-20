@@ -125,7 +125,7 @@ def rust_dependencies():
                 version = "2.2.0",
             ),
             "diesel": crate.spec(
-                version = "2.2.6",
+                version = "2.2.11",
                 features = ["extras", "sqlite", "postgres", "returning_clauses_for_sqlite_3_35", "r2d2"],
             ),
             "diesel_migrations": crate.spec(
