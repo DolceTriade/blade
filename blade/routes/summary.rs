@@ -26,7 +26,7 @@ pub async fn get_output(uuid: String) -> Result<String, ServerFnError> {
 #[component]
 pub fn Summary() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
-    let (output, set_output) = signal("".to_string());
+    let (output, set_output) = signal("Loading...".to_string());
     let output_res = LocalResource::new(move||{
         let id = invocation.read_only().read().id.clone();
         async move {

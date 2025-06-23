@@ -20,7 +20,7 @@ impl crate::EventHandler for Handler {
             return Ok(());
         }
         let desc = event.descriptor();
-        let dm = event.transcode_to_dynamic();
+        let mut dm: prost_reflect::DynamicMessage = event.transcode_to_dynamic();
         let oneof = match desc.oneofs().next() {
             None => {
                 return Ok(());
@@ -30,6 +30,7 @@ impl crate::EventHandler for Handler {
         let _ = oneof.fields().try_for_each(|f| {
             if dm.has_field(&f) && re.is_match(f.field_descriptor_proto().type_name()) {
                 let type_name = f.field_descriptor_proto().name();
+                dm.clear_field_by_name("children");
                 let j = serde_json::ser::to_string(&dm).map_err(|_| ())?;
                 tracing::info!(type_name, "{}", j);
                 return Err(());

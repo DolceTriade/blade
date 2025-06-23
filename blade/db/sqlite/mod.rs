@@ -239,9 +239,7 @@ impl state::DB for Sqlite {
             .order(schema::InvocationOutput::id.asc())
             .load::<String>(&mut self.conn)
         {
-            Ok(res) => {
-                Ok(res.join("\n"))
-            },
+            Ok(res) => Ok(res.join("\n")),
             Err(e) => match e {
                 diesel::result::Error::NotFound => Ok("".to_string()),
                 _ => Err(e).context("failed to get progress"),
@@ -252,7 +250,7 @@ impl state::DB for Sqlite {
     fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()> {
         let to_delete = schema::InvocationOutput::table
             .filter(schema::InvocationOutput::invocation_id.eq(id))
-            .order(schema::InvocationOutput::id.asc())
+            .order(schema::InvocationOutput::id.desc())
             .limit(num_lines.into())
             .select(schema::InvocationOutput::id)
             .load::<i32>(&mut self.conn);
@@ -827,5 +825,36 @@ mod tests {
         assert_eq!(res.cmd_line, opts.cmd_line);
         assert_eq!(res.explicit_cmd_line, opts.explicit_cmd_line);
         assert_eq!(res.build_metadata, opts.build_metadata);
+    }
+
+    fn make<S>(lines: &[S]) -> Vec<String>
+    where
+        S: ToString,
+    {
+        lines.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn test_progress() {
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let db_path = tmp.path().join("test.db");
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+        let inv = state::InvocationResults {
+            id: "blah".to_string(),
+            command: "test".to_string(),
+            status: state::Status::Fail,
+            start: std::time::SystemTime::now(),
+            ..Default::default()
+        };
+        db.upsert_shallow_invocation(&inv).unwrap();
+        let initial = vec!["a", "b", "c", "d"];
+        db.insert_output_lines(&inv.id, make(&initial)).unwrap();
+        let prog = db.get_progress(&inv.id).unwrap();
+        assert_eq!(prog, "a\nb\nc\nd");
+        db.delete_last_output_lines(&inv.id, 2_u32).unwrap();
+        let prog = db.get_progress(&inv.id).unwrap();
+        assert_eq!(prog, "a\nb");
     }
 }

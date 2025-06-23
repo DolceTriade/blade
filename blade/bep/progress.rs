@@ -9,20 +9,20 @@ pub(crate) struct Handler {}
 fn cleanup(stdout: &str, stderr: &str) -> (u32, Vec<String>) {
     let clean_stdout = stdout.replace('\r', "");
     let clean_stderr = stderr.replace('\r', "");
-    let err_lines = clean_stderr.split('\n');
-    let mut lines = clean_stdout
+    let out_lines = clean_stdout.split('\n');
+    let mut lines = clean_stderr
         .split('\n')
-        .chain(err_lines)
+        .chain(out_lines)
         .map(String::from)
         .collect::<Vec<_>>();
     let mut to_remove = vec![];
     let mut database_remove = 0;
     for (i, l) in lines.iter_mut().enumerate() {
-        // This logic assumes that this delete lines sequence is always on a line of its own.
-        // This happens to be the case in Bazel.
+        // This logic assumes that this delete lines sequence is always on a line of its
+        // own. This happens to be the case in Bazel.
         let c = l.matches(DELETE_LINE_SEQ).count();
         for j in 0..c {
-            if i - 1 < j {
+            if i == 0 || i - 1 < j {
                 database_remove = std::cmp::max(j + 1 - i, database_remove);
                 continue;
             }
@@ -87,7 +87,7 @@ impl crate::EventHandler for Handler {
 
 #[cfg(test)]
 mod tests {
-    use crate::progress::{cleanup, DELETE_LINE_SEQ};
+    use crate::progress::{DELETE_LINE_SEQ, cleanup};
 
     fn make<S, T>(del: T, lines: &[S]) -> (u32, Vec<String>)
     where
@@ -99,12 +99,30 @@ mod tests {
 
     #[test]
     fn test_cleanup() {
-        assert_eq!(cleanup("a", "b"), make(0_u32, &["a", "b"]));
+        assert_eq!(cleanup("a", "b"), make(0_u32, &["b", "a"]));
         assert_eq!(cleanup("", "b"), make(0_u32, &["b"]));
         assert_eq!(cleanup("a", ""), make(0_u32, &["a"]));
         assert_eq!(cleanup("", ""), (0_u32, Vec::new()));
-        assert_eq!(cleanup(&("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ), "ab"), make(0_u32, &["ab"]));
-        assert_eq!(cleanup(&("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ), "ab"), make(0_u32, &["ab"]));
-        assert_eq!(cleanup(&("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ + DELETE_LINE_SEQ), "ab"), make(1_u32, &["ab"]));
+        assert_eq!(
+            cleanup(
+                &("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ),
+                "ab"
+            ),
+            make(0_u32, &["ab"])
+        );
+        assert_eq!(
+            cleanup(
+                &("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ),
+                "ab"
+            ),
+            make(0_u32, &["ab"])
+        );
+        assert_eq!(
+            cleanup(
+                &("a\r\nb\r\n".to_owned() + DELETE_LINE_SEQ + DELETE_LINE_SEQ + DELETE_LINE_SEQ),
+                "ab"
+            ),
+            (0, vec![])
+        );
     }
 }
