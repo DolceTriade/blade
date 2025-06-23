@@ -70,7 +70,6 @@ pub struct InvocationResults {
     pub targets: HashMap<String, Target>,
     pub tests: HashMap<String, Test>,
     pub status: Status,
-    pub output: String,
     pub start: std::time::SystemTime,
     pub end: Option<std::time::SystemTime>,
     pub command: String,
@@ -84,7 +83,6 @@ impl Default for InvocationResults {
             targets: HashMap::new(),
             tests: HashMap::new(),
             status: Status::Unknown,
-            output: "".into(),
             command: "".into(),
             pattern: vec![],
             start: std::time::UNIX_EPOCH,
@@ -125,6 +123,8 @@ pub trait DB {
     fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
     fn insert_options(&mut self, id: &str, options: &BuildOptions) -> anyhow::Result<()>;
     fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
+    fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()>;
+    fn insert_output_lines(&mut self, id: &str, lines: Vec<String>) -> anyhow::Result<()>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 use anyhow::{Context, anyhow};
 use diesel::{prelude::*, r2d2::ConnectionManager};
@@ -111,7 +111,6 @@ impl state::DB for Postgres {
                 Ok(state::InvocationResults {
                     id: res.id.to_string(),
                     status: state::Status::parse(&res.status),
-                    output: res.output,
                     start: crate::time::to_systemtime(&res.start)?,
                     end: res
                         .end
@@ -226,17 +225,65 @@ impl state::DB for Postgres {
     }
 
     fn get_progress(&mut self, invocation_id: &str) -> anyhow::Result<String> {
-        match schema::invocations::table
-            .select(models::Invocation::as_select())
-            .filter(schema::invocations::id.eq(invocation_id))
-            .get_result(&mut self.conn)
+        match schema::invocationoutput::table
+            .select(schema::invocationoutput::line)
+            .filter(schema::invocationoutput::invocation_id.eq(invocation_id))
+            .order(schema::invocationoutput::id.asc())
+            .load::<String>(&mut self.conn)
         {
-            Ok(res) => Ok(res.output),
+            Ok(res) => {
+                Ok(res.join("\n"))
+            },
             Err(e) => match e {
                 diesel::result::Error::NotFound => Ok("".to_string()),
                 _ => Err(e).context("failed to get progress"),
             },
         }
+    }
+
+    fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()> {
+        let to_delete = schema::invocationoutput::table
+            .filter(schema::invocationoutput::invocation_id.eq(id))
+            .order(schema::invocationoutput::id.asc())
+            .limit(num_lines.into())
+            .select(schema::invocationoutput::id)
+            .load::<i32>(&mut self.conn);
+        if let Err(e) = to_delete {
+            match e {
+                diesel::result::Error::NotFound => {
+                    return Ok(());
+                },
+                _ => {
+                    return Err(e.into());
+                },
+            }
+        }
+        let to_delete = to_delete.unwrap();
+        if to_delete.is_empty() {
+            return Ok(());
+        }
+
+        diesel::delete(
+            schema::invocationoutput::table.filter(schema::invocationoutput::id.eq_any(to_delete)),
+        )
+        .execute(&mut self.conn)?;
+
+        Ok(())
+    }
+
+    fn insert_output_lines(&mut self, id: &str, lines: Vec<String>) -> anyhow::Result<()> {
+        let input = lines
+            .into_iter()
+            .map(|l| models::InvocationOutput {
+                invocation_id: id.to_string(),
+                line: l,
+            })
+            .collect::<Vec<models::InvocationOutput>>();
+        diesel::insert_into(schema::invocationoutput::table)
+            .values(&input)
+            .execute(&mut self.conn)
+            .map(|_| ())
+            .context("failed to insert lines")
     }
 
     fn get_shallow_invocation(
@@ -420,9 +467,8 @@ mod tests {
         let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
         let mut db = mgr.get().unwrap();
         let mut conn = PgConnection::establish(&uri).unwrap();
-        let mut inv = state::InvocationResults {
+        let inv = state::InvocationResults {
             id: "blah".to_string(),
-            output: "whatever".to_string(),
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
@@ -436,9 +482,7 @@ mod tests {
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
-            assert_eq!(res.output, inv.output);
         }
-        inv.output.push_str("more output");
         db.upsert_shallow_invocation(&inv).unwrap();
         {
             let res = schema::invocations::table
@@ -447,7 +491,6 @@ mod tests {
                 .get_result(&mut conn)
                 .unwrap();
             assert_eq!(res.id, inv.id);
-            assert_eq!(res.output, inv.output);
         }
     }
 
@@ -463,7 +506,6 @@ mod tests {
 
         let inv = state::InvocationResults {
             id: "blah".to_string(),
-            output: "whatever".to_string(),
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
@@ -525,7 +567,6 @@ mod tests {
 
         let inv = state::InvocationResults {
             id: "blah".to_string(),
-            output: "whatever".to_string(),
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
@@ -584,7 +625,6 @@ mod tests {
 
         let mut inv = state::InvocationResults {
             id: "blah".to_string(),
-            output: "whatever".to_string(),
             command: "test".to_string(),
             status: state::Status::InProgress,
             start: std::time::SystemTime::now(),
@@ -760,7 +800,6 @@ mod tests {
         };
         let inv = state::InvocationResults {
             id: "blah".to_string(),
-            output: "whatever".to_string(),
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
