@@ -270,15 +270,7 @@ impl TestArtifact {
 }
 
 #[derive(
-    Serialize,
-    Deserialize,
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Insertable,
-    AsChangeset,
-    Associations,
+    Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Insertable, AsChangeset, Associations,
 )]
 #[diesel(table_name = super::schema::invocationoutput)]
 #[diesel(belongs_to(Invocation, foreign_key = invocation_id))]

@@ -19,8 +19,8 @@ pub async fn get_invocation(uuid: String) -> Result<state::InvocationResults, Se
 }
 
 #[derive(PartialEq, Params)]
-struct InvocationParams {
-    id: Option<String>,
+pub(crate) struct InvocationParams {
+    pub(crate) id: Option<String>,
 }
 
 #[allow(non_snake_case)]
@@ -42,15 +42,20 @@ pub fn Invocation() -> impl IntoView {
         }
     });
     Effect::new(move || {
-        if res.read().is_none() {
-            return;
-        }
-        if res.read().as_ref().is_some_and(|ir| {
-            ir.as_ref().map_or(true, |i| {
-                matches!(i.status, state::Status::Success | state::Status::Fail)
-            })
-        }) {
-            return;
+        match (*res.read()).as_ref() {
+            None => {
+                return;
+            },
+            Some(Err(_)) => {
+                return;
+            },
+            Some(Ok(inv)) => {
+                let done = matches!(inv.status, state::Status::Success | state::Status::Fail);
+                invocation.set(inv.clone());
+                if done {
+                    return;
+                }
+            },
         }
         set_timeout(move || res.refetch(), std::time::Duration::from_secs(2));
     });
@@ -68,10 +73,7 @@ pub fn Invocation() -> impl IntoView {
                     None => view! { <div>"Loading..."</div> }.into_any(),
                     Some(i) => {
                         match i {
-                            Ok(i) => {
-                                invocation.set(i.clone());
-                                view! { <Outlet /> }.into_any()
-                            }
+                            Ok(_) => view! { <Outlet /> }.into_any(),
                             Err(e) => {
                                 view! {
                                     <div>

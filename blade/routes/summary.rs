@@ -2,12 +2,16 @@
 use std::sync::Arc;
 
 use leptos::prelude::*;
+use leptos_router::hooks::use_params;
 
-use crate::components::{
-    card::Card,
-    summaryheader::SummaryHeader,
-    targetlist::TargetList,
-    shellout::ShellOut,
+use crate::{
+    components::{
+        card::Card,
+        shellout::ShellOut,
+        summaryheader::SummaryHeader,
+        targetlist::TargetList,
+    },
+    routes::invocation::InvocationParams,
 };
 
 #[cfg(feature = "ssr")]
@@ -25,20 +29,30 @@ pub async fn get_output(uuid: String) -> Result<String, ServerFnError> {
 #[allow(non_snake_case)]
 #[component]
 pub fn Summary() -> impl IntoView {
-    let invocation = expect_context::<RwSignal<state::InvocationResults>>();
+    let params = use_params::<InvocationParams>();
     let (output, set_output) = signal("Loading...".to_string());
-    let output_res = LocalResource::new(move||{
-        let id = invocation.read_only().read().id.clone();
+    let output_res = LocalResource::new(move || {
+        let id = params
+            .with(|p| p.as_ref().map(|p| p.id.clone()).unwrap_or_default())
+            .unwrap_or_default();
         async move {
+            if id.is_empty() {
+                return "".to_string();
+            }
             match get_output(id).await {
                 Ok(v) => v,
                 Err(e) => format!("{e:#?}"),
             }
         }
     });
-    Effect::new(move|| {
+    Effect::new(move || {
         let output = output_res.read();
-        set_output(output.as_ref().map(|s|s.clone()).unwrap_or_default());
+        set_output(
+            output
+                .as_ref()
+                .map(|s| s.clone())
+                .unwrap_or("Loading...".to_string()),
+        );
     });
 
     view! {
