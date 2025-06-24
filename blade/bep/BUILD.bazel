@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
 rust_library(
     name = "bep",
@@ -46,4 +46,10 @@ rust_library(
         "@crate//:walkdir",
         "@rules_rust//tools/runfiles",
     ],
+)
+
+rust_test(
+    name = "bep_test",
+    size = "small",
+    crate = ":bep",
 )

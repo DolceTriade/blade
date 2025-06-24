@@ -6,7 +6,6 @@ diesel::table! {
         status -> Text,
         start -> Timestamptz,
         end -> Nullable<Timestamptz>,
-        output -> Text,
         command -> Text,
         pattern -> Nullable<Text>,
     }
@@ -69,6 +68,14 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    invocationoutput (id) {
+        id -> Int4,
+        invocation_id -> Text,
+        line -> Text,
+    }
+}
+
 diesel::joinable!(options -> invocations (invocation_id));
 diesel::joinable!(targets -> invocations (invocation_id));
 diesel::joinable!(testartifacts -> invocations (invocation_id));
@@ -76,6 +83,7 @@ diesel::joinable!(testartifacts -> testruns (test_run_id));
 diesel::joinable!(testruns -> invocations (invocation_id));
 diesel::joinable!(testruns -> tests (test_id));
 diesel::joinable!(tests -> invocations (invocation_id));
+diesel::joinable!(invocationoutput -> invocations (invocation_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     invocations,

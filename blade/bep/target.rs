@@ -119,13 +119,15 @@ impl crate::EventHandler for Handler {
                     invocation_id,
                     &label,
                     match build_event_stream::aborted::AbortReason::try_from(a.reason) {
-                        Ok(build_event_stream::aborted::AbortReason::Skipped|build_event_stream::aborted::AbortReason::UserInterrupted) => {
-                            state::Status::Skip
-                        },
+                        Ok(
+                            build_event_stream::aborted::AbortReason::Skipped
+                            | build_event_stream::aborted::AbortReason::UserInterrupted,
+                        ) => state::Status::Skip,
                         _ => state::Status::Fail,
                     },
                     std::time::SystemTime::now(),
-                ).or_else(|_| {
+                )
+                .or_else(|_| {
                     // If the target was not found, we can still log the abort
                     db.upsert_target(
                         invocation_id,

@@ -22,7 +22,6 @@ pub struct Invocation {
     pub status: String,
     pub start: time::OffsetDateTime,
     pub end: Option<time::OffsetDateTime>,
-    pub output: String,
     pub command: String,
     pub pattern: Option<String>,
 }
@@ -34,7 +33,6 @@ impl Invocation {
             status: ir.status.to_string(),
             start: ir.start.into(),
             end: ir.end.map(core::convert::Into::into),
-            output: ir.output.clone(),
             command: ir.command.clone(),
             pattern: Some(ir.pattern.join(",")),
         })
@@ -44,7 +42,6 @@ impl Invocation {
         state::InvocationResults {
             id: self.id,
             status: state::Status::parse(&self.status),
-            output: self.output,
             start: crate::time::to_systemtime(&self.start)
                 .unwrap_or_else(|_| std::time::SystemTime::now()),
             end: self.end.map(|e| {
@@ -275,4 +272,25 @@ impl TestArtifact {
             uri: t.uri.clone(),
         }
     }
+}
+
+#[derive(
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Queryable,
+    QueryableByName,
+    Selectable,
+    Insertable,
+    AsChangeset,
+    Associations,
+)]
+#[diesel(table_name = super::schema::InvocationOutput)]
+#[diesel(belongs_to(Invocation, foreign_key = invocation_id))]
+pub struct InvocationOutput {
+    pub invocation_id: String,
+    pub line: String,
 }
