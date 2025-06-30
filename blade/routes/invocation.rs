@@ -6,8 +6,6 @@ use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{hooks::use_params, nested_router::Outlet, params::Params};
 
-use crate::components::tooltip::Tooltip;
-
 #[cfg(feature = "ssr")]
 pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
     ServerFnError::ServerError(format!("Invocation {e} not found"))
@@ -92,15 +90,13 @@ pub fn Invocation() -> impl IntoView {
                 }
             } else {
                 view! {
-                    <Tooltip tooltip=move || view! { <span class="p-2">In Progress</span> }>
-                        <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
-                            <img
-                                class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
-                                src="/assets/logo.svg"
-                            />
-                            <p>Loading...</p>
-                        </div>
-                    </Tooltip>
+                    <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
+                        <img
+                            class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
+                            src="/assets/logo.svg"
+                        />
+                        <p>Loading...</p>
+                    </div>
                 }
                     .into_any()
             }
