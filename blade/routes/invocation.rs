@@ -30,6 +30,8 @@ pub(crate) struct InvocationParams {
 pub fn Invocation() -> impl IntoView {
     let params = use_params::<InvocationParams>();
     let invocation = RwSignal::new(state::InvocationResults::default());
+    let (loaded, set_loaded) = signal(false);
+    let (error, set_error) = signal(None);
     provide_context(invocation);
     let load_invocation = move |id: String| async move { get_invocation(id).await };
     let res = LocalResource::new(move || {
@@ -48,11 +50,19 @@ pub fn Invocation() -> impl IntoView {
             None => {
                 return;
             },
-            Some(Err(_)) => {
+            Some(Err(e)) => {
+                set_error(Some(format!("{e:#?}")));
+                set_loaded(true);
                 return;
             },
             Some(Ok(inv)) => {
-                let done = matches!(inv.status, state::Status::Success | state::Status::Fail);
+                if !*loaded.read() {
+                    set_loaded(true);
+                }
+                let done = matches!(
+                    inv.status,
+                    state::Status::Success | state::Status::Fail | state::Status::Skip
+                );
                 invocation.set(inv.clone());
                 if done {
                     return;
@@ -68,33 +78,32 @@ pub fn Invocation() -> impl IntoView {
                 .with(|p| p.as_ref().map(|p| p.id.clone().unwrap_or_default()).unwrap_or_default())
         } />
         {move || {
-            res.with(|i| match i {
-                None => view! {
-                    <Tooltip tooltip=move || view! { <span class="p-2">In Progress</span> }>
-                         <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
-                             <img
-                                 class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
-                                 src="/assets/logo.svg"
-                             />
-                             <p>Loading...</p>
-                         </div>
-                     </Tooltip>
-                }.into_any(),
-                Some(i) => {
-                    match i {
-                        Ok(_) => view! { <Outlet /> }.into_any(),
-                        Err(e) => {
-                            view! {
-                                <div>
-                                    <pre>{format!("{e:#?}")}</pre>
-                                </div>
-                            }
-                                .into_any()
+            if *loaded.read() {
+                match error.read().as_ref() {
+                    None => view! { <Outlet /> }.into_any(),
+                    Some(e) => {
+                        view! {
+                            <div>
+                                <pre>{e.clone()}</pre>
+                            </div>
                         }
+                            .into_any()
                     }
                 }
-            })
+            } else {
+                view! {
+                    <Tooltip tooltip=move || view! { <span class="p-2">In Progress</span> }>
+                        <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
+                            <img
+                                class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
+                                src="/assets/logo.svg"
+                            />
+                            <p>Loading...</p>
+                        </div>
+                    </Tooltip>
+                }
+                    .into_any()
+            }
         }}
-
     }
 }

@@ -30,7 +30,8 @@ pub async fn get_output(uuid: String) -> Result<String, ServerFnError> {
 #[component]
 pub fn Summary() -> impl IntoView {
     let params = use_params::<InvocationParams>();
-    let (output, set_output) = signal("Loading...".to_string());
+    let invocation = expect_context::<RwSignal<state::InvocationResults>>();
+    let (output, set_output) = signal("".to_string());
     let output_res = LocalResource::new(move || {
         let id = params
             .with(|p| p.as_ref().map(|p| p.id.clone()).unwrap_or_default())
@@ -46,13 +47,25 @@ pub fn Summary() -> impl IntoView {
         }
     });
     Effect::new(move || {
-        let output = output_res.read();
-        set_output(
-            output
-                .as_ref()
-                .map(|s| s.clone())
-                .unwrap_or("Loading...".to_string()),
+        let out = output_res.read();
+        match out.as_ref() {
+            Some(out) => set_output(out.clone()),
+            None => {
+                if output.with(|o| o.is_empty()) {
+                    set_output("Loading...".to_string());
+                }
+            },
+        }
+        let done = matches!(
+            invocation.read_untracked().status,
+            state::Status::Success | state::Status::Fail | state::Status::Skip
         );
+        if !done {
+            set_timeout(
+                move || output_res.refetch(),
+                std::time::Duration::from_secs(10),
+            );
+        }
     });
 
     view! {
