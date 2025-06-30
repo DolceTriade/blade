@@ -6,6 +6,8 @@ use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{hooks::use_params, nested_router::Outlet, params::Params};
 
+use crate::components::tooltip::Tooltip;
+
 #[cfg(feature = "ssr")]
 pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
     ServerFnError::ServerError(format!("Invocation {e} not found"))
@@ -65,28 +67,34 @@ pub fn Invocation() -> impl IntoView {
             params
                 .with(|p| p.as_ref().map(|p| p.id.clone().unwrap_or_default()).unwrap_or_default())
         } />
-        <Transition fallback=move || {
-            view! { <p>"Loading..."</p> }
-        }>
-            {move || {
-                res.with(|i| match i {
-                    None => view! { <div>"Loading..."</div> }.into_any(),
-                    Some(i) => {
-                        match i {
-                            Ok(_) => view! { <Outlet /> }.into_any(),
-                            Err(e) => {
-                                view! {
-                                    <div>
-                                        <pre>{format!("{e:#?}")}</pre>
-                                    </div>
-                                }
-                                    .into_any()
+        {move || {
+            res.with(|i| match i {
+                None => view! {
+                    <Tooltip tooltip=move || view! { <span class="p-2">In Progress</span> }>
+                         <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
+                             <img
+                                 class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
+                                 src="/assets/logo.svg"
+                             />
+                             <p>Loading...</p>
+                         </div>
+                     </Tooltip>
+                }.into_any(),
+                Some(i) => {
+                    match i {
+                        Ok(_) => view! { <Outlet /> }.into_any(),
+                        Err(e) => {
+                            view! {
+                                <div>
+                                    <pre>{format!("{e:#?}")}</pre>
+                                </div>
                             }
+                                .into_any()
                         }
                     }
-                })
-            }}
+                }
+            })
+        }}
 
-        </Transition>
     }
 }
