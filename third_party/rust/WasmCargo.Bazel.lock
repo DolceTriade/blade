@@ -1,5 +1,5 @@
 {
-  "checksum": "8eea3d1690b79d76d79ccf5a9ad5caf88d52d581cbb3f097b8804e0c99f24da2",
+  "checksum": "6139ed847728a3dab72f8ba5e4a6506d9a0b793b348e4342a94018fb6000990f",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -5492,7 +5492,8 @@
         ],
         "crate_features": {
           "common": [
-            "default"
+            "default",
+            "tracing"
           ],
           "selects": {}
         },
@@ -5521,6 +5522,10 @@
             {
               "id": "send_wrapper 0.6.0",
               "target": "send_wrapper"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "wasm-bindgen 0.2.100",
@@ -5583,6 +5588,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "tracing"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -5636,6 +5647,10 @@
             {
               "id": "thiserror 2.0.12",
               "target": "thiserror"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "url 2.5.0",

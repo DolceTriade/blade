@@ -1,5 +1,5 @@
 {
-  "checksum": "d16e25a658b6fed10fad2c5bdd8b96f04a6577ad131d88752b8f94ceca0b003b",
+  "checksum": "392f4b78b8f9b094c94cbd274988b27663c7fe06de190af5735b91bf4523f2ec",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -10489,7 +10489,8 @@
             "nightly",
             "nonce",
             "rand",
-            "ssr"
+            "ssr",
+            "tracing"
           ],
           "selects": {}
         },
@@ -10596,6 +10597,10 @@
               "target": "throw_error"
             },
             {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
+            },
+            {
               "id": "typed-builder 0.21.0",
               "target": "typed_builder"
             },
@@ -10685,6 +10690,12 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": {
+          "common": [
+            "tracing"
+          ],
+          "selects": {}
+        },
         "deps": {
           "common": [
             {
@@ -10758,6 +10769,10 @@
             {
               "id": "tokio 1.44.2",
               "target": "tokio"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             }
           ],
           "selects": {}
@@ -10875,7 +10890,8 @@
         "crate_features": {
           "common": [
             "default",
-            "hydration"
+            "hydration",
+            "tracing"
           ],
           "selects": {}
         },
@@ -10900,6 +10916,10 @@
             {
               "id": "tachys 0.2.0",
               "target": "tachys"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "wasm-bindgen 0.2.100",
@@ -11120,7 +11140,8 @@
           "common": [
             "actix",
             "nightly",
-            "ssr"
+            "ssr",
+            "tracing"
           ],
           "selects": {}
         },
@@ -11181,6 +11202,10 @@
             {
               "id": "syn 2.0.87",
               "target": "syn"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "uuid 1.11.0",
@@ -11260,7 +11285,8 @@
           "common": [
             "default",
             "nonce",
-            "ssr"
+            "ssr",
+            "tracing"
           ],
           "selects": {}
         },
@@ -11289,6 +11315,10 @@
             {
               "id": "send_wrapper 0.6.0",
               "target": "send_wrapper"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "wasm-bindgen 0.2.100",
@@ -11353,7 +11383,8 @@
         ],
         "crate_features": {
           "common": [
-            "ssr"
+            "ssr",
+            "tracing"
           ],
           "selects": {}
         },
@@ -11414,6 +11445,10 @@
             {
               "id": "thiserror 2.0.12",
               "target": "thiserror"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "url 2.5.0",
@@ -11560,7 +11595,8 @@
           "common": [
             "hydration",
             "ssr",
-            "tachys"
+            "tachys",
+            "tracing"
           ],
           "selects": {}
         },
@@ -11613,6 +11649,10 @@
             {
               "id": "tachys 0.2.0",
               "target": "tachys"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             }
           ],
           "selects": {}
@@ -17414,7 +17454,8 @@
             "hydration",
             "nightly",
             "sandboxed-arenas",
-            "serde"
+            "serde",
+            "tracing"
           ],
           "selects": {}
         },
@@ -17471,6 +17512,10 @@
             {
               "id": "thiserror 2.0.12",
               "target": "thiserror"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             }
           ],
           "selects": {
@@ -20787,7 +20832,8 @@
             "reactive_graph",
             "reactive_stores",
             "ssr",
-            "testing"
+            "testing",
+            "tracing"
           ],
           "selects": {}
         },
@@ -20884,6 +20930,10 @@
             {
               "id": "throw_error 0.3.0",
               "target": "throw_error"
+            },
+            {
+              "id": "tracing 0.1.41",
+              "target": "tracing"
             },
             {
               "id": "wasm-bindgen 0.2.100",

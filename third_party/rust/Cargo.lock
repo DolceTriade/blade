@@ -1767,6 +1767,7 @@ dependencies = [
  "tachys",
  "thiserror 2.0.12",
  "throw_error",
+ "tracing",
  "typed-builder",
  "typed-builder-macro",
  "wasm-bindgen",
@@ -1798,6 +1799,7 @@ dependencies = [
  "server_fn",
  "tachys",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -1824,6 +1826,7 @@ dependencies = [
  "reactive_graph",
  "send_wrapper",
  "tachys",
+ "tracing",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -1881,6 +1884,7 @@ dependencies = [
  "rustc_version",
  "server_fn_macro",
  "syn 2.0.87",
+ "tracing",
  "uuid",
 ]
 
@@ -1896,6 +1900,7 @@ dependencies = [
  "once_cell",
  "or_poisoned",
  "send_wrapper",
+ "tracing",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -1921,6 +1926,7 @@ dependencies = [
  "send_wrapper",
  "tachys",
  "thiserror 2.0.12",
+ "tracing",
  "url",
  "wasm-bindgen",
  "web-sys",
@@ -1956,6 +1962,7 @@ dependencies = [
  "serde_json",
  "server_fn",
  "tachys",
+ "tracing",
 ]
 
 [[package]]
@@ -2849,6 +2856,7 @@ dependencies = [
  "serde",
  "slotmap",
  "thiserror 2.0.12",
+ "tracing",
  "web-sys",
 ]
 
@@ -3359,6 +3367,7 @@ dependencies = [
  "send_wrapper",
  "slotmap",
  "throw_error",
+ "tracing",
  "wasm-bindgen",
  "web-sys",
 ]

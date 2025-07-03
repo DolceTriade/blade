@@ -157,21 +157,23 @@ def rust_dependencies():
             ),
             "leptos": crate.spec(
                 version = "0.8.0",
-                features = ["ssr", "nightly"],
+                features = ["ssr", "nightly", "tracing"],
             ),
             "leptos_actix": crate.spec(
                 version = "0.8.0",
+                features = ["tracing"],
             ),
             "leptos_meta": crate.spec(
                 version = "0.8.0",
-                features = ["ssr"],
+                features = ["ssr", "tracing"],
             ),
             "leptos_router": crate.spec(
                 version = "0.8.0",
-                features = ["ssr"],
+                features = ["ssr", "tracing"],
             ),
             "leptos_dom": crate.spec(
                 version = "0.8.0",
+                features = ["tracing"],
             ),
             "log": crate.spec(
                 version = "0.4",
@@ -340,12 +342,15 @@ def rust_dependencies():
             ),
             "leptos_meta": crate.spec(
                 version = "0.8.0",
+                features = ["tracing"],
             ),
             "leptos_router": crate.spec(
                 version = "0.8.0",
+                features = ["tracing"],
             ),
             "leptos_dom": crate.spec(
                 version = "0.8.0",
+                features = ["tracing"],
             ),
             "gloo-file": crate.spec(
                 version = "0.3.0",

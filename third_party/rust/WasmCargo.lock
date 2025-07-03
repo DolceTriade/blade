@@ -919,6 +919,7 @@ dependencies = [
  "once_cell",
  "or_poisoned",
  "send_wrapper",
+ "tracing",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -943,6 +944,7 @@ dependencies = [
  "send_wrapper",
  "tachys",
  "thiserror 2.0.12",
+ "tracing",
  "url",
  "wasm-bindgen",
  "web-sys",

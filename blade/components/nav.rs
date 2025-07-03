@@ -10,6 +10,7 @@ fn extract_path(url_str: &str) -> Option<String> {
     Some(url_str.split("/").take(3).collect::<Vec<&str>>().join("/"))
 }
 
+#[allow(non_snake_case)]
 #[component]
 pub fn Nav(
     #[prop(into)] name: Signal<String>,

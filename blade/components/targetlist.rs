@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use anyhow::anyhow;
 use leptos::prelude::*;
 use leptos_router::components::A;
 use web_sys::KeyboardEvent;
@@ -10,6 +11,7 @@ use crate::components::{
     searchbar::Searchbar,
     statusicon::StatusIcon,
     tooltip::Tooltip,
+    card::Card,
 };
 
 fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {
@@ -32,36 +34,111 @@ fn status_weight(s: &state::Status) -> u8 {
     }
 }
 
-fn sorted_targets(targets: &HashMap<String, state::Target>) -> Vec<state::Target> {
-    let mut vec = targets.values().collect::<Vec<_>>();
-    vec.sort_unstable_by(|a, b| {
-        let a_status = status_weight(&a.status);
-        let b_status = status_weight(&b.status);
-        if a_status != b_status {
-            return a_status.partial_cmp(&b_status).unwrap();
-        }
-        if a.end != b.end {
-            return b.end.cmp(&a.end);
-        }
-        a.name.partial_cmp(&b.name).unwrap()
-    });
-    vec.into_iter().cloned().collect::<Vec<_>>()
+#[derive(Clone, Debug, PartialEq)]
+enum SortType {
+    Alphabetical,
+    Timestamp,
+    Duration,
 }
 
-fn sorted_tests(tests: &HashMap<String, state::Test>) -> Vec<state::Test> {
-    let mut vec = tests.values().collect::<Vec<_>>();
+impl std::str::FromStr for SortType {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "alphabetical" => Ok(SortType::Alphabetical),
+            "timestamp" => Ok(SortType::Timestamp),
+            "duration" => Ok(SortType::Duration),
+            _ => Err(anyhow!("failed to parse {s} into SortType")),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+enum SortOrder {
+    Descending,
+    Ascending,
+}
+
+impl std::str::FromStr for SortOrder {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_ascii_lowercase().as_str() {
+            "descending" => Ok(SortOrder::Descending),
+            "ascending" => Ok(SortOrder::Ascending),
+            _ => Err(anyhow!("failed to parse {s} into SortOrder")),
+        }
+    }
+}
+
+fn sorted_targets(
+    targets: &HashMap<String, state::Target>,
+    sort_by: SortType,
+    sort_order: SortOrder,
+    failed_first: bool,
+) -> Vec<state::Target> {
+    let mut vec = targets.values().cloned().collect::<Vec<_>>();
+
     vec.sort_unstable_by(|a, b| {
-        let a_status = status_weight(&a.status);
-        let b_status = status_weight(&b.status);
-        if a_status != b_status {
-            return a_status.partial_cmp(&b_status).unwrap();
+        if failed_first {
+            let a_status = status_weight(&a.status);
+            let b_status = status_weight(&b.status);
+            if a_status != b_status {
+                return a_status.partial_cmp(&b_status).unwrap();
+            }
         }
-        if a.end != b.end {
-            return b.end.cmp(&a.end);
+
+        match sort_by {
+            SortType::Timestamp => a
+                .end
+                .cmp(&b.end)
+                .then_with(|| a.name.partial_cmp(&b.name).unwrap()),
+            SortType::Duration => match (a.end, b.end) {
+                (Some(a_end), Some(b_end)) => a_end.cmp(&b_end),
+                (None, None) => a.name.partial_cmp(&b.name).unwrap(),
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (Some(_), None) => std::cmp::Ordering::Less,
+            },
+            SortType::Alphabetical => a.name.partial_cmp(&b.name).unwrap(),
         }
-        a.name.partial_cmp(&b.name).unwrap()
     });
-    vec.into_iter().cloned().collect::<Vec<_>>()
+    matches!(sort_order, SortOrder::Ascending).then(|| vec.reverse());
+    vec
+}
+
+fn sorted_tests(
+    tests: &HashMap<String, state::Test>,
+    sort_by: SortType,
+    sort_order: SortOrder,
+    failed_first: bool,
+) -> Vec<state::Test> {
+    let mut vec = tests.values().cloned().collect::<Vec<_>>();
+
+    vec.sort_unstable_by(|a, b| {
+        if failed_first {
+            let a_status = status_weight(&a.status);
+            let b_status = status_weight(&b.status);
+            if a_status != b_status {
+                return a_status.partial_cmp(&b_status).unwrap();
+            }
+        }
+
+        match sort_by {
+            SortType::Timestamp => a
+                .end
+                .cmp(&b.end)
+                .then_with(|| a.name.partial_cmp(&b.name).unwrap()),
+            SortType::Duration => a
+                .duration
+                .cmp(&b.duration)
+                .then_with(|| a.name.partial_cmp(&b.name).unwrap()),
+            SortType::Alphabetical => a.name.partial_cmp(&b.name).unwrap(),
+        }
+    });
+
+    matches!(sort_order, SortOrder::Ascending).then(|| vec.reverse());
+    vec
 }
 
 #[allow(non_snake_case)]
@@ -76,11 +153,64 @@ pub fn TargetList() -> impl IntoView {
         set_filter.set(value);
     };
 
+    let (sort_by, set_sort_by) = signal(SortType::Timestamp);
+    let (sort_order, set_sort_order) = signal(SortOrder::Descending);
+    let (failed_first, set_failed_first) = signal(true);
     view! {
         <div>
-            <div class="p-xs">
+            <div class="p-xs flex flex-row justify-between">
                 <Searchbar id="search" placeholder="Filter targets..." keyup=search_key />
+                <div class="group p-1 place-self-center align-self-center flex flex-col">
+                    <img class="h-4 w-4 dark:invert" src="/assets/sort.svg" />
+                    <div class="hidden group-hover:flex group-hover:fixed flex-row">
+                        <Card class="p-2">
+                            <label>Sorting</label>
+                            <select
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                id="sort_type_dropdown"
+                                on:change=move |ev| {
+                                    let val = event_target_value(&ev).parse::<SortType>().unwrap();
+                                    if sort_by.read() == val {
+                                        return;
+                                    }
+                                    set_sort_by.set(val);
+                                }
+                            >
+                                <option value="Timestamp">End Time</option>
+                                <option value="Alphabetical">Alphabetical</option>
+                                <option value="Duration">Duration</option>
+                            </select>
+                            <select
+                                id="sort_order_dropdown"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                on:change=move |ev| {
+                                    let val = event_target_value(&ev).parse::<SortOrder>().unwrap();
+                                    if sort_order.read() == val {
+                                        return;
+                                    }
+                                    set_sort_order.set(val);
+                                }
+                            >
+                                <option value="Descending">Descending</option>
+                                <option value="Ascending">Ascending</option>
+                            </select>
+                            <span>
+                                <label>Failed first</label>
+                                <input
+                                    class="ml-4"
+                                    type="checkbox"
+                                    prop:checked=move || failed_first.get()
+                                    on:change=move |ev| {
+                                        let val = event_target_checked(&ev);
+                                        set_failed_first(val);
+                                    }
+                                />
+                            </span>
+                        </Card>
+                    </div>
+                </div>
             </div>
+
             <Accordion>
 
                 {move || {
@@ -91,7 +221,15 @@ pub fn TargetList() -> impl IntoView {
                                 <AccordionItem header=move || view! { <h3>Tests</h3> }>
                                     <List>
                                         <For
-                                            each=move || tests.with(sorted_tests)
+                                            each=move || {
+                                                tests
+                                                    .with(|tests| sorted_tests(
+                                                        tests,
+                                                        sort_by.get(),
+                                                        sort_order.get(),
+                                                        failed_first.get(),
+                                                    ))
+                                            }
                                             key=|t| (t.name.to_string(), t.status)
                                             children=move |t| {
                                                 let label = t.name.clone();
@@ -121,7 +259,7 @@ pub fn TargetList() -> impl IntoView {
                                                                     </Tooltip>
                                                                 </span>
                                                                 <span class="text-gray-400 text-xs pl-1 ml-auto float-right whitespace-nowrap">
-                                                                    {format!("{}", humantime::format_duration(t.duration))}
+                                                                    {format!("{:.2?}", t.duration)}
                                                                 </span>
                                                             </div>
                                                         </A>
@@ -137,7 +275,15 @@ pub fn TargetList() -> impl IntoView {
                 }} <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
-                            each=move || targets.with(sorted_targets)
+                            each=move || {
+                                targets
+                                    .with(|targets| sorted_targets(
+                                        targets,
+                                        sort_by.get(),
+                                        sort_order.get(),
+                                        failed_first.get(),
+                                    ))
+                            }
                             key=|t| (t.name.to_string(), t.status)
                             children=move |t| {
                                 let label = t.name.clone();
