@@ -2,6 +2,7 @@
 use std::sync::Arc;
 
 use leptos::prelude::*;
+use leptos::either::{Either, EitherOf3};
 use leptos_router::{
     NavigateOptions,
     components::Redirect,
@@ -237,7 +238,7 @@ pub fn Test() -> impl IntoView {
         move || {
             match *test_run.read() {
             Some(_) => {
-                view! {
+                Either::Left(view! {
                     <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
                         <Card class="flex p-3 m-2">
                             <TestSummary />
@@ -254,14 +255,15 @@ pub fn Test() -> impl IntoView {
                                 }>
                                     {move || match test_out.get() {
                                         Some(Some(s)) => {
-                                            view! {
-                                                <div>
-                                                    <ShellOut text=s />
-                                                </div>
-                                            }
-                                                .into_any()
+                                            Either::Left(
+                                                view! {
+                                                    <div>
+                                                        <ShellOut text=s />
+                                                    </div>
+                                                },
+                                            )
                                         }
-                                        _ => view! { <div>No test output</div> }.into_any(),
+                                        _ => Either::Right(view! { <div>No test output</div> }),
                                     }}
 
                                 </Suspense>
@@ -269,14 +271,14 @@ pub fn Test() -> impl IntoView {
                             </Card>
                         </div>
                     </div>
-                }.into_any()
+                })
             }
-            None => view! {
+            None => Either::Right(view! {
                 <div>
                     {move || match test.read().as_ref() {
                         Ok(test) => {
                             if test.runs.is_empty() {
-                                return view! { <div>RIP</div> }.into_any();
+                                return EitherOf3::A(view! { <div>RIP</div> });
                             }
                             let (r, s, a) = get_run(
                                 &run.read(),
@@ -289,23 +291,23 @@ pub fn Test() -> impl IntoView {
                             q.replace("run", r.to_string());
                             q.replace("shard", s.to_string());
                             q.replace("attempt", a.to_string());
-                            view! {
-                                <Redirect
-                                    path=format!("{}{}", path.get(), q.to_query_string())
-                                    options=NavigateOptions {
-                                        replace: true,
-                                        ..Default::default()
-                                    }
-                                />
-                            }
-                                .into_any()
+                            EitherOf3::B(
+                                view! {
+                                    <Redirect
+                                        path=format!("{}{}", path.get(), q.to_query_string())
+                                        options=NavigateOptions {
+                                            replace: true,
+                                            ..Default::default()
+                                        }
+                                    />
+                                },
+                            )
                         }
-                        Err(e) => view! { <div>{e.to_string()}</div> }.into_any(),
+                        Err(e) => EitherOf3::C(view! { <div>{e.to_string()}</div> }),
                     }}
 
                 </div>
-            }
-            .into_any(),
+            }),
         }
         }
     }

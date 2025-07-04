@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::either::Either;
 
 use crate::components::{accordion::*, shellout::ShellOut, statusicon::StatusIcon};
 
@@ -97,7 +98,7 @@ pub fn TestResults() -> impl IntoView {
         }>
             {move || match xml.read().as_ref().and_then(|sw| sw.as_ref().map(|_| true)) {
                 Some(_) => {
-                    view! {
+                    Either::Left(view! {
                         <Accordion>
                             <For
                                 each=sorted_tests
@@ -148,15 +149,13 @@ pub fn TestResults() -> impl IntoView {
                                             </div>
                                         </AccordionItem>
                                     }
-                                        .into_any()
                                 }
                             />
 
                         </Accordion>
-                    }
-                        .into_any()
+                    })
                 }
-                _ => view! { <div></div> }.into_any(),
+                None => Either::Right(view! { <div></div> }),
             }}
 
         </Suspense>

@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::either::Either;
 
 use crate::components::list::*;
 
@@ -55,7 +56,7 @@ pub fn TestArtifactList() -> impl IntoView {
             {move || Suspend::new(async move {
                 match manifest.await {
                     Some(outs) => {
-                        view! {
+                        Either::Left(view! {
                             <h1 class="font-bold text-lg">Undeclared Outputs</h1>
                             <List>
                                 <For
@@ -79,10 +80,9 @@ pub fn TestArtifactList() -> impl IntoView {
                                 />
 
                             </List>
-                        }
-                            .into_any()
+                        })
                     }
-                    _ => view! { <div></div> }.into_any(),
+                    _ => Either::Right(view! { <div></div> }),
                 }
             })}
 
