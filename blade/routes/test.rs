@@ -144,7 +144,6 @@ pub fn Test() -> impl IntoView {
     let test = Memo::new(move |_| match &*params.read() {
         Ok(params) => match &params.target {
             Some(target) => {
-                tracing::info!("Got params: {:#?}", params);
                 if let Some(test) = invocation.read().tests.get(target) {
                     return Ok(test.clone());
                 }

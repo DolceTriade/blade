@@ -220,10 +220,6 @@ cfg_if! {
                     }
                 }
             });
-            let cur = std::env::current_dir().unwrap();
-            let ld_preload = std::env::var("LD_PRELOAD").unwrap_or("".to_string());
-            tracing::info!("LD_PRELOAD is {ld_preload}; pwd is {cur:?}");
-
             // Setting this to None means we'll be using cargo-leptos and its env vars.
             // when not using cargo-leptos None must be replaced with Some("Cargo.toml")
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
