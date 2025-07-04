@@ -55,12 +55,6 @@ def rust_dependencies():
                     ],
                 ),
             ],
-            "junit-parser": [
-                crate.annotation(
-                    patches = ["@//third_party/rust/patches/junit-parser:cdata_parse.patch"],
-                    patch_args = ["-p1"],
-                ),
-            ],
             "diesel": [
                 crate.annotation(
                     deps = [
@@ -149,7 +143,7 @@ def rust_dependencies():
                 version = "2.1.0",
             ),
             "junit-parser": crate.spec(
-                version = "1.0.0",
+                version = "1.4.0",
                 features = ["serde"],
             ),
             "lazy_static": crate.spec(
@@ -317,12 +311,6 @@ def rust_dependencies():
                     rustc_flags = ["-O"],
                 ),
             ],
-            "junit-parser": [
-                crate.annotation(
-                    patches = ["@//third_party/rust/patches/junit-parser:cdata_parse.patch"],
-                    patch_args = ["-p1"],
-                ),
-            ],
             "wasm-bindgen": [
                 crate.annotation(
                     version = "=0.2.100",
@@ -395,7 +383,7 @@ def rust_dependencies():
                 version = "0.3.29",
             ),
             "junit-parser": crate.spec(
-                version = "1.0.0",
+                version = "1.4.0",
                 features = ["serde"],
             ),
             "humantime": crate.spec(

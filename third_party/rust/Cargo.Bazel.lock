@@ -1,5 +1,5 @@
 {
-  "checksum": "392f4b78b8f9b094c94cbd274988b27663c7fe06de190af5735b91bf4523f2ec",
+  "checksum": "b9c1240a5f8b64925b44161cdc68ebf5e69d2a467f16691e4469201c7d83d0b1",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -6276,7 +6276,7 @@
               "target": "humantime"
             },
             {
-              "id": "junit-parser 1.0.0",
+              "id": "junit-parser 1.4.0",
               "target": "junit_parser"
             },
             {
@@ -10293,20 +10293,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "junit-parser 1.0.0": {
+    "junit-parser 1.4.0": {
       "name": "junit-parser",
-      "version": "1.0.0",
+      "version": "1.4.0",
       "package_url": "https://github.com/borisfaure/junit-parser",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/junit-parser/1.0.0/download",
-          "sha256": "ee683adf6ad5ceae97468845677cc014132da1e62ac81b25cb18faf791988112",
-          "patch_args": [
-            "-p1"
-          ],
-          "patches": [
-            "@//third_party/rust/patches/junit-parser:cdata_parse.patch"
-          ]
+          "url": "https://static.crates.io/crates/junit-parser/1.4.0/download",
+          "sha256": "f68b8fa538f003a756a95defe9c6cb1a47f69249551ccb4b93bf00ac187a3ec6"
         }
       },
       "targets": [
@@ -10340,7 +10334,7 @@
         "deps": {
           "common": [
             {
-              "id": "quick-xml 0.30.0",
+              "id": "quick-xml 0.37.5",
               "target": "quick_xml"
             },
             {
@@ -10348,14 +10342,14 @@
               "target": "serde"
             },
             {
-              "id": "thiserror 1.0.69",
+              "id": "thiserror 2.0.12",
               "target": "thiserror"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "1.0.0"
+        "version": "1.4.0"
       },
       "license": "BSD-2-Clause",
       "license_ids": [
@@ -16692,14 +16686,14 @@
       ],
       "license_file": null
     },
-    "quick-xml 0.30.0": {
+    "quick-xml 0.37.5": {
       "name": "quick-xml",
-      "version": "0.30.0",
+      "version": "0.37.5",
       "package_url": "https://github.com/tafia/quick-xml",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/quick-xml/0.30.0/download",
-          "sha256": "eff6510e86862b57b210fd8cbe8ed3f0d7d600b9c2863cd4549a2e033c66e956"
+          "url": "https://static.crates.io/crates/quick-xml/0.37.5/download",
+          "sha256": "331e97a1af0bf59823e6eadffe373d7b27f485be8748f71471c662c1f269b7fb"
         }
       },
       "targets": [
@@ -16737,8 +16731,8 @@
           ],
           "selects": {}
         },
-        "edition": "2018",
-        "version": "0.30.0"
+        "edition": "2021",
+        "version": "0.37.5"
       },
       "license": "MIT",
       "license_ids": [
@@ -28276,7 +28270,7 @@
     "futures 0.3.31",
     "futures-core 0.3.31",
     "humantime 2.1.0",
-    "junit-parser 1.0.0",
+    "junit-parser 1.4.0",
     "lazy_static 1.4.0",
     "leptos 0.8.0",
     "leptos_actix 0.8.0",

@@ -83,6 +83,50 @@ fn get_run(
     }
 }
 
+fn flatten_test_suites(mut suites: junit_parser::TestSuites) -> junit_parser::TestSuites {
+    if suites.suites.len() <= 1 {
+        return suites;
+    }
+
+    let (first, others): (Vec<_>, Vec<_>) = suites
+        .suites
+        .into_iter()
+        .enumerate()
+        .partition(|(i, _)| *i == 0);
+    let mut first = first.into_iter().next().unwrap().1;
+
+    others.into_iter().for_each(|(_, other)| {
+        first.cases.extend(other.cases);
+        first.suites.extend(other.suites);
+        first.time += other.time;
+        first.tests += other.tests;
+        first.errors += other.errors;
+        first.failures += other.failures;
+        first.skipped += other.skipped;
+
+        if let Some(other_assertions) = other.assertions {
+            first.assertions = Some(first.assertions.unwrap_or(0) + other_assertions);
+        }
+
+        if first.system_out.is_none() {
+            first.system_out = other.system_out;
+        } else if let Some(other_out) = other.system_out {
+            first.system_out.as_mut().unwrap().push('\n');
+            first.system_out.as_mut().unwrap().push_str(&other_out);
+        }
+
+        if first.system_err.is_none() {
+            first.system_err = other.system_err;
+        } else if let Some(other_err) = other.system_err {
+            first.system_err.as_mut().unwrap().push('\n');
+            first.system_err.as_mut().unwrap().push_str(&other_err);
+        }
+    });
+
+    suites.suites = vec![first];
+    suites
+}
+
 #[derive(PartialEq, Params, Debug)]
 struct TestParams {
     target: Option<String>,
@@ -157,7 +201,12 @@ pub fn Test() -> impl IntoView {
                     .as_ref()
                     .and_then(|v| {
                         let c = std::io::Cursor::new(v);
-                        junit_parser::from_reader(c).ok()
+                        junit_parser::from_reader(c)
+                            .inspect_err(|e| {
+                                tracing::warn!("could not fetch test.xml: {e:#?}");
+                            })
+                            .ok()
+                            .map(flatten_test_suites)
                     }),
             }
         }

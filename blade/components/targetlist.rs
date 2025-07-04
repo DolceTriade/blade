@@ -7,11 +7,11 @@ use web_sys::KeyboardEvent;
 
 use crate::components::{
     accordion::*,
+    card::Card,
     list::*,
     searchbar::Searchbar,
     statusicon::StatusIcon,
     tooltip::Tooltip,
-    card::Card,
 };
 
 fn format_time(start: &std::time::SystemTime, end: Option<&std::time::SystemTime>) -> String {
