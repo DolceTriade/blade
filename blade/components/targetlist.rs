@@ -103,7 +103,9 @@ fn sorted_targets(
             SortType::Alphabetical => a.name.partial_cmp(&b.name).unwrap(),
         }
     });
-    matches!(sort_order, SortOrder::Ascending).then(|| vec.reverse());
+    if matches!(sort_order, SortOrder::Ascending) {
+        vec.reverse();
+    }
     vec
 }
 
@@ -137,7 +139,9 @@ fn sorted_tests(
         }
     });
 
-    matches!(sort_order, SortOrder::Ascending).then(|| vec.reverse());
+    if matches!(sort_order, SortOrder::Ascending) {
+        vec.reverse();
+    }
     vec
 }
 
@@ -156,6 +160,15 @@ pub fn TargetList() -> impl IntoView {
     let (sort_by, set_sort_by) = signal(SortType::Timestamp);
     let (sort_order, set_sort_order) = signal(SortOrder::Descending);
     let (failed_first, set_failed_first) = signal(true);
+
+    // Memoized sorted data to avoid recomputation
+    let sorted_tests_memo = Memo::new(move |_| {
+        tests.with(|t| sorted_tests(t, sort_by.get(), sort_order.get(), failed_first.get()))
+    });
+
+    let sorted_targets_memo = Memo::new(move |_| {
+        targets.with(|t| sorted_targets(t, sort_by.get(), sort_order.get(), failed_first.get()))
+    });
     view! {
         <div>
             <div class="p-xs flex flex-row justify-between">
@@ -221,24 +234,18 @@ pub fn TargetList() -> impl IntoView {
                                 <AccordionItem header=move || view! { <h3>Tests</h3> }>
                                     <List>
                                         <For
-                                            each=move || {
-                                                tests
-                                                    .with(|tests| sorted_tests(
-                                                        tests,
-                                                        sort_by.get(),
-                                                        sort_order.get(),
-                                                        failed_first.get(),
-                                                    ))
-                                            }
-                                            key=|t| (t.name.to_string(), t.status)
+                                            each=move || sorted_tests_memo.get()
+                                            key=|t| (t.name.clone(), t.status)
                                             children=move |t| {
-                                                let label = t.name.clone();
-                                                let tooltip = t.name.clone();
-                                                let query = format!("test?target={label}");
+                                                let test_name = t.name.clone();
+                                                let test_name_filter = test_name.clone();
+                                                let test_name_tooltip = test_name.clone();
+                                                let query = format!("test?target={test_name}");
                                                 let link = url_escape::encode_query(&query).to_string();
                                                 view! {
                                                     <ListItem hide=Signal::derive(move || {
-                                                        !filter.get().is_empty() && !label.contains(&filter.get())
+                                                        !filter.get().is_empty()
+                                                            && !test_name_filter.contains(&filter.get())
                                                     })>
                                                         <A href=link>
                                                             <div class="flex items-center justify-start w-full">
@@ -251,10 +258,12 @@ pub fn TargetList() -> impl IntoView {
                                                                 </span>
                                                                 <span class="pl-4 max-w-3/4 float-left whitespace-nowrap text-ellipsis overflow-hidden">
                                                                     <Tooltip tooltip=move || {
-                                                                        view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                                        view! {
+                                                                            <span class="p-2">{test_name_tooltip.clone()}</span>
+                                                                        }
                                                                     }>
                                                                         <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                                            {t.name.clone()}
+                                                                            {test_name}
                                                                         </span>
                                                                     </Tooltip>
                                                                 </span>
@@ -275,22 +284,16 @@ pub fn TargetList() -> impl IntoView {
                 }} <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
-                            each=move || {
-                                targets
-                                    .with(|targets| sorted_targets(
-                                        targets,
-                                        sort_by.get(),
-                                        sort_order.get(),
-                                        failed_first.get(),
-                                    ))
-                            }
-                            key=|t| (t.name.to_string(), t.status)
+                            each=move || sorted_targets_memo.get()
+                            key=|t| (t.name.clone(), t.status)
                             children=move |t| {
-                                let label = t.name.clone();
-                                let tooltip = t.name.clone();
+                                let target_name = t.name.clone();
+                                let target_name_filter = target_name.clone();
+                                let target_name_tooltip = target_name.clone();
                                 view! {
                                     <ListItem hide=Signal::derive(move || {
-                                        !filter.get().is_empty() && !label.contains(&filter.get())
+                                        !filter.get().is_empty()
+                                            && !target_name_filter.contains(&filter.get())
                                     })>
                                         <div class="flex items-center justify-start w-full">
                                             <span class="float-left">
@@ -302,10 +305,12 @@ pub fn TargetList() -> impl IntoView {
                                             </span>
                                             <span class="pl-4 max-w-3/4 float-left">
                                                 <Tooltip tooltip=move || {
-                                                    view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                    view! {
+                                                        <span class="p-2">{target_name_tooltip.clone()}</span>
+                                                    }
                                                 }>
                                                     <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                        {t.name.clone()}
+                                                        {target_name}
                                                     </span>
                                                 </Tooltip>
                                             </span>
