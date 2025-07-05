@@ -1,8 +1,10 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use leptos::prelude::*;
-use leptos::either::{Either, EitherOf3};
+use leptos::{
+    either::{Either, EitherOf3},
+    prelude::*,
+};
 use leptos_router::{
     NavigateOptions,
     components::Redirect,
@@ -234,44 +236,41 @@ pub fn Test() -> impl IntoView {
     provide_context(test_xml);
 
     {
-        move || {
-            match *test_run.read() {
-            Some(_) => {
-                Either::Left(view! {
-                    <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
-                        <Card class="flex p-3 m-2">
-                            <TestSummary />
+        move || match *test_run.read() {
+            Some(_) => Either::Left(view! {
+                <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+                    <Card class="flex p-3 m-2">
+                        <TestSummary />
+                    </Card>
+
+                    <div class="h-[73dvh] flex items-start justify-start justify-items-center">
+                        <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <TestRunList />
                         </Card>
+                        <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <TestResults />
+                            <Suspense fallback=move || {
+                                view! { <div>Loading...</div> }
+                            }>
+                                {move || match test_out.get() {
+                                    Some(Some(s)) => {
+                                        Either::Left(
+                                            view! {
+                                                <div>
+                                                    <ShellOut text=s />
+                                                </div>
+                                            },
+                                        )
+                                    }
+                                    _ => Either::Right(view! { <div>No test output</div> }),
+                                }}
 
-                        <div class="h-[73dvh] flex items-start justify-start justify-items-center">
-                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                <TestRunList />
-                            </Card>
-                            <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                <TestResults />
-                                <Suspense fallback=move || {
-                                    view! { <div>Loading...</div> }
-                                }>
-                                    {move || match test_out.get() {
-                                        Some(Some(s)) => {
-                                            Either::Left(
-                                                view! {
-                                                    <div>
-                                                        <ShellOut text=s />
-                                                    </div>
-                                                },
-                                            )
-                                        }
-                                        _ => Either::Right(view! { <div>No test output</div> }),
-                                    }}
-
-                                </Suspense>
-                                <TestArtifactList />
-                            </Card>
-                        </div>
+                            </Suspense>
+                            <TestArtifactList />
+                        </Card>
                     </div>
-                })
-            }
+                </div>
+            }),
             None => Either::Right(view! {
                 <div>
                     {move || match test.read().as_ref() {
@@ -307,7 +306,6 @@ pub fn Test() -> impl IntoView {
 
                 </div>
             }),
-        }
         }
     }
 }

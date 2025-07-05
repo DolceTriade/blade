@@ -1,5 +1,4 @@
-use leptos::prelude::*;
-use leptos::either::Either;
+use leptos::{either::Either, prelude::*};
 
 use crate::components::{accordion::*, shellout::ShellOut, statusicon::StatusIcon};
 
@@ -98,62 +97,64 @@ pub fn TestResults() -> impl IntoView {
         }>
             {move || match xml.read().as_ref().and_then(|sw| sw.as_ref().map(|_| true)) {
                 Some(_) => {
-                    Either::Left(view! {
-                        <Accordion>
-                            <For
-                                each=sorted_tests
-                                key=move |c| c.name.clone()
-                                children=move |c| {
-                                    let status = junit_status_to_status(c.status.clone());
-                                    let header = c.name.clone();
-                                    let duration = c.time;
-                                    let id = c.name.clone();
-                                    let mut message = match c.status {
-                                        junit_parser::TestStatus::Error(e) => merge_error(&e),
-                                        junit_parser::TestStatus::Failure(e) => merge_fail(&e),
-                                        junit_parser::TestStatus::Skipped(e) => merge_skip(&e),
-                                        junit_parser::TestStatus::Success => "SUCCESS".into(),
-                                    };
-                                    let mut parts = vec![message];
-                                    if let Some(out) = &c.system_out && !out.is_empty() {
-                                        parts.push(out.clone());
-                                    }
-                                    if let Some(err) = &c.system_err && !err.is_empty() {
-                                        parts.push(err.clone());
-                                    }
-                                    let message = parts.join("\n");
-                                    view! {
-                                        <AccordionItem
-                                            header_class="w-full"
-                                            hide=true
-                                            header=move || {
-                                                view! {
-                                                    <div
-                                                        id=id.clone()
-                                                        class="flex justify-between items-center"
-                                                    >
-                                                        <span class="flex items-center">
-                                                            <StatusIcon class="h-4 w-4" status=status.into() />
-                                                            <h3 class="p-2">{header.clone()}</h3>
-                                                        </span>
-                                                        <div class="text-gray-400 text-xs pl-2 float-right">
-                                                            {format!("{duration:.2}s")}
+                    Either::Left(
+                        view! {
+                            <Accordion>
+                                <For
+                                    each=sorted_tests
+                                    key=move |c| c.name.clone()
+                                    children=move |c| {
+                                        let status = junit_status_to_status(c.status.clone());
+                                        let header = c.name.clone();
+                                        let duration = c.time;
+                                        let id = c.name.clone();
+                                        let mut message = match c.status {
+                                            junit_parser::TestStatus::Error(e) => merge_error(&e),
+                                            junit_parser::TestStatus::Failure(e) => merge_fail(&e),
+                                            junit_parser::TestStatus::Skipped(e) => merge_skip(&e),
+                                            junit_parser::TestStatus::Success => "SUCCESS".into(),
+                                        };
+                                        let mut parts = vec![message];
+                                        if let Some(out) = &c.system_out && !out.is_empty() {
+                                            parts.push(out.clone());
+                                        }
+                                        if let Some(err) = &c.system_err && !err.is_empty() {
+                                            parts.push(err.clone());
+                                        }
+                                        let message = parts.join("\n");
+                                        view! {
+                                            <AccordionItem
+                                                header_class="w-full"
+                                                hide=true
+                                                header=move || {
+                                                    view! {
+                                                        <div
+                                                            id=id.clone()
+                                                            class="flex justify-between items-center"
+                                                        >
+                                                            <span class="flex items-center">
+                                                                <StatusIcon class="h-4 w-4" status=status.into() />
+                                                                <h3 class="p-2">{header.clone()}</h3>
+                                                            </span>
+                                                            <div class="text-gray-400 text-xs pl-2 float-right">
+                                                                {format!("{duration:.2}s")}
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    }
                                                 }
-                                            }
-                                        >
+                                            >
 
-                                            <div>
-                                                <ShellOut text=message />
-                                            </div>
-                                        </AccordionItem>
+                                                <div>
+                                                    <ShellOut text=message />
+                                                </div>
+                                            </AccordionItem>
+                                        }
                                     }
-                                }
-                            />
+                                />
 
-                        </Accordion>
-                    })
+                            </Accordion>
+                        },
+                    )
                 }
                 None => Either::Right(view! { <div></div> }),
             }}

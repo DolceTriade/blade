@@ -1,9 +1,9 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-//use anyhow::anyhow;
-use leptos::prelude::*;
 use leptos::either::EitherOf3;
+// use anyhow::anyhow;
+use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{hooks::use_params, nested_router::Outlet, params::Params};
 
@@ -33,7 +33,7 @@ pub fn Invocation() -> impl IntoView {
     let (error, set_error) = signal(None);
     provide_context(invocation);
     let load_invocation = move |id: String| async move { get_invocation(id).await };
-    let res = LocalResource::new(move||{
+    let res = LocalResource::new(move || {
         let id = params.with(|p| p.as_ref().map(|p| p.id.clone()).unwrap_or_default());
         async move {
             match id {
@@ -81,23 +81,27 @@ pub fn Invocation() -> impl IntoView {
                 match error.read().as_ref() {
                     None => EitherOf3::A(view! { <Outlet /> }),
                     Some(e) => {
-                        EitherOf3::B(view! {
-                            <div>
-                                <pre>{e.clone()}</pre>
-                            </div>
-                        })
+                        EitherOf3::B(
+                            view! {
+                                <div>
+                                    <pre>{e.clone()}</pre>
+                                </div>
+                            },
+                        )
                     }
                 }
             } else {
-                EitherOf3::C(view! {
-                    <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
-                        <img
-                            class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
-                            src="/assets/logo.svg"
-                        />
-                        <p>Loading...</p>
-                    </div>
-                })
+                EitherOf3::C(
+                    view! {
+                        <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
+                            <img
+                                class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
+                                src="/assets/logo.svg"
+                            />
+                            <p>Loading...</p>
+                        </div>
+                    },
+                )
             }
         }}
     }

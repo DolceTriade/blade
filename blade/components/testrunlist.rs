@@ -1,5 +1,4 @@
-use leptos::prelude::*;
-use leptos::either::Either;
+use leptos::{either::Either, prelude::*};
 use leptos_router::{components::A, hooks::use_location};
 use web_sys::KeyboardEvent;
 
