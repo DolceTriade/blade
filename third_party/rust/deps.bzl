@@ -150,23 +150,23 @@ def rust_dependencies():
                 version = "1",
             ),
             "leptos": crate.spec(
-                version = "0.8.0",
-                features = ["ssr", "nightly", "tracing"],
+                version = "0.8.2",
+                features = ["ssr", "nightly", "tracing", "trace-component-props"],
             ),
             "leptos_actix": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["tracing"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["ssr", "tracing"],
             ),
             "leptos_router": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["ssr", "tracing"],
             ),
             "leptos_dom": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["tracing"],
             ),
             "log": crate.spec(
@@ -271,7 +271,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
@@ -325,19 +325,19 @@ def rust_dependencies():
                 version = "1.0.75",
             ),
             "leptos": crate.spec(
-                version = "0.8.0",
-                features = ["hydrate", "tracing", "nightly"],
+                version = "0.8.2",
+                features = ["hydrate", "tracing", "nightly", "trace-component-props"],
             ),
             "leptos_meta": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["tracing"],
             ),
             "leptos_router": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["tracing"],
             ),
             "leptos_dom": crate.spec(
-                version = "0.8.0",
+                version = "0.8.2",
                 features = ["tracing"],
             ),
             "gloo-file": crate.spec(
@@ -417,7 +417,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",

@@ -1,7 +1,10 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use leptos::prelude::*;
+use leptos::{
+    either::{Either, EitherOf3},
+    prelude::*,
+};
 use leptos_router::{
     NavigateOptions,
     components::Redirect,
@@ -143,7 +146,6 @@ pub fn Test() -> impl IntoView {
     let test = Memo::new(move |_| match &*params.read() {
         Ok(params) => match &params.target {
             Some(target) => {
-                tracing::info!("Got params: {:#?}", params);
                 if let Some(test) = invocation.read().tests.get(target) {
                     return Ok(test.clone());
                 }
@@ -234,49 +236,47 @@ pub fn Test() -> impl IntoView {
     provide_context(test_xml);
 
     {
-        move || {
-            match *test_run.read() {
-            Some(_) => {
-                view! {
-                    <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
-                        <Card class="flex p-3 m-2">
-                            <TestSummary />
-                        </Card>
+        move || match *test_run.read() {
+            Some(_) => Either::Left(view! {
+                <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+                    <Card class="flex p-3 m-2">
+                        <TestSummary />
+                    </Card>
 
-                        <div class="h-[73dvh] flex items-start justify-start justify-items-center">
-                            <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                <TestRunList />
-                            </Card>
-                            <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                                <TestResults />
-                                <Suspense fallback=move || {
-                                    view! { <div>Loading...</div> }
-                                }>
-                                    {move || match test_out.get() {
-                                        Some(Some(s)) => {
+                    <div class="h-[73dvh] flex items-start justify-start justify-items-center">
+                        <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <TestRunList />
+                        </Card>
+                        <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
+                            <TestResults />
+                            <Suspense fallback=move || {
+                                view! { <div>Loading...</div> }
+                            }>
+                                {move || match test_out.get() {
+                                    Some(Some(s)) => {
+                                        Either::Left(
                                             view! {
                                                 <div>
                                                     <ShellOut text=s />
                                                 </div>
-                                            }
-                                                .into_any()
-                                        }
-                                        _ => view! { <div>No test output</div> }.into_any(),
-                                    }}
+                                            },
+                                        )
+                                    }
+                                    _ => Either::Right(view! { <div>No test output</div> }),
+                                }}
 
-                                </Suspense>
-                                <TestArtifactList />
-                            </Card>
-                        </div>
+                            </Suspense>
+                            <TestArtifactList />
+                        </Card>
                     </div>
-                }.into_any()
-            }
-            None => view! {
+                </div>
+            }),
+            None => Either::Right(view! {
                 <div>
                     {move || match test.read().as_ref() {
                         Ok(test) => {
                             if test.runs.is_empty() {
-                                return view! { <div>RIP</div> }.into_any();
+                                return EitherOf3::A(view! { <div>RIP</div> });
                             }
                             let (r, s, a) = get_run(
                                 &run.read(),
@@ -289,24 +289,23 @@ pub fn Test() -> impl IntoView {
                             q.replace("run", r.to_string());
                             q.replace("shard", s.to_string());
                             q.replace("attempt", a.to_string());
-                            view! {
-                                <Redirect
-                                    path=format!("{}{}", path.get(), q.to_query_string())
-                                    options=NavigateOptions {
-                                        replace: true,
-                                        ..Default::default()
-                                    }
-                                />
-                            }
-                                .into_any()
+                            EitherOf3::B(
+                                view! {
+                                    <Redirect
+                                        path=format!("{}{}", path.get(), q.to_query_string())
+                                        options=NavigateOptions {
+                                            replace: true,
+                                            ..Default::default()
+                                        }
+                                    />
+                                },
+                            )
                         }
-                        Err(e) => view! { <div>{e.to_string()}</div> }.into_any(),
+                        Err(e) => EitherOf3::C(view! { <div>{e.to_string()}</div> }),
                     }}
 
                 </div>
-            }
-            .into_any(),
-        }
+            }),
         }
     }
 }

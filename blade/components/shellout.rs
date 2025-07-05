@@ -1,4 +1,4 @@
-use leptos::{html::*, prelude::*};
+use leptos::{either::Either, html::*, prelude::*};
 
 pub fn scroll_bottom(el: web_sys::HtmlElement) {
     if let Some(c) = el.last_element_child() {
@@ -23,10 +23,11 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
             class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto"
         >
             {move || match ansi_to_html::convert_escaped(&text.read()) {
-                Err(err) => view! { <div>{format!("mistake: {err:#?}")}</div> }.into_any(),
+                Err(err) => Either::Left(view! { <div>{format!("mistake: {err:#?}")}</div> }),
                 Ok(t) => {
-                    view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> }
-                        .into_any()
+                    Either::Right(
+                        view! { <div class="inline whitespace-pre font-mono" inner_html=t></div> },
+                    )
                 }
             }}
 

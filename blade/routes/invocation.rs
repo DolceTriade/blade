@@ -1,7 +1,8 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use anyhow::anyhow;
+use leptos::either::EitherOf3;
+// use anyhow::anyhow;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{hooks::use_params, nested_router::Outlet, params::Params};
@@ -36,10 +37,10 @@ pub fn Invocation() -> impl IntoView {
         let id = params.with(|p| p.as_ref().map(|p| p.id.clone()).unwrap_or_default());
         async move {
             match id {
-                None => Err(anyhow!("no id")),
+                None => Err("no id".to_string()),
                 Some(id) => load_invocation(id)
                     .await
-                    .map_err(|e| anyhow!("failed to get invocation: {e:#?}")),
+                    .map_err(|e| format!("failed to get invocation: {e:#?}")),
             }
         }
     });
@@ -78,27 +79,29 @@ pub fn Invocation() -> impl IntoView {
         {move || {
             if *loaded.read() {
                 match error.read().as_ref() {
-                    None => view! { <Outlet /> }.into_any(),
+                    None => EitherOf3::A(view! { <Outlet /> }),
                     Some(e) => {
-                        view! {
-                            <div>
-                                <pre>{e.clone()}</pre>
-                            </div>
-                        }
-                            .into_any()
+                        EitherOf3::B(
+                            view! {
+                                <div>
+                                    <pre>{e.clone()}</pre>
+                                </div>
+                            },
+                        )
                     }
                 }
             } else {
-                view! {
-                    <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
-                        <img
-                            class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
-                            src="/assets/logo.svg"
-                        />
-                        <p>Loading...</p>
-                    </div>
-                }
-                    .into_any()
+                EitherOf3::C(
+                    view! {
+                        <div class="flex flex-col place-content-center place-items-center w-screen h-screen">
+                            <img
+                                class="w-64 h-64 text-gray-200 animate-spin fill-blue-600 self-center"
+                                src="/assets/logo.svg"
+                            />
+                            <p>Loading...</p>
+                        </div>
+                    },
+                )
             }
         }}
     }

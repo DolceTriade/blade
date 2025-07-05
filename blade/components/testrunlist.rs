@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_router::{components::A, hooks::use_location};
 use web_sys::KeyboardEvent;
 
@@ -29,8 +29,8 @@ fn status_weight(s: state::Status) -> u8 {
     }
 }
 
-fn sort_runs(runs: &[state::TestRun]) -> Vec<state::TestRun> {
-    let mut runs = runs.to_owned();
+fn sort_runs(runs: &[state::TestRun]) -> Vec<&state::TestRun> {
+    let mut runs = runs.iter().collect::<Vec<_>>();
     runs.sort_unstable_by(|a, b| {
         let a_s = status_weight(a.status);
         let b_s = status_weight(b.status);
@@ -64,8 +64,8 @@ fn junit_status_weight(s: &junit_parser::TestStatus) -> u8 {
     }
 }
 
-fn sort_tests(cases: &[TestListItem]) -> Vec<TestListItem> {
-    let mut cases = cases.to_owned();
+fn sort_tests(cases: &[TestListItem]) -> Vec<&TestListItem> {
+    let mut cases = cases.iter().collect::<Vec<_>>();
     cases.sort_unstable_by(|a, b| {
         let a_s = junit_status_weight(&a.2);
         let b_s = junit_status_weight(&b.2);
@@ -106,9 +106,12 @@ pub fn TestRunList() -> impl IntoView {
                                 <List>
                                     <For
                                         each=move || {
-                                            test.with(move |test| sort_runs(
-                                                &test.as_ref().unwrap().runs,
-                                            ))
+                                            test.with(move |test| {
+                                                sort_runs(&test.as_ref().unwrap().runs)
+                                                    .into_iter()
+                                                    .cloned()
+                                                    .collect::<Vec<_>>()
+                                            })
                                         }
 
                                         key=move |r| (r.run, r.shard, r.attempt)
@@ -128,6 +131,7 @@ pub fn TestRunList() -> impl IntoView {
                                                 run.shard,
                                                 run.attempt,
                                             );
+                                            let tooltip_clone = tooltip.clone();
                                             view! {
                                                 <ListItem hide=Signal::derive(|| false)>
                                                     <A href=link>
@@ -141,7 +145,7 @@ pub fn TestRunList() -> impl IntoView {
                                                             </span>
                                                             <div class="pl-4 max-w-3/4 float-left overflow-hidden overflow-x-auto whitespace-nowrap">
                                                                 <Tooltip tooltip=move || {
-                                                                    view! { <span class="p-1">{tooltip.clone()}</span> }
+                                                                    view! { <span class="p-1">{tooltip_clone.clone()}</span> }
                                                                 }>
                                                                     <div class="flex items-center max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden text-sm">
                                                                         <span class="pl-4">{format!("Run {}", run.run)}</span>
@@ -178,79 +182,85 @@ pub fn TestRunList() -> impl IntoView {
                 }>
                     {move || match xml.read().as_ref().and_then(|sw| sw.as_ref().map(|_| true)) {
                         Some(_) => {
-                            view! {
-                                <List>
-                                    <For
-                                        each=move || {
-                                            xml.try_read()
-                                                .as_ref()
-                                                .and_then(|rg| rg.as_ref())
-                                                .and_then(|sw| {
-                                                    sw.clone().and_then(|ts| ts.suites.first().cloned())
-                                                })
-                                                .map(|c| {
-                                                    c.cases
-                                                        .iter()
-                                                        .map(|i| (
-                                                            c.name.clone(),
-                                                            i.name.clone(),
-                                                            i.status.clone(),
-                                                            std::time::Duration::from_secs_f64(i.time),
-                                                        ))
-                                                        .collect::<Vec<_>>()
-                                                })
-                                                .map(|c| sort_tests(&c))
-                                                .unwrap_or_default()
-                                        }
-
-                                        key=move |c| (c.0.clone(), c.1.clone())
-                                        children=move |c| {
-                                            let tooltip = c.1.clone();
-                                            let id_memo = c.1.clone();
-                                            let id = Memo::new(move |_| id_memo.clone());
-                                            view! {
-                                                <ListItem hide=Signal::derive(move || {
-                                                    !filter.get().is_empty()
-                                                        && !id.with(|id| id.contains(&filter.get()))
-                                                })>
-                                                    <div
-                                                        on:click=move |_| {
-                                                            click(id.get());
-                                                        }
-                                                        class="flex items-center justify-start w-full"
-                                                        id=move || id
-                                                    >
-                                                        <span class="float-left">
-                                                            <StatusIcon
-                                                                class="h-4 w-4 max-w-fit"
-                                                                status=junit_status_to_status(c.2).into()
-                                                            />
-
-                                                        </span>
-                                                        <span class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                            <Tooltip tooltip=move || {
-                                                                view! { <span class="p-2">{tooltip.clone()}</span> }
-                                                            }>
-                                                                <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
-                                                                    {c.1.clone()}
-                                                                </span>
-                                                            </Tooltip>
-                                                        </span>
-                                                        <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
-                                                            {format!("{}", humantime::format_duration(c.3))}
-                                                        </span>
-                                                    </div>
-
-                                                </ListItem>
+                            Either::Left(
+                                view! {
+                                    <List>
+                                        <For
+                                            each=move || {
+                                                xml.try_read()
+                                                    .as_ref()
+                                                    .and_then(|rg| rg.as_ref())
+                                                    .and_then(|sw| {
+                                                        sw.as_ref().and_then(|ts| ts.suites.first())
+                                                    })
+                                                    .map(|c| {
+                                                        c.cases
+                                                            .iter()
+                                                            .map(|i| (
+                                                                c.name.clone(),
+                                                                i.name.clone(),
+                                                                i.status.clone(),
+                                                                std::time::Duration::from_secs_f64(i.time),
+                                                            ))
+                                                            .collect::<Vec<_>>()
+                                                    })
+                                                    .map(|c| {
+                                                        sort_tests(&c).into_iter().cloned().collect::<Vec<_>>()
+                                                    })
+                                                    .unwrap_or_default()
                                             }
-                                        }
-                                    />
 
-                                </List>
-                            }
-                                .into_any()
+                                            key=move |c| (c.0.clone(), c.1.clone())
+                                            children=move |c| {
+                                                let test_name = c.1.clone();
+                                                let tooltip = test_name.clone();
+                                                let filter_name = test_name.clone();
+                                                let click_name = test_name.clone();
+                                                let id_name = test_name.clone();
+                                                let display_name = test_name.clone();
+                                                view! {
+                                                    <ListItem hide=Signal::derive(move || {
+                                                        !filter.get().is_empty()
+                                                            && !filter_name.contains(&filter.get())
+                                                    })>
+                                                        <div
+                                                            on:click=move |_| {
+                                                                click(click_name.clone());
+                                                            }
+                                                            class="flex items-center justify-start w-full"
+                                                            id=id_name
+                                                        >
+                                                            <span class="float-left">
+                                                                <StatusIcon
+                                                                    class="h-4 w-4 max-w-fit"
+                                                                    status=junit_status_to_status(c.2).into()
+                                                                />
+
+                                                            </span>
+                                                            <span class="pl-4 max-w-3/4 float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                <Tooltip tooltip=move || {
+                                                                    view! { <span class="p-2">{tooltip.clone()}</span> }
+                                                                }>
+                                                                    <span class="max-w-full float-left text-ellipsis whitespace-nowrap overflow-hidden">
+                                                                        {display_name}
+                                                                    </span>
+                                                                </Tooltip>
+                                                            </span>
+                                                            <span class="text-gray-400 text-xs pl-2 ml-auto float-right whitespace-nowrap">
+                                                                {format!("{}", humantime::format_duration(c.3))}
+                                                            </span>
+                                                        </div>
+
+                                                    </ListItem>
+                                                }
+                                            }
+                                        />
+
+                                    </List>
+                                },
+                            )
                         }
-                        _ => view! { <div>Loading...</div> }.into_any(),
+                        _ => Either::Right(view! { <div>Loading...</div> }),
                     }}
 
                 </Suspense>

@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 
 use crate::components::list::*;
 
@@ -55,34 +55,35 @@ pub fn TestArtifactList() -> impl IntoView {
             {move || Suspend::new(async move {
                 match manifest.await {
                     Some(outs) => {
-                        view! {
-                            <h1 class="font-bold text-lg">Undeclared Outputs</h1>
-                            <List>
-                                <For
-                                    each=move || outs.clone()
-                                    key=move |r: &UndeclaredOutput| r.name.clone()
-                                    children=move |r| {
-                                        let query = format!(
-                                            "artifact?{}",
-                                            url_escape::encode_query(
-                                                &format!("uri={}&zip={}", r.uri, r.name),
-                                            ),
-                                        );
-                                        view! {
-                                            <ListItem hide=Signal::derive(|| false)>
-                                                <a href=query>
-                                                    {format!("{} -- ({} bytes)", r.name, r.size)}
-                                                </a>
-                                            </ListItem>
+                        Either::Left(
+                            view! {
+                                <h1 class="font-bold text-lg">Undeclared Outputs</h1>
+                                <List>
+                                    <For
+                                        each=move || outs.clone()
+                                        key=move |r: &UndeclaredOutput| r.name.clone()
+                                        children=move |r| {
+                                            let query = format!(
+                                                "artifact?{}",
+                                                url_escape::encode_query(
+                                                    &format!("uri={}&zip={}", r.uri, r.name),
+                                                ),
+                                            );
+                                            view! {
+                                                <ListItem hide=Signal::derive(|| false)>
+                                                    <a href=query>
+                                                        {format!("{} -- ({} bytes)", r.name, r.size)}
+                                                    </a>
+                                                </ListItem>
+                                            }
                                         }
-                                    }
-                                />
+                                    />
 
-                            </List>
-                        }
-                            .into_any()
+                                </List>
+                            },
+                        )
                     }
-                    _ => view! { <div></div> }.into_any(),
+                    _ => Either::Right(view! { <div></div> }),
                 }
             })}
 

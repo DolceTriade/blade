@@ -1,6 +1,6 @@
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_load")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library", "rust_test")
 load("//nix/bazel:runfiles.bzl", "runfiles")
 
 rust_binary(
@@ -119,6 +119,13 @@ rust_shared_library(
         "@wasm_crate//:web-sys",
         "@wasm_crate//:zip",
     ],
+)
+
+rust_test(
+    name = "blade_test",
+    size = "small",
+    crate = ":blade",
+    crate_features = ["ssr"],
 )
 
 runfiles(
