@@ -286,30 +286,35 @@ pub fn TargetList() -> impl IntoView {
                                             }
                                         />
                                     </List>
-                                    <div class="flex items-center justify-center">
-                                        <button
-                                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
-                                            on:click=move |_| {
-                                                set_test_limit.update(|v| *v += 50);
+                                    {(test_limit.get() < sorted_tests_memo.read().len())
+                                        .then(move || {
+                                            view! {
+                                                <div class="flex items-center justify-center">
+                                                    <button
+                                                        class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                                        on:click=move |_| {
+                                                            set_test_limit.update(|v| *v += 50);
+                                                        }
+                                                        disabled=move || {
+                                                            test_limit.get() >= sorted_tests_memo.read().len()
+                                                        }
+                                                    >
+                                                        Load 50 more
+                                                    </button>
+                                                    <button
+                                                        class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                                        on:click=move |_| {
+                                                            set_test_limit.set(usize::MAX);
+                                                        }
+                                                        disabled=move || {
+                                                            test_limit.get() >= sorted_tests_memo.read().len()
+                                                        }
+                                                    >
+                                                        Load all
+                                                    </button>
+                                                </div>
                                             }
-                                            disabled=move || {
-                                                test_limit.get() >= sorted_tests_memo.get().len()
-                                            }
-                                        >
-                                            Load 50 more
-                                        </button>
-                                        <button
-                                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
-                                            on:click=move |_| {
-                                                set_test_limit.set(usize::MAX);
-                                            }
-                                            disabled=move || {
-                                                test_limit.get() >= sorted_tests_memo.get().len()
-                                            }
-                                        >
-                                            Load all
-                                        </button>
-                                    </div>
+                                        })}
                                 </AccordionItem>
                             }
                         })
@@ -362,30 +367,35 @@ pub fn TargetList() -> impl IntoView {
                             }
                         />
                     </List>
-                    <div class="flex items-center justify-center">
-                        <button
-                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
-                            on:click=move |_| {
-                                set_target_limit.update(|v| *v += 50);
+                    {(target_limit.get() < sorted_targets_memo.read().len())
+                        .then(move || {
+                            view! {
+                                <div class="flex items-center justify-center">
+                                    <button
+                                        class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                        on:click=move |_| {
+                                            set_target_limit.update(|v| *v += 50);
+                                        }
+                                        disabled=move || {
+                                            target_limit.get() >= sorted_targets_memo.read().len()
+                                        }
+                                    >
+                                        Load 50 more
+                                    </button>
+                                    <button
+                                        class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                        on:click=move |_| {
+                                            set_target_limit.set(usize::MAX);
+                                        }
+                                        disabled=move || {
+                                            target_limit.get() >= sorted_targets_memo.read().len()
+                                        }
+                                    >
+                                        Load all
+                                    </button>
+                                </div>
                             }
-                            disabled=move || {
-                                target_limit.get() >= sorted_targets_memo.get().len()
-                            }
-                        >
-                            Load 50 more
-                        </button>
-                        <button
-                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
-                            on:click=move |_| {
-                                set_target_limit.set(usize::MAX);
-                            }
-                            disabled=move || {
-                                target_limit.get() >= sorted_targets_memo.get().len()
-                            }
-                        >
-                            Load all
-                        </button>
-                    </div>
+                        })}
                 </AccordionItem>
             </Accordion>
         </div>

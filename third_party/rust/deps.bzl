@@ -271,7 +271,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
@@ -417,7 +417,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
