@@ -286,7 +286,7 @@ pub fn TargetList() -> impl IntoView {
                                             }
                                         />
                                     </List>
-                                    {(test_limit.get() < sorted_tests_memo.read().len())
+                                    {move||(test_limit.get() < sorted_tests_memo.read().len())
                                         .then(move || {
                                             view! {
                                                 <div class="flex items-center justify-center">
@@ -367,7 +367,7 @@ pub fn TargetList() -> impl IntoView {
                             }
                         />
                     </List>
-                    {(target_limit.get() < sorted_targets_memo.read().len())
+                    {move||(target_limit.get() < sorted_targets_memo.read().len())
                         .then(move || {
                             view! {
                                 <div class="flex items-center justify-center">

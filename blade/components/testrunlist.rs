@@ -380,7 +380,7 @@ pub fn TestRunList(
                                         />
 
                                     </List>
-                                    {(test_limit.get() < test_list_size.get())
+                                    {move||(test_limit.get() < test_list_size.get())
                                         .then(move || {
                                             view! {
                                                 <div class="flex items-center justify-center">

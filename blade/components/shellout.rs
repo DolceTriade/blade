@@ -1,3 +1,5 @@
+use std::hash::{DefaultHasher, Hash, Hasher};
+
 use leptos::{html::*, prelude::*};
 use web_sys::{Blob, Url, js_sys::Array, window};
 
@@ -7,26 +9,25 @@ const MAX_DISPLAY_LINES: usize = TRUNCATE_THRESHOLD * 2;
 #[allow(non_snake_case)]
 #[component]
 pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
-    let full_lines = Memo::new(move |_| text.get().lines().map(String::from).collect::<Vec<_>>());
-
-    let (display_lines, set_display_lines) = signal(Vec::<String>::new());
-    let (is_truncated, set_is_truncated) = signal(false);
-
-    Effect::new(move |_| {
-        let lines_vec = full_lines.get();
-        let total_lines = lines_vec.len();
-
-        if total_lines > MAX_DISPLAY_LINES {
-            set_is_truncated.set(true);
-            let mut truncated_lines = Vec::with_capacity(MAX_DISPLAY_LINES);
-            truncated_lines.extend_from_slice(&lines_vec[0..TRUNCATE_THRESHOLD]);
-            truncated_lines
-                .extend_from_slice(&lines_vec[total_lines - TRUNCATE_THRESHOLD..total_lines]);
-            set_display_lines.set(truncated_lines);
-        } else {
-            set_is_truncated.set(false);
-            set_display_lines.set(lines_vec);
-        }
+    let (truncated, set_truncated) = signal(false);
+    let lines = Memo::new(move |_| {
+        let text = text.read();
+        let lines: Vec<&str> = text.lines().collect();
+        let should_truncate = lines.len() > MAX_DISPLAY_LINES;
+        set_truncated(should_truncate);
+        lines
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter(|(i, _)| {
+                if should_truncate {
+                    *i < TRUNCATE_THRESHOLD || *i > lines.len() - TRUNCATE_THRESHOLD
+                } else {
+                    true
+                }
+            })
+            .map(|(i, s)| (i, s.to_string()))
+            .collect::<Vec<(usize, String)>>()
     });
 
     let open_raw_output = move |_| {
@@ -46,7 +47,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
 
     view! {
         <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto">
-            <Show when=move || { is_truncated.get() } fallback=|| view! { <></> }>
+            <Show when=move || { truncated.get() } fallback=|| view! { <></> }>
                 <div class="bg-yellow-600 text-white p-2 mb-2 rounded">
                     "Output truncated. Showing first " {TRUNCATE_THRESHOLD} " and last "
                     {TRUNCATE_THRESHOLD} " lines."
@@ -59,11 +60,16 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
                 </div>
             </Show>
             <For
-                each=display_lines
-                key=|line| line.clone()
-                children=move |line: String| {
-                    let converted = ansi_to_html::convert_escaped(&line)
-                        .unwrap_or_else(|_| line.clone());
+                each=move||lines.get()
+                key=|line| {
+                    let mut h = DefaultHasher::new();
+                    line.0.hash(&mut h);
+                    line.1.hash(&mut h);
+                    h.finish()
+                }
+                children=move |line| {
+                    let converted = ansi_to_html::convert_escaped(&line.1)
+                        .unwrap_or_else(|_| line.1.clone());
                     view! { <div class="whitespace-pre font-mono" inner_html=converted></div> }
                 }
             />
