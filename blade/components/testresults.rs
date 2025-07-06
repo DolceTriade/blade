@@ -31,7 +31,16 @@ pub fn sort_tests(
     hide_success: bool,
 ) -> Vec<junit_parser::TestCase> {
     let mut vec = if hide_success {
-        cases.iter().filter(|c|!matches!(junit_status_to_status(c.status.clone()), state::Status::Success)).cloned().collect::<Vec<_>>()
+        cases
+            .iter()
+            .filter(|c| {
+                !matches!(
+                    junit_status_to_status(c.status.clone()),
+                    state::Status::Success
+                )
+            })
+            .cloned()
+            .collect::<Vec<_>>()
     } else {
         cases.to_vec()
     };
