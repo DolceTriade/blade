@@ -16,7 +16,7 @@ use crate::components::{
     card::Card,
     shellout::ShellOut,
     testartifactlist::TestArtifactList,
-    testresults,
+    testresults::TestResults,
     testrunlist::{SortOrder, SortType, TestRunList},
     testsummary::TestSummary,
 };
@@ -258,7 +258,7 @@ pub fn Test() -> impl IntoView {
                             />
                         </Card>
                         <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            <testresults::TestResults
+                            <TestResults
                                 sort_by=sort_by
                                 sort_order=sort_order
                                 hide_success=hide_success

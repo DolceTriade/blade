@@ -154,6 +154,16 @@ pub fn TestRunList(
         set_filter.set(value);
     };
 
+    let (test_limit, set_test_limit) = signal(50);
+    let test_list_size = Memo::new(move |_| {
+        xml.try_read()
+            .as_ref()
+            .and_then(|rg| rg.as_ref())
+            .and_then(|sw| sw.as_ref().and_then(|ts| ts.suites.first()))
+            .map(|c| c.cases.len())
+            .unwrap_or(0)
+    });
+
     view! {
         <div class="p-xs flex flex-row justify-between">
             <Searchbar id="search" placeholder="Filter tests..." keyup=search_key />
@@ -317,6 +327,7 @@ pub fn TestRunList(
                                                     .map(|c| {
                                                         sort_test_list_items(&c, sort_by.get(), sort_order.get())
                                                             .into_iter()
+                                                            .take(test_limit.get())
                                                             .collect::<Vec<_>>()
                                                     })
                                                     .unwrap_or_default()
@@ -324,7 +335,6 @@ pub fn TestRunList(
 
                                             key=move |c| (c.0.clone(), c.1.clone())
                                             children=move |c| {
-                                                let test_status_clone = c.2.clone();
                                                 let test_name = c.1.clone();
                                                 let tooltip = test_name.clone();
                                                 let filter_name = test_name.clone();
@@ -335,11 +345,6 @@ pub fn TestRunList(
                                                     <ListItem hide=Signal::derive(move || {
                                                         !filter.get().is_empty()
                                                             && !filter_name.contains(&filter.get())
-                                                            || (hide_success.get()
-                                                                && matches!(
-                                                                    junit_status_to_status(test_status_clone.clone()),
-                                                                    state::Status::Success
-                                                                ))
                                                     })>
                                                         <div
                                                             on:click=move |_| {
@@ -375,6 +380,30 @@ pub fn TestRunList(
                                         />
 
                                     </List>
+                                    <div class="flex items-center justify-center">
+                                        <button
+                                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                            on:click=move |_| {
+                                                set_test_limit.update(|v| *v += 50);
+                                            }
+                                            disabled=move || {
+                                                test_limit.get() >= test_list_size.get()
+                                            }
+                                        >
+                                            Load 50 more
+                                        </button>
+                                        <button
+                                            class="p-1 m-1 rounded-md bg-gray-200 dark:bg-gray-700 disabled:bg-gray-400"
+                                            on:click=move |_| {
+                                                set_test_limit.set(usize::MAX);
+                                            }
+                                            disabled=move || {
+                                                test_limit.get() >= test_list_size.get()
+                                            }
+                                        >
+                                            Load all
+                                        </button>
+                                    </div>
                                 },
                             )
                         }

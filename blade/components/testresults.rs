@@ -1,7 +1,11 @@
 use leptos::{either::Either, prelude::*};
 
-use crate::components::{accordion::*, shellout::ShellOut, statusicon::StatusIcon};
-use crate::components::testrunlist::{SortOrder, SortType};
+use crate::components::{
+    accordion::*,
+    shellout::ShellOut,
+    statusicon::StatusIcon,
+    testrunlist::{SortOrder, SortType},
+};
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {
@@ -24,8 +28,13 @@ pub fn sort_tests(
     cases: &[junit_parser::TestCase],
     sort_by: SortType,
     sort_order: SortOrder,
+    hide_success: bool,
 ) -> Vec<junit_parser::TestCase> {
-    let mut vec = cases.to_vec();
+    let mut vec = if hide_success {
+        cases.iter().filter(|c|!matches!(junit_status_to_status(c.status.clone()), state::Status::Success)).cloned().collect::<Vec<_>>()
+    } else {
+        cases.to_vec()
+    };
 
     vec.sort_unstable_by(|a, b| {
         let a_s = status_weight(&a.status);
@@ -118,6 +127,7 @@ pub fn TestResults(
                                                 &c.cases,
                                                 sort_by.get(),
                                                 sort_order.get(),
+                                                hide_success.get(),
                                             ))
                                             .unwrap_or_default()
                                     }
@@ -147,11 +157,10 @@ pub fn TestResults(
                                         view! {
                                             <AccordionItem
                                                 header_class="w-full"
-                                                hide=hide_success.get()
-                                                    && matches!(
-                                                        junit_status_to_status(c.status.clone()),
-                                                        state::Status::Success
-                                                    )
+                                                hide=matches!(
+                                                    junit_status_to_status(c.status.clone()),
+                                                    state::Status::Success
+                                                )
                                                 header=move || {
                                                     view! {
                                                         <div
