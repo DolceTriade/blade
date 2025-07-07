@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, anyhow};
-use diesel::{dsl::exists, prelude::*, r2d2::ConnectionManager};
+use diesel::{prelude::*, r2d2::ConnectionManager};
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use diesel_tracing::sqlite::InstrumentedSqliteConnection;
 use r2d2::PooledConnection;
@@ -540,12 +540,10 @@ impl state::DB for Sqlite {
                     let keyval_filter = format!("{key}={value}");
 
                     let mut subquery = Options::table
-                        .inner_join(
-                            Invocations::table.on(Options::invocation_id.eq(Invocations::id)),
-                        )
                         .into_boxed()
                         .filter(Options::kind.eq(metadata_kind))
-                        .select(diesel::dsl::sql::<diesel::sql_types::Integer>("1"));
+                        .select(Options::invocation_id)
+                        .distinct();
 
                     subquery = match f.op {
                         state::TestFilterOp::Equals => {
@@ -558,9 +556,9 @@ impl state::DB for Sqlite {
                     };
 
                     if f.invert {
-                        query.filter(diesel::dsl::not(exists(subquery)))
+                        query.filter(diesel::dsl::not(Invocations::id.eq_any(subquery)))
                     } else {
-                        query.filter(exists(subquery))
+                        query.filter(Invocations::id.eq_any(subquery))
                     }
                 },
                 state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
@@ -1003,5 +1001,162 @@ mod tests {
         db.delete_last_output_lines(&inv.id, 2_u32).unwrap();
         let prog = db.get_progress(&inv.id).unwrap();
         assert_eq!(prog, "a\nb");
+    }
+
+    #[test]
+    fn test_get_test_history() {
+        use state::{Status, TestFilter, TestFilterItem, TestFilterOp};
+
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let db_path = tmp.path().join("test.db");
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let test_name = "//:my_test";
+        let now = std::time::SystemTime::now();
+
+        // Invocation 1 (now): a successful run, on main branch
+        let inv1 = state::InvocationResults {
+            id: "inv1".to_string(),
+            start: now,
+            ..Default::default()
+        };
+        let test1 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Success,
+            duration: Duration::from_secs(5),
+            end: now,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv1).unwrap();
+        db.upsert_test(&inv1.id, &test1).unwrap();
+        db.insert_options(
+            &inv1.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "main".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Invocation 2 (now - 1 day): a failed run, on main branch
+        let day = Duration::from_secs(24 * 60 * 60);
+        let inv2_time = now.checked_sub(day).unwrap();
+        let inv2 = state::InvocationResults {
+            id: "inv2".to_string(),
+            start: inv2_time,
+            ..Default::default()
+        };
+        let test2 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Fail,
+            duration: Duration::from_secs(12),
+            end: inv2_time,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv2).unwrap();
+        db.upsert_test(&inv2.id, &test2).unwrap();
+        db.insert_options(
+            &inv2.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "main".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Invocation 3 (now - 2 days): a successful run, on a feature branch
+        let inv3_time = now.checked_sub(day * 2).unwrap();
+        let inv3 = state::InvocationResults {
+            id: "inv3".to_string(),
+            start: inv3_time,
+            ..Default::default()
+        };
+        let test3 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Success,
+            duration: Duration::from_secs(6),
+            end: inv3_time,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv3).unwrap();
+        db.upsert_test(&inv3.id, &test3).unwrap();
+        db.insert_options(
+            &inv3.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "feature/foo".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Case 1: Get all history (limit 10)
+        let history = db.get_test_history(test_name, &[], 10).unwrap();
+        assert_eq!(history.name, test_name);
+        assert_eq!(history.history.len(), 3);
+        assert_eq!(history.history[0].invocation_id, "inv1");
+        assert_eq!(history.history[1].invocation_id, "inv2");
+        assert_eq!(history.history[2].invocation_id, "inv3");
+
+        // Case 2: Filter by status: Success
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: false,
+            filter: TestFilterItem::Status(Status::Success),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 2);
+        assert!(
+            history
+                .history
+                .iter()
+                .all(|h| h.test.status == Status::Success)
+        );
+
+        // Case 3: Filter by duration > 10s
+        let filters = [TestFilter {
+            op: TestFilterOp::GreaterThan,
+            invert: false,
+            filter: TestFilterItem::Duration(Duration::from_secs(10)),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv2");
+
+        // Case 4: Filter by metadata: branch=main
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: false,
+            filter: TestFilterItem::Metadata {
+                key: "branch".to_string(),
+                value: "main".to_string(),
+            },
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 2);
+        assert_eq!(history.history[0].invocation_id, "inv1");
+        assert_eq!(history.history[1].invocation_id, "inv2");
+
+        // Case 5: Inverted metadata filter: branch!=main
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: true,
+            filter: TestFilterItem::Metadata {
+                key: "branch".to_string(),
+                value: "main".to_string(),
+            },
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv3");
+
+        // Case 6: Limit to 1 result
+        let history = db.get_test_history(test_name, &[], 1).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv1");
     }
 }

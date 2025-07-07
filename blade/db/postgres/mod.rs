@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, anyhow};
-use diesel::{dsl::exists, prelude::*, r2d2::ConnectionManager};
+use diesel::{prelude::*, r2d2::ConnectionManager};
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use diesel_tracing::pg::InstrumentedPgConnection;
 use r2d2::PooledConnection;
@@ -525,12 +525,10 @@ impl state::DB for Postgres {
                     let keyval_filter = format!("{key}={value}");
 
                     let mut subquery = options::table
-                        .inner_join(
-                            invocations::table.on(options::invocation_id.eq(invocations::id)),
-                        )
                         .into_boxed()
                         .filter(options::kind.eq(metadata_kind))
-                        .select(diesel::dsl::sql::<diesel::sql_types::Integer>("1"));
+                        .select(options::invocation_id)
+                        .distinct();
 
                     subquery = match f.op {
                         state::TestFilterOp::Equals => {
@@ -543,9 +541,9 @@ impl state::DB for Postgres {
                     };
 
                     if f.invert {
-                        query.filter(diesel::dsl::not(exists(subquery)))
+                        query.filter(diesel::dsl::not(invocations::id.eq_any(subquery)))
                     } else {
-                        query.filter(exists(subquery))
+                        query.filter(invocations::id.eq_any(subquery))
                     }
                 },
                 state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
