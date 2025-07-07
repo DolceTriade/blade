@@ -235,7 +235,6 @@ pub fn Test() -> impl IntoView {
 
     let (sort_by, set_sort_by) = signal(SortType::NoSort);
     let (sort_order, set_sort_order) = signal(SortOrder::Descending);
-    let (hide_success, set_hide_success) = signal(false);
 
     {
         // This block is for the view! macro
@@ -253,15 +252,12 @@ pub fn Test() -> impl IntoView {
                                 set_sort_by=set_sort_by
                                 sort_order=sort_order
                                 set_sort_order=set_sort_order
-                                hide_success=hide_success
-                                set_hide_success=set_hide_success
                             />
                         </Card>
                         <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                             <TestResults
                                 sort_by=sort_by
                                 sort_order=sort_order
-                                hide_success=hide_success
                             />
                             <Suspense fallback=move || {
                                 view! { <div>Loading...</div> }

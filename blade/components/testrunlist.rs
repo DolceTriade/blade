@@ -138,8 +138,6 @@ pub fn TestRunList(
     set_sort_by: WriteSignal<SortType>,
     sort_order: ReadSignal<SortOrder>,
     set_sort_order: WriteSignal<SortOrder>,
-    hide_success: ReadSignal<bool>,
-    set_hide_success: WriteSignal<bool>,
 ) -> impl IntoView {
     let test = expect_context::<Memo<Result<state::Test, String>>>();
     let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
@@ -201,18 +199,6 @@ pub fn TestRunList(
                             <option value="Descending">Descending</option>
                             <option value="Ascending">Ascending</option>
                         </select>
-                        <span>
-                            <label>Hide Success</label>
-                            <input
-                                class="ml-4"
-                                type="checkbox"
-                                prop:checked=move || hide_success.get()
-                                on:change=move |ev| {
-                                    let val = event_target_checked(&ev);
-                                    set_hide_success(val);
-                                }
-                            />
-                        </span>
                     </Card>
                 </div>
             </div>
