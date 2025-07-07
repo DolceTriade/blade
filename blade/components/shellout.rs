@@ -60,7 +60,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
                 </div>
             </Show>
             <For
-                each=move||lines.get()
+                each=move || lines.get()
                 key=|line| {
                     let mut h = DefaultHasher::new();
                     line.0.hash(&mut h);
