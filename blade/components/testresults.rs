@@ -1,6 +1,11 @@
 use leptos::{either::Either, prelude::*};
 
-use crate::components::{accordion::*, shellout::ShellOut, statusicon::StatusIcon};
+use crate::components::{
+    accordion::*,
+    shellout::ShellOut,
+    statusicon::StatusIcon,
+    testrunlist::{SortOrder, SortType},
+};
 
 fn junit_status_to_status(s: junit_parser::TestStatus) -> state::Status {
     match s {
@@ -19,18 +24,40 @@ fn status_weight(s: &junit_parser::TestStatus) -> u8 {
         junit_parser::TestStatus::Success => 3,
     }
 }
+pub fn sort_tests(
+    cases: &[junit_parser::TestCase],
+    sort_by: SortType,
+    sort_order: SortOrder,
+) -> Vec<junit_parser::TestCase> {
+    let mut vec = cases
+        .iter()
+        .filter(|c| {
+            !matches!(
+                junit_status_to_status(c.status.clone()),
+                state::Status::Success
+            )
+        })
+        .cloned()
+        .collect::<Vec<_>>();
 
-fn sort_tests(cases: &[junit_parser::TestCase]) -> Vec<&junit_parser::TestCase> {
-    let mut cases = cases.iter().collect::<Vec<_>>();
-    cases.sort_unstable_by(|a, b| {
+    vec.sort_unstable_by(|a, b| {
         let a_s = status_weight(&a.status);
         let b_s = status_weight(&b.status);
         if a_s != b_s {
             return a_s.cmp(&b_s);
         }
-        a.name.cmp(&b.name)
+
+        match sort_by {
+            SortType::Duration => a.time.partial_cmp(&b.time).unwrap(),
+            SortType::Alphabetical => a.name.partial_cmp(&b.name).unwrap(),
+            SortType::NoSort => std::cmp::Ordering::Equal,
+        }
     });
-    cases
+
+    if matches!(sort_order, SortOrder::Ascending) {
+        vec.reverse();
+    }
+    vec
 }
 
 fn merge_error(e: &junit_parser::TestError) -> String {
@@ -77,20 +104,12 @@ fn merge_skip(e: &junit_parser::TestSkipped) -> String {
 
 #[allow(non_snake_case)]
 #[component]
-pub fn TestResults() -> impl IntoView {
+pub fn TestResults(
+    sort_by: ReadSignal<SortType>,
+    sort_order: ReadSignal<SortOrder>,
+) -> impl IntoView {
     let xml = expect_context::<LocalResource<Option<junit_parser::TestSuites>>>();
-    let sorted_tests = move || {
-        xml.read()
-            .as_ref()
-            .and_then(|sw| sw.clone().and_then(|ts| ts.suites.first().cloned()))
-            .map(|c| {
-                sort_tests(&c.cases)
-                    .into_iter()
-                    .cloned()
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default()
-    };
+
     view! {
         <Suspense fallback=move || {
             view! { <div>Loading...</div> }
@@ -101,14 +120,29 @@ pub fn TestResults() -> impl IntoView {
                         view! {
                             <Accordion>
                                 <For
-                                    each=sorted_tests
+                                    each=move || {
+                                        xml.read()
+                                            .as_ref()
+                                            .and_then(|sw| {
+                                                sw.clone().and_then(|ts| ts.suites.first().cloned())
+                                            })
+                                            .map(|c| sort_tests(
+                                                &c.cases,
+                                                sort_by.get(),
+                                                sort_order.get(),
+                                            ))
+                                            .unwrap_or_default()
+                                    }
                                     key=move |c| c.name.clone()
                                     children=move |c| {
-                                        let status = junit_status_to_status(c.status.clone());
+                                        let test_case_status = c.status.clone();
+                                        let status = junit_status_to_status(
+                                            test_case_status.clone(),
+                                        );
                                         let header = c.name.clone();
                                         let duration = c.time;
                                         let id = c.name.clone();
-                                        let mut message = match c.status {
+                                        let mut message = match test_case_status {
                                             junit_parser::TestStatus::Error(e) => merge_error(&e),
                                             junit_parser::TestStatus::Failure(e) => merge_fail(&e),
                                             junit_parser::TestStatus::Skipped(e) => merge_skip(&e),
@@ -125,7 +159,10 @@ pub fn TestResults() -> impl IntoView {
                                         view! {
                                             <AccordionItem
                                                 header_class="w-full"
-                                                hide=true
+                                                hide=matches!(
+                                                    junit_status_to_status(c.status.clone()),
+                                                    state::Status::Success
+                                                )
                                                 header=move || {
                                                     view! {
                                                         <div

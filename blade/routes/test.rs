@@ -17,7 +17,7 @@ use crate::components::{
     shellout::ShellOut,
     testartifactlist::TestArtifactList,
     testresults::TestResults,
-    testrunlist::TestRunList,
+    testrunlist::{SortOrder, SortType, TestRunList},
     testsummary::TestSummary,
 };
 
@@ -213,14 +213,12 @@ pub fn Test() -> impl IntoView {
             }
         }
     });
-    let test_out = Resource::new(
-        move || {
-            test_run
-                .read()
-                .as_ref()
-                .and_then(|test_run| test_run.files.get("test.log").map(|a| a.uri.clone()))
-        },
-        move |uri| async move {
+    let test_out = LocalResource::new(move || {
+        let uri = test_run
+            .read()
+            .as_ref()
+            .and_then(|test_run| test_run.files.get("test.log").map(|a| a.uri.clone()));
+        async move {
             match uri {
                 None => None,
                 Some(uri) => get_artifact(uri.to_string())
@@ -229,13 +227,17 @@ pub fn Test() -> impl IntoView {
                     .as_ref()
                     .map(|v| String::from_utf8_lossy(v).to_string()),
             }
-        },
-    );
+        }
+    });
     provide_context(test);
     provide_context(test_run);
     provide_context(test_xml);
 
+    let (sort_by, set_sort_by) = signal(SortType::NoSort);
+    let (sort_order, set_sort_order) = signal(SortOrder::Descending);
+
     {
+        // This block is for the view! macro
         move || match *test_run.read() {
             Some(_) => Either::Left(view! {
                 <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
@@ -245,10 +247,18 @@ pub fn Test() -> impl IntoView {
 
                     <div class="h-[73dvh] flex items-start justify-start justify-items-center">
                         <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            <TestRunList />
+                            <TestRunList
+                                sort_by=sort_by
+                                set_sort_by=set_sort_by
+                                sort_order=sort_order
+                                set_sort_order=set_sort_order
+                            />
                         </Card>
                         <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            <TestResults />
+                            <TestResults
+                                sort_by=sort_by
+                                sort_order=sort_order
+                            />
                             <Suspense fallback=move || {
                                 view! { <div>Loading...</div> }
                             }>

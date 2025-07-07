@@ -161,6 +161,9 @@ pub fn TargetList() -> impl IntoView {
     let (sort_order, set_sort_order) = signal(SortOrder::Descending);
     let (failed_first, set_failed_first) = signal(true);
 
+    let (test_limit, set_test_limit) = signal(50);
+    let (target_limit, set_target_limit) = signal(50);
+
     // Memoized sorted data to avoid recomputation
     let sorted_tests_memo = Memo::new(move |_| {
         tests.with(|t| sorted_tests(t, sort_by.get(), sort_order.get(), failed_first.get()))
@@ -234,7 +237,13 @@ pub fn TargetList() -> impl IntoView {
                                 <AccordionItem header=move || view! { <h3>Tests</h3> }>
                                     <List>
                                         <For
-                                            each=move || sorted_tests_memo.get()
+                                            each=move || {
+                                                sorted_tests_memo
+                                                    .get()
+                                                    .into_iter()
+                                                    .take(test_limit.get())
+                                                    .collect::<Vec<_>>()
+                                            }
                                             key=|t| (t.name.clone(), t.status)
                                             children=move |t| {
                                                 let test_name = t.name.clone();
@@ -276,15 +285,43 @@ pub fn TargetList() -> impl IntoView {
                                                 }
                                             }
                                         />
-
                                     </List>
+                                    {move||(test_limit.get() < sorted_tests_memo.read().len())
+                                        .then(move || {
+                                            view! {
+                                                <div class="flex items-center justify-center">
+                                                    <button
+                                                        class="p-1 m-1 rounded-md bg-blue-200 dark:bg-blue-700"
+                                                        on:click=move |_| {
+                                                            set_test_limit.update(|v| *v += 50);
+                                                        }
+                                                    >
+                                                        Load 50 more
+                                                    </button>
+                                                    <button
+                                                        class="p-1 m-1 rounded-md bg-blue-200 dark:bg-blue-700"
+                                                        on:click=move |_| {
+                                                            set_test_limit.set(usize::MAX);
+                                                        }
+                                                    >
+                                                        Load all
+                                                    </button>
+                                                </div>
+                                            }
+                                        })}
                                 </AccordionItem>
                             }
                         })
                 }} <AccordionItem header=move || view! { <h3>Targets</h3> }>
                     <List>
                         <For
-                            each=move || sorted_targets_memo.get()
+                            each=move || {
+                                sorted_targets_memo
+                                    .get()
+                                    .into_iter()
+                                    .take(target_limit.get())
+                                    .collect::<Vec<_>>()
+                            }
                             key=|t| (t.name.clone(), t.status)
                             children=move |t| {
                                 let target_name = t.name.clone();
@@ -323,8 +360,30 @@ pub fn TargetList() -> impl IntoView {
                                 }
                             }
                         />
-
                     </List>
+                    {move||(target_limit.get() < sorted_targets_memo.read().len())
+                        .then(move || {
+                            view! {
+                                <div class="flex items-center justify-center">
+                                    <button
+                                        class="p-1 m-1 rounded-md bg-blue-200 dark:bg-blue-700"
+                                        on:click=move |_| {
+                                            set_target_limit.update(|v| *v += 50);
+                                        }
+                                    >
+                                        Load 50 more
+                                    </button>
+                                    <button
+                                        class="p-1 m-1 rounded-md bg-blue-200 dark:bg-blue-700"
+                                        on:click=move |_| {
+                                            set_target_limit.set(usize::MAX);
+                                        }
+                                    >
+                                        Load all
+                                    </button>
+                                </div>
+                            }
+                        })}
                 </AccordionItem>
             </Accordion>
         </div>

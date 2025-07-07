@@ -1,5 +1,5 @@
 {
-  "checksum": "ab4e11a715f0e27e625fb1cee41a655a550f69ea241adfbfdec2cc7065192005",
+  "checksum": "149b1c331ff8d3d313d09f7ae2bf7640a642005e20a8b27fa5647d272442b926",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -25489,6 +25489,7 @@
             "BeforeUnloadEvent",
             "BinaryType",
             "Blob",
+            "BlobPropertyBag",
             "CharacterData",
             "Clipboard",
             "ClipboardEvent",
