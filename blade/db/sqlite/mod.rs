@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{Context, anyhow};
-use diesel::{prelude::*, r2d2::ConnectionManager};
+use diesel::{dsl::exists, prelude::*, r2d2::ConnectionManager};
 use diesel_migrations::{FileBasedMigrations, MigrationHarness};
 use diesel_tracing::sqlite::InstrumentedSqliteConnection;
 use r2d2::PooledConnection;
@@ -449,6 +449,153 @@ impl state::DB for Sqlite {
             },
         });
         Ok(opts)
+    }
+
+    fn get_test_history(
+        &mut self,
+        test_name: &str,
+        filters: &[state::TestFilter],
+        limit: usize,
+    ) -> anyhow::Result<state::TestHistory> {
+        use schema::*;
+        // Helper struct to structure the flat results from our query, combining all
+        // necessary models.
+        #[derive(Queryable, Debug)]
+        struct FullHistoryRun {
+            test: models::Test,
+            invocation: models::Invocation,
+        }
+
+        let limit_i64: i64 = limit.try_into().context("failed to convert into i64")?;
+
+        // 1. Start with a base query joining the necessary tables. We join testruns ->
+        //    tests -> invocations. We box it to allow for dynamic modification based on
+        //    filters.
+        let mut query = Tests::table
+            .inner_join(Invocations::table.on(Tests::invocation_id.eq(Invocations::id)))
+            .filter(Tests::name.eq(test_name))
+            .into_boxed()
+            .select((models::Test::as_select(), models::Invocation::as_select()));
+
+        // 2. Dynamically add filters to the query
+        for f in filters {
+            query = match &f.filter {
+                state::TestFilterItem::Status(status) => {
+                    let db_status = status.to_string();
+                    match f.op {
+                        state::TestFilterOp::Equals => {
+                            if f.invert {
+                                query.filter(Tests::status.ne(db_status))
+                            } else {
+                                query.filter(Tests::status.eq(db_status))
+                            }
+                        },
+                        _ => query, // Other ops are not applicable to Status
+                    }
+                },
+                state::TestFilterItem::Duration(duration) => {
+                    let duration_s = duration.as_secs_f64();
+                    match f.op {
+                        state::TestFilterOp::GreaterThan => {
+                            if f.invert {
+                                query.filter(Tests::duration_s.le(duration_s))
+                            } else {
+                                query.filter(Tests::duration_s.gt(duration_s))
+                            }
+                        },
+                        state::TestFilterOp::LessThan => {
+                            if f.invert {
+                                query.filter(Tests::duration_s.ge(duration_s))
+                            } else {
+                                query.filter(Tests::duration_s.lt(duration_s))
+                            }
+                        },
+                        _ => query, // Equals/Contains not applicable
+                    }
+                },
+                state::TestFilterItem::Start(time) => {
+                    let odt: time::OffsetDateTime = (*time).into();
+                    match f.op {
+                        state::TestFilterOp::GreaterThan => {
+                            if f.invert {
+                                query.filter(Invocations::start.le(odt))
+                            } else {
+                                query.filter(Invocations::start.gt(odt))
+                            }
+                        },
+                        state::TestFilterOp::LessThan => {
+                            if f.invert {
+                                query.filter(Invocations::start.ge(odt))
+                            } else {
+                                query.filter(Invocations::start.lt(odt))
+                            }
+                        },
+                        _ => query, // Equals/Contains not applicable
+                    }
+                },
+                state::TestFilterItem::Metadata { key, value } => {
+                    // For Build Metadata, the `kind` is "Build Metadata" and the `keyval` is
+                    // "key=value"
+                    let metadata_kind = "Build Metadata".to_string();
+                    let keyval_filter = format!("{key}={value}");
+
+                    let mut subquery = Options::table
+                        .inner_join(
+                            Invocations::table.on(Options::invocation_id.eq(Invocations::id)),
+                        )
+                        .into_boxed()
+                        .filter(Options::kind.eq(metadata_kind))
+                        .select(diesel::dsl::sql::<diesel::sql_types::Integer>("1"));
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            subquery.filter(Options::keyval.eq(keyval_filter))
+                        },
+                        state::TestFilterOp::Contains => {
+                            subquery.filter(Options::keyval.like(format!("%{value}%")))
+                        },
+                        _ => subquery, // Other ops not applicable
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(exists(subquery)))
+                    } else {
+                        query.filter(exists(subquery))
+                    }
+                },
+                state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
+            };
+        }
+
+        // 3. Apply ordering and limit to the final query
+        let results = query
+        .order_by(Invocations::start.desc())
+        // We query more than the limit because we need to group runs by invocation.
+        // This is a pragmatic approach; a more advanced solution might use a window function.
+        .limit(limit_i64 * 5) // Assume max 5 runs per invocation on average
+        .load::<FullHistoryRun>(&mut self.conn)
+        .context("Failed to load test history")?;
+
+        // 4. Convert the map to the final Vec, sort by time, and apply the limit.
+        let mut history: Vec<state::TestHistoryPoint> = results
+            .into_iter()
+            .map(|item| state::TestHistoryPoint {
+                invocation_id: item.invocation.id.clone(),
+                start: crate::time::to_systemtime(&item.invocation.start)
+                    .unwrap_or_else(|_| std::time::SystemTime::now()),
+                test: item.test.into_state(),
+            })
+            .collect();
+
+        // Sort by the original invocation start time, descending (newest first)
+        history.sort_by_key(|item| std::cmp::Reverse(item.start));
+
+        history.truncate(limit);
+
+        Ok(state::TestHistory {
+            name: test_name.to_string(),
+            history,
+        })
     }
 }
 

@@ -102,6 +102,44 @@ pub struct BuildOptions {
     pub build_metadata: HashMap<String, String>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct TestHistoryPoint {
+    pub invocation_id: String,
+    pub start: std::time::SystemTime,
+    pub test: Test,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct TestHistory {
+    pub name: String,
+    // Invocation ID + Test
+    pub history: Vec<TestHistoryPoint>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum TestFilterOp {
+    Equals,
+    Contains,
+    GreaterThan,
+    LessThan,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum TestFilterItem {
+    Start(std::time::SystemTime),
+    Duration(std::time::Duration),
+    Metadata { key: String, value: String },
+    Status(Status),
+    LogOutput(String),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub struct TestFilter {
+    pub op: TestFilterOp,
+    pub invert: bool,
+    pub filter: TestFilterItem,
+}
+
 cfg_if! {
 if #[cfg(feature = "ssr")] {
 use derivative::Derivative;
@@ -125,6 +163,7 @@ pub trait DB {
     fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
     fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()>;
     fn insert_output_lines(&mut self, id: &str, lines: Vec<String>) -> anyhow::Result<()>;
+    fn get_test_history(&mut self, test_name: &str, filters: &[TestFilter], limit: usize) -> anyhow::Result<TestHistory>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {
