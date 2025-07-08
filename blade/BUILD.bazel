@@ -7,7 +7,6 @@ rust_binary(
     name = "blade",
     srcs = [
         "admin.rs",
-        "components.rs",
         "lib.rs",
         "main.rs",
         "routes.rs",
@@ -73,7 +72,6 @@ rust_binary(
 rust_shared_library(
     name = "blade.wasm",
     srcs = [
-        "components.rs",
         "lib.rs",
         "main.rs",
         "routes.rs",

@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::leptos_dom::helpers::event_target_value;
 use state::{TestFilter, TestFilterItem, TestFilterOp};
 
 #[allow(non_snake_case)]

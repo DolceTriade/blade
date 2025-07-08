@@ -1,7 +1,9 @@
 use leptos::{either::Either, prelude::*};
 use state::TestHistory;
 
-use crate::components::dashboard::{duration_chart::DurationChart, pass_fail_chart::PassFailChart};
+
+use crate::components::dashboard::duration_chart::DurationChart;
+use crate::components::dashboard::pass_fail_chart::PassFailChart;
 
 #[allow(non_snake_case)]
 #[component]

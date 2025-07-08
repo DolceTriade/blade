@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 use std::{fmt::Write, io::IsTerminal, net::SocketAddr, sync::Mutex};
 
 use actix_web::{
@@ -24,6 +25,7 @@ pub mod components;
 pub mod darkmode;
 #[allow(clippy::empty_docs)]
 pub mod routes;
+
 
 // boilerplate to run in different modes
 cfg_if! {
