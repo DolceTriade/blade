@@ -16,11 +16,11 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
     view! {
         <LineChart
             data=history.history
-            x_accessor=|point| point.start.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs_f64()
-            y_accessor=|point| point.test.duration.as_millis() as f64
-            x_label_accessor=|_point| {
-                "Date".to_string() // Placeholder
+            x_accessor=|point| {
+                point.start.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs_f64()
             }
+            y_accessor=|point| point.test.duration.as_millis() as f64
+            x_label_accessor=|_point| { "Date".to_string() }
             line_color="#4299e1"
             point_color="#4299e1"
             tooltip_content_accessor=|point| {
@@ -28,11 +28,7 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
                     "Invocation: {}\nDuration: {}ms\nDate: {}",
                     point.invocation_id.chars().take(8).collect::<String>(),
                     point.test.duration.as_millis(),
-                    // {
-                    //     let datetime: chrono::DateTime<chrono::Utc> = point.start.into();
-                    //     datetime.format("%Y-%m-%d %H:%M:%S").to_string()
-                    // }
-                    "Date Placeholder"
+                    "Date Placeholder",
                 )
             }
             on_point_click=on_point_click

@@ -102,7 +102,13 @@ where
             let x = margin.3 as f64 + (x_accessor(point) - min_x) * x_scale;
             let y = height as f64 - margin.2 as f64 + 15.0;
             view! {
-                <text x=x.to_string() y=y.to_string() style:text-anchor="middle" fill="#a0aec0" style:font-size="10">
+                <text
+                    x=x.to_string()
+                    y=y.to_string()
+                    style:text-anchor="middle"
+                    fill="#a0aec0"
+                    style:font-size="10"
+                >
                     {x_label_accessor(point)}
                 </text>
             }
@@ -114,7 +120,13 @@ where
             let value = (max_y / 5.0) * i as f64;
             let y = margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
             view! {
-                <text x=(margin.3 - 10).to_string() y=y.to_string() style:text-anchor="end" fill="#a0aec0" style:font-size="10">
+                <text
+                    x=(margin.3 - 10).to_string()
+                    y=y.to_string()
+                    style:text-anchor="end"
+                    fill="#a0aec0"
+                    style:font-size="10"
+                >
                     {format!("{value:.1}")}
                 </text>
             }
@@ -127,8 +139,23 @@ where
             let (x, y) = points[i];
             view! {
                 <g class="pointer-events-none" transform=format!("translate({}, {})", x, y - 10.0)>
-                    <rect x="-75" y="-25" width="150" height="50" rx="5" fill="#2d3748" stroke="#4a5568" stroke-width="1" />
-                    <text x="0" y="-10" style:text-anchor="middle" fill="white" style:font-size="12">
+                    <rect
+                        x="-75"
+                        y="-25"
+                        width="150"
+                        height="50"
+                        rx="5"
+                        fill="#2d3748"
+                        stroke="#4a5568"
+                        stroke-width="1"
+                    />
+                    <text
+                        x="0"
+                        y="-10"
+                        style:text-anchor="middle"
+                        fill="white"
+                        style:font-size="12"
+                    >
                         {tooltip_content_accessor(point)}
                     </text>
                 </g>
@@ -177,7 +204,10 @@ where
             <text
                 x="15"
                 y=(margin.0 as f64 + chart_height as f64 / 2.0).to_string()
-                transform=format!("rotate(-90, 15, {})", margin.0 as f64 + chart_height as f64 / 2.0)
+                transform=format!(
+                    "rotate(-90, 15, {})",
+                    margin.0 as f64 + chart_height as f64 / 2.0,
+                )
                 style:text-anchor="middle"
                 fill="#a0aec0"
                 style:font-size="14"
