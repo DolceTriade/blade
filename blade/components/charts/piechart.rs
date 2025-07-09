@@ -31,8 +31,10 @@ where
     let slices = data.iter().map(|item| {
         let value = value_accessor(item);
         let percentage = value / total_value;
-        tracing::info!("Percentage = {percentage}");
-        let angle_delta = percentage * 2.0 * PI;
+        let mut angle_delta = percentage * 2.0 * PI;
+        if percentage >= 1.0 {
+            angle_delta = 2.0 * PI - 0.0001; // Use a slightly smaller angle for a full circle to avoid SVG path issues
+        }
         let end_angle = current_angle + angle_delta;
 
         let large_arc_flag = if angle_delta > PI { 1 } else { 0 };
