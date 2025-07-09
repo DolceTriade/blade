@@ -26,7 +26,6 @@ pub mod darkmode;
 #[allow(clippy::empty_docs)]
 pub mod routes;
 
-
 // boilerplate to run in different modes
 cfg_if! {
     // server-only stuff

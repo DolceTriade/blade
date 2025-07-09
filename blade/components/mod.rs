@@ -1,6 +1,8 @@
 pub mod accordion;
 pub mod card;
+pub mod charts;
 pub mod clipboard;
+pub mod dashboard;
 pub mod list;
 pub mod measuretime;
 pub mod nav;
@@ -14,5 +16,3 @@ pub mod testresults;
 pub mod testrunlist;
 pub mod testsummary;
 pub mod tooltip;
-pub mod dashboard;
-pub mod charts;

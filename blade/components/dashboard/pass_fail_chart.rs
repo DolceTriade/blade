@@ -17,8 +17,10 @@ pub fn PassFailChart(history: TestHistory) -> impl IntoView {
     view! {
         <PieChart
             data=vec![(true, passed), (false, failed)]
+            size=200
+            inner_radius_ratio=0.75
             value_accessor=|v| v.1 as f64
-            _label_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
+            label_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
             color_accessor=|v| (if v.0 { "#48bb78" } else { "#f56565" }).to_string()
             tooltip_content_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
         />

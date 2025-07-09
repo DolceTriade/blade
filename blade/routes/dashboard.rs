@@ -32,9 +32,12 @@ pub fn Dashboard() -> impl IntoView {
             if test_name.is_empty() {
                 return None;
             }
-            get_test_history(test_name, Some(filters)).await.inspect_err(|e|{
-                tracing::warn!("Failed to get test history: {e:#?}");
-            }).ok()
+            get_test_history(test_name, Some(filters))
+                .await
+                .inspect_err(|e| {
+                    tracing::warn!("Failed to get test history: {e:#?}");
+                })
+                .ok()
         },
     );
 

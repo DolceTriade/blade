@@ -1,13 +1,13 @@
 use std::f64::consts::PI;
 
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 
 #[allow(non_snake_case)]
 #[component]
 pub fn PieChart<T, V, L, C, TC>(
     data: Vec<T>,
     value_accessor: V,
-    _label_accessor: L, // Not used directly in this version, but good for API consistency
+    label_accessor: L,
     color_accessor: C,
     tooltip_content_accessor: TC,
     #[prop(default = 200)] size: u32,
@@ -27,6 +27,7 @@ where
         .map(value_accessor)
         .sum::<f64>()
         .max(f64::EPSILON); // Avoid division by zero
+
     let center = size as f64 / 2.0;
     let radius = center;
 
@@ -54,13 +55,9 @@ where
             let y1_inner = center + inner_radius * current_angle.sin();
             let x2_inner = center + inner_radius * end_angle.cos();
             let y2_inner = center + inner_radius * end_angle.sin();
-            format!(
-                "M {x1_inner} {y1_inner} L {x1_outer} {y1_outer} A {radius} {radius} 0 {large_arc_flag} 1 {x2_outer} {y2_outer} L {x2_inner} {y2_inner} A {inner_radius} {inner_radius} 0 {large_arc_flag} 0 {x1_inner} {y1_inner} Z",
-            )
+            format!("M {x1_inner} {y1_inner} L {x1_outer} {y1_outer} A {radius} {radius} 0 {large_arc_flag} 1 {x2_outer} {y2_outer} L {x2_inner} {y2_inner} A {inner_radius} {inner_radius} 0 {large_arc_flag} 0 {x1_inner} {y1_inner} Z")
         } else {
-            format!(
-                "M {center} {center} L {x1_outer} {y1_outer} A {radius} {radius} 0 {large_arc_flag} 1 {x2_outer} {y2_outer} Z",
-            )
+            format!("M {center} {center} L {x1_outer} {y1_outer} A {radius} {radius} 0 {large_arc_flag} 1 {x2_outer} {y2_outer} Z")
         };
 
         let mid_angle = current_angle + angle_delta / 2.0;
@@ -70,45 +67,9 @@ where
         (path, mid_angle, color)
     }).collect::<Vec<_>>();
 
-    let mid_angles: Vec<f64> = slices.iter().map(|v|v.1).collect();
+    let mid_angles: Vec<f64> = slices.iter().map(|v| v.1).collect();
 
-    let tooltip = move || {
-        hovered_index.get().map(|i| {
-            let item = &data[i];
-            let value = value_accessor(item);
-            let percentage = (value / total_value) * 100.0;
-
-            let mid_angle = &mid_angles[i];
-
-            let tooltip_radius = if inner_radius_ratio > 0.0 {
-                // Average of inner and outer radius for doughnut charts
-                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
-            } else {
-                // Halfway out for pie charts
-                radius * 0.5
-            };
-
-            let x = center + tooltip_radius * mid_angle.cos();
-            let y = center + tooltip_radius * mid_angle.sin();
-
-            view! {
-                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
-                    // Tooltip box
-                    <rect x="-60" y="-25" width="120" height="50" rx="5" fill="rgba(45, 55, 72, 0.9)" stroke="#4a5568" stroke-width="1" />
-                    // Tooltip text
-                    <text x="0" y="-5" style:text-anchor="middle" fill="white" style:font-size="14">
-                        {tooltip_content_accessor(item)}
-                    </text>
-                    // Tooltip percentage
-                    <text x="0" y="15" style:text-anchor="middle" fill="#a0aec0" style:font-size="12">
-                        {format!("{percentage:.1}%")}
-                    </text>
-                </g>
-            }
-        })
-    };
-
-    let slice_views = slices.into_iter().enumerate().map(|(i, (path, _mid_angle, color))| {
+    let slice_views = slices.iter().enumerate().map(|(i, (path, _mid_angle, color))| {
         let transform = move || {
             if hovered_index.get() == Some(i) {
                 "scale(1.05)".to_string()
@@ -119,24 +80,107 @@ where
 
         view! {
             <path
-                d=path
-                fill=color
+                d=path.clone()
+                fill=color.clone()
                 stroke="white"
                 stroke-width="1"
                 on:mouseenter=move |_| set_hovered_index.set(Some(i))
                 on:mouseleave=move |_| set_hovered_index.set(None)
                 style=format!(
                     "transition: transform 0.2s ease-out; cursor: pointer; transform-origin: {}px {}px;",
-                    center, center
+                    center,
+                    center,
                 )
                 transform=transform
             />
         }
     }).collect_view();
 
+    let label_views = mid_angles
+        .iter()
+        .enumerate()
+        .map(|(i, mid_angle)| {
+            let item = &data[i];
+            let label_radius = if inner_radius_ratio > 0.0 {
+                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
+            } else {
+                radius * 0.65
+            };
+
+            let x = center + label_radius * mid_angle.cos();
+            let y = center + label_radius * mid_angle.sin();
+
+            // Hide label for very small slices to avoid clutter
+            let value = value_accessor(item);
+            let percentage = value / total_value;
+            if percentage < 0.03 {
+                return Either::Left(view! { <g></g> });
+            }
+
+            Either::Right(view! {
+                <text
+                    x=x
+                    y=y
+                    style:text-anchor="middle"
+                    style:dominant-baseline="middle"
+                    fill="white"
+                    style:font-size="0.5rem"
+                    class="pointer-events-none"
+                >
+                    {label_accessor(item)}
+                </text>
+            })
+        })
+        .collect_view();
+
+    let tooltip = move || {
+        hovered_index.get().map(|i| {
+            let item = &data[i];
+            let value = value_accessor(item);
+            let percentage = (value / total_value) * 100.0;
+
+            let mid_angle = mid_angles[i];
+
+            let tooltip_radius = if inner_radius_ratio > 0.0 {
+                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
+            } else {
+                radius * 0.5
+            };
+
+            let x = center + tooltip_radius * mid_angle.cos();
+            let y = center + tooltip_radius * mid_angle.sin();
+
+            view! {
+                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
+                    <foreignObject x="-75" y="-40" width="150" height="80">
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                            <div style=format!(
+                                "background-color: rgba(45, 55, 72, 0.9); color: white; border-radius: {}px; padding: {}px {}px; border: 0.25px solid #4a5568; display: inline-block;",
+                                size / 40,
+                                size / 25,
+                                size / 16,
+                            )>
+                                <div style=format!(
+                                    "font-size: {}px; text-align: center;",
+                                    size / 22,
+                                )>{tooltip_content_accessor(item)}</div>
+                                <div style=format!(
+                                    "font-size: {}px; color: #a0aec0; text-align: center; margin-top: {}px;",
+                                    size / 30,
+                                    size / 50,
+                                )>{format!("{percentage:.1}%")}</div>
+                            </div>
+                        </div>
+                    </foreignObject>
+                </g>
+            }
+        })
+    };
+
     view! {
         <svg width="100%" height="100%" viewBox=format!("0 0 {size} {size}")>
             <g>{slice_views}</g>
+            <g>{label_views}</g>
             {tooltip}
         </svg>
     }

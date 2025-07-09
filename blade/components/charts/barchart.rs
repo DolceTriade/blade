@@ -116,7 +116,9 @@ where
         hovered_index.get().map(|i| {
             let point = &data[i];
             let x = margin.3 as f64 + (i as f64 * bar_width) + (bar_width / 2.0);
-            let y = margin.0 as f64 + chart_height as f64 - (y_accessor(point) / max_y) * chart_height as f64 - 10.0; // Above the bar
+            let y = margin.0 as f64 + chart_height as f64
+                - (y_accessor(point) / max_y) * chart_height as f64
+                - 10.0; // Above the bar
 
             view! {
                 <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
