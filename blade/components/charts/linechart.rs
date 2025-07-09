@@ -2,13 +2,12 @@ use leptos::prelude::*;
 
 #[allow(non_snake_case)]
 #[component]
-pub fn LineChart<T, X, Y, XL, TC>(
+pub fn LineChart<T, X, Y, PC, TC>(
     data: Vec<T>,
     x_accessor: X,
     y_accessor: Y,
-    x_label_accessor: XL,
     line_color: &'static str,
-    point_color: &'static str,
+    point_color_accessor: PC,
     tooltip_content_accessor: TC,
     #[prop(optional)] on_point_click: Option<fn(T)>,
     #[prop(default = "")] x_axis_label: &'static str,
@@ -16,18 +15,22 @@ pub fn LineChart<T, X, Y, XL, TC>(
     #[prop(default = 500)] width: u32,
     #[prop(default = 200)] height: u32,
     #[prop(default = (50, 50, 50, 50))] margin: (u32, u32, u32, u32), // top, right, bottom, left
+    #[prop(default = 5)] x_axis_ticks_count: u32,
+    #[prop(optional)] x_tick_formatter: Option<Box<dyn Fn(f64) -> String + 'static + Send>>,
 ) -> impl IntoView
 where
     T: Clone + 'static + Send,
     X: Fn(&T) -> f64 + Copy + 'static + Send,
     Y: Fn(&T) -> f64 + Copy + 'static + Send,
-    XL: Fn(&T) -> String + Copy + 'static + Send,
+    PC: Fn(&T) -> String + Copy + 'static + Send,
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
     let (hovered_index, set_hovered_index) = signal(None::<usize>);
 
     let chart_width = width - margin.3 - margin.1;
     let chart_height = height - margin.0 - margin.2;
+
+    let x_tick_formatter = x_tick_formatter.unwrap_or_else(|| Box::new(|v: f64| format!("{v:.1}")));
 
     let max_y = data
         .iter()
@@ -84,7 +87,7 @@ where
                     cx=x.to_string()
                     cy=y.to_string()
                     r="4"
-                    fill=point_color
+                    fill=point_color_accessor(&data[i])
                     stroke="#1a202c"
                     stroke-width="2"
                     on:mouseenter=move |_| set_hovered_index.set(Some(i))
@@ -96,10 +99,10 @@ where
         })
         .collect_view();
 
-    let x_axis_ticks = data
-        .iter()
-        .map(|point| {
-            let x = margin.3 as f64 + (x_accessor(point) - min_x) * x_scale;
+    let x_axis_ticks = (0..=x_axis_ticks_count)
+        .map(|i| {
+            let value = min_x + (max_x - min_x) / x_axis_ticks_count as f64 * i as f64;
+            let x = margin.3 as f64 + (value - min_x) * x_scale;
             let y = height as f64 - margin.2 as f64 + 15.0;
             view! {
                 <text
@@ -109,7 +112,7 @@ where
                     fill="#a0aec0"
                     style:font-size="10"
                 >
-                    {x_label_accessor(point)}
+                    {x_tick_formatter(value)}
                 </text>
             }
         })
@@ -138,27 +141,26 @@ where
             let point = &data[i];
             let (x, y) = points[i];
             view! {
-                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y - 10.0)>
-                    <rect
-                        x="-75"
-                        y="-25"
-                        width="150"
-                        height="50"
-                        rx="5"
-                        fill="#2d3748"
-                        stroke="#4a5568"
-                        stroke-width="1"
-                    />
-                    <text
-                        x="0"
-                        y="-10"
-                        style:text-anchor="middle"
-                        fill="white"
-                        style:font-size="12"
-                    >
-                        {tooltip_content_accessor(point)}
-                    </text>
-                </g>
+                <foreignObject
+                    x=x.to_string()
+                    y=(y - 30.0).to_string()
+                    width="150"
+                    height="50"
+                    style="overflow: visible;"
+                    attr:xmlns="http://www.w3.org/1999/xhtml"
+                >
+                    <div style="
+                    background-color: #2d3748;
+                    border: 1px solid #4a5568;
+                    border-radius: 5px;
+                    padding: 5px 10px;
+                    color: white;
+                    font-size: 12px;
+                    text-align: center;
+                    white-space: nowrap;
+                    transform: translateX(-50%);
+                    ">{tooltip_content_accessor(point)}</div>
+                </foreignObject>
             }
         })
     };

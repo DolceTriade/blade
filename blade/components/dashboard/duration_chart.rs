@@ -20,9 +20,8 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
                 point.start.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs_f64()
             }
             y_accessor=|point| point.test.duration.as_millis() as f64
-            x_label_accessor=|_point| { "Date".to_string() }
             line_color="#4299e1"
-            point_color="#4299e1"
+            point_color_accessor=|_| "#4299e1".to_string()
             tooltip_content_accessor=|point| {
                 format!(
                     "Invocation: {}\nDuration: {}ms\nDate: {}",
