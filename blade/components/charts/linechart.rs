@@ -17,6 +17,7 @@ pub fn LineChart<T, X, Y, PC, TC>(
     #[prop(default = (50, 50, 50, 50))] margin: (u32, u32, u32, u32), // top, right, bottom, left
     #[prop(default = 5)] x_axis_ticks_count: u32,
     #[prop(optional)] x_tick_formatter: Option<Box<dyn Fn(f64) -> String + 'static + Send>>,
+    #[prop(optional)] x_axis_label_rotation: Option<f64>,
 ) -> impl IntoView
 where
     T: Clone + 'static + Send,
@@ -111,6 +112,7 @@ where
                     style:text-anchor="middle"
                     fill="#a0aec0"
                     style:font-size="10"
+                    transform=x_axis_label_rotation.map(|r| format!("rotate({r}, {x}, {y})"))
                 >
                     {x_tick_formatter(value)}
                 </text>

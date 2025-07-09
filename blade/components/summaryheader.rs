@@ -31,7 +31,7 @@ struct Counts {
     status: state::Status,
 }
 
-fn format_time(t: &std::time::SystemTime) -> String {
+pub fn format_time(t: &std::time::SystemTime) -> String {
     let ts: time::OffsetDateTime = (*t).into();
     ts.format(&format_description!(
         "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second]"

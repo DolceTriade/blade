@@ -2,8 +2,13 @@ use leptos::prelude::*;
 use leptos_dom::helpers::window;
 use state::TestHistory;
 
-use crate::components::charts::linechart::LineChart;
-// use chrono::prelude::*;
+use crate::components::{charts::linechart::LineChart, summaryheader::format_time};
+
+pub fn format_unix(t: f64) -> String {
+    let d = std::time::Duration::from_secs_f64(t);
+    let ss = std::time::SystemTime::UNIX_EPOCH.checked_add(d).unwrap_or_else(std::time::SystemTime::now);
+    format_time(&ss)
+}
 
 #[allow(non_snake_case)]
 #[component]
@@ -21,18 +26,25 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
             }
             y_accessor=|point| point.test.duration.as_millis() as f64
             line_color="#4299e1"
-            point_color_accessor=|_| "#4299e1".to_string()
+            point_color_accessor=|p| {
+                (match p.test.status {
+                    state::Status::Success => "#48bb78",
+                    _ => "#f56565",
+                }).to_string()
+            }
             tooltip_content_accessor=|point| {
                 format!(
-                    "Invocation: {}\nDuration: {}ms\nDate: {}",
+                    "Invocation: {} Duration: {} Date: {}",
                     point.invocation_id.chars().take(8).collect::<String>(),
-                    point.test.duration.as_millis(),
-                    "Date Placeholder",
+                    humantime::format_duration(point.test.duration),
+                    format_time(&point.start),
                 )
             }
+            x_tick_formatter=Box::new(format_unix)
             on_point_click=on_point_click
             x_axis_label="Time"
             y_axis_label="Duration (ms)"
+            x_axis_label_rotation=10.0
         />
     }
 }
