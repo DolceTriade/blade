@@ -19,7 +19,7 @@ pub fn PassFailChart(history: TestHistory) -> impl IntoView {
             data=vec![(true, passed), (false, failed)]
             value_accessor=|v| v.1 as f64
             _label_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
-            color_accessor=|v| (if v.0 { "green" } else { "red" }).to_string()
+            color_accessor=|v| (if v.0 { "#48bb78" } else { "#f56565" }).to_string()
             tooltip_content_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
         />
     }

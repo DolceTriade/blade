@@ -22,7 +22,6 @@ where
     let (hovered_index, set_hovered_index) = signal(None::<usize>);
 
     let total_value = data.iter().map(value_accessor).sum::<f64>().max(f64::EPSILON); // Avoid division by zero
-    tracing::info!("Total value = {total_value}");
     let center = size as f64 / 2.0;
     let radius = center;
 
@@ -66,14 +65,12 @@ where
         (path, mid_angle, color)
     }).collect::<Vec<_>>();
 
-    let slice_views = slices.into_iter().enumerate().map(|(i, (path, mid_angle, color))| {
+    let slice_views = slices.into_iter().enumerate().map(|(i, (path, _mid_angle, color))| {
         let transform = move || {
             if hovered_index.get() == Some(i) {
-                let x = 0.05 * radius * mid_angle.cos();
-                let y = 0.05 * radius * mid_angle.sin();
-                format!("translate({x}, {y})")
+                "scale(1.05)".to_string()
             } else {
-                "".to_string()
+                "scale(1.0)".to_string()
             }
         };
 
@@ -85,7 +82,10 @@ where
                 stroke-width="1"
                 on:mouseenter=move |_| set_hovered_index.set(Some(i))
                 on:mouseleave=move |_| set_hovered_index.set(None)
-                style="transition: transform 0.2s ease-out; cursor: pointer;"
+                style=format!(
+                    "transition: transform 0.2s ease-out; cursor: pointer; transform-origin: {}px {}px;",
+                    center, center
+                )
                 transform=transform
             />
         }
