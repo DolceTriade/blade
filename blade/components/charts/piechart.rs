@@ -177,8 +177,16 @@ where
         })
     };
 
+    const HOVER_SCALE: f64 = 1.05;
+    let scaled_size = size as f64 * HOVER_SCALE;
+    let offset = (scaled_size - size as f64) / 2.0;
+
     view! {
-        <svg width="100%" height="100%" viewBox=format!("0 0 {size} {size}")>
+        <svg
+            width="100%"
+            height="100%"
+            viewBox=format!("{} {} {} {}", -offset, -offset, scaled_size, scaled_size)
+        >
             <g>{slice_views}</g>
             <g>{label_views}</g>
             {tooltip}

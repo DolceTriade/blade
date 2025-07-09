@@ -22,7 +22,7 @@ pub fn PassFailChart(history: TestHistory) -> impl IntoView {
             value_accessor=|v| v.1 as f64
             label_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
             color_accessor=|v| (if v.0 { "#48bb78" } else { "#f56565" }).to_string()
-            tooltip_content_accessor=|v| (if v.0 { "Pass" } else { "Fail" }).to_string()
+            tooltip_content_accessor=|v| format!("{} {}", v.1, if v.1 == 1 { "run" } else { "runs" })
         />
     }
 }
