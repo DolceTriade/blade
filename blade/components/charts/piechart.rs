@@ -1,5 +1,6 @@
-use leptos::prelude::*;
 use std::f64::consts::PI;
+
+use leptos::prelude::*;
 
 #[allow(non_snake_case)]
 #[component]
@@ -21,7 +22,11 @@ where
 {
     let (hovered_index, set_hovered_index) = signal(None::<usize>);
 
-    let total_value = data.iter().map(value_accessor).sum::<f64>().max(f64::EPSILON); // Avoid division by zero
+    let total_value = data
+        .iter()
+        .map(value_accessor)
+        .sum::<f64>()
+        .max(f64::EPSILON); // Avoid division by zero
     let center = size as f64 / 2.0;
     let radius = center;
 
@@ -65,6 +70,44 @@ where
         (path, mid_angle, color)
     }).collect::<Vec<_>>();
 
+    let mid_angles: Vec<f64> = slices.iter().map(|v|v.1).collect();
+
+    let tooltip = move || {
+        hovered_index.get().map(|i| {
+            let item = &data[i];
+            let value = value_accessor(item);
+            let percentage = (value / total_value) * 100.0;
+
+            let mid_angle = &mid_angles[i];
+
+            let tooltip_radius = if inner_radius_ratio > 0.0 {
+                // Average of inner and outer radius for doughnut charts
+                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
+            } else {
+                // Halfway out for pie charts
+                radius * 0.5
+            };
+
+            let x = center + tooltip_radius * mid_angle.cos();
+            let y = center + tooltip_radius * mid_angle.sin();
+
+            view! {
+                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
+                    // Tooltip box
+                    <rect x="-60" y="-25" width="120" height="50" rx="5" fill="rgba(45, 55, 72, 0.9)" stroke="#4a5568" stroke-width="1" />
+                    // Tooltip text
+                    <text x="0" y="-5" style:text-anchor="middle" fill="white" style:font-size="14">
+                        {tooltip_content_accessor(item)}
+                    </text>
+                    // Tooltip percentage
+                    <text x="0" y="15" style:text-anchor="middle" fill="#a0aec0" style:font-size="12">
+                        {format!("{percentage:.1}%")}
+                    </text>
+                </g>
+            }
+        })
+    };
+
     let slice_views = slices.into_iter().enumerate().map(|(i, (path, _mid_angle, color))| {
         let transform = move || {
             if hovered_index.get() == Some(i) {
@@ -90,39 +133,6 @@ where
             />
         }
     }).collect_view();
-
-    let tooltip = move || {
-        hovered_index.get().map(|i| {
-            let item = &data[i];
-            let value = value_accessor(item);
-            let percentage = (value / total_value) * 100.0;
-
-            view! {
-                <g class="pointer-events-none">
-                    <text
-                        x=center
-                        y=center
-                        style:text-anchor="middle"
-                        style:dominant-baseline="middle"
-                        fill="currentColor"
-                        style:font-size=format!("{}px", size / 12)
-                    >
-                        {tooltip_content_accessor(item)}
-                    </text>
-                    <text
-                        x=center
-                        y=center + (size as f64 / 10.0)
-                        style:text-anchor="middle"
-                        style:dominant-baseline="middle"
-                        fill="#a0aec0"
-                        style:font-size=format!("{}px", size / 16)
-                    >
-                        {format!("{percentage:.1}%")}
-                    </text>
-                </g>
-            }
-        })
-    };
 
     view! {
         <svg width="100%" height="100%" viewBox=format!("0 0 {size} {size}")>
