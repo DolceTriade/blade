@@ -6,7 +6,9 @@ use crate::components::{charts::linechart::LineChart, summaryheader::format_time
 
 pub fn format_unix(t: f64) -> String {
     let d = std::time::Duration::from_secs_f64(t);
-    let ss = std::time::SystemTime::UNIX_EPOCH.checked_add(d).unwrap_or_else(std::time::SystemTime::now);
+    let ss = std::time::SystemTime::UNIX_EPOCH
+        .checked_add(d)
+        .unwrap_or_else(std::time::SystemTime::now);
     format_time(&ss)
 }
 
@@ -30,7 +32,8 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
                 (match p.test.status {
                     state::Status::Success => "#48bb78",
                     _ => "#f56565",
-                }).to_string()
+                })
+                    .to_string()
             }
             tooltip_content_accessor=|point| {
                 format!(
