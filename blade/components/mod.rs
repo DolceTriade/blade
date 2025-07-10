@@ -1,6 +1,8 @@
 pub mod accordion;
 pub mod card;
+pub mod charts;
 pub mod clipboard;
+pub mod dashboard;
 pub mod list;
 pub mod measuretime;
 pub mod nav;

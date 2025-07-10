@@ -87,6 +87,7 @@ diesel::joinable!(invocationoutput -> invocations (invocation_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     invocations,
+    invocationoutput,
     options,
     targets,
     testartifacts,

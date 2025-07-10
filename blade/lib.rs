@@ -1,4 +1,4 @@
-#![recursion_limit = "512"]
+#![recursion_limit = "256"]
 use cfg_if::cfg_if;
 #[allow(clippy::empty_docs)]
 pub mod components;

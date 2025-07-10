@@ -255,10 +255,7 @@ pub fn Test() -> impl IntoView {
                             />
                         </Card>
                         <Card class="h-full w-full max-w-full p-1 m-1 flex-1 overflow-x-auto overflow-auto">
-                            <TestResults
-                                sort_by=sort_by
-                                sort_order=sort_order
-                            />
+                            <TestResults sort_by=sort_by sort_order=sort_order />
                             <Suspense fallback=move || {
                                 view! { <div>Loading...</div> }
                             }>

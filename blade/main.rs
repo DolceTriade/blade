@@ -1,3 +1,4 @@
+#![recursion_limit = "256"]
 use std::{fmt::Write, io::IsTerminal, net::SocketAddr, sync::Mutex};
 
 use actix_web::{

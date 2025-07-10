@@ -450,6 +450,151 @@ impl state::DB for Sqlite {
         });
         Ok(opts)
     }
+
+    fn get_test_history(
+        &mut self,
+        test_name: &str,
+        filters: &[state::TestFilter],
+        limit: usize,
+    ) -> anyhow::Result<state::TestHistory> {
+        use schema::*;
+        // Helper struct to structure the flat results from our query, combining all
+        // necessary models.
+        #[derive(Queryable, Debug)]
+        struct FullHistoryRun {
+            test: models::Test,
+            invocation: models::Invocation,
+        }
+
+        let limit_i64: i64 = limit.try_into().context("failed to convert into i64")?;
+
+        // 1. Start with a base query joining the necessary tables. We join testruns ->
+        //    tests -> invocations. We box it to allow for dynamic modification based on
+        //    filters.
+        let mut query = Tests::table
+            .inner_join(Invocations::table.on(Tests::invocation_id.eq(Invocations::id)))
+            .filter(Tests::name.eq(test_name))
+            .into_boxed()
+            .select((models::Test::as_select(), models::Invocation::as_select()));
+
+        // 2. Dynamically add filters to the query
+        for f in filters {
+            query = match &f.filter {
+                state::TestFilterItem::Status(status) => {
+                    let db_status = status.to_string();
+                    match f.op {
+                        state::TestFilterOp::Equals => {
+                            if f.invert {
+                                query.filter(Tests::status.ne(db_status))
+                            } else {
+                                query.filter(Tests::status.eq(db_status))
+                            }
+                        },
+                        _ => query, // Other ops are not applicable to Status
+                    }
+                },
+                state::TestFilterItem::Duration(duration) => {
+                    let duration_s = duration.as_secs_f64();
+                    match f.op {
+                        state::TestFilterOp::GreaterThan => {
+                            if f.invert {
+                                query.filter(Tests::duration_s.le(duration_s))
+                            } else {
+                                query.filter(Tests::duration_s.gt(duration_s))
+                            }
+                        },
+                        state::TestFilterOp::LessThan => {
+                            if f.invert {
+                                query.filter(Tests::duration_s.ge(duration_s))
+                            } else {
+                                query.filter(Tests::duration_s.lt(duration_s))
+                            }
+                        },
+                        _ => query, // Equals/Contains not applicable
+                    }
+                },
+                state::TestFilterItem::Start(time) => {
+                    let odt: time::OffsetDateTime = (*time).into();
+                    match f.op {
+                        state::TestFilterOp::GreaterThan => {
+                            if f.invert {
+                                query.filter(Invocations::start.le(odt))
+                            } else {
+                                query.filter(Invocations::start.gt(odt))
+                            }
+                        },
+                        state::TestFilterOp::LessThan => {
+                            if f.invert {
+                                query.filter(Invocations::start.ge(odt))
+                            } else {
+                                query.filter(Invocations::start.lt(odt))
+                            }
+                        },
+                        _ => query, // Equals/Contains not applicable
+                    }
+                },
+                state::TestFilterItem::Metadata { key, value } => {
+                    // For Build Metadata, the `kind` is "Build Metadata" and the `keyval` is
+                    // "key=value"
+                    let metadata_kind = "Build Metadata".to_string();
+                    let keyval_filter = format!("{key}={value}");
+
+                    let mut subquery = Options::table
+                        .into_boxed()
+                        .filter(Options::kind.eq(metadata_kind))
+                        .select(Options::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            subquery.filter(Options::keyval.eq(keyval_filter))
+                        },
+                        state::TestFilterOp::Contains => {
+                            subquery.filter(Options::keyval.like(format!("%{value}%")))
+                        },
+                        _ => subquery, // Other ops not applicable
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(Invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(Invocations::id.eq_any(subquery))
+                    }
+                },
+                state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
+            };
+        }
+
+        // 3. Apply ordering and limit to the final query
+        let results = query
+        .order_by(Invocations::start.desc())
+        // We query more than the limit because we need to group runs by invocation.
+        // This is a pragmatic approach; a more advanced solution might use a window function.
+        .limit(limit_i64 * 5) // Assume max 5 runs per invocation on average
+        .load::<FullHistoryRun>(&mut self.conn)
+        .context("Failed to load test history")?;
+
+        // 4. Convert the map to the final Vec, sort by time, and apply the limit.
+        let mut history: Vec<state::TestHistoryPoint> = results
+            .into_iter()
+            .map(|item| state::TestHistoryPoint {
+                invocation_id: item.invocation.id.clone(),
+                start: crate::time::to_systemtime(&item.invocation.start)
+                    .unwrap_or_else(|_| std::time::SystemTime::now()),
+                test: item.test.into_state(),
+            })
+            .collect();
+
+        // Sort by the original invocation start time, descending (newest first)
+        history.sort_by_key(|item| std::cmp::Reverse(item.start));
+
+        history.truncate(limit);
+
+        Ok(state::TestHistory {
+            name: test_name.to_string(),
+            history,
+        })
+    }
 }
 
 define_sql_function! {
@@ -856,5 +1001,162 @@ mod tests {
         db.delete_last_output_lines(&inv.id, 2_u32).unwrap();
         let prog = db.get_progress(&inv.id).unwrap();
         assert_eq!(prog, "a\nb");
+    }
+
+    #[test]
+    fn test_get_test_history() {
+        use state::{Status, TestFilter, TestFilterItem, TestFilterOp};
+
+        let tmp = tempdir::TempDir::new("test_target").unwrap();
+        let db_path = tmp.path().join("test.db");
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let test_name = "//:my_test";
+        let now = std::time::SystemTime::now();
+
+        // Invocation 1 (now): a successful run, on main branch
+        let inv1 = state::InvocationResults {
+            id: "inv1".to_string(),
+            start: now,
+            ..Default::default()
+        };
+        let test1 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Success,
+            duration: Duration::from_secs(5),
+            end: now,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv1).unwrap();
+        db.upsert_test(&inv1.id, &test1).unwrap();
+        db.insert_options(
+            &inv1.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "main".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Invocation 2 (now - 1 day): a failed run, on main branch
+        let day = Duration::from_secs(24 * 60 * 60);
+        let inv2_time = now.checked_sub(day).unwrap();
+        let inv2 = state::InvocationResults {
+            id: "inv2".to_string(),
+            start: inv2_time,
+            ..Default::default()
+        };
+        let test2 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Fail,
+            duration: Duration::from_secs(12),
+            end: inv2_time,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv2).unwrap();
+        db.upsert_test(&inv2.id, &test2).unwrap();
+        db.insert_options(
+            &inv2.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "main".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Invocation 3 (now - 2 days): a successful run, on a feature branch
+        let inv3_time = now.checked_sub(day * 2).unwrap();
+        let inv3 = state::InvocationResults {
+            id: "inv3".to_string(),
+            start: inv3_time,
+            ..Default::default()
+        };
+        let test3 = state::Test {
+            name: test_name.to_string(),
+            status: Status::Success,
+            duration: Duration::from_secs(6),
+            end: inv3_time,
+            num_runs: 0,
+            runs: vec![],
+        };
+        db.upsert_shallow_invocation(&inv3).unwrap();
+        db.upsert_test(&inv3.id, &test3).unwrap();
+        db.insert_options(
+            &inv3.id,
+            &state::BuildOptions {
+                build_metadata: HashMap::from([("branch".to_string(), "feature/foo".to_string())]),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+
+        // Case 1: Get all history (limit 10)
+        let history = db.get_test_history(test_name, &[], 10).unwrap();
+        assert_eq!(history.name, test_name);
+        assert_eq!(history.history.len(), 3);
+        assert_eq!(history.history[0].invocation_id, "inv1");
+        assert_eq!(history.history[1].invocation_id, "inv2");
+        assert_eq!(history.history[2].invocation_id, "inv3");
+
+        // Case 2: Filter by status: Success
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: false,
+            filter: TestFilterItem::Status(Status::Success),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 2);
+        assert!(
+            history
+                .history
+                .iter()
+                .all(|h| h.test.status == Status::Success)
+        );
+
+        // Case 3: Filter by duration > 10s
+        let filters = [TestFilter {
+            op: TestFilterOp::GreaterThan,
+            invert: false,
+            filter: TestFilterItem::Duration(Duration::from_secs(10)),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv2");
+
+        // Case 4: Filter by metadata: branch=main
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: false,
+            filter: TestFilterItem::Metadata {
+                key: "branch".to_string(),
+                value: "main".to_string(),
+            },
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 2);
+        assert_eq!(history.history[0].invocation_id, "inv1");
+        assert_eq!(history.history[1].invocation_id, "inv2");
+
+        // Case 5: Inverted metadata filter: branch!=main
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: true,
+            filter: TestFilterItem::Metadata {
+                key: "branch".to_string(),
+                value: "main".to_string(),
+            },
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv3");
+
+        // Case 6: Limit to 1 result
+        let history = db.get_test_history(test_name, &[], 1).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv1");
     }
 }

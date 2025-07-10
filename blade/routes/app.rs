@@ -7,6 +7,7 @@ use crate::{
     darkmode,
     routes::{
         artifact::Artifact,
+        dashboard::Dashboard,
         details::Details,
         empty::Empty,
         invocation::Invocation,
@@ -51,6 +52,7 @@ pub fn App() -> impl IntoView {
                             <Route path=path!("artifact") view=Artifact />
                             <Route path=path!("*any") view=Summary />
                         </ParentRoute>
+                        <Route path=path!("dashboard") view=Dashboard />
                         <Route path=path!("*any") view=Empty />
                     </Routes>
                 </main>
