@@ -37,7 +37,7 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
             }
             tooltip_content_accessor=|point| {
                 format!(
-                    "Invocation: {} Duration: {} Date: {}",
+                    "Invocation: {}\nDuration: {}\nDate: {}",
                     point.invocation_id.chars().take(8).collect::<String>(),
                     humantime::format_duration(point.test.duration),
                     format_time(&point.start),

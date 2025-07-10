@@ -145,11 +145,9 @@ where
             view! {
                 <foreignObject
                     x=x.to_string()
-                    y=(y - 30.0).to_string()
-                    width="150"
-                    height="50"
-                    style="overflow: visible;"
+                    y=y.to_string()
                     attr:xmlns="http://www.w3.org/1999/xhtml"
+                    style="overflow: visible;"
                 >
                     <div style="
                     background-color: #2d3748;
@@ -159,8 +157,8 @@ where
                     color: white;
                     font-size: 12px;
                     text-align: center;
-                    white-space: nowrap;
-                    transform: translateX(-50%);
+                    display: inline-block;
+                    transform: translate(-50%, -100%);
                     ">{tooltip_content_accessor(point)}</div>
                 </foreignObject>
             }
