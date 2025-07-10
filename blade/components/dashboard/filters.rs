@@ -29,19 +29,19 @@ pub fn FilterControls(
     };
 
     view! {
-        <div class="bg-gray-800 p-4 rounded-lg shadow-md mb-6">
+        <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md mb-6">
             <div class="flex items-center space-x-4">
                 <input
                     type="text"
                     placeholder="//test:name"
-                    class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="flex-grow p-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                     on:input=move |ev| set_name.set(event_target_value(&ev))
                     prop:value=name
                 />
                 <input
                     type="text"
                     placeholder="branch=main"
-                    class="p-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="p-2 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                     on:input=move |ev| set_metadata.set(event_target_value(&ev))
                     prop:value=metadata
                 />

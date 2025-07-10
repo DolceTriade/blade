@@ -10,16 +10,16 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
         <div class="mt-8">
             <h2 class="text-2xl font-bold mb-4">"Raw Test Results"</h2>
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-gray-800 rounded-lg shadow-md">
+                <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg shadow-md">
                     <thead>
-                        <tr class="bg-gray-700 text-gray-300 uppercase text-sm leading-normal">
+                        <tr class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase text-sm leading-normal">
                             <th class="py-3 px-6 text-left">"Invocation ID"</th>
                             <th class="py-3 px-6 text-left">"Status"</th>
                             <th class="py-3 px-6 text-left">"Duration"</th>
                             <th class="py-3 px-6 text-left">"Date"</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-300 text-sm font-light">
+                    <tbody class="text-gray-700 dark:text-gray-300 text-sm font-light">
                         {history
                             .history
                             .into_iter()
@@ -27,7 +27,7 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                                 let duration_ms = point.test.duration.as_millis();
                                 view! {
                                     <tr
-                                        class="border-b border-gray-700 hover:bg-gray-700 cursor-pointer"
+                                        class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                                         on:click=move |_| {
                                             let navigate = use_navigate();
                                             let url = format!("/invocation/{}", &point.invocation_id);

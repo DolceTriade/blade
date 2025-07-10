@@ -46,7 +46,7 @@ pub fn Dashboard() -> impl IntoView {
     );
 
     view! {
-        <div class="p-4 bg-gray-900 text-white h-[calc(100vh-64px)] overflow-y-auto">
+        <div class="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white h-[calc(100vh-64px)] overflow-y-auto">
             <div class="container mx-auto">
                 <h1 class="text-3xl font-bold mb-6">"Test History Dashboard"</h1>
                 <FilterControls set_test_name=set_test_name set_filters=set_filters />
