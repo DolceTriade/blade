@@ -4,7 +4,7 @@ use std::sync::Arc;
 use leptos::{either::Either, prelude::*};
 use state::{TestFilter, TestHistory};
 
-use crate::components::dashboard::{filters::FilterControls, graphs::HistoryGraphs};
+use crate::components::dashboard::{filters::FilterControls, graphs::HistoryGraphs, test_history_table::TestHistoryTable};
 
 #[server]
 pub async fn get_test_history(
@@ -42,7 +42,7 @@ pub fn Dashboard() -> impl IntoView {
     );
 
     view! {
-        <div class="p-4 bg-gray-900 text-white min-h-screen">
+        <div class="p-4 bg-gray-900 text-white h-[calc(100vh-64px)] overflow-y-auto">
             <div class="container mx-auto">
                 <h1 class="text-3xl font-bold mb-6">"Test History Dashboard"</h1>
                 <FilterControls set_test_name=set_test_name set_filters=set_filters />
@@ -56,7 +56,10 @@ pub fn Dashboard() -> impl IntoView {
                             .map(|data| match data {
                                 Some(history) => {
                                     Either::Right(
-                                        view! { <HistoryGraphs history=history.clone() /> },
+                                        view! {
+                                            <HistoryGraphs history=history.clone() />
+                                            <TestHistoryTable history=history.clone() />
+                                        },
                                     )
                                 }
                                 None => {
