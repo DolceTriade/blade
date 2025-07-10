@@ -4,7 +4,11 @@ use std::sync::Arc;
 use leptos::{either::Either, prelude::*};
 use state::{TestFilter, TestHistory};
 
-use crate::components::dashboard::{filters::FilterControls, graphs::HistoryGraphs, test_history_table::TestHistoryTable};
+use crate::components::dashboard::{
+    filters::FilterControls,
+    graphs::HistoryGraphs,
+    test_history_table::TestHistoryTable,
+};
 
 #[server]
 pub async fn get_test_history(
