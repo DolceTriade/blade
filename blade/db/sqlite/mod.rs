@@ -607,9 +607,9 @@ impl state::DB for Sqlite {
                         state::TestFilterOp::Equals => {
                             subquery.filter(schema::InvocationOutput::line.eq(search_term))
                         },
-                        state::TestFilterOp::Contains => {
-                            subquery.filter(schema::InvocationOutput::line.like(format!("%{search_term}%")))
-                        },
+                        state::TestFilterOp::Contains => subquery.filter(
+                            schema::InvocationOutput::line.like(format!("%{search_term}%")),
+                        ),
                         _ => subquery, // Other ops not applicable for log output
                     };
 
@@ -1229,9 +1229,15 @@ mod tests {
         assert_eq!(history.history[0].invocation_id, "inv3");
 
         // Add some log output for testing LogOutput filter
-        db.insert_output_lines("inv1", vec!["INFO: Test passed successfully".to_string()]).unwrap();
-        db.insert_output_lines("inv2", vec!["ERROR: Test failed with timeout".to_string()]).unwrap();
-        db.insert_output_lines("inv3", vec!["DEBUG: Running feature branch test".to_string()]).unwrap();
+        db.insert_output_lines("inv1", vec!["INFO: Test passed successfully".to_string()])
+            .unwrap();
+        db.insert_output_lines("inv2", vec!["ERROR: Test failed with timeout".to_string()])
+            .unwrap();
+        db.insert_output_lines(
+            "inv3",
+            vec!["DEBUG: Running feature branch test".to_string()],
+        )
+        .unwrap();
 
         // Case 6: Filter by log output containing "ERROR"
         let filters = [TestFilter {

@@ -592,9 +592,8 @@ impl state::DB for Postgres {
                         state::TestFilterOp::Equals => {
                             subquery.filter(invocationoutput::line.eq(search_term))
                         },
-                        state::TestFilterOp::Contains => {
-                            subquery.filter(invocationoutput::line.ilike(format!("%{search_term}%")))
-                        },
+                        state::TestFilterOp::Contains => subquery
+                            .filter(invocationoutput::line.ilike(format!("%{search_term}%"))),
                         _ => subquery, // Other ops not applicable for log output
                     };
 
