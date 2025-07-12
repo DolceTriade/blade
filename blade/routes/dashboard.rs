@@ -8,6 +8,7 @@ use components::dashboard::{
     test_search::TestSearchInput,
 };
 use leptos::{either::Either, prelude::*};
+use leptos_router::{hooks::use_query, params::Params};
 use state::{TestFilter, TestHistory};
 
 #[server]
@@ -24,10 +25,25 @@ pub async fn get_test_history(
         .map_err(|e| ServerFnError::ServerError(e.to_string()))
 }
 
+#[derive(PartialEq, Params)]
+pub(crate) struct DashboardParams {
+    pub(crate) test_name: Option<String>,
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn Dashboard() -> impl IntoView {
-    let (test_name, set_test_name) = signal(String::new());
+    // Read test_name from URL query parameter
+    let params = use_query::<DashboardParams>();
+    let initial_test_name = params.with_untracked(|p| {
+        p.as_ref()
+            .ok()
+            .map(|params| params.test_name.clone().unwrap_or_default())
+            .inspect(|s| tracing::info!("Initial test name: {}", s))
+            .unwrap_or_default()
+    });
+
+    let (test_name, set_test_name) = signal(initial_test_name);
     let (filters, set_filters) = signal(Vec::<TestFilter>::new());
 
     let history_resource = Resource::new(
