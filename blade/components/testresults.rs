@@ -1,6 +1,6 @@
 use leptos::{either::Either, prelude::*};
 
-use crate::components::{
+use crate::{
     accordion::*,
     shellout::ShellOut,
     statusicon::StatusIcon,

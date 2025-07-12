@@ -9,12 +9,7 @@ rust_binary(
         "admin.rs",
         "lib.rs",
         "main.rs",
-        "routes.rs",
-        "darkmode.rs",
-    ] + glob([
-        "routes/**/*.rs",
-        "components/**/*.rs",
-    ]),
+    ],
     crate_features = ["ssr"],
     data = [
         "leptos.toml",
@@ -26,9 +21,12 @@ rust_binary(
     deps = [
         "//blade/bep",
         "//blade/bytestream",
+        "//blade/components",
         "//blade/db",
         "//blade/memdump",
         "//blade/metrics",
+        "//blade/routes",
+        "//blade/shared",
         "//blade/state",
         "//blade/tailwindmerge",
         "@crate//:actix-files",
@@ -74,12 +72,7 @@ rust_shared_library(
     srcs = [
         "lib.rs",
         "main.rs",
-        "routes.rs",
-        "darkmode.rs",
-    ] + glob([
-        "routes/**/*.rs",
-        "components/**/*.rs",
-    ]),
+    ],
     crate_features = ["hydrate"],
     crate_name = "blade",
     rustc_env = {
@@ -88,6 +81,9 @@ rust_shared_library(
     tags = ["manual"],
     visibility = ["//visibility:public"],
     deps = [
+        "//blade/components",
+        "//blade/routes",
+        "//blade/shared",
         "//blade/state",
         "//blade/tailwindmerge",
         "@wasm_crate//:ansi-to-html",

@@ -1,7 +1,6 @@
 use leptos::{prelude::*, tachys::dom::event_target_checked};
 use leptos_router::hooks::use_location;
-
-use crate::routes::app::DarkMode;
+use shared::DarkMode;
 
 fn extract_path(url_str: &str) -> Option<String> {
     if !url_str.starts_with("/invocation/") {
@@ -78,7 +77,7 @@ pub fn Nav(
                                         on:change=move |ev| {
                                             let val = event_target_checked(&ev);
                                             dark_mode.1.set(DarkMode(val));
-                                            crate::darkmode::set(val).unwrap();
+                                            shared::darkmode::set(val).unwrap();
                                         }
                                     />
                                     <span class="w-16 h-10 flex items-center flex-shrink-0 ml-4 p-1 bg-gray-300 dark:bg-gray-800 rounded-full duration-300 ease-in-out peer-checked:bg-green-400 after:w-8 after:h-8 after:bg-white after:rounded-full after:shadow-md after:duration-300 peer-checked:after:translate-x-6 group-hover:after:translate-x-1"></span>

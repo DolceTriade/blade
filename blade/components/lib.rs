@@ -16,3 +16,6 @@ pub mod testresults;
 pub mod testrunlist;
 pub mod testsummary;
 pub mod tooltip;
+
+// Temporary duplicate to avoid circular dependency - will be cleaned up later
+pub struct DarkMode(pub bool);

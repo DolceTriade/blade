@@ -1,9 +1,8 @@
 use std::io::{Cursor, prelude::Read};
 
+use components::shellout::ShellOut;
 use leptos::prelude::*;
 use leptos_router::{hooks::use_query, params::Params};
-
-use crate::components::shellout::ShellOut;
 
 #[derive(PartialEq, Params, Debug, Clone)]
 struct ArtifactParams {
@@ -23,9 +22,7 @@ pub fn Artifact() -> impl IntoView {
         let Some(uri) = uri else {
             return Err("empty uri".into());
         };
-        let bytes = crate::routes::test::get_artifact(uri)
-            .await
-            .map_err(stringify)?;
+        let bytes = crate::test::get_artifact(uri).await.map_err(stringify)?;
         if let Some(zip) = zip {
             let cur = Cursor::new(bytes);
             let mut arc = zip::ZipArchive::new(cur).map_err(stringify)?;

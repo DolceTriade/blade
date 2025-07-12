@@ -1,22 +1,18 @@
+use components::nav::Nav;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{components::*, path};
+use shared::{DarkMode, darkmode};
 
 use crate::{
-    components::nav::Nav,
-    darkmode,
-    routes::{
-        artifact::Artifact,
-        dashboard::Dashboard,
-        details::Details,
-        empty::Empty,
-        invocation::Invocation,
-        summary::Summary,
-        test::Test,
-    },
+    artifact::Artifact,
+    dashboard::Dashboard,
+    details::Details,
+    empty::Empty,
+    invocation::Invocation,
+    summary::Summary,
+    test::Test,
 };
-
-pub(crate) struct DarkMode(pub bool);
 
 #[component]
 pub fn App() -> impl IntoView {

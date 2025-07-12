@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use state::{Status, TestHistory};
 
-use crate::components::charts::piechart::PieChart;
+use crate::charts::piechart::PieChart;
 // use chrono::prelude::*;
 
 #[allow(non_snake_case)]

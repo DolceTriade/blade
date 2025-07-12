@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_dom::helpers::window;
 use state::TestHistory;
 
-use crate::components::{charts::linechart::LineChart, summaryheader::format_time};
+use crate::{charts::linechart::LineChart, summaryheader::format_time};
 
 pub fn format_unix(t: f64) -> String {
     let d = std::time::Duration::from_secs_f64(t);

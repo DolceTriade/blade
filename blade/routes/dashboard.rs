@@ -1,14 +1,13 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use leptos::{either::Either, prelude::*};
-use state::{TestFilter, TestHistory};
-
-use crate::components::dashboard::{
+use components::dashboard::{
     filters::FilterControls,
     graphs::HistoryGraphs,
     test_history_table::TestHistoryTable,
 };
+use leptos::{either::Either, prelude::*};
+use state::{TestFilter, TestHistory};
 
 #[server]
 pub async fn get_test_history(
@@ -19,7 +18,7 @@ pub async fn get_test_history(
     let mut db = global
         .db_manager
         .get()
-        .map_err(crate::routes::invocation::internal_err)?;
+        .map_err(crate::invocation::internal_err)?;
     db.get_test_history(&test_name, &filters.unwrap_or_default(), 50) // Limit to 50 results for now
         .map_err(|e| ServerFnError::ServerError(e.to_string()))
 }

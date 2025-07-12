@@ -3,7 +3,7 @@ use leptos::{either::Either, prelude::*};
 use leptos_router::{components::A, hooks::use_location};
 use web_sys::KeyboardEvent;
 
-use crate::components::{
+use crate::{
     accordion::*,
     card::Card,
     list::*,

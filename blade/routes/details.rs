@@ -2,14 +2,13 @@ use std::collections::HashMap;
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use leptos::prelude::*;
-
-use crate::components::{
+use components::{
     accordion::*,
     card::Card,
     list::{List, ListItem},
     summaryheader::SummaryHeader,
 };
+use leptos::prelude::*;
 
 #[server]
 pub async fn get_options(uuid: String) -> Result<state::BuildOptions, ServerFnError> {
@@ -17,9 +16,9 @@ pub async fn get_options(uuid: String) -> Result<state::BuildOptions, ServerFnEr
     let mut db = global
         .db_manager
         .get()
-        .map_err(crate::routes::invocation::internal_err)?;
+        .map_err(crate::invocation::internal_err)?;
     db.get_options(&uuid)
-        .map_err(crate::routes::invocation::internal_err)
+        .map_err(crate::invocation::internal_err)
 }
 
 #[allow(non_snake_case)]
