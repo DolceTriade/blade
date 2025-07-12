@@ -56,7 +56,7 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                                             }>{point.test.status.to_string()}</span>
                                         </td>
                                         <td class="py-3 px-6 text-left">
-                                            {format!("{:.3} s", duration_secs)}
+                                            {format!("{duration_secs:.3} s")}
                                         </td>
                                         <td class="py-3 px-6 text-left">
                                             {format_time(&point.start)}
