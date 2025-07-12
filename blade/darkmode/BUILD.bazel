@@ -1,13 +1,10 @@
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
-    name = "shared",
+    name = "darkmode",
     srcs = [
         "lib.rs",
     ],
-    rustc_env = {
-        "SERVER_FN_OVERRIDE_KEY": "bazel",
-    },
     crate_features = select({
         "@platforms//cpu:wasm32": ["hydrate"],
         "//conditions:default": ["ssr"],
@@ -15,20 +12,13 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = select({
         "@platforms//cpu:wasm32": [
-            "//blade/darkmode",
-            "//blade/state",
             "@wasm_crate//:cfg-if",
             "@wasm_crate//:leptos",
-            "@wasm_crate//:url",
             "@wasm_crate//:web-sys",
         ],
         "//conditions:default": [
-            "//blade/bytestream",
-            "//blade/darkmode",
-            "//blade/state",
             "@crate//:cfg-if",
             "@crate//:leptos",
-            "@crate//:url",
             "@crate//:web-sys",
         ],
     }),

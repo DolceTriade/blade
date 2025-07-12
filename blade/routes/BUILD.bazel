@@ -14,6 +14,7 @@ rust_library(
     deps = select({
         "@platforms//cpu:wasm32": [
             "//blade/components",
+            "//blade/darkmode",
             "//blade/shared",
             "//blade/state",
             "//blade/tailwindmerge",
@@ -41,6 +42,7 @@ rust_library(
             "//blade/bep",
             "//blade/bytestream",
             "//blade/components",
+            "//blade/darkmode",
             "//blade/db",
             "//blade/shared",
             "//blade/state",

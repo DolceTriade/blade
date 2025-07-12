@@ -22,6 +22,7 @@ rust_binary(
         "//blade/bep",
         "//blade/bytestream",
         "//blade/components",
+        "//blade/darkmode",
         "//blade/db",
         "//blade/memdump",
         "//blade/metrics",
@@ -82,6 +83,7 @@ rust_shared_library(
     visibility = ["//visibility:public"],
     deps = [
         "//blade/components",
+        "//blade/darkmode",
         "//blade/routes",
         "//blade/shared",
         "//blade/state",

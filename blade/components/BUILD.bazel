@@ -10,6 +10,7 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = select({
         "@platforms//cpu:wasm32": [
+            "//blade/darkmode",
             "//blade/shared",
             "//blade/state",
             "//blade/tailwindmerge",
@@ -27,6 +28,7 @@ rust_library(
             "@wasm_crate//:web-sys",
         ],
         "//conditions:default": [
+            "//blade/darkmode",
             "//blade/shared",
             "//blade/state",
             "//blade/tailwindmerge",

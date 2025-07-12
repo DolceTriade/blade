@@ -1,8 +1,8 @@
 use components::nav::Nav;
+use darkmode::DarkMode;
 use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::{components::*, path};
-use shared::{DarkMode, darkmode};
 
 use crate::{
     artifact::Artifact,
