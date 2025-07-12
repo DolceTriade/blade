@@ -1,6 +1,6 @@
+use darkmode::DarkMode;
 use leptos::{prelude::*, tachys::dom::event_target_checked};
 use leptos_router::hooks::use_location;
-use darkmode::DarkMode;
 
 fn extract_path(url_str: &str) -> Option<String> {
     if !url_str.starts_with("/invocation/") {

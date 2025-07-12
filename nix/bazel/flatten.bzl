@@ -20,10 +20,9 @@ def _flatten_impl(ctx):
                 cp $1 $out
                 shift
             done
-        """
+        """,
     )
-    return DefaultInfo(files=depset([d]))
-
+    return DefaultInfo(files = depset([d]))
 
 flatten = rule(
     implementation = _flatten_impl,
@@ -36,5 +35,5 @@ flatten = rule(
             allow_files = True,
             doc = "List of inputs to flatten.",
         ),
-    }
+    },
 )
