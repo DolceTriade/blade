@@ -10,10 +10,14 @@ const MAX_DISPLAY_LINES: usize = TRUNCATE_THRESHOLD * 2;
 #[component]
 pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
     let (truncated, set_truncated) = signal(false);
+    let (force_show, set_force_show) = signal(false);
     let lines = Memo::new(move |_| {
         let text = text.read();
         let lines: Vec<&str> = text.lines().collect();
-        let should_truncate = lines.len() > MAX_DISPLAY_LINES;
+        let mut should_truncate = lines.len() > MAX_DISPLAY_LINES;
+        if force_show.get() {
+            should_truncate = false;
+        }
         set_truncated(should_truncate);
         lines
             .clone()
@@ -45,6 +49,10 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
         }
     };
 
+    let show_all = move |_| {
+        set_force_show(true);
+    };
+
     view! {
         <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto">
             <Show when=move || { truncated.get() } fallback=|| view! { <></> }>
@@ -56,6 +64,12 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
                         class="ml-4 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded text-sm"
                     >
                         "View Full Raw Output"
+                    </button>
+                    <button
+                        on:click=show_all
+                        class="ml-4 px-3 py-1 bg-blue-700 hover:bg-blue-800 rounded text-sm"
+                    >
+                        "Load Full Output (slow)"
                     </button>
                 </div>
             </Show>
