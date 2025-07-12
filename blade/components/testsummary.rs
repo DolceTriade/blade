@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_router::{components::A, *};
 
-use crate::components::{clipboard::CopyToClipboard, statusicon::StatusIcon};
+use crate::{clipboard::CopyToClipboard, statusicon::StatusIcon};
 
 #[allow(non_snake_case)]
 #[component]

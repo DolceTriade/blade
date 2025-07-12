@@ -1,8 +1,14 @@
+// Dark mode utilities and state management
 use cfg_if::cfg_if;
-#[cfg(feature = "hydrate")]
-use leptos::tachys::dom::window;
+
+/// Dark mode state shared between components and routes
+#[derive(Clone, Copy, Debug)]
+pub struct DarkMode(pub bool);
 
 const BLADE_LOCALSTORAGE_KEY: &str = "blade_dark_mode";
+
+#[cfg(feature = "hydrate")]
+use leptos::tachys::dom::window;
 
 fn storage() -> Option<web_sys::Storage> {
     cfg_if! {
@@ -21,8 +27,8 @@ fn is_system_dark_mode() -> bool {
                 .match_media("(prefers-color-scheme: dark)")
                 .ok()
                 .flatten()
-                .map(|media| media.matches())
-                .unwrap_or_default()
+                .map(|x| x.matches())
+                .unwrap_or(false)
         } else {
             false
         }
@@ -31,17 +37,14 @@ fn is_system_dark_mode() -> bool {
 
 pub fn get() -> bool {
     storage()
-        .and_then(|s| s.get(BLADE_LOCALSTORAGE_KEY).ok().flatten())
-        .and_then(|s| s.parse::<bool>().ok())
+        .and_then(|storage| storage.get_item(BLADE_LOCALSTORAGE_KEY).ok().flatten())
+        .and_then(|v| v.parse().ok())
         .unwrap_or_else(is_system_dark_mode)
 }
 
-pub fn set(b: bool) -> anyhow::Result<()> {
-    let val: String = b.to_string();
+pub fn set(is_dark: bool) -> Result<(), String> {
     storage()
-        .map(|s| {
-            s.set(BLADE_LOCALSTORAGE_KEY, &val)
-                .map_err(|e| anyhow::anyhow!("{e:#?}"))
-        })
-        .unwrap_or(Err(anyhow::anyhow!("No local storage")))
+        .ok_or("no storage")?
+        .set_item(BLADE_LOCALSTORAGE_KEY, &is_dark.to_string())
+        .map_err(|e| format!("{e:?}"))
 }

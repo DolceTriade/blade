@@ -1,11 +1,5 @@
 #![recursion_limit = "256"]
 use cfg_if::cfg_if;
-#[allow(clippy::empty_docs)]
-pub mod components;
-#[allow(clippy::empty_docs)]
-pub mod darkmode;
-#[allow(clippy::empty_docs)]
-pub mod routes;
 
 // Needs to be in lib.rs AFAIK because wasm-bindgen needs us to be compiling a
 // lib. I may be wrong.
@@ -14,7 +8,7 @@ cfg_if! {
         use wasm_bindgen::prelude::wasm_bindgen;
         use tracing_web::{MakeWebConsoleWriter};
         use tracing_subscriber::prelude::*;
-        use crate::routes::app::App;
+        use routes::app::App;
 
         #[wasm_bindgen]
         pub fn hydrate() {

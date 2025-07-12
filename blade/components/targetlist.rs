@@ -5,7 +5,7 @@ use leptos::prelude::*;
 use leptos_router::components::A;
 use web_sys::KeyboardEvent;
 
-use crate::components::{
+use crate::{
     accordion::*,
     card::Card,
     list::*,

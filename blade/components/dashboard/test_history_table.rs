@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_navigate;
 use state::{Status, TestHistory};
 
-use crate::components::summaryheader::format_time;
+use crate::summaryheader::format_time;
 
 #[allow(non_snake_case)]
 #[component]

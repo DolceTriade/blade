@@ -1,7 +1,7 @@
 use leptos::{either::EitherOf4, prelude::*};
 use tailwindmerge::tailwind_merge;
 
-use crate::components::tooltip::Tooltip;
+use crate::tooltip::Tooltip;
 
 #[allow(non_snake_case)]
 #[component]

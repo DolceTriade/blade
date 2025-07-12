@@ -1,0 +1,25 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+rust_library(
+    name = "darkmode",
+    srcs = [
+        "lib.rs",
+    ],
+    crate_features = select({
+        "@platforms//cpu:wasm32": ["hydrate"],
+        "//conditions:default": ["ssr"],
+    }),
+    visibility = ["//visibility:public"],
+    deps = select({
+        "@platforms//cpu:wasm32": [
+            "@wasm_crate//:cfg-if",
+            "@wasm_crate//:leptos",
+            "@wasm_crate//:web-sys",
+        ],
+        "//conditions:default": [
+            "@crate//:cfg-if",
+            "@crate//:leptos",
+            "@crate//:web-sys",
+        ],
+    }),
+)

@@ -1,6 +1,14 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
+use components::{
+    card::Card,
+    shellout::ShellOut,
+    testartifactlist::TestArtifactList,
+    testresults::TestResults,
+    testrunlist::{SortOrder, SortType, TestRunList},
+    testsummary::TestSummary,
+};
 use leptos::{
     either::{Either, EitherOf3},
     prelude::*,
@@ -10,15 +18,6 @@ use leptos_router::{
     components::Redirect,
     hooks::{use_location, use_query},
     params::Params,
-};
-
-use crate::components::{
-    card::Card,
-    shellout::ShellOut,
-    testartifactlist::TestArtifactList,
-    testresults::TestResults,
-    testrunlist::{SortOrder, SortType, TestRunList},
-    testsummary::TestSummary,
 };
 
 #[server]

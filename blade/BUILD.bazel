@@ -1,4 +1,4 @@
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_load")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load", "oci_push")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library", "rust_test")
 load("//nix/bazel:runfiles.bzl", "runfiles")
@@ -9,12 +9,7 @@ rust_binary(
         "admin.rs",
         "lib.rs",
         "main.rs",
-        "routes.rs",
-        "darkmode.rs",
-    ] + glob([
-        "routes/**/*.rs",
-        "components/**/*.rs",
-    ]),
+    ],
     crate_features = ["ssr"],
     data = [
         "leptos.toml",
@@ -26,9 +21,13 @@ rust_binary(
     deps = [
         "//blade/bep",
         "//blade/bytestream",
+        "//blade/components",
+        "//blade/darkmode",
         "//blade/db",
         "//blade/memdump",
         "//blade/metrics",
+        "//blade/routes",
+        "//blade/shared",
         "//blade/state",
         "//blade/tailwindmerge",
         "@crate//:actix-files",
@@ -74,12 +73,7 @@ rust_shared_library(
     srcs = [
         "lib.rs",
         "main.rs",
-        "routes.rs",
-        "darkmode.rs",
-    ] + glob([
-        "routes/**/*.rs",
-        "components/**/*.rs",
-    ]),
+    ],
     crate_features = ["hydrate"],
     crate_name = "blade",
     rustc_env = {
@@ -88,6 +82,10 @@ rust_shared_library(
     tags = ["manual"],
     visibility = ["//visibility:public"],
     deps = [
+        "//blade/components",
+        "//blade/darkmode",
+        "//blade/routes",
+        "//blade/shared",
         "//blade/state",
         "//blade/tailwindmerge",
         "@wasm_crate//:ansi-to-html",

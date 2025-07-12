@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_dom::helpers::window;
 use state::{Status, TestHistory};
 
-use crate::components::{charts::scatterplot::ScatterPlot, summaryheader::format_time};
+use crate::{charts::scatterplot::ScatterPlot, summaryheader::format_time};
 
 #[allow(non_snake_case)]
 #[component]

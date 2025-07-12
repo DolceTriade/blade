@@ -1,18 +1,16 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
+use components::{
+    card::Card,
+    shellout::ShellOut,
+    summaryheader::SummaryHeader,
+    targetlist::TargetList,
+};
 use leptos::prelude::*;
 use leptos_router::hooks::use_params;
 
-use crate::{
-    components::{
-        card::Card,
-        shellout::ShellOut,
-        summaryheader::SummaryHeader,
-        targetlist::TargetList,
-    },
-    routes::invocation::InvocationParams,
-};
+use crate::invocation::InvocationParams;
 
 #[cfg(feature = "ssr")]
 pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {

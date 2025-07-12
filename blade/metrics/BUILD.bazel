@@ -1,5 +1,5 @@
-load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
 
 rust_library(
     name = "metrics",
@@ -9,8 +9,8 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         "@crate//:anyhow",
-        "@crate//:prometheus-client",
         "@crate//:lazy_static",
+        "@crate//:prometheus-client",
     ],
 )
 

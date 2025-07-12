@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::{components::A, hooks::use_location};
 use time::macros::format_description;
 
-use crate::components::{clipboard::CopyToClipboard, statusicon::StatusIcon};
+use crate::{clipboard::CopyToClipboard, statusicon::StatusIcon};
 
 #[allow(non_snake_case)]
 #[component]

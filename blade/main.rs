@@ -19,12 +19,6 @@ use tracing_subscriber::{
     reload::Handle,
     util::SubscriberInitExt,
 };
-#[allow(clippy::empty_docs)]
-pub mod components;
-#[allow(clippy::empty_docs)]
-pub mod darkmode;
-#[allow(clippy::empty_docs)]
-pub mod routes;
 
 // boilerplate to run in different modes
 cfg_if! {
@@ -50,7 +44,7 @@ cfg_if! {
 
         pub mod admin;
 
-        use crate::routes::app::App;
+        use routes::app::App;
 
         lazy_static! {
             static ref API_ERRORS: Family::<APIErrorLabels, Counter> = metrics::register_metric("blade_http_errors", "Actix API requests errors", Family::default());
