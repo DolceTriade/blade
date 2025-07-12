@@ -4,7 +4,7 @@ use wasm_bindgen::JsCast;
 
 #[derive(Clone, Debug)]
 struct FilterBuilder {
-    filter_type: String, // "Duration", "Status", "Metadata", "LogOutput"
+    filter_type: String, // "Duration", "Status", "Metadata", "BazelFlags", "LogOutput"
     operation: TestFilterOp,
     invert: bool,
     // Values for different filter types
@@ -12,6 +12,8 @@ struct FilterBuilder {
     status: Status,
     metadata_key: String,
     metadata_value: String,
+    bazel_flag: String,
+    bazel_value: String,
     log_output: String,
 }
 
@@ -25,6 +27,8 @@ impl Default for FilterBuilder {
             status: Status::Success,
             metadata_key: String::new(),
             metadata_value: String::new(),
+            bazel_flag: String::new(),
+            bazel_value: String::new(),
             log_output: String::new(),
         }
     }
@@ -44,6 +48,15 @@ impl FilterBuilder {
                 TestFilterItem::Metadata {
                     key: self.metadata_key.clone(),
                     value: self.metadata_value.clone(),
+                }
+            },
+            "BazelFlags" => {
+                if self.bazel_flag.is_empty() {
+                    return None;
+                }
+                TestFilterItem::BazelFlags {
+                    flag: self.bazel_flag.clone(),
+                    value: self.bazel_value.clone(),
                 }
             },
             "LogOutput" => {
@@ -175,6 +188,7 @@ fn FilterRow(
                         <option value="Duration">"Duration"</option>
                         <option value="Status">"Status"</option>
                         <option value="Metadata">"Metadata"</option>
+                        <option value="BazelFlags">"Bazel Flags"</option>
                         <option value="LogOutput">"Log Output"</option>
                     </select>
                 </div>
@@ -273,6 +287,36 @@ fn FilterRow(
                                             }
                                             prop:value=move || current_builder.get().metadata_value
                                         />
+                                    </div>
+                                }
+                                    .into_any()
+                            }
+                            "BazelFlags" => {
+                                view! {
+                                    <div class="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Flag (e.g., --test_env)"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.bazel_flag = value);
+                                            }
+                                            prop:value=move || current_builder.get().bazel_flag
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Value (optional - leave empty to match any value)"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.bazel_value = value);
+                                            }
+                                            prop:value=move || current_builder.get().bazel_value
+                                        />
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        "Leave value empty to match any occurrence of the flag"
                                     </div>
                                 }
                                     .into_any()

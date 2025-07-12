@@ -129,6 +129,7 @@ pub enum TestFilterItem {
     Start(std::time::SystemTime),
     Duration(std::time::Duration),
     Metadata { key: String, value: String },
+    BazelFlags { flag: String, value: String },
     Status(Status),
     LogOutput(String),
 }

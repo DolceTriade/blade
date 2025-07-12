@@ -546,6 +546,41 @@ impl state::DB for Postgres {
                         query.filter(invocations::id.eq_any(subquery))
                     }
                 },
+                state::TestFilterItem::BazelFlags { flag, value } => {
+                    // For Bazel flags, we need to search in various option kinds
+                    let mut subquery = options::table
+                        .into_boxed()
+                        .select(options::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            if value.is_empty() {
+                                // Just check for flag existence (flag=*)
+                                subquery.filter(options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for exact flag=value match
+                                subquery.filter(options::keyval.eq(format!("{flag}={value}")))
+                            }
+                        },
+                        state::TestFilterOp::Contains => {
+                            if value.is_empty() {
+                                // Just check for flag existence
+                                subquery.filter(options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for flag containing value
+                                subquery.filter(options::keyval.like(format!("%{flag}%{value}%")))
+                            }
+                        },
+                        _ => subquery, // Other ops not applicable
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(invocations::id.eq_any(subquery))
+                    }
+                },
                 state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
             };
         }

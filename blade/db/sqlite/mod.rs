@@ -561,6 +561,41 @@ impl state::DB for Sqlite {
                         query.filter(Invocations::id.eq_any(subquery))
                     }
                 },
+                state::TestFilterItem::BazelFlags { flag, value } => {
+                    // For Bazel flags, we need to search in various option kinds
+                    let mut subquery = Options::table
+                        .into_boxed()
+                        .select(Options::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            if value.is_empty() {
+                                // Just check for flag existence (flag=*)
+                                subquery.filter(Options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for exact flag=value match
+                                subquery.filter(Options::keyval.eq(format!("{flag}={value}")))
+                            }
+                        },
+                        state::TestFilterOp::Contains => {
+                            if value.is_empty() {
+                                // Just check for flag existence
+                                subquery.filter(Options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for flag containing value
+                                subquery.filter(Options::keyval.like(format!("%{flag}%{value}%")))
+                            }
+                        },
+                        _ => subquery, // Other ops not applicable
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(Invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(Invocations::id.eq_any(subquery))
+                    }
+                },
                 state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
             };
         }

@@ -43,7 +43,7 @@ mod tests {
         assert_eq!(tailwind_merge("m-1 m-2", ""), "m-2");
         assert_eq!(tailwind_merge("m-1", "m-2"), "m-2");
         assert_eq!(tailwind_merge("m-2", "m-1"), "m-1");
-        assert_eq!(tailwind_merge("m-2 hover:m-3", "m-1"), "hover:m-3 m-1");
+        assert_eq!(tailwind_merge("m-2 hover:m-3", "m-3"), "hover:m-3 m-1");
         assert_eq!(
             tailwind_merge("m-2 hover:m-4", "m-1 hover:m-1"),
             "hover:m-1 m-1"
