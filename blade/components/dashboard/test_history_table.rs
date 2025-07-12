@@ -25,7 +25,7 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                             .history
                             .into_iter()
                             .map(|point| {
-                                let duration_ms = point.test.duration.as_millis();
+                                let duration_secs = point.test.duration.as_secs_f64();
                                 view! {
                                     <tr
                                         class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
@@ -56,7 +56,7 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                                             }>{point.test.status.to_string()}</span>
                                         </td>
                                         <td class="py-3 px-6 text-left">
-                                            {format!("{duration_ms} ms")}
+                                            {format!("{:.3} s", duration_secs)}
                                         </td>
                                         <td class="py-3 px-6 text-left">
                                             {format_time(&point.start)}

@@ -19,7 +19,7 @@ pub fn HistoryGraphs(history: TestHistory) -> impl IntoView {
                 <PassFailChart history=history.clone() />
             </div>
             <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg">
-                <h2 class="text-xl font-semibold mb-4">"Duration History (ms)"</h2>
+                <h2 class="text-xl font-semibold mb-4">"Duration History (s)"</h2>
                 <DurationChart history=history />
             </div>
         </div>

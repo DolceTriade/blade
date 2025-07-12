@@ -120,6 +120,25 @@ where
         })
         .collect_view();
 
+    let x_axis_tick_marks = (0..=x_axis_ticks_count)
+        .map(|i| {
+            let value = min_x + (max_x - min_x) / x_axis_ticks_count as f64 * i as f64;
+            let x = margin.3 as f64 + (value - min_x) * x_scale;
+            let y_start = (margin.0 + chart_height) as f64;
+            let y_end = y_start + 5.0; // 5px tick marks
+            view! {
+                <line
+                    x1=x.to_string()
+                    y1=y_start.to_string()
+                    x2=x.to_string()
+                    y2=y_end.to_string()
+                    stroke="#a0aec0"
+                    stroke-width="1"
+                />
+            }
+        })
+        .collect_view();
+
     let y_axis_ticks = (0..=5)
         .map(|i| {
             let value = (max_y / 5.0) * i as f64;
@@ -188,6 +207,7 @@ where
 
             <path d=path_data fill="none" stroke=line_color stroke-width="2" />
             {circles}
+            {x_axis_tick_marks}
             {x_axis_ticks}
             {y_axis_ticks}
 
