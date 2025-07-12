@@ -596,7 +596,29 @@ impl state::DB for Sqlite {
                         query.filter(Invocations::id.eq_any(subquery))
                     }
                 },
-                state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
+                state::TestFilterItem::LogOutput(search_term) => {
+                    // Search in invocation output lines
+                    let mut subquery = schema::InvocationOutput::table
+                        .into_boxed()
+                        .select(schema::InvocationOutput::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            subquery.filter(schema::InvocationOutput::line.eq(search_term))
+                        },
+                        state::TestFilterOp::Contains => {
+                            subquery.filter(schema::InvocationOutput::line.like(format!("%{search_term}%")))
+                        },
+                        _ => subquery, // Other ops not applicable for log output
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(Invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(Invocations::id.eq_any(subquery))
+                    }
+                },
             };
         }
 
@@ -1206,7 +1228,44 @@ mod tests {
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv3");
 
-        // Case 6: Limit to 1 result
+        // Add some log output for testing LogOutput filter
+        db.insert_output_lines("inv1", vec!["INFO: Test passed successfully".to_string()]).unwrap();
+        db.insert_output_lines("inv2", vec!["ERROR: Test failed with timeout".to_string()]).unwrap();
+        db.insert_output_lines("inv3", vec!["DEBUG: Running feature branch test".to_string()]).unwrap();
+
+        // Case 6: Filter by log output containing "ERROR"
+        let filters = [TestFilter {
+            op: TestFilterOp::Contains,
+            invert: false,
+            filter: TestFilterItem::LogOutput("ERROR".to_string()),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv2");
+
+        // Case 7: Filter by exact log line match
+        let filters = [TestFilter {
+            op: TestFilterOp::Equals,
+            invert: false,
+            filter: TestFilterItem::LogOutput("INFO: Test passed successfully".to_string()),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 1);
+        assert_eq!(history.history[0].invocation_id, "inv1");
+
+        // Case 8: Inverted log output filter (no ERROR messages)
+        let filters = [TestFilter {
+            op: TestFilterOp::Contains,
+            invert: true,
+            filter: TestFilterItem::LogOutput("ERROR".to_string()),
+        }];
+        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        assert_eq!(history.history.len(), 2);
+        // Should return inv1 and inv3 (no ERROR logs)
+        assert!(history.history.iter().any(|h| h.invocation_id == "inv1"));
+        assert!(history.history.iter().any(|h| h.invocation_id == "inv3"));
+
+        // Case 9: Limit to 1 result
         let history = db.get_test_history(test_name, &[], 1).unwrap();
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv1");

@@ -581,7 +581,29 @@ impl state::DB for Postgres {
                         query.filter(invocations::id.eq_any(subquery))
                     }
                 },
-                state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
+                state::TestFilterItem::LogOutput(search_term) => {
+                    // Search in invocation output lines
+                    let mut subquery = invocationoutput::table
+                        .into_boxed()
+                        .select(invocationoutput::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            subquery.filter(invocationoutput::line.eq(search_term))
+                        },
+                        state::TestFilterOp::Contains => {
+                            subquery.filter(invocationoutput::line.ilike(format!("%{search_term}%")))
+                        },
+                        _ => subquery, // Other ops not applicable for log output
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(invocations::id.eq_any(subquery))
+                    }
+                },
             };
         }
 
