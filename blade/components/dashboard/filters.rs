@@ -4,7 +4,7 @@ use wasm_bindgen::JsCast;
 
 #[derive(Clone, Debug)]
 struct FilterBuilder {
-    filter_type: String,    // "Duration", "Status", "Metadata", "LogOutput"
+    filter_type: String, // "Duration", "Status", "Metadata", "LogOutput"
     operation: TestFilterOp,
     invert: bool,
     // Values for different filter types
@@ -33,9 +33,9 @@ impl Default for FilterBuilder {
 impl FilterBuilder {
     fn to_test_filter(&self) -> Option<TestFilter> {
         let filter_item = match self.filter_type.as_str() {
-            "Duration" => TestFilterItem::Duration(
-                std::time::Duration::from_secs_f64(self.duration_seconds)
-            ),
+            "Duration" => {
+                TestFilterItem::Duration(std::time::Duration::from_secs_f64(self.duration_seconds))
+            },
             "Status" => TestFilterItem::Status(self.status),
             "Metadata" => {
                 if self.metadata_key.is_empty() || self.metadata_value.is_empty() {
@@ -65,11 +65,7 @@ impl FilterBuilder {
 
 #[allow(non_snake_case)]
 #[component]
-pub fn FilterControls(
-    set_test_name: WriteSignal<String>,
-    set_filters: WriteSignal<Vec<TestFilter>>,
-) -> impl IntoView {
-    let (name, set_name) = signal(String::new());
+pub fn FilterControls(set_filters: WriteSignal<Vec<TestFilter>>) -> impl IntoView {
     let (filter_builders, set_filter_builders) = signal(vec![FilterBuilder::default()]);
 
     let add_filter = move |_| {
@@ -87,8 +83,8 @@ pub fn FilterControls(
     };
 
     let apply_filters = move |_| {
-        set_test_name.set(name.get());
-        let filters: Vec<TestFilter> = filter_builders.get()
+        let filters: Vec<TestFilter> = filter_builders
+            .get()
             .iter()
             .filter_map(|builder| builder.to_test_filter())
             .collect();
@@ -97,21 +93,9 @@ pub fn FilterControls(
 
     view! {
         <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md mb-6">
-            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">"Search Filters"</h3>
-
-            // Test name input
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    "Test Name"
-                </label>
-                <input
-                    type="text"
-                    placeholder="//path/to/test:target_name"
-                    class="w-full p-3 bg-gray-50 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                    on:input=move |ev| set_name.set(event_target_value(&ev))
-                    prop:value=name
-                />
-            </div>
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                "Advanced Filters"
+            </h3>
 
             // Dynamic filter builders
             <div class="space-y-4">
@@ -125,11 +109,12 @@ pub fn FilterControls(
                                 index=index
                                 on_remove=remove_filter
                                 on_update=move |updated_builder| {
-                                    set_filter_builders.update(|builders| {
-                                        if let Some(b) = builders.get_mut(index) {
-                                            *b = updated_builder;
-                                        }
-                                    });
+                                    set_filter_builders
+                                        .update(|builders| {
+                                            if let Some(b) = builders.get_mut(index) {
+                                                *b = updated_builder;
+                                            }
+                                        });
                                 }
                             />
                         }
@@ -227,80 +212,97 @@ fn FilterRow(
                     {move || {
                         let builder = current_builder.get();
                         match builder.filter_type.as_str() {
-                            "Duration" => view! {
-                                <input
-                                    type="number"
-                                    step="0.001"
-                                    placeholder="Duration in seconds"
-                                    class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                                    on:input=move |ev| {
-                                        if let Ok(value) = event_target_value(&ev).parse::<f64>() {
-                                            set_current_builder.update(|b| b.duration_seconds = value);
+                            "Duration" => {
+                                view! {
+                                    <input
+                                        type="number"
+                                        step="0.001"
+                                        placeholder="Duration in seconds"
+                                        class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                        on:input=move |ev| {
+                                            if let Ok(value) = event_target_value(&ev).parse::<f64>() {
+                                                set_current_builder.update(|b| b.duration_seconds = value);
+                                            }
                                         }
-                                    }
-                                    prop:value=move || current_builder.get().duration_seconds.to_string()
-                                />
-                            }.into_any(),
-                            "Status" => view! {
-                                <select
-                                    class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                                    on:change=move |ev| {
-                                        let value = event_target_value(&ev);
-                                        let status = Status::parse(&value);
-                                        set_current_builder.update(|b| b.status = status);
-                                    }
-                                >
-                                    <option value="Success">"Success"</option>
-                                    <option value="Fail">"Fail"</option>
-                                    <option value="Skip">"Skip"</option>
-                                    <option value="InProgress">"In Progress"</option>
-                                    <option value="Unknown">"Unknown"</option>
-                                </select>
-                            }.into_any(),
-                            "Metadata" => view! {
-                                <div class="flex space-x-2">
+                                        prop:value=move || {
+                                            current_builder.get().duration_seconds.to_string()
+                                        }
+                                    />
+                                }
+                                    .into_any()
+                            }
+                            "Status" => {
+                                view! {
+                                    <select
+                                        class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                        on:change=move |ev| {
+                                            let value = event_target_value(&ev);
+                                            let status = Status::parse(&value);
+                                            set_current_builder.update(|b| b.status = status);
+                                        }
+                                    >
+                                        <option value="Success">"Success"</option>
+                                        <option value="Fail">"Fail"</option>
+                                        <option value="Skip">"Skip"</option>
+                                        <option value="InProgress">"In Progress"</option>
+                                        <option value="Unknown">"Unknown"</option>
+                                    </select>
+                                }
+                                    .into_any()
+                            }
+                            "Metadata" => {
+                                view! {
+                                    <div class="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Key"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.metadata_key = value);
+                                            }
+                                            prop:value=move || current_builder.get().metadata_key
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Value"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.metadata_value = value);
+                                            }
+                                            prop:value=move || current_builder.get().metadata_value
+                                        />
+                                    </div>
+                                }
+                                    .into_any()
+                            }
+                            "LogOutput" => {
+                                view! {
                                     <input
                                         type="text"
-                                        placeholder="Key"
-                                        class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                        placeholder="Search in log output"
+                                        class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                                         on:input=move |ev| {
                                             let value = event_target_value(&ev);
-                                            set_current_builder.update(|b| b.metadata_key = value);
+                                            set_current_builder.update(|b| b.log_output = value);
                                         }
-                                        prop:value=move || current_builder.get().metadata_key
+                                        prop:value=move || current_builder.get().log_output
                                     />
+                                }
+                                    .into_any()
+                            }
+                            _ => {
+                                view! {
                                     <input
                                         type="text"
-                                        placeholder="Value"
-                                        class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                                        on:input=move |ev| {
-                                            let value = event_target_value(&ev);
-                                            set_current_builder.update(|b| b.metadata_value = value);
-                                        }
-                                        prop:value=move || current_builder.get().metadata_value
+                                        disabled=true
+                                        class="w-full p-2 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md"
+                                        placeholder="Select filter type"
                                     />
-                                </div>
-                            }.into_any(),
-                            "LogOutput" => view! {
-                                <input
-                                    type="text"
-                                    placeholder="Search in log output"
-                                    class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
-                                    on:input=move |ev| {
-                                        let value = event_target_value(&ev);
-                                        set_current_builder.update(|b| b.log_output = value);
-                                    }
-                                    prop:value=move || current_builder.get().log_output
-                                />
-                            }.into_any(),
-                            _ => view! {
-                                <input
-                                    type="text"
-                                    disabled=true
-                                    class="w-full p-2 bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md"
-                                    placeholder="Select filter type"
-                                />
-                            }.into_any(),
+                                }
+                                    .into_any()
+                            }
                         }
                     }}
                 </div>
@@ -314,7 +316,8 @@ fn FilterRow(
                             class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             prop:checked=move || current_builder.get().invert
                             on:change=move |ev| {
-                                let checked = ev.target()
+                                let checked = ev
+                                    .target()
                                     .and_then(|t| t.dyn_into::<web_sys::HtmlInputElement>().ok())
                                     .map(|input| input.checked())
                                     .unwrap_or(false);

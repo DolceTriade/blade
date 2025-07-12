@@ -5,6 +5,7 @@ use components::dashboard::{
     filters::FilterControls,
     graphs::HistoryGraphs,
     test_history_table::TestHistoryTable,
+    test_search::TestSearchInput,
 };
 use leptos::{either::Either, prelude::*};
 use state::{TestFilter, TestHistory};
@@ -48,7 +49,8 @@ pub fn Dashboard() -> impl IntoView {
         <div class="p-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white h-[calc(100vh-64px)] overflow-y-auto">
             <div class="container mx-auto">
                 <h1 class="text-3xl font-bold mb-6">"Test History Dashboard"</h1>
-                <FilterControls set_test_name=set_test_name set_filters=set_filters />
+                <TestSearchInput test_name=test_name set_test_name=set_test_name />
+                <FilterControls set_filters=set_filters />
                 <Suspense fallback=|| {
                     view! { <p class="text-gray-400">"Loading..."</p> }
                 }>

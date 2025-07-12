@@ -580,6 +580,23 @@ impl state::DB for Postgres {
             history,
         })
     }
+
+    fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>> {
+        use schema::tests::dsl::*;
+
+        let limit_i64: i64 = limit.try_into().context("failed to convert limit to i64")?;
+
+        let results = tests
+            .select(name)
+            .filter(name.like(format!("%{pattern}%")))
+            .distinct()
+            .order_by(name.asc())
+            .limit(limit_i64)
+            .load::<String>(&mut self.conn)
+            .context("Failed to search test names")?;
+
+        Ok(results)
+    }
 }
 
 #[cfg(test)]

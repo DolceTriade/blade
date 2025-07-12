@@ -595,6 +595,23 @@ impl state::DB for Sqlite {
             history,
         })
     }
+
+    fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>> {
+        use schema::Tests::dsl::*;
+
+        let limit_i64: i64 = limit.try_into().context("failed to convert limit to i64")?;
+
+        let results = Tests
+            .select(name)
+            .filter(name.like(format!("%{pattern}%")))
+            .distinct()
+            .order_by(name.asc())
+            .limit(limit_i64)
+            .load::<String>(&mut self.conn)
+            .context("Failed to search test names")?;
+
+        Ok(results)
+    }
 }
 
 define_sql_function! {
