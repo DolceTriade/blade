@@ -171,9 +171,9 @@ fn FilterRow(
 
     view! {
         <div class="p-4 bg-gray-50 dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                 // Filter type dropdown
-                <div>
+                <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         "Filter Type"
                     </label>
@@ -194,7 +194,7 @@ fn FilterRow(
                 </div>
 
                 // Operation dropdown
-                <div>
+                <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         "Operation"
                     </label>
@@ -306,7 +306,8 @@ fn FilterRow(
                                         />
                                         <input
                                             type="text"
-                                            placeholder="Value (optional - leave empty to match any value)"
+                                            placeholder="Value (optional)"
+                                            title="Leave empty to match any occurrence of the flag"
                                             class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                                             on:input=move |ev| {
                                                 let value = event_target_value(&ev);
@@ -314,9 +315,6 @@ fn FilterRow(
                                             }
                                             prop:value=move || current_builder.get().bazel_value
                                         />
-                                    </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        "Leave value empty to match any occurrence of the flag"
                                     </div>
                                 }
                                     .into_any()
