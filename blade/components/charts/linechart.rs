@@ -18,6 +18,8 @@ pub fn LineChart<T, X, Y, PC, TC>(
     #[prop(default = 5)] x_axis_ticks_count: u32,
     #[prop(optional)] x_tick_formatter: Option<Box<dyn Fn(f64) -> String + 'static + Send>>,
     #[prop(optional)] x_axis_label_rotation: Option<f64>,
+    #[prop(default = true)] show_y_axis_labels: bool,
+    #[prop(default = true)] show_line: bool,
 ) -> impl IntoView
 where
     T: Clone + 'static + Send,
@@ -139,23 +141,27 @@ where
         })
         .collect_view();
 
-    let y_axis_ticks = (0..=5)
-        .map(|i| {
-            let value = (max_y / 5.0) * i as f64;
-            let y = margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
-            view! {
-                <text
-                    x=(margin.3 - 10).to_string()
-                    y=y.to_string()
-                    style:text-anchor="end"
-                    fill="#a0aec0"
-                    style:font-size="10"
-                >
-                    {format!("{value:.1}")}
-                </text>
-            }
-        })
-        .collect_view();
+    let y_axis_ticks = if show_y_axis_labels {
+        (0..=5)
+            .map(|i| {
+                let value = (max_y / 5.0) * i as f64;
+                let y = margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
+                view! {
+                    <text
+                        x=(margin.3 - 10).to_string()
+                        y=y.to_string()
+                        style:text-anchor="end"
+                        fill="#a0aec0"
+                        style:font-size="10"
+                    >
+                        {format!("{value:.1}")}
+                    </text>
+                }
+            })
+            .collect_view()
+    } else {
+        vec![].into_iter().collect_view()
+    };
 
     let tooltip = move || {
         hovered_index.get().map(|i| {
@@ -205,7 +211,9 @@ where
                 stroke-width="1"
             />
 
-            <path d=path_data fill="none" stroke=line_color stroke-width="2" />
+            {show_line.then(|| view! {
+                <path d=path_data fill="none" stroke=line_color stroke-width="2" />
+            })}
             {circles}
             {x_axis_tick_marks}
             {x_axis_ticks}
