@@ -163,7 +163,7 @@ where
                                                     url.query_pairs_mut().append_pair("test_name", &test.name);
                                                     format!(
                                                         "/dashboard{}",
-                                                        url.query().map(|q| format!("?{}", q)).unwrap_or_default(),
+                                                        url.query().map(|q| format!("?{q}")).unwrap_or_default(),
                                                     )
                                                 }
                                                 attr:class="inline-block ml-2 h-4 rounded-lg hover:bg-gray-500 transition-colors"

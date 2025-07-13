@@ -1,5 +1,5 @@
 {
-  "checksum": "4dbd755af7f47d41186f59fdd26d59db15cba31934317b4d50e11f1a53356994",
+  "checksum": "06bdd355bca3404b7ebdcc9df50f4ebf757064cd8eaf7cf2e5000e133b23ea61",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -11340,6 +11340,7 @@
             "default",
             "formatting",
             "macros",
+            "parsing",
             "std"
           ],
           "selects": {}
@@ -11458,7 +11459,8 @@
         ],
         "crate_features": {
           "common": [
-            "formatting"
+            "formatting",
+            "parsing"
           ],
           "selects": {}
         },

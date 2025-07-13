@@ -440,7 +440,8 @@ impl state::DB for Postgres {
         &mut self,
         test_name: &str,
         filters: &[state::TestFilter],
-        limit: usize,
+        max_results: usize,
+        default_days: Option<u32>,
     ) -> anyhow::Result<state::TestHistory> {
         use schema::*;
         // Helper struct to structure the flat results from our query, combining all
@@ -451,7 +452,29 @@ impl state::DB for Postgres {
             invocation: models::Invocation,
         }
 
-        let limit_i64: i64 = limit.try_into().context("failed to convert into i64")?;
+        let max_results_i64: i64 = max_results
+            .try_into()
+            .context("failed to convert into i64")?;
+
+        // Apply default date range if no DateRange filter is provided
+        let mut filters = filters.to_vec();
+        let has_date_range = filters
+            .iter()
+            .any(|f| matches!(f.filter, state::TestFilterItem::DateRange { .. }));
+
+        if let Some(days) = default_days
+            && !has_date_range
+        {
+            let now = std::time::SystemTime::now();
+            let from = now
+                .checked_sub(std::time::Duration::from_secs(days as u64 * 24 * 60 * 60))
+                .unwrap_or(std::time::UNIX_EPOCH);
+            filters.push(state::TestFilter {
+                op: state::TestFilterOp::GreaterThan,
+                invert: false,
+                filter: state::TestFilterItem::DateRange { from, to: now },
+            });
+        }
 
         // 1. Start with a base query joining the necessary tables. We join testruns ->
         //    tests -> invocations. We box it to allow for dynamic modification based on
@@ -463,7 +486,7 @@ impl state::DB for Postgres {
             .select((models::Test::as_select(), models::Invocation::as_select()));
 
         // 2. Dynamically add filters to the query
-        for f in filters {
+        for f in &filters {
             query = match &f.filter {
                 state::TestFilterItem::Status(status) => {
                     let db_status = status.to_string();
@@ -603,6 +626,25 @@ impl state::DB for Postgres {
                         query.filter(invocations::id.eq_any(subquery))
                     }
                 },
+                state::TestFilterItem::DateRange { from, to } => {
+                    let from_odt: time::OffsetDateTime = (*from).into();
+                    let to_odt: time::OffsetDateTime = (*to).into();
+                    if f.invert {
+                        // Exclude results in this date range
+                        query.filter(
+                            invocations::start
+                                .lt(from_odt)
+                                .or(invocations::start.gt(to_odt)),
+                        )
+                    } else {
+                        // Include results in this date range
+                        query.filter(
+                            invocations::start
+                                .ge(from_odt)
+                                .and(invocations::start.le(to_odt)),
+                        )
+                    }
+                },
             };
         }
 
@@ -611,7 +653,7 @@ impl state::DB for Postgres {
         .order_by(invocations::start.desc())
         // We query more than the limit because we need to group runs by invocation.
         // This is a pragmatic approach; a more advanced solution might use a window function.
-        .limit(limit_i64 * 5) // Assume max 5 runs per invocation on average
+        .limit(max_results_i64 * 5) // Assume max 5 runs per invocation on average
         .load::<FullHistoryRun>(&mut self.conn)
         .context("Failed to load test history")?;
 
@@ -629,11 +671,23 @@ impl state::DB for Postgres {
         // Sort by the original invocation start time, descending (newest first)
         history.sort_by_key(|item| std::cmp::Reverse(item.start));
 
-        history.truncate(limit);
+        let total_found = history.len();
+        let was_truncated = total_found > max_results;
+        history.truncate(max_results);
+
+        // Extract query date range from filters
+        let query_date_range = filters.iter().find_map(|f| match &f.filter {
+            state::TestFilterItem::DateRange { from, to } => Some((*from, *to)),
+            _ => None,
+        });
 
         Ok(state::TestHistory {
             name: test_name.to_string(),
             history,
+            total_found,
+            limit_applied: max_results,
+            was_truncated,
+            query_date_range,
         })
     }
 
@@ -1158,7 +1212,7 @@ mod tests {
         .unwrap();
 
         // Case 1: Get all history (limit 10)
-        let history = db.get_test_history(test_name, &[], 10).unwrap();
+        let history = db.get_test_history(test_name, &[], 10, Some(30)).unwrap();
         assert_eq!(history.name, test_name);
         assert_eq!(history.history.len(), 3);
         assert_eq!(history.history[0].invocation_id, "inv1");
@@ -1171,7 +1225,7 @@ mod tests {
             invert: false,
             filter: TestFilterItem::Status(Status::Success),
         }];
-        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        let history = db.get_test_history(test_name, &filters, 10, None).unwrap();
         assert_eq!(history.history.len(), 2);
         assert!(
             history
@@ -1186,7 +1240,7 @@ mod tests {
             invert: false,
             filter: TestFilterItem::Duration(Duration::from_secs(10)),
         }];
-        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        let history = db.get_test_history(test_name, &filters, 10, None).unwrap();
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv2");
 
@@ -1199,7 +1253,7 @@ mod tests {
                 value: "main".to_string(),
             },
         }];
-        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        let history = db.get_test_history(test_name, &filters, 10, None).unwrap();
         assert_eq!(history.history.len(), 2);
         assert_eq!(history.history[0].invocation_id, "inv1");
         assert_eq!(history.history[1].invocation_id, "inv2");
@@ -1213,12 +1267,12 @@ mod tests {
                 value: "main".to_string(),
             },
         }];
-        let history = db.get_test_history(test_name, &filters, 10).unwrap();
+        let history = db.get_test_history(test_name, &filters, 10, None).unwrap();
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv3");
 
         // Case 6: Limit to 1 result
-        let history = db.get_test_history(test_name, &[], 1).unwrap();
+        let history = db.get_test_history(test_name, &[], 1, None).unwrap();
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv1");
     }

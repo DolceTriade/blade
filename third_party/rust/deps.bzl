@@ -220,7 +220,7 @@ def rust_dependencies():
             ),
             "time": crate.spec(
                 version = "0.3.37",
-                features = ["formatting", "macros", "serde"],
+                features = ["formatting", "macros", "serde", "parsing"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",
@@ -391,7 +391,7 @@ def rust_dependencies():
             ),
             "time": crate.spec(
                 version = "0.3.37",
-                features = ["formatting", "macros"],
+                features = ["formatting", "macros", "parsing"],
             ),
             "tokio": crate.spec(
                 version = "1.32.0",
