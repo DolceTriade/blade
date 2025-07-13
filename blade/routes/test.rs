@@ -289,7 +289,7 @@ pub fn Test() -> impl IntoView {
                             </div>
 
                             // Tab Content
-                            {move || match &*active_tab.get() {
+                            {move || match active_tab.get() {
                                 "insights" => view! {
                                     <TestInsights />
                                 }.into_any(),

@@ -6,93 +6,74 @@ use crate::charts::{linechart::LineChart, piechart::PieChart};
 
 #[derive(Debug, Clone, PartialEq)]
 struct TestInsightsData {
-    duration_distribution: Vec<(String, f64)>,
-    status_distribution: Vec<(String, f64)>,
-    failure_types: Vec<(String, f64)>,
-    performance_by_name_length: Vec<(f64, f64)>,
-    alphabetical_performance: Vec<(String, f64)>,
+    pass_fail_distribution: Vec<(String, f64)>,
+    duration_distribution: Vec<(String, f64)>, // (test_name, percentage)
+    duration_mapping: HashMap<String, f64>, // (test_name, actual_duration) for tooltips
+    test_performance: Vec<(String, f64)>, // (test_name, duration)
 }
 
 fn analyze_test_cases(cases: &[junit_parser::TestCase]) -> TestInsightsData {
+    let mut pass_count = 0;
+    let mut fail_count = 0;
     let mut duration_buckets = HashMap::new();
-    let mut status_counts = HashMap::new();
-    let mut failure_types = HashMap::new();
-    let mut name_length_durations: Vec<(usize, f64)> = Vec::new();
-    let mut alphabetical_durations: Vec<(String, f64)> = Vec::new();
+    let mut duration_mapping = HashMap::new();
+    let mut test_performance: Vec<(String, f64)> = Vec::new();
+
+    // Handle empty case list
+    if cases.is_empty() {
+        return TestInsightsData {
+            pass_fail_distribution: vec![
+                ("Passed".to_string(), 0.0),
+                ("Failed".to_string(), 0.0),
+            ],
+            duration_distribution: vec![],
+            duration_mapping: HashMap::new(),
+            test_performance: vec![],
+        };
+    }
+
+    // Calculate total duration for proportional calculation
+    let total_duration: f64 = cases.iter().map(|case| case.time.max(0.001)).sum(); // Minimum 1ms per test
 
     for case in cases {
-        // Duration distribution
-        let duration_bucket = match case.time {
-            t if t < 1.0 => "Fast (<1s)",
-            t if t < 5.0 => "Medium (1-5s)",
-            t if t < 10.0 => "Slow (5-10s)",
-            _ => "Very Slow (>10s)",
-        };
-        *duration_buckets
-            .entry(duration_bucket.to_string())
-            .or_insert(0.0) += 1.0;
-
-        // Status distribution
-        let status = match case.status {
-            junit_parser::TestStatus::Success => "Passing",
-            junit_parser::TestStatus::Error(_) => "Error",
-            junit_parser::TestStatus::Failure(_) => "Failure",
-            junit_parser::TestStatus::Skipped(_) => "Skipped",
-        };
-        *status_counts.entry(status.to_string()).or_insert(0.0) += 1.0;
-
-        // Failure type analysis
-        match &case.status {
-            junit_parser::TestStatus::Error(e) => {
-                let error_type = if e.error_type.is_empty() {
-                    "Unknown Error"
-                } else {
-                    &e.error_type
-                };
-                *failure_types.entry(error_type.to_string()).or_insert(0.0) += 1.0;
-            },
-            junit_parser::TestStatus::Failure(f) => {
-                let failure_type = if f.failure_type.is_empty() {
-                    "Unknown Failure"
-                } else {
-                    &f.failure_type
-                };
-                *failure_types.entry(failure_type.to_string()).or_insert(0.0) += 1.0;
-            },
-            _ => {},
+        // Pass/Fail distribution
+        match case.status {
+            junit_parser::TestStatus::Success => pass_count += 1,
+            _ => fail_count += 1,
         }
 
-        // Name length vs duration
-        name_length_durations.push((case.name.len(), case.time));
+        // Ensure minimum duration of 1ms to avoid division issues
+        let actual_duration = case.time.max(0.001);
+        
+        // Duration distribution - individual test durations as proportion of total
+        let proportion = if total_duration > 0.0 {
+            (actual_duration / total_duration) * 100.0
+        } else {
+            // Fallback: if somehow total is 0, distribute equally
+            100.0 / cases.len() as f64
+        };
+        
+        // Ensure proportion is at least 0.1% to be visible in pie chart
+        let final_proportion = proportion.max(0.1);
+        
+        duration_buckets.insert(case.name.clone(), final_proportion);
+        duration_mapping.insert(case.name.clone(), case.time); // Keep original time for display
 
-        // Alphabetical performance
-        alphabetical_durations.push((case.name.clone(), case.time));
+        // Test performance (name -> duration)
+        test_performance.push((case.name.clone(), case.time));
     }
 
-    // Sort alphabetical performance
-    alphabetical_durations.sort_by(|a, b| a.0.cmp(&b.0));
-
-    // Calculate average duration by name length buckets
-    let mut length_buckets: HashMap<usize, Vec<f64>> = HashMap::new();
-    for (length, duration) in name_length_durations {
-        let bucket = (length / 10) * 10; // Group by 10s: 0-9, 10-19, etc.
-        length_buckets.entry(bucket).or_default().push(duration);
-    }
-
-    let performance_by_name_length: Vec<(f64, f64)> = length_buckets
-        .iter()
-        .map(|(bucket, durations)| {
-            let avg = durations.iter().sum::<f64>() / durations.len() as f64;
-            (*bucket as f64, avg)
-        })
-        .collect();
+    // Sort test performance by duration for better visualization
+    test_performance.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
 
     TestInsightsData {
+        pass_fail_distribution: vec![
+            ("Passed".to_string(), pass_count as f64),
+            ("Failed".to_string(), fail_count as f64),
+        ],
         duration_distribution: duration_buckets.into_iter().collect(),
-        status_distribution: status_counts.into_iter().collect(),
-        failure_types: failure_types.into_iter().collect(),
-        performance_by_name_length,
-        alphabetical_performance: alphabetical_durations,
+        duration_mapping,
+        test_performance,
     }
 }
 
@@ -124,22 +105,20 @@ pub fn TestInsights() -> impl IntoView {
                                     </h2>
 
                                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                        // Test Status Distribution
+                                        // Pass/Fail Distribution
                                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                                "Test Status Distribution"
+                                                "Test Results Distribution"
                                             </h3>
                                             <PieChart
-                                                data=insights.status_distribution.clone()
+                                                data=insights.pass_fail_distribution.clone()
                                                 size=250
                                                 value_accessor=|item: &(String, f64)| item.1
                                                 label_accessor=|item: &(String, f64)| item.0.clone()
                                                 color_accessor=|item: &(String, f64)| {
                                                     match item.0.as_str() {
-                                                        "Passing" => "#10b981".to_string(),
-                                                        "Error" => "#f97316".to_string(),
-                                                        "Failure" => "#ef4444".to_string(),
-                                                        "Skipped" => "#6b7280".to_string(),
+                                                        "Passed" => "#10b981".to_string(),
+                                                        "Failed" => "#ef4444".to_string(),
                                                         _ => "#9ca3af".to_string(),
                                                     }
                                                 }
@@ -152,84 +131,47 @@ pub fn TestInsights() -> impl IntoView {
                                         // Duration Distribution
                                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                             <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                                "Test Duration Distribution"
+                                                "Test Duration Distribution (% of Total Time)"
                                             </h3>
-                                            <PieChart
-                                                data=insights.duration_distribution.clone()
-                                                size=250
-                                                value_accessor=|item: &(String, f64)| item.1
-                                                label_accessor=|item: &(String, f64)| item.0.clone()
-                                                color_accessor=|item: &(String, f64)| {
-                                                    match item.0.as_str() {
-                                                        "Fast (<1s)" => "#10b981".to_string(),
-                                                        "Medium (1-5s)" => "#3b82f6".to_string(),
-                                                        "Slow (5-10s)" => "#f59e0b".to_string(),
-                                                        "Very Slow (>10s)" => "#ef4444".to_string(),
-                                                        _ => "#9ca3af".to_string(),
-                                                    }
-                                                }
-                                                tooltip_content_accessor=|item: &(String, f64)| {
-                                                    format!("{}: {} tests", item.0, item.1 as i32)
-                                                }
-                                            />
-                                        </div>
-
-                                        // Failure Types (only show if there are failures)
-                                        {(!insights.failure_types.is_empty()).then(|| {
-                                            view! {
-                                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                                    <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                                        "Failure Type Analysis"
-                                                    </h3>
+                                            {
+                                                // Create a combined data structure with both percentage and actual duration
+                                                let combined_data: Vec<(String, f64, f64)> = insights.duration_distribution
+                                                    .iter()
+                                                    .map(|(name, percentage)| {
+                                                        let actual_duration = insights.duration_mapping.get(name).unwrap_or(&0.0);
+                                                        (name.clone(), *percentage, *actual_duration)
+                                                    })
+                                                    .collect();
+                                                    
+                                                view! {
                                                     <PieChart
-                                                        data=insights.failure_types.clone()
+                                                        data=combined_data
                                                         size=250
-                                                        value_accessor=|item: &(String, f64)| item.1
-                                                        label_accessor=|item: &(String, f64)| item.0.clone()
-                                                        color_accessor=|item: &(String, f64)| {
-                                                            let colors = ["#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e"];
-                                                            let index = item.0.len() % colors.len();
-                                                            colors[index].to_string()
+                                                        value_accessor=|item: &(String, f64, f64)| item.1
+                                                        label_accessor=|item: &(String, f64, f64)| item.0.clone()
+                                                        color_accessor=|item: &(String, f64, f64)| {
+                                                            // Generate colors based on percentage of total time
+                                                            match item.1 {
+                                                                p if p < 10.0 => "#10b981".to_string(),   // Small portion - green
+                                                                p if p < 25.0 => "#3b82f6".to_string(),   // Medium portion - blue
+                                                                p if p < 50.0 => "#f59e0b".to_string(),   // Large portion - yellow
+                                                                _ => "#ef4444".to_string(),               // Very large portion - red
+                                                            }
                                                         }
-                                                        tooltip_content_accessor=|item: &(String, f64)| {
-                                                            format!("{}: {} failures", item.0, item.1 as i32)
+                                                        tooltip_content_accessor=|item: &(String, f64, f64)| {
+                                                            format!("{}: {:.1}% ({:.2}s)", item.0, item.1, item.2)
                                                         }
                                                     />
-                                                </div>
+                                                }
                                             }
-                                        })}
-
-                                        // Performance by Name Length
-                                        {(!insights.performance_by_name_length.is_empty()).then(|| {
-                                            view! {
-                                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                                                    <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                                        "Performance by Test Name Length"
-                                                    </h3>
-                                                    <LineChart
-                                                        data=insights.performance_by_name_length.clone()
-                                                        width=400
-                                                        height=250
-                                                        x_accessor=|item: &(f64, f64)| item.0
-                                                        y_accessor=|item: &(f64, f64)| item.1
-                                                        line_color="#3b82f6"
-                                                        point_color_accessor=|_: &(f64, f64)| "#3b82f6".to_string()
-                                                        tooltip_content_accessor=|item: &(f64, f64)| {
-                                                            format!("Length: {}, Avg Duration: {:.2}s", item.0 as i32, item.1)
-                                                        }
-                                                        x_axis_label="Name Length (chars)"
-                                                        y_axis_label="Avg Duration (s)"
-                                                    />
-                                                </div>
-                                            }
-                                        })}
+                                        </div>
                                     </div>
 
-                                    // Alphabetical Performance (full width)
-                                    {(!insights.alphabetical_performance.is_empty() && insights.alphabetical_performance.len() > 5).then(|| {
+                                    // Test Performance Scatter Plot (full width)
+                                    {(insights.test_performance.len() > 1).then(|| {
                                         // Sample every nth test to avoid overcrowding
-                                        let step = (insights.alphabetical_performance.len() / 20).max(1);
-                                        let sampled_data: Vec<(String, f64)> = insights.alphabetical_performance
+                                        let step = (insights.test_performance.len() / 20).max(1);
+                                        let sampled_data: Vec<(String, f64)> = insights.test_performance
                                             .iter()
                                             .step_by(step)
                                             .take(20)
@@ -247,7 +189,7 @@ pub fn TestInsights() -> impl IntoView {
                                         view! {
                                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                                 <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                                                    "Test Performance (Alphabetical Sample)"
+                                                    "Test Performance (Duration by Test Name)"
                                                 </h3>
                                                 <div class="overflow-x-auto">
                                                     <LineChart
@@ -265,6 +207,19 @@ pub fn TestInsights() -> impl IntoView {
                                                         y_axis_label="Duration (s)"
                                                     />
                                                 </div>
+                                            </div>
+                                        }
+                                    })}
+
+                                    {(insights.test_performance.len() <= 1).then(|| {
+                                        view! {
+                                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                                                    "Test Performance"
+                                                </h3>
+                                                <p class="text-gray-500 text-center py-8">
+                                                    "Not enough test data to display performance chart"
+                                                </p>
                                             </div>
                                         }
                                     })}
