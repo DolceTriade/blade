@@ -546,7 +546,63 @@ impl state::DB for Postgres {
                         query.filter(invocations::id.eq_any(subquery))
                     }
                 },
-                state::TestFilterItem::LogOutput(_) => query, // Not implemented yet
+                state::TestFilterItem::BazelFlags { flag, value } => {
+                    // For Bazel flags, we need to search in various option kinds
+                    let mut subquery = options::table
+                        .into_boxed()
+                        .select(options::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            if value.is_empty() {
+                                // Just check for flag existence (flag=*)
+                                subquery.filter(options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for exact flag=value match
+                                subquery.filter(options::keyval.eq(format!("{flag}={value}")))
+                            }
+                        },
+                        state::TestFilterOp::Contains => {
+                            if value.is_empty() {
+                                // Just check for flag existence
+                                subquery.filter(options::keyval.like(format!("{flag}=%")))
+                            } else {
+                                // Check for flag containing value
+                                subquery.filter(options::keyval.like(format!("%{flag}%{value}%")))
+                            }
+                        },
+                        _ => subquery, // Other ops not applicable
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(invocations::id.eq_any(subquery))
+                    }
+                },
+                state::TestFilterItem::LogOutput(search_term) => {
+                    // Search in invocation output lines
+                    let mut subquery = invocationoutput::table
+                        .into_boxed()
+                        .select(invocationoutput::invocation_id)
+                        .distinct();
+
+                    subquery = match f.op {
+                        state::TestFilterOp::Equals => {
+                            subquery.filter(invocationoutput::line.eq(search_term))
+                        },
+                        state::TestFilterOp::Contains => subquery
+                            .filter(invocationoutput::line.ilike(format!("%{search_term}%"))),
+                        _ => subquery, // Other ops not applicable for log output
+                    };
+
+                    if f.invert {
+                        query.filter(diesel::dsl::not(invocations::id.eq_any(subquery)))
+                    } else {
+                        query.filter(invocations::id.eq_any(subquery))
+                    }
+                },
             };
         }
 
@@ -579,6 +635,23 @@ impl state::DB for Postgres {
             name: test_name.to_string(),
             history,
         })
+    }
+
+    fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>> {
+        use schema::tests::dsl::*;
+
+        let limit_i64: i64 = limit.try_into().context("failed to convert limit to i64")?;
+
+        let results = tests
+            .select(name)
+            .filter(name.like(format!("%{pattern}%")))
+            .distinct()
+            .order_by(name.asc())
+            .limit(limit_i64)
+            .load::<String>(&mut self.conn)
+            .context("Failed to search test names")?;
+
+        Ok(results)
     }
 }
 

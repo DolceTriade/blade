@@ -26,7 +26,7 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
             x_accessor=|point| {
                 point.start.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs_f64()
             }
-            y_accessor=|point| point.test.duration.as_millis() as f64
+            y_accessor=|point| point.test.duration.as_secs_f64()
             line_color="#4299e1"
             point_color_accessor=|p| {
                 (match p.test.status {
@@ -46,7 +46,7 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
             x_tick_formatter=Box::new(format_unix)
             on_point_click=on_point_click
             x_axis_label="Time"
-            y_axis_label="Duration (ms)"
+            y_axis_label="Duration (s)"
             x_axis_label_rotation=10.0
         />
     }

@@ -29,3 +29,20 @@ pub async fn get_artifact(uri: String) -> Result<Vec<u8>, ServerFnError<String>>
         _ => Err(ServerFnError::ServerError("not implemented".to_string())),
     }
 }
+
+#[server]
+pub async fn search_test_names(
+    pattern: String,
+    limit: Option<usize>,
+) -> Result<Vec<String>, ServerFnError<String>> {
+    let global: Arc<Global> = use_context::<Arc<Global>>().unwrap();
+    let mut db = global
+        .db_manager
+        .get()
+        .map_err(|e| ServerFnError::<String>::ServerError(format!("failed to get db: {e}")))?;
+
+    let search_limit = limit.unwrap_or(10).min(50); // Cap at 50 results
+    db.search_test_names(&pattern, search_limit).map_err(|e| {
+        ServerFnError::<String>::ServerError(format!("failed to search test names: {e}"))
+    })
+}

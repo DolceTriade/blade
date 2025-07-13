@@ -129,6 +129,7 @@ pub enum TestFilterItem {
     Start(std::time::SystemTime),
     Duration(std::time::Duration),
     Metadata { key: String, value: String },
+    BazelFlags { flag: String, value: String },
     Status(Status),
     LogOutput(String),
 }
@@ -164,6 +165,7 @@ pub trait DB {
     fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()>;
     fn insert_output_lines(&mut self, id: &str, lines: Vec<String>) -> anyhow::Result<()>;
     fn get_test_history(&mut self, test_name: &str, filters: &[TestFilter], limit: usize) -> anyhow::Result<TestHistory>;
+    fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>>;
 }
 
 pub trait DBManager: std::marker::Send + std::marker::Sync {
