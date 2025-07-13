@@ -12,6 +12,7 @@ pub mod statusicon;
 pub mod summaryheader;
 pub mod targetlist;
 pub mod testartifactlist;
+pub mod testinsights;
 pub mod testresults;
 pub mod testrunlist;
 pub mod testsummary;
