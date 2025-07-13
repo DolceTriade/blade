@@ -218,17 +218,19 @@ fn FilterRow(
                         class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                         on:change=move |ev| {
                             let value = event_target_value(&ev);
-                            set_current_builder.update(|b| {
-                                b.filter_type = value.clone();
-                                // Reset operation to a valid one for the new filter type
-                                b.operation = match value.as_str() {
-                                    "Duration" => TestFilterOp::Equals,
-                                    "Status" => TestFilterOp::Equals,
-                                    "Metadata" | "BazelFlags" | "LogOutput" => TestFilterOp::Equals,
-                                    "DateRange" => TestFilterOp::Equals,
-                                    _ => TestFilterOp::Equals,
-                                };
-                            });
+                            set_current_builder
+                                .update(|b| {
+                                    b.filter_type = value.clone();
+                                    b.operation = match value.as_str() {
+                                        "Duration" => TestFilterOp::Equals,
+                                        "Status" => TestFilterOp::Equals,
+                                        "Metadata" | "BazelFlags" | "LogOutput" => {
+                                            TestFilterOp::Equals
+                                        }
+                                        "DateRange" => TestFilterOp::Equals,
+                                        _ => TestFilterOp::Equals,
+                                    };
+                                });
                         }
                         prop:value=move || current_builder.get().filter_type
                     >
@@ -276,29 +278,24 @@ fn FilterRow(
                                         <option value="Equals">"Equals"</option>
                                         <option value="GreaterThan">"Greater Than"</option>
                                         <option value="LessThan">"Less Than"</option>
-                                    }.into_any()
+                                    }
+                                        .into_any()
                                 }
                                 "Status" => {
-                                    view! {
-                                        <option value="Equals">"Equals"</option>
-                                    }.into_any()
+                                    view! { <option value="Equals">"Equals"</option> }.into_any()
                                 }
                                 "Metadata" | "BazelFlags" | "LogOutput" => {
                                     view! {
                                         <option value="Equals">"Equals"</option>
                                         <option value="Contains">"Contains"</option>
-                                    }.into_any()
+                                    }
+                                        .into_any()
                                 }
                                 "DateRange" => {
-                                    view! {
-                                        <option value="Equals">"Within Range"</option>
-                                    }.into_any()
+                                    view! { <option value="Equals">"Within Range"</option> }
+                                        .into_any()
                                 }
-                                _ => {
-                                    view! {
-                                        <option value="Equals">"Equals"</option>
-                                    }.into_any()
-                                }
+                                _ => view! { <option value="Equals">"Equals"</option> }.into_any(),
                             }
                         }}
                     </select>
