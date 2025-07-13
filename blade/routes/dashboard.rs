@@ -18,14 +18,21 @@ use state::{TestFilter, TestHistory};
 pub async fn get_test_history(
     test_name: String,
     filters: Option<Vec<TestFilter>>,
+    max_results: Option<usize>,
+    default_days: Option<u32>,
 ) -> Result<TestHistory, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
     let mut db = global
         .db_manager
         .get()
         .map_err(crate::invocation::internal_err)?;
-    db.get_test_history(&test_name, &filters.unwrap_or_default(), 50) // Limit to 50 results for now
-        .map_err(|e| ServerFnError::ServerError(e.to_string()))
+    db.get_test_history(
+        &test_name,
+        &filters.unwrap_or_default(),
+        max_results.unwrap_or(1000),
+        default_days.or(Some(30)),
+    )
+    .map_err(|e| ServerFnError::ServerError(e.to_string()))
 }
 
 #[derive(PartialEq, Params)]
@@ -55,7 +62,7 @@ pub fn Dashboard() -> impl IntoView {
             if test_name.is_empty() {
                 return None;
             }
-            get_test_history(test_name, Some(filters))
+            get_test_history(test_name, Some(filters), None, None)
                 .await
                 .inspect_err(|e| {
                     tracing::warn!("Failed to get test history: {e:#?}");

@@ -9,7 +9,41 @@ use crate::summaryheader::format_time;
 pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
     view! {
         <div class="mt-8">
-            <h2 class="text-2xl font-bold mb-4">"Raw Test Results"</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold">"Raw Test Results"</h2>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    {format!(
+                        "Showing {} of {} results",
+                        history.history.len(),
+                        history.total_found,
+                    )}
+                    {if history.was_truncated {
+                        Some(
+                            view! {
+                                <span class="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-md text-xs">
+                                    "Results truncated"
+                                </span>
+                            },
+                        )
+                    } else {
+                        None
+                    }}
+                </div>
+            </div>
+
+            {if history.was_truncated {
+                Some(
+                    view! {
+                        <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                "Too many results found. Consider narrowing your date range or adding more specific filters to see all results."
+                            </p>
+                        </div>
+                    },
+                )
+            } else {
+                None
+            }}
             <div class="overflow-x-auto">
                 <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg shadow-md">
                     <thead>

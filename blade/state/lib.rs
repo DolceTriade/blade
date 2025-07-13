@@ -114,6 +114,11 @@ pub struct TestHistory {
     pub name: String,
     // Invocation ID + Test
     pub history: Vec<TestHistoryPoint>,
+    // Metadata about the query results
+    pub total_found: usize,
+    pub limit_applied: usize,
+    pub was_truncated: bool,
+    pub query_date_range: Option<(std::time::SystemTime, std::time::SystemTime)>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -128,10 +133,20 @@ pub enum TestFilterOp {
 pub enum TestFilterItem {
     Start(std::time::SystemTime),
     Duration(std::time::Duration),
-    Metadata { key: String, value: String },
-    BazelFlags { flag: String, value: String },
+    Metadata {
+        key: String,
+        value: String,
+    },
+    BazelFlags {
+        flag: String,
+        value: String,
+    },
     Status(Status),
     LogOutput(String),
+    DateRange {
+        from: std::time::SystemTime,
+        to: std::time::SystemTime,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -164,7 +179,7 @@ pub trait DB {
     fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
     fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()>;
     fn insert_output_lines(&mut self, id: &str, lines: Vec<String>) -> anyhow::Result<()>;
-    fn get_test_history(&mut self, test_name: &str, filters: &[TestFilter], limit: usize) -> anyhow::Result<TestHistory>;
+    fn get_test_history(&mut self, test_name: &str, filters: &[TestFilter], max_results: usize, default_days: Option<u32>) -> anyhow::Result<TestHistory>;
     fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>>;
 }
 

@@ -1,10 +1,33 @@
 use leptos::{leptos_dom::helpers::event_target_value, prelude::*};
 use state::{Status, TestFilter, TestFilterItem, TestFilterOp};
+use time::{Date, Time};
 use wasm_bindgen::JsCast;
+
+// Helper function to parse ISO date string (YYYY-MM-DD) to SystemTime
+fn parse_date_string(date_str: &str) -> Option<std::time::SystemTime> {
+    if date_str.is_empty() {
+        return None;
+    }
+
+    // Parse YYYY-MM-DD format using time crate
+    let date = Date::parse(
+        date_str,
+        &time::format_description::well_known::Iso8601::DATE,
+    )
+    .ok()?;
+
+    // Create datetime at start of day (midnight UTC)
+    let datetime = date.with_time(Time::MIDNIGHT).assume_utc();
+
+    // Convert to SystemTime
+    let duration_since_epoch = std::time::Duration::from_secs(datetime.unix_timestamp() as u64);
+    Some(std::time::UNIX_EPOCH + duration_since_epoch)
+}
 
 #[derive(Clone, Debug)]
 struct FilterBuilder {
-    filter_type: String, // "Duration", "Status", "Metadata", "BazelFlags", "LogOutput"
+    filter_type: String, /* "Duration", "Status", "Metadata", "BazelFlags", "LogOutput",
+                          * "DateRange" */
     operation: TestFilterOp,
     invert: bool,
     // Values for different filter types
@@ -15,6 +38,9 @@ struct FilterBuilder {
     bazel_flag: String,
     bazel_value: String,
     log_output: String,
+    // Date range fields
+    date_from: String, // ISO date string (YYYY-MM-DD)
+    date_to: String,   // ISO date string (YYYY-MM-DD)
 }
 
 impl Default for FilterBuilder {
@@ -30,6 +56,8 @@ impl Default for FilterBuilder {
             bazel_flag: String::new(),
             bazel_value: String::new(),
             log_output: String::new(),
+            date_from: String::new(),
+            date_to: String::new(),
         }
     }
 }
@@ -64,6 +92,15 @@ impl FilterBuilder {
                     return None;
                 }
                 TestFilterItem::LogOutput(self.log_output.clone())
+            },
+            "DateRange" => {
+                if self.date_from.is_empty() || self.date_to.is_empty() {
+                    return None;
+                }
+                // Parse ISO date strings to SystemTime
+                let from = parse_date_string(&self.date_from)?;
+                let to = parse_date_string(&self.date_to)?;
+                TestFilterItem::DateRange { from, to }
             },
             _ => return None,
         };
@@ -181,7 +218,19 @@ fn FilterRow(
                         class="w-full p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                         on:change=move |ev| {
                             let value = event_target_value(&ev);
-                            set_current_builder.update(|b| b.filter_type = value);
+                            set_current_builder
+                                .update(|b| {
+                                    b.filter_type = value.clone();
+                                    b.operation = match value.as_str() {
+                                        "Duration" => TestFilterOp::Equals,
+                                        "Status" => TestFilterOp::Equals,
+                                        "Metadata" | "BazelFlags" | "LogOutput" => {
+                                            TestFilterOp::Equals
+                                        }
+                                        "DateRange" => TestFilterOp::Equals,
+                                        _ => TestFilterOp::Equals,
+                                    };
+                                });
                         }
                         prop:value=move || current_builder.get().filter_type
                     >
@@ -190,6 +239,7 @@ fn FilterRow(
                         <option value="Metadata">"Metadata"</option>
                         <option value="BazelFlags">"Bazel Flags"</option>
                         <option value="LogOutput">"Log Output"</option>
+                        <option value="DateRange">"Date Range"</option>
                     </select>
                 </div>
 
@@ -210,11 +260,44 @@ fn FilterRow(
                             };
                             set_current_builder.update(|b| b.operation = op);
                         }
+                        prop:value=move || {
+                            let builder = current_builder.get();
+                            match builder.operation {
+                                TestFilterOp::Contains => "Contains",
+                                TestFilterOp::GreaterThan => "GreaterThan",
+                                TestFilterOp::LessThan => "LessThan",
+                                TestFilterOp::Equals => "Equals",
+                            }
+                        }
                     >
-                        <option value="Equals">"Equals"</option>
-                        <option value="Contains">"Contains"</option>
-                        <option value="GreaterThan">"Greater Than"</option>
-                        <option value="LessThan">"Less Than"</option>
+                        {move || {
+                            let builder = current_builder.get();
+                            match builder.filter_type.as_str() {
+                                "Duration" => {
+                                    view! {
+                                        <option value="Equals">"Equals"</option>
+                                        <option value="GreaterThan">"Greater Than"</option>
+                                        <option value="LessThan">"Less Than"</option>
+                                    }
+                                        .into_any()
+                                }
+                                "Status" => {
+                                    view! { <option value="Equals">"Equals"</option> }.into_any()
+                                }
+                                "Metadata" | "BazelFlags" | "LogOutput" => {
+                                    view! {
+                                        <option value="Equals">"Equals"</option>
+                                        <option value="Contains">"Contains"</option>
+                                    }
+                                        .into_any()
+                                }
+                                "DateRange" => {
+                                    view! { <option value="Equals">"Within Range"</option> }
+                                        .into_any()
+                                }
+                                _ => view! { <option value="Equals">"Equals"</option> }.into_any(),
+                            }
+                        }}
                     </select>
                 </div>
 
@@ -331,6 +414,33 @@ fn FilterRow(
                                         }
                                         prop:value=move || current_builder.get().log_output
                                     />
+                                }
+                                    .into_any()
+                            }
+                            "DateRange" => {
+                                view! {
+                                    <div class="flex space-x-2">
+                                        <input
+                                            type="date"
+                                            placeholder="From date"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.date_from = value);
+                                            }
+                                            prop:value=move || current_builder.get().date_from
+                                        />
+                                        <input
+                                            type="date"
+                                            placeholder="To date"
+                                            class="flex-1 p-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
+                                            on:input=move |ev| {
+                                                let value = event_target_value(&ev);
+                                                set_current_builder.update(|b| b.date_to = value);
+                                            }
+                                            prop:value=move || current_builder.get().date_to
+                                        />
+                                    </div>
                                 }
                                     .into_any()
                             }
