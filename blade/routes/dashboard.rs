@@ -1,11 +1,14 @@
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
-use components::dashboard::{
-    filters::FilterControls,
-    graphs::HistoryGraphs,
-    test_history_table::TestHistoryTable,
-    test_search::TestSearchInput,
+use components::{
+    accordion::*,
+    dashboard::{
+        filters::FilterControls,
+        graphs::HistoryGraphs,
+        test_history_table::TestHistoryTable,
+        test_search::TestSearchInput,
+    },
 };
 use leptos::{either::Either, prelude::*};
 use leptos_router::{hooks::use_query, params::Params};
@@ -66,7 +69,12 @@ pub fn Dashboard() -> impl IntoView {
             <div class="container mx-auto">
                 <h1 class="text-3xl font-bold mb-6">"Test History Dashboard"</h1>
                 <TestSearchInput test_name=test_name set_test_name=set_test_name />
-                <FilterControls set_filters=set_filters />
+
+                <Accordion>
+                    <AccordionItem header=|| "Advanced Filters" hide=true>
+                        <FilterControls set_filters=set_filters />
+                    </AccordionItem>
+                </Accordion>
                 <Suspense fallback=|| {
                     view! { <p class="text-gray-400">"Loading..."</p> }
                 }>
