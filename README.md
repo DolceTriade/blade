@@ -5,6 +5,7 @@
 Blade is a Bazel BEP viewer. It's in its early stages, but should be generally functional.
 
 ![screenshot](img/ss.png)
+![screenshot](img/testhistory.png)
 
 # Quick Start
 
@@ -13,7 +14,7 @@ Blade is a Bazel BEP viewer. It's in its early stages, but should be generally f
 You can run this using Docker:
 
 ```
-docker run --rm -p 3000:3000 -p 50332:50332 -v $HOME:$HOME ghcr.io/dolcetriade/blade:v0.8 --db_path sqlite:///tmp/blade.db -l
+docker run --rm -p 3000:3000 -p 50332:50332 -v $HOME:$HOME ghcr.io/dolcetriade/blade:v0.23 --db_path sqlite:///tmp/blade.db -l
 ```
 
 Then you can run:
