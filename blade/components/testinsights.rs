@@ -205,7 +205,8 @@ pub fn TestInsights() -> impl IntoView {
                                                         }
                                                         x_axis_label="Test Name"
                                                         y_axis_label="Duration (s)"
-                                                        show_y_axis_labels=false
+                                                        show_y_axis_labels=true
+                                                        show_x_axis_labels=false
                                                         show_line=false
                                                     />
                                                 </div>

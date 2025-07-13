@@ -19,6 +19,7 @@ pub fn LineChart<T, X, Y, PC, TC>(
     #[prop(optional)] x_tick_formatter: Option<Box<dyn Fn(f64) -> String + 'static + Send>>,
     #[prop(optional)] x_axis_label_rotation: Option<f64>,
     #[prop(default = true)] show_y_axis_labels: bool,
+    #[prop(default = true)] show_x_axis_labels: bool,
     #[prop(default = true)] show_line: bool,
 ) -> impl IntoView
 where
@@ -102,25 +103,29 @@ where
         })
         .collect_view();
 
-    let x_axis_ticks = (0..=x_axis_ticks_count)
-        .map(|i| {
-            let value = min_x + (max_x - min_x) / x_axis_ticks_count as f64 * i as f64;
-            let x = margin.3 as f64 + (value - min_x) * x_scale;
-            let y = height as f64 - margin.2 as f64 + 15.0;
-            view! {
-                <text
-                    x=x.to_string()
-                    y=y.to_string()
-                    style:text-anchor="middle"
-                    fill="#a0aec0"
-                    style:font-size="10"
-                    transform=x_axis_label_rotation.map(|r| format!("rotate({r}, {x}, {y})"))
-                >
-                    {x_tick_formatter(value)}
-                </text>
-            }
-        })
-        .collect_view();
+    let x_axis_ticks = if show_x_axis_labels {
+        (0..=x_axis_ticks_count)
+            .map(|i| {
+                let value = min_x + (max_x - min_x) / x_axis_ticks_count as f64 * i as f64;
+                let x = margin.3 as f64 + (value - min_x) * x_scale;
+                let y = height as f64 - margin.2 as f64 + 15.0;
+                view! {
+                    <text
+                        x=x.to_string()
+                        y=y.to_string()
+                        style:text-anchor="middle"
+                        fill="#a0aec0"
+                        style:font-size="10"
+                        transform=x_axis_label_rotation.map(|r| format!("rotate({r}, {x}, {y})"))
+                    >
+                        {x_tick_formatter(value)}
+                    </text>
+                }
+            })
+            .collect_view()
+    } else {
+        vec![].into_iter().collect_view()
+    };
 
     let x_axis_tick_marks = (0..=x_axis_ticks_count)
         .map(|i| {
