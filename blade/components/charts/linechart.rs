@@ -150,7 +150,8 @@ where
         (0..=5)
             .map(|i| {
                 let value = (max_y / 5.0) * i as f64;
-                let y = margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
+                let y =
+                    margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
                 view! {
                     <text
                         x=(margin.3 - 10).to_string()
@@ -216,9 +217,10 @@ where
                 stroke-width="1"
             />
 
-            {show_line.then(|| view! {
-                <path d=path_data fill="none" stroke=line_color stroke-width="2" />
-            })}
+            {show_line
+                .then(|| {
+                    view! { <path d=path_data fill="none" stroke=line_color stroke-width="2" /> }
+                })}
             {circles}
             {x_axis_tick_marks}
             {x_axis_ticks}
