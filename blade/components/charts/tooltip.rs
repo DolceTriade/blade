@@ -1,6 +1,4 @@
-use leptos::prelude::*;
-use leptos::html::Div;
-use leptos::ev::MouseEvent;
+use leptos::{ev::MouseEvent, html::Div, prelude::*};
 
 #[derive(Clone, Debug)]
 pub struct TooltipPosition {
@@ -29,8 +27,8 @@ pub fn Tooltip(
 
             format!(
                 "position: fixed; \
-                 left: {}px; \
-                 top: {}px; \
+                 left: {x}px; \
+                 top: {y}px; \
                  transform: translate(-50%, -100%); \
                  background-color: rgba(45, 55, 72, 0.95); \
                  color: white; \
@@ -45,23 +43,19 @@ pub fn Tooltip(
                  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); \
                  backdrop-filter: blur(4px); \
                  opacity: 1; \
-                 transition: opacity 0.2s ease-in-out;",
-                x, y
+                 transition: opacity 0.2s ease-in-out;"
             )
         } else {
             "position: fixed; \
              opacity: 0; \
              pointer-events: none; \
-             z-index: -1;".to_string()
+             z-index: -1;"
+                .to_string()
         }
     };
 
     view! {
-        <div
-            node_ref=tooltip_ref
-            style=move || style()
-            class="tooltip-container"
-        >
+        <div node_ref=tooltip_ref style=style class="tooltip-container">
             {children()}
         </div>
     }

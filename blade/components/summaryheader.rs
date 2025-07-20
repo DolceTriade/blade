@@ -103,11 +103,23 @@ pub fn SummaryHeader() -> impl IntoView {
                 format!("Took {}", humantime::format_duration(duration))
             })
             .unwrap_or_default();
+        let is_live = Signal::derive(move || invocation.with(|inv| inv.is_live()));
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x overflow-hidden">
                 <div class="grid grid-rows-1 grid-flow-col place-content-start">
-                    <div class="p-4 place-content-center self-center">
+                    <div class="p-4 place-content-center self-center relative">
                         <StatusIcon class="h-8 w-8" status=status />
+                        {move || {
+                            is_live
+                                .get()
+                                .then(|| {
+                                    view! {
+                                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse">
+                                            <span class="sr-only">Live stream</span>
+                                        </div>
+                                    }
+                                })
+                        }}
                     </div>
                     <div class="grid grid-rows-3 items-start self-center place-content-center">
                         <div class="flex gap-3 content-start place-items-center">

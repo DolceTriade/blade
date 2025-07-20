@@ -24,6 +24,7 @@ pub struct Invocation {
     pub end: Option<time::OffsetDateTime>,
     pub command: String,
     pub pattern: Option<String>,
+    pub last_heartbeat: Option<time::OffsetDateTime>,
 }
 
 impl Invocation {
@@ -35,6 +36,7 @@ impl Invocation {
             end: ir.end.map(core::convert::Into::into),
             command: ir.command.clone(),
             pattern: Some(ir.pattern.join(",")),
+            last_heartbeat: ir.last_heartbeat.map(core::convert::Into::into),
         })
     }
 
@@ -53,6 +55,9 @@ impl Invocation {
                 .as_ref()
                 .map(|p| p.split(',').map(|s| s.to_string()).collect::<Vec<_>>())
                 .unwrap_or_default(),
+            last_heartbeat: self.last_heartbeat.map(|h| {
+                crate::time::to_systemtime(&h).unwrap_or_else(|_| std::time::SystemTime::now())
+            }),
             ..Default::default()
         }
     }

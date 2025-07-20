@@ -74,6 +74,7 @@ pub struct InvocationResults {
     pub end: Option<std::time::SystemTime>,
     pub command: String,
     pub pattern: Vec<String>,
+    pub last_heartbeat: Option<std::time::SystemTime>,
 }
 
 impl Default for InvocationResults {
@@ -87,6 +88,32 @@ impl Default for InvocationResults {
             pattern: vec![],
             start: std::time::UNIX_EPOCH,
             end: None,
+            last_heartbeat: None,
+        }
+    }
+}
+
+impl InvocationResults {
+    /// Determines if this invocation has an active stream based on heartbeat
+    /// An invocation is considered "live" if:
+    /// 1. It's in InProgress status AND
+    /// 2. It has a recent heartbeat (within last 2 minutes) OR no end time set
+    pub fn is_live(&self) -> bool {
+        match self.status {
+            Status::InProgress => {
+                if let Some(heartbeat) = self.last_heartbeat {
+                    // Stream is live if heartbeat is within the last 2 minutes
+                    let heartbeat_threshold = std::time::Duration::from_secs(2 * 60);
+                    std::time::SystemTime::now()
+                        .duration_since(heartbeat)
+                        .map(|duration| duration < heartbeat_threshold)
+                        .unwrap_or(false)
+                } else {
+                    // No heartbeat yet, but if no end time and recently started, consider live
+                    self.end.is_none()
+                }
+            },
+            _ => false, // Completed builds are never live
         }
     }
 }
@@ -175,6 +202,7 @@ pub trait DB {
     fn get_shallow_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
     fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
+    fn update_invocation_heartbeat(&mut self, invocation_id: &str) -> anyhow::Result<()>;
     fn insert_options(&mut self, id: &str, options: &BuildOptions) -> anyhow::Result<()>;
     fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
     fn delete_last_output_lines(&mut self, id: &str, num_lines: u32) -> anyhow::Result<()>;

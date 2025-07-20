@@ -1,5 +1,5 @@
-use leptos::prelude::*;
-use leptos::ev::MouseEvent;
+use leptos::{ev::MouseEvent, prelude::*};
+
 use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
 
 #[allow(non_snake_case)]
@@ -39,8 +39,16 @@ where
     let adjusted_margin = (
         margin.0, // top
         margin.1, // right
-        if show_x_axis_labels { margin.2 + 20 } else { margin.2 }, // bottom - extra space for tick labels + axis label
-        if show_y_axis_labels { margin.3 + 10 } else { margin.3 }, // left - extra space for wider tick labels
+        if show_x_axis_labels {
+            margin.2 + 20
+        } else {
+            margin.2
+        }, // bottom - extra space for tick labels + axis label
+        if show_y_axis_labels {
+            margin.3 + 10
+        } else {
+            margin.3
+        }, // left - extra space for wider tick labels
     );
 
     let chart_width = width - adjusted_margin.3 - adjusted_margin.1;
@@ -189,8 +197,8 @@ where
         (0..=5)
             .map(|i| {
                 let value = (max_y / 5.0) * i as f64;
-                let y =
-                    adjusted_margin.0 as f64 + chart_height as f64 - (i as f64 / 5.0) * chart_height as f64;
+                let y = adjusted_margin.0 as f64 + chart_height as f64
+                    - (i as f64 / 5.0) * chart_height as f64;
                 view! {
                     <text
                         x=(adjusted_margin.3 - 10).to_string()
@@ -232,7 +240,9 @@ where
 
                 {show_line
                     .then(|| {
-                        view! { <path d=path_data fill="none" stroke=line_color stroke-width="2" /> }
+                        view! {
+                            <path d=path_data fill="none" stroke=line_color stroke-width="2" />
+                        }
                     })}
                 {circles}
                 {x_axis_tick_marks}
@@ -267,9 +277,7 @@ where
                 </text>
             </svg>
 
-            <Tooltip position=tooltip_position>
-                {move || tooltip_content.get()}
-            </Tooltip>
+            <Tooltip position=tooltip_position>{move || tooltip_content.get()}</Tooltip>
         </div>
     }
 }

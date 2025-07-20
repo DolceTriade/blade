@@ -207,12 +207,14 @@ pub fn TestInsights() -> impl IntoView {
                                                                     line_color="#3b82f6"
                                                                     point_color_accessor=|item: &(String, f64, usize, bool)| {
                                                                         if item.3 {
-                                                                            "#10b981".to_string() // Green for success
+                                                                            "#10b981".to_string()
                                                                         } else {
-                                                                            "#ef4444".to_string() // Red for failure
+                                                                            "#ef4444".to_string()
                                                                         }
                                                                     }
-                                                                    tooltip_content_accessor=|item: &(String, f64, usize, bool)| {
+                                                                    tooltip_content_accessor=|
+                                                                        item: &(String, f64, usize, bool)|
+                                                                    {
                                                                         let status_text = if item.3 { "PASSED" } else { "FAILED" };
                                                                         format!("{}: {:.2}s ({})", item.0, item.1, status_text)
                                                                     }

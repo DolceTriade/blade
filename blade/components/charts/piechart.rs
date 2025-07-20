@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 
-use leptos::{either::Either, prelude::*};
-use leptos::ev::MouseEvent;
+use leptos::{either::Either, ev::MouseEvent, prelude::*};
+
 use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
 
 #[allow(non_snake_case)]
@@ -164,9 +164,7 @@ where
                 <g>{label_views}</g>
             </svg>
 
-            <Tooltip position=tooltip_position>
-                {move || tooltip_content.get()}
-            </Tooltip>
+            <Tooltip position=tooltip_position>{move || tooltip_content.get()}</Tooltip>
         </div>
     }
 }

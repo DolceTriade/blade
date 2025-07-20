@@ -373,6 +373,17 @@ impl state::DB for Sqlite {
         .context(format!("failed to delete invocation since {ot:#?}"))
     }
 
+    fn update_invocation_heartbeat(&mut self, invocation_id: &str) -> anyhow::Result<()> {
+        use schema::Invocations::dsl::*;
+        let now: time::OffsetDateTime = std::time::SystemTime::now().into();
+
+        diesel::update(Invocations.find(invocation_id))
+            .set(last_heartbeat.eq(Some(now)))
+            .execute(&mut self.conn)
+            .map(|_| ())
+            .context("failed to update invocation heartbeat")
+    }
+
     fn insert_options(
         &mut self,
         inv_id: &str,
@@ -915,6 +926,7 @@ mod tests {
             start: std::time::SystemTime::now(),
             end: None,
             pattern: vec!["//...".to_string()],
+            last_heartbeat: None,
             targets: HashMap::from([
                 (
                     "//target1".to_string(),
