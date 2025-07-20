@@ -1,4 +1,6 @@
 use leptos::prelude::*;
+use leptos::ev::MouseEvent;
+use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
 
 #[allow(non_snake_case)]
 #[component]
@@ -29,7 +31,9 @@ where
     PC: Fn(&T) -> String + Copy + 'static + Send,
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
-    let (hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (_hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (tooltip_position, set_tooltip_position) = signal(None::<TooltipPosition>);
+    let (tooltip_content, set_tooltip_content) = signal(String::new());
 
     let chart_width = width - margin.3 - margin.1;
     let chart_height = height - margin.0 - margin.2;
@@ -81,10 +85,20 @@ where
         .enumerate()
         .map(|(i, (x, y))| {
             let cloned_point = data[i].clone();
+            let cloned_data_item = data[i].clone(); // Clone for tooltip access
             let on_click_handler = move |_| {
                 if let Some(callback) = on_point_click {
                     callback(cloned_point.clone());
                 }
+            };
+            let on_mouse_enter = move |event: MouseEvent| {
+                set_hovered_index.set(Some(i));
+                set_tooltip_position.set(Some(get_mouse_position_from_event(&event)));
+                set_tooltip_content.set(tooltip_content_accessor(&cloned_data_item));
+            };
+            let on_mouse_leave = move |_| {
+                set_hovered_index.set(None);
+                set_tooltip_position.set(None);
             };
             view! {
                 <circle
@@ -94,8 +108,8 @@ where
                     fill=point_color_accessor(&data[i])
                     stroke="#1a202c"
                     stroke-width="2"
-                    on:mouseenter=move |_| set_hovered_index.set(Some(i))
-                    on:mouseleave=move |_| set_hovered_index.set(None)
+                    on:mouseenter=on_mouse_enter
+                    on:mouseleave=on_mouse_leave
                     on:click=on_click_handler
                     class="hover:r-6 transition-all cursor-pointer"
                 />
@@ -169,90 +183,67 @@ where
         vec![].into_iter().collect_view()
     };
 
-    let tooltip = move || {
-        hovered_index.get().map(|i| {
-            let point = &data[i];
-            let (x, y) = points[i];
-            view! {
-                <foreignObject
-                    x=x.to_string()
-                    y=y.to_string()
-                    attr:xmlns="http://www.w3.org/1999/xhtml"
-                    style="overflow: visible;"
-                >
-                    <div style="
-                    background-color: #2d3748;
-                    border: 1px solid #4a5568;
-                    border-radius: 5px;
-                    padding: 5px 10px;
-                    color: white;
-                    font-size: 12px;
-                    text-align: center;
-                    display: inline-block;
-                    transform: translate(-50%, -100%);
-                    ">{tooltip_content_accessor(point)}</div>
-                </foreignObject>
-            }
-        })
-    };
-
     view! {
-        <svg width="100%" height="100%" viewBox=format!("0 0 {width} {height}")>
-            // X-axis line
-            <line
-                x1=margin.3.to_string()
-                y1=(margin.0 + chart_height).to_string()
-                x2=(margin.3 + chart_width).to_string()
-                y2=(margin.0 + chart_height).to_string()
-                stroke="#a0aec0"
-                stroke-width="1"
-            />
-            // Y-axis line
-            <line
-                x1=margin.3.to_string()
-                y1=margin.0.to_string()
-                x2=margin.3.to_string()
-                y2=(margin.0 + chart_height).to_string()
-                stroke="#a0aec0"
-                stroke-width="1"
-            />
+        <div style="position: relative;">
+            <svg width="100%" height="100%" viewBox=format!("0 0 {width} {height}")>
+                // X-axis line
+                <line
+                    x1=margin.3.to_string()
+                    y1=(margin.0 + chart_height).to_string()
+                    x2=(margin.3 + chart_width).to_string()
+                    y2=(margin.0 + chart_height).to_string()
+                    stroke="#a0aec0"
+                    stroke-width="1"
+                />
+                // Y-axis line
+                <line
+                    x1=margin.3.to_string()
+                    y1=margin.0.to_string()
+                    x2=margin.3.to_string()
+                    y2=(margin.0 + chart_height).to_string()
+                    stroke="#a0aec0"
+                    stroke-width="1"
+                />
 
-            {show_line
-                .then(|| {
-                    view! { <path d=path_data fill="none" stroke=line_color stroke-width="2" /> }
-                })}
-            {circles}
-            {x_axis_tick_marks}
-            {x_axis_ticks}
-            {y_axis_ticks}
+                {show_line
+                    .then(|| {
+                        view! { <path d=path_data fill="none" stroke=line_color stroke-width="2" /> }
+                    })}
+                {circles}
+                {x_axis_tick_marks}
+                {x_axis_ticks}
+                {y_axis_ticks}
 
-            // X-axis label
-            <text
-                x=(margin.3 as f64 + chart_width as f64 / 2.0).to_string()
-                y=(height as f64 - 10.0).to_string()
-                style:text-anchor="middle"
-                fill="#a0aec0"
-                style:font-size="14"
-            >
-                {x_axis_label}
-            </text>
+                // X-axis label
+                <text
+                    x=(margin.3 as f64 + chart_width as f64 / 2.0).to_string()
+                    y=(height as f64 - 10.0).to_string()
+                    style:text-anchor="middle"
+                    fill="#a0aec0"
+                    style:font-size="14"
+                >
+                    {x_axis_label}
+                </text>
 
-            // Y-axis label
-            <text
-                x="15"
-                y=(margin.0 as f64 + chart_height as f64 / 2.0).to_string()
-                transform=format!(
-                    "rotate(-90, 15, {})",
-                    margin.0 as f64 + chart_height as f64 / 2.0,
-                )
-                style:text-anchor="middle"
-                fill="#a0aec0"
-                style:font-size="14"
-            >
-                {y_axis_label}
-            </text>
+                // Y-axis label
+                <text
+                    x="15"
+                    y=(margin.0 as f64 + chart_height as f64 / 2.0).to_string()
+                    transform=format!(
+                        "rotate(-90, 15, {})",
+                        margin.0 as f64 + chart_height as f64 / 2.0,
+                    )
+                    style:text-anchor="middle"
+                    fill="#a0aec0"
+                    style:font-size="14"
+                >
+                    {y_axis_label}
+                </text>
+            </svg>
 
-            {tooltip}
-        </svg>
+            <Tooltip position=tooltip_position>
+                {move || tooltip_content.get()}
+            </Tooltip>
+        </div>
     }
 }

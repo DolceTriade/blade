@@ -1,6 +1,8 @@
 use std::f64::consts::PI;
 
 use leptos::{either::Either, prelude::*};
+use leptos::ev::MouseEvent;
+use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
 
 #[allow(non_snake_case)]
 #[component]
@@ -20,7 +22,9 @@ where
     C: Fn(&T) -> String + Copy + 'static + Send,
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
-    let (hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (_hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (tooltip_position, set_tooltip_position) = signal(None::<TooltipPosition>);
+    let (tooltip_content, set_tooltip_content) = signal(String::new());
 
     let total_value = data
         .iter()
@@ -68,14 +72,26 @@ where
     }).collect::<Vec<_>>();
 
     let mid_angles: Vec<f64> = slices.iter().map(|v| v.1).collect();
+    let data_clone = data.clone(); // Clone data for slice views
 
     let slice_views = slices.iter().enumerate().map(|(i, (path, _mid_angle, color))| {
         let transform = move || {
-            if hovered_index.get() == Some(i) {
+            if _hovered_index.get() == Some(i) {
                 "scale(1.05)".to_string()
             } else {
                 "scale(1.0)".to_string()
             }
+        };
+
+        let cloned_data_item = data_clone[i].clone(); // Clone for tooltip access
+        let on_mouse_enter = move |event: MouseEvent| {
+            set_hovered_index.set(Some(i));
+            set_tooltip_position.set(Some(get_mouse_position_from_event(&event)));
+            set_tooltip_content.set(tooltip_content_accessor(&cloned_data_item));
+        };
+        let on_mouse_leave = move |_| {
+            set_hovered_index.set(None);
+            set_tooltip_position.set(None);
         };
 
         view! {
@@ -84,8 +100,8 @@ where
                 fill=color.clone()
                 stroke="white"
                 stroke-width="1"
-                on:mouseenter=move |_| set_hovered_index.set(Some(i))
-                on:mouseleave=move |_| set_hovered_index.set(None)
+                on:mouseenter=on_mouse_enter
+                on:mouseleave=on_mouse_leave
                 style=format!(
                     "transition: transform 0.2s ease-out; cursor: pointer; transform-origin: {}px {}px;",
                     center,
@@ -133,63 +149,24 @@ where
         })
         .collect_view();
 
-    let tooltip = move || {
-        hovered_index.get().map(|i| {
-            let item = &data[i];
-            let value = value_accessor(item);
-            let percentage = (value / total_value) * 100.0;
-
-            let mid_angle = mid_angles[i];
-
-            let tooltip_radius = if inner_radius_ratio > 0.0 {
-                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
-            } else {
-                radius * 0.5
-            };
-
-            let x = center + tooltip_radius * mid_angle.cos();
-            let y = center + tooltip_radius * mid_angle.sin();
-
-            view! {
-                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
-                    <foreignObject x="-75" y="-40" width="150" height="80">
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
-                            <div style=format!(
-                                "background-color: rgba(45, 55, 72, 0.9); color: white; border-radius: {}px; padding: {}px {}px; border: 0.25px solid #4a5568; display: inline-block;",
-                                size / 40,
-                                size / 25,
-                                size / 16,
-                            )>
-                                <div style=format!(
-                                    "font-size: {}px; text-align: center;",
-                                    size / 22,
-                                )>{tooltip_content_accessor(item)}</div>
-                                <div style=format!(
-                                    "font-size: {}px; color: #a0aec0; text-align: center; margin-top: {}px;",
-                                    size / 30,
-                                    size / 50,
-                                )>{format!("{percentage:.1}%")}</div>
-                            </div>
-                        </div>
-                    </foreignObject>
-                </g>
-            }
-        })
-    };
-
     const HOVER_SCALE: f64 = 1.05;
     let scaled_size = size as f64 * HOVER_SCALE;
     let offset = (scaled_size - size as f64) / 2.0;
 
     view! {
-        <svg
-            width="100%"
-            height="100%"
-            viewBox=format!("{} {} {} {}", -offset, -offset, scaled_size, scaled_size)
-        >
-            <g>{slice_views}</g>
-            <g>{label_views}</g>
-            {tooltip}
-        </svg>
+        <div style="position: relative;">
+            <svg
+                width="100%"
+                height="100%"
+                viewBox=format!("{} {} {} {}", -offset, -offset, scaled_size, scaled_size)
+            >
+                <g>{slice_views}</g>
+                <g>{label_views}</g>
+            </svg>
+
+            <Tooltip position=tooltip_position>
+                {move || tooltip_content.get()}
+            </Tooltip>
+        </div>
     }
 }
