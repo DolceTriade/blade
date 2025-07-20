@@ -40,7 +40,7 @@ pub fn App() -> impl IntoView {
                 class:dark=move || dark_mode.read().0
             >
                 <Nav name="Blade" logo="/assets/logo.svg" />
-                <main>
+                <main class="overflow-hidden">
                     <Routes fallback=|| "Not Found.">
                         <ParentRoute path=path!("invocation/:id") view=Invocation>
                             <Route path=path!("test") view=Test />

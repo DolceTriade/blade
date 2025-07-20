@@ -41,7 +41,7 @@ impl Invocation {
     }
 
     pub fn into_state(self) -> state::InvocationResults {
-        state::InvocationResults {
+        let mut result = state::InvocationResults {
             id: self.id,
             status: state::Status::parse(&self.status),
             start: crate::time::to_systemtime(&self.start)
@@ -59,7 +59,11 @@ impl Invocation {
                 crate::time::to_systemtime(&h).unwrap_or_else(|_| std::time::SystemTime::now())
             }),
             ..Default::default()
-        }
+        };
+
+        // Calculate liveness on the server side
+        result.is_live = result.is_live_at(std::time::SystemTime::now());
+        result
     }
 }
 

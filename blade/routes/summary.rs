@@ -56,7 +56,7 @@ pub fn Summary() -> impl IntoView {
         }
         let done = matches!(
             invocation.read_untracked().status,
-            state::Status::Success | state::Status::Fail | state::Status::Skip
+            state::Status::Success | state::Status::Fail | state::Status::Skip | state::Status::Unknown
         );
         if !done {
             set_timeout(
@@ -67,12 +67,12 @@ pub fn Summary() -> impl IntoView {
     });
 
     view! {
-        <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+        <div class="flex flex-col m-1 p-1 dark:bg-gray-800 overflow-hidden">
             <Card class="flex p-3 m-2">
                 <SummaryHeader />
             </Card>
 
-            <div class="h-[73dvh] flex items-start justify-start justify-items-center">
+            <div class="h-[73dvh] flex items-start justify-start justify-items-center overflow-hidden">
                 <Card class="h-full w-1/4 max-w-1/4 md:max-w-xs p-1 m-1 flex-1 overflow-x-auto overflow-auto">
                     {TargetList()}
                 </Card>

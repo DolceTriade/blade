@@ -2,7 +2,7 @@ use leptos::prelude::*;
 use leptos_router::{components::A, hooks::use_location};
 use time::macros::format_description;
 
-use crate::{clipboard::CopyToClipboard, statusicon::StatusIcon};
+use crate::{clipboard::CopyToClipboard, statusicon::StatusIcon, tooltip::Tooltip};
 
 #[allow(non_snake_case)]
 #[component]
@@ -103,22 +103,30 @@ pub fn SummaryHeader() -> impl IntoView {
                 format!("Took {}", humantime::format_duration(duration))
             })
             .unwrap_or_default();
-        let is_live = Signal::derive(move || invocation.with(|inv| inv.is_live()));
+        let is_disconnected = Signal::derive(move || {
+            let inv = invocation.read();
+            let is_incomplete = matches!(inv.status, state::Status::InProgress | state::Status::Unknown);
+            let is_disconnected = is_incomplete && !inv.is_live;
+            is_disconnected
+        });
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x overflow-hidden">
                 <div class="grid grid-rows-1 grid-flow-col place-content-start">
-                    <div class="p-4 place-content-center self-center relative">
+                    <div class="p-4 place-content-center self-center relative overflow-hidden">
                         <StatusIcon class="h-8 w-8" status=status />
                         {move || {
-                            is_live
-                                .get()
-                                .then(|| {
-                                    view! {
-                                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse">
-                                            <span class="sr-only">Live stream</span>
-                                        </div>
-                                    }
-                                })
+                            is_disconnected.get().then(|| {
+                                view! {
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                                        <Tooltip tooltip=|| "Disconnected">
+                                            <img
+                                                class="h-6 w-6 dark:invert cursor-pointer"
+                                                src="/assets/disconnect.svg"
+                                            />
+                                        </Tooltip>
+                                    </div>
+                                }
+                            })
                         }}
                     </div>
                     <div class="grid grid-rows-3 items-start self-center place-content-center">

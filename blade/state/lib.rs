@@ -75,6 +75,7 @@ pub struct InvocationResults {
     pub command: String,
     pub pattern: Vec<String>,
     pub last_heartbeat: Option<std::time::SystemTime>,
+    pub is_live: bool,
 }
 
 impl Default for InvocationResults {
@@ -89,6 +90,7 @@ impl Default for InvocationResults {
             start: std::time::UNIX_EPOCH,
             end: None,
             last_heartbeat: None,
+            is_live: false,
         }
     }
 }
@@ -96,15 +98,22 @@ impl Default for InvocationResults {
 impl InvocationResults {
     /// Determines if this invocation has an active stream based on heartbeat
     /// An invocation is considered "live" if:
-    /// 1. It's in InProgress status AND
+    /// 1. It's in InProgress or Unknown status AND
     /// 2. It has a recent heartbeat (within last 2 minutes) OR no end time set
+    #[cfg(feature = "ssr")]
     pub fn is_live(&self) -> bool {
+        self.is_live_at(std::time::SystemTime::now())
+    }
+
+    /// Determines if this invocation has an active stream based on heartbeat at a specific time
+    /// This method is WASM-safe as it doesn't call SystemTime::now() directly
+    pub fn is_live_at(&self, current_time: std::time::SystemTime) -> bool {
         match self.status {
-            Status::InProgress => {
+            Status::InProgress | Status::Unknown => {
                 if let Some(heartbeat) = self.last_heartbeat {
                     // Stream is live if heartbeat is within the last 2 minutes
                     let heartbeat_threshold = std::time::Duration::from_secs(2 * 60);
-                    std::time::SystemTime::now()
+                    current_time
                         .duration_since(heartbeat)
                         .map(|duration| duration < heartbeat_threshold)
                         .unwrap_or(false)
