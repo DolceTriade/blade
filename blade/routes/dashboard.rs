@@ -11,7 +11,10 @@ use components::{
     },
 };
 use leptos::{either::Either, prelude::*};
-use leptos_router::{hooks::{use_query, use_navigate}, params::Params};
+use leptos_router::{
+    hooks::{use_navigate, use_query},
+    params::Params,
+};
 use state::{TestFilter, TestHistory};
 
 #[server]
