@@ -11,10 +11,7 @@ use components::{
     },
 };
 use leptos::{either::Either, prelude::*};
-use leptos_router::{
-    hooks::{use_navigate, use_query},
-    params::Params,
-};
+use leptos_router::{hooks::use_query, params::Params};
 use state::{TestFilter, TestHistory};
 
 #[server]
@@ -58,17 +55,6 @@ pub fn Dashboard() -> impl IntoView {
 
     let (test_name, set_test_name) = signal(initial_test_name);
     let (filters, set_filters) = signal(Vec::<TestFilter>::new());
-
-    // Update URL when test_name changes
-    let navigate = use_navigate();
-    Effect::new(move |_| {
-        let current_test_name = test_name.get();
-        if !current_test_name.is_empty() {
-            let encoded_name = url_escape::encode_query(&current_test_name);
-            let url = format!("/dashboard?test_name={}", encoded_name);
-            navigate(&url, Default::default());
-        }
-    });
 
     let history_resource = Resource::new(
         move || (test_name.get(), filters.get()),

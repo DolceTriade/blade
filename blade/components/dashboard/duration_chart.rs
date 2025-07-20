@@ -48,6 +48,7 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
             x_axis_label="Time"
             y_axis_label="Duration (s)"
             x_axis_label_rotation=10.0
+            show_line=false
         />
     }
 }
