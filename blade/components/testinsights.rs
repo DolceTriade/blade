@@ -173,12 +173,9 @@ pub fn TestInsights() -> impl IntoView {
                                             // Test Performance Scatter Plot (full width)
                                             {(insights.test_performance.len() > 1)
                                                 .then(|| {
-                                                    let step = (insights.test_performance.len() / 20).max(1);
-                                                    let sampled_data: Vec<(String, f64, usize, bool)> = insights
+                                                    let all_data: Vec<(String, f64, usize, bool)> = insights
                                                         .test_performance
                                                         .iter()
-                                                        .step_by(step)
-                                                        .take(20)
                                                         .enumerate()
                                                         .map(|(index, (name, duration, is_success))| {
                                                             let display_name = if name.len() > 30 {
@@ -189,7 +186,7 @@ pub fn TestInsights() -> impl IntoView {
                                                             (display_name, *duration, index, *is_success)
                                                         })
                                                         .collect();
-                                                    // Sample every nth test to avoid overcrowding
+                                                    // Show all tests in the scatter plot
                                                     // Truncate long test names for display
                                                     // Include index for proper X-axis distribution
                                                     // Include success status for color coding
@@ -201,7 +198,7 @@ pub fn TestInsights() -> impl IntoView {
                                                             </h3>
                                                             <div class="overflow-x-auto">
                                                                 <LineChart
-                                                                    data=sampled_data
+                                                                    data=all_data
                                                                     width=800
                                                                     height=300
                                                                     // Use test index for proper X-axis distribution
