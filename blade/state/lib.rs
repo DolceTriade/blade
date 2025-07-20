@@ -101,12 +101,11 @@ impl InvocationResults {
     /// 1. It's in InProgress or Unknown status AND
     /// 2. It has a recent heartbeat (within last 2 minutes) OR no end time set
     #[cfg(feature = "ssr")]
-    pub fn is_live(&self) -> bool {
-        self.is_live_at(std::time::SystemTime::now())
-    }
+    pub fn is_live(&self) -> bool { self.is_live_at(std::time::SystemTime::now()) }
 
-    /// Determines if this invocation has an active stream based on heartbeat at a specific time
-    /// This method is WASM-safe as it doesn't call SystemTime::now() directly
+    /// Determines if this invocation has an active stream based on heartbeat at
+    /// a specific time This method is WASM-safe as it doesn't call
+    /// SystemTime::now() directly
     pub fn is_live_at(&self, current_time: std::time::SystemTime) -> bool {
         match self.status {
             Status::InProgress | Status::Unknown => {

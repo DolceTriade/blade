@@ -56,7 +56,10 @@ pub fn Summary() -> impl IntoView {
         }
         let done = matches!(
             invocation.read_untracked().status,
-            state::Status::Success | state::Status::Fail | state::Status::Skip | state::Status::Unknown
+            state::Status::Success
+                | state::Status::Fail
+                | state::Status::Skip
+                | state::Status::Unknown
         );
         if !done {
             set_timeout(

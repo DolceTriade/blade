@@ -105,7 +105,10 @@ pub fn SummaryHeader() -> impl IntoView {
             .unwrap_or_default();
         let is_disconnected = Signal::derive(move || {
             let inv = invocation.read();
-            let is_incomplete = matches!(inv.status, state::Status::InProgress | state::Status::Unknown);
+            let is_incomplete = matches!(
+                inv.status,
+                state::Status::InProgress | state::Status::Unknown
+            );
             let is_disconnected = is_incomplete && !inv.is_live;
             is_disconnected
         });
@@ -115,18 +118,20 @@ pub fn SummaryHeader() -> impl IntoView {
                     <div class="p-4 place-content-center self-center relative overflow-hidden">
                         <StatusIcon class="h-8 w-8" status=status />
                         {move || {
-                            is_disconnected.get().then(|| {
-                                view! {
-                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                                        <Tooltip tooltip=|| "Disconnected">
-                                            <img
-                                                class="h-6 w-6 dark:invert cursor-pointer"
-                                                src="/assets/disconnect.svg"
-                                            />
-                                        </Tooltip>
-                                    </div>
-                                }
-                            })
+                            is_disconnected
+                                .get()
+                                .then(|| {
+                                    view! {
+                                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                                            <Tooltip tooltip=|| "Disconnected">
+                                                <img
+                                                    class="h-6 w-6 dark:invert cursor-pointer"
+                                                    src="/assets/disconnect.svg"
+                                                />
+                                            </Tooltip>
+                                        </div>
+                                    }
+                                })
                         }}
                     </div>
                     <div class="grid grid-rows-3 items-start self-center place-content-center">
