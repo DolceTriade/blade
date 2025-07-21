@@ -1,5 +1,5 @@
 {
-  "checksum": "06bdd355bca3404b7ebdcc9df50f4ebf757064cd8eaf7cf2e5000e133b23ea61",
+  "checksum": "1822f0e738a00fdea07a62ce1bf5d4a2cf0d3b84e0bf1fc7ed70a95f8e2de64d",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -1282,7 +1282,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -2310,6 +2310,10 @@
             {
               "id": "serde 1.0.193",
               "target": "serde"
+            },
+            {
+              "id": "serde_json 1.0.109",
+              "target": "serde_json"
             },
             {
               "id": "time 0.3.37",
@@ -3775,7 +3779,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -3887,7 +3891,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -3965,7 +3969,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -5195,7 +5199,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -5845,7 +5849,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -9561,14 +9565,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "serde_json 1.0.105": {
+    "serde_json 1.0.109": {
       "name": "serde_json",
-      "version": "1.0.105",
+      "version": "1.0.109",
       "package_url": "https://github.com/serde-rs/json",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/serde_json/1.0.105/download",
-          "sha256": "693151e1ac27563d6dbcec9dee9fbd5da8539b20fa14ad3752b2e6d363ace360"
+          "url": "https://static.crates.io/crates/serde_json/1.0.109/download",
+          "sha256": "cb0652c533506ad7a2e353cce269330d6afd8bdfb6d75e0ace5b35aacbd7b9e9"
         }
       },
       "targets": [
@@ -9624,14 +9628,14 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "1.0.105"
+        "version": "1.0.109"
       },
       "build_script_attrs": {
         "compile_data_glob": [
@@ -9870,7 +9874,7 @@
               "target": "serde"
             },
             {
-              "id": "serde_json 1.0.105",
+              "id": "serde_json 1.0.109",
               "target": "serde_json"
             },
             {
@@ -15349,6 +15353,7 @@
     "leptos_router 0.8.2",
     "log 0.4.20",
     "serde 1.0.193",
+    "serde_json 1.0.109",
     "time 0.3.37",
     "tokio 1.32.0",
     "tokio-stream 0.1.14",

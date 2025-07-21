@@ -350,6 +350,9 @@ def rust_dependencies():
                 version = "1.0.186",
                 features = ["derive"],
             ),
+            "serde_json": crate.spec(
+                version = "1.0.108",
+            ),
             "log": crate.spec(
                 version = "0.4",
             ),

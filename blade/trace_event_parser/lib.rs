@@ -1,15 +1,49 @@
 use serde::Deserialize;
+use std::collections::HashMap;
+
+/**
+ * Represents a single trace event in the Trace Event Format.
+ *
+ * Fields:
+ * - `name`: The name of the event, as displayed in Trace Viewer.
+ * - `cat`: Optional. The event categories, a comma-separated list of categories for the event.
+ * - `ph`: The event type (phase). A single character indicating the type of event (e.g., 'B' for begin, 'E' for end, 'X' for complete, etc.).
+ * - `ts`: The tracing clock timestamp of the event, provided at microsecond granularity.
+ * - `pid`: Optional. The process ID for the process that output this event.
+ * - `tid`: Optional. The thread ID for the thread that output this event.
+ * - `args`: Optional. Additional arguments provided for the event. These can include any custom data relevant to the event.
+ */
+#[derive(Debug, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum Phase {
+    #[serde(rename = "X")]
+    Complete,
+    #[serde(rename = "C")]
+    Counter,
+    #[serde(rename = "i")]
+    Instant,
+    #[serde(rename = "M")]
+    Metadata,
+    #[serde(other)]
+    Unsupported,
+}
 
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct TraceEvent {
     pub name: String,
     pub cat: Option<String>,
-    pub ph: String,
+    pub ph: Phase,
     #[serde(default)]
     pub ts: f64,
     pub pid: Option<u32>,
     pub tid: Option<u32>,
     pub args: Option<serde_json::Value>,
+}
+
+impl TraceEvent {
+    pub fn is_supported_phase(&self) -> bool {
+        !matches!(self.ph, Phase::Unsupported)
+    }
 }
 
 #[derive(Debug, Deserialize, PartialEq)]
@@ -21,6 +55,98 @@ pub struct TraceEventFile {
 impl TraceEventFile {
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct BazelTrace {
+    pub traces: Vec<Trace>,
+    pub counters: Vec<Counter>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Trace {
+    pub name: String,
+    pub sort_index: Option<i32>,
+    pub pid: u32,
+    pub tid: u32,
+    pub events: Vec<Event>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Event {
+    pub category: String,
+    pub name: String,
+    pub start: i64,
+    pub duration: Option<i64>,
+    pub args: Option<serde_json::Value>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Counter {
+    pub name: String,
+    pub tid: u32,
+    pub color: Option<String>,
+    pub time_series: Vec<TimeSeriesDataPoint>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct TimeSeriesDataPoint {
+    pub timestamp: i64, // Changed to i64
+    pub value: f64, // Changed to f64
+}
+
+impl BazelTrace {
+    pub fn from_trace_events(events: Vec<TraceEvent>) -> Self {
+        let mut traces_map: HashMap<(u32, u32), Trace> = HashMap::new();
+        let mut counters_map: HashMap<(String, u32, u32), Counter> = HashMap::new();
+
+        for event in events {
+            match event.ph {
+                Phase::Complete | Phase::Instant => {
+                    let trace = traces_map.entry((event.pid.unwrap_or_default(), event.tid.unwrap_or_default())).or_insert_with(|| Trace {
+                        name: String::new(),
+                        sort_index: None,
+                        pid: event.pid.unwrap_or_default(),
+                        tid: event.tid.unwrap_or_default(),
+                        events: Vec::new(),
+                    });
+
+                    trace.events.push(Event {
+                        category: event.cat.unwrap_or_default(),
+                        name: event.name,
+                        start: event.ts as i64, // Cast to i64
+                        duration: None, // Placeholder for duration extraction
+                        args: event.args,
+                    });
+                }
+                Phase::Unsupported | Phase::Metadata => {}
+                Phase::Counter => {
+                    let key = (event.name.clone(), event.pid.unwrap_or_default(), event.tid.unwrap_or_default());
+                    let counter = counters_map.entry(key).or_insert_with(|| Counter {
+                        name: event.name.clone(),
+                        tid: event.tid.unwrap_or_default(),
+                        color: None, // Placeholder for color extraction
+                        time_series: Vec::new(),
+                    });
+
+                    counter.time_series.push(TimeSeriesDataPoint {
+                        timestamp: event.ts as i64, // Cast to i64
+                        value: event.args.as_ref().and_then(|args| args.get("value")).and_then(|v| v.as_f64()).unwrap_or_default(), // Extract f64 value from "value" key
+                    });
+                }
+            }
+        }
+
+        let mut traces: Vec<Trace> = traces_map.into_values().collect();
+        traces.sort_by_key(|trace| trace.sort_index);
+        for trace in &mut traces {
+            trace.events.sort_by(|a, b| a.start.cmp(&b.start));
+        }
+
+        let counters: Vec<Counter> = counters_map.into_values().collect();
+
+        BazelTrace { traces, counters }
     }
 }
 
@@ -41,8 +167,8 @@ mod tests {
 
         assert_eq!(parsed.trace_events.len(), 2);
         assert_eq!(parsed.trace_events[0].name, "A");
-        assert_eq!(parsed.trace_events[0].ph, "B");
-        assert_eq!(parsed.trace_events[1].ph, "E");
+        assert_eq!(parsed.trace_events[0].ph, Phase::Unsupported);
+        assert_eq!(parsed.trace_events[1].ph, Phase::Unsupported);
     }
 
     #[test]
@@ -63,5 +189,65 @@ mod tests {
 
         // Example validation: Check the first trace event's name
         assert_eq!(parsed.trace_events[0].name, "thread_name");
+        parsed.trace_events.iter().for_each(|event| {
+            assert!(event.is_supported_phase(), "Event phase should be supported");
+        });
+
+        let bazel_trace = BazelTrace::from_trace_events(parsed.trace_events);
+
+        // Ensure no counters have only one item
+        for counter in &bazel_trace.counters {
+            assert!(counter.time_series.len() > 1, "Counter {} should have more than one data point", counter.name);
+        }
+    }
+
+    #[test]
+    fn test_bazel_trace_from_trace_events() {
+        let json = include_str!("./testdata/command.profile");
+        let trace_event_file = TraceEventFile::from_json(json).expect("Failed to parse command.profile");
+
+        let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
+
+        // Validate traces
+        assert!(!bazel_trace.traces.is_empty(), "Traces should not be empty");
+        for trace in &bazel_trace.traces {
+            assert!(!trace.events.is_empty(), "Each trace should have events");
+            assert!(trace.events.windows(2).all(|w| w[0].start <= w[1].start), "Events should be sorted by start time");
+        }
+
+        // Validate counters
+        assert!(!bazel_trace.counters.is_empty(), "Counters should not be empty");
+        for counter in &bazel_trace.counters {
+            assert!(!counter.time_series.is_empty(), "Each counter should have time series data");
+        }
+    }
+
+    #[test]
+    fn test_bazel_trace_counters_merge() {
+        let json = r#"{
+            "traceEvents": [
+                {"name": "counter1", "ph": "C", "ts": 1.0, "pid": 1, "tid": 1, "args": {"value": 10}},
+                {"name": "counter1", "ph": "C", "ts": 2.0, "pid": 1, "tid": 1, "args": {"value": 20}},
+                {"name": "counter2", "ph": "C", "ts": 3.0, "pid": 2, "tid": 2, "args": {"value": 30}}
+            ]
+        }"#;
+
+        let trace_event_file = TraceEventFile::from_json(json).unwrap();
+        let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
+
+        // Validate counters
+        assert_eq!(bazel_trace.counters.len(), 2, "There should be two unique counters");
+
+        let counter1 = bazel_trace.counters.iter().find(|c| c.name == "counter1" && c.tid == 1).expect("Counter1 should exist");
+        assert_eq!(counter1.time_series.len(), 2, "Counter1 should have two data points");
+        assert_eq!(counter1.time_series[0].timestamp, 1);
+        assert_eq!(counter1.time_series[0].value, 10.0);
+        assert_eq!(counter1.time_series[1].timestamp, 2);
+        assert_eq!(counter1.time_series[1].value, 20.0);
+
+        let counter2 = bazel_trace.counters.iter().find(|c| c.name == "counter2" && c.tid == 2).expect("Counter2 should exist");
+        assert_eq!(counter2.time_series.len(), 1, "Counter2 should have one data point");
+        assert_eq!(counter2.time_series[0].timestamp, 3);
+        assert_eq!(counter2.time_series[0].value, 30.0);
     }
 }
