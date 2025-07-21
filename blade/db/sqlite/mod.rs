@@ -135,6 +135,7 @@ impl state::DB for Sqlite {
                         .split(',')
                         .map(|s| s.to_string())
                         .collect::<Vec<_>>(),
+                    is_live: false,
                     ..Default::default()
                 })
             })?
@@ -775,6 +776,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
+            is_live: false,
             ..Default::default()
         };
         db.upsert_shallow_invocation(&inv).unwrap();
@@ -811,6 +813,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
+            is_live: false,
             ..Default::default()
         };
         let mut target = state::Target {
@@ -871,6 +874,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
+            is_live: false,
             ..Default::default()
         };
         let mut test = state::Test {
@@ -931,6 +935,7 @@ mod tests {
             end: None,
             pattern: vec!["//...".to_string()],
             last_heartbeat: None,
+            is_live: false,
             targets: HashMap::from([
                 (
                     "//target1".to_string(),
@@ -1102,6 +1107,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
+            is_live: false,
             ..Default::default()
         };
         db.upsert_shallow_invocation(&inv).unwrap();
@@ -1135,6 +1141,7 @@ mod tests {
             command: "test".to_string(),
             status: state::Status::Fail,
             start: std::time::SystemTime::now(),
+            is_live: false,
             ..Default::default()
         };
         db.upsert_shallow_invocation(&inv).unwrap();
@@ -1164,6 +1171,7 @@ mod tests {
         let inv1 = state::InvocationResults {
             id: "inv1".to_string(),
             start: now,
+            is_live: false,
             ..Default::default()
         };
         let test1 = state::Test {
@@ -1191,6 +1199,7 @@ mod tests {
         let inv2 = state::InvocationResults {
             id: "inv2".to_string(),
             start: inv2_time,
+            is_live: false,
             ..Default::default()
         };
         let test2 = state::Test {
@@ -1217,6 +1226,7 @@ mod tests {
         let inv3 = state::InvocationResults {
             id: "inv3".to_string(),
             start: inv3_time,
+            is_live: false,
             ..Default::default()
         };
         let test3 = state::Test {

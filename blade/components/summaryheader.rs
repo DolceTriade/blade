@@ -109,8 +109,7 @@ pub fn SummaryHeader() -> impl IntoView {
                 inv.status,
                 state::Status::InProgress | state::Status::Unknown
             );
-            let is_disconnected = is_incomplete && !inv.is_live;
-            is_disconnected
+            is_incomplete && !inv.is_live
         });
         view! {
             <div class="w-screen h-fit grid grid-rows-1 grid-flow-col content-start divide-x overflow-hidden">
