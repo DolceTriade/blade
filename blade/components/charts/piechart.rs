@@ -21,6 +21,7 @@ where
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
     let (hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (tooltip_position, set_tooltip_position) = signal(None::<(f64, f64)>);
 
     let total_value = data
         .iter()
@@ -78,14 +79,23 @@ where
             }
         };
 
+        let on_mouse_enter=move |ev| {
+            set_hovered_index.set(Some(i));
+            set_tooltip_position.set(Some(super::get_mouse_position_from_event(&ev)));
+        };
+        let on_mouse_leave = move |_| {
+            set_hovered_index.set(None);
+            set_tooltip_position.set(None);
+        };
+
         view! {
             <path
                 d=path.clone()
                 fill=color.clone()
                 stroke="white"
                 stroke-width="1"
-                on:mouseenter=move |_| set_hovered_index.set(Some(i))
-                on:mouseleave=move |_| set_hovered_index.set(None)
+                on:mouseenter=on_mouse_enter
+                on:mouseleave=on_mouse_leave
                 style=format!(
                     "transition: transform 0.2s ease-out; cursor: pointer; transform-origin: {}px {}px;",
                     center,
@@ -134,47 +144,31 @@ where
         .collect_view();
 
     let tooltip = move || {
-        hovered_index.get().map(|i| {
-            let item = &data[i];
-            let value = value_accessor(item);
-            let percentage = (value / total_value) * 100.0;
-
-            let mid_angle = mid_angles[i];
-
-            let tooltip_radius = if inner_radius_ratio > 0.0 {
-                radius * (inner_radius_ratio + (1.0 - inner_radius_ratio) / 2.0)
-            } else {
-                radius * 0.5
-            };
-
-            let x = center + tooltip_radius * mid_angle.cos();
-            let y = center + tooltip_radius * mid_angle.sin();
-
-            view! {
-                <g class="pointer-events-none" transform=format!("translate({}, {})", x, y)>
-                    <foreignObject x="-75" y="-40" width="150" height="80">
-                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
-                            <div style=format!(
-                                "background-color: rgba(45, 55, 72, 0.9); color: white; border-radius: {}px; padding: {}px {}px; border: 0.25px solid #4a5568; display: inline-block;",
-                                size / 40,
-                                size / 25,
-                                size / 16,
-                            )>
-                                <div style=format!(
-                                    "font-size: {}px; text-align: center;",
-                                    size / 22,
-                                )>{tooltip_content_accessor(item)}</div>
-                                <div style=format!(
-                                    "font-size: {}px; color: #a0aec0; text-align: center; margin-top: {}px;",
-                                    size / 30,
-                                    size / 50,
-                                )>{format!("{percentage:.1}%")}</div>
-                            </div>
-                        </div>
-                    </foreignObject>
-                </g>
-            }
-        })
+        hovered_index
+            .get()
+            .zip(tooltip_position.get())
+            .map(|(i, (x, y))| {
+                let point = &data[i];
+                view! {
+                    <div
+                        style="
+                        position: absolute;
+                        background-color: #2d3748;
+                        border: 1px solid #4a5568;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                        color: white;
+                        font-size: 12px;
+                        text-align: center;
+                        display: inline-block;
+                        "
+                        style:top=format!("{y}px")
+                        style:left=format!("{x}px")
+                    >
+                        {tooltip_content_accessor(point)}
+                    </div>
+                }
+            })
     };
 
     const HOVER_SCALE: f64 = 1.05;
@@ -189,7 +183,7 @@ where
         >
             <g>{slice_views}</g>
             <g>{label_views}</g>
-            {tooltip}
         </svg>
+        {tooltip}
     }
 }

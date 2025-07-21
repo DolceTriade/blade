@@ -57,6 +57,20 @@ impl BESSession {
             create_invocation(&*self.global.db_manager, &self.invocation_id)
                 .map_err(|e| tonic::Status::internal(format!("{e:#?}")))?;
         }
+
+        // Update heartbeat for liveness tracking
+        if let Ok(mut db) = self.global.db_manager.get() {
+            let _ = db
+                .update_invocation_heartbeat(&self.invocation_id)
+                .inspect_err(|e| {
+                    tracing::warn!(
+                        "Failed to update heartbeat for {}: {:#?}",
+                        self.invocation_id,
+                        e
+                    );
+                });
+        }
+
         let Some(obe) = msg.ordered_build_event else {
             return Err(tonic::Status::invalid_argument("Empty OBE"));
         };

@@ -18,7 +18,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
         if force_show.get() {
             should_truncate = false;
         }
-        set_truncated(should_truncate);
+        set_truncated.set(should_truncate);
         lines
             .clone()
             .into_iter()
@@ -50,11 +50,11 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
     };
 
     let show_all = move |_| {
-        set_force_show(true);
+        set_force_show.set(true);
     };
 
     view! {
-        <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto overflow-x-auto">
+        <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto h-full">
             <Show when=move || { truncated.get() } fallback=|| view! { <></> }>
                 <div class="bg-yellow-600 text-white p-2 mb-2 rounded">
                     "Output truncated. Showing first " {TRUNCATE_THRESHOLD} " and last "

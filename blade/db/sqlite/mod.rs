@@ -168,12 +168,16 @@ impl state::DB for Sqlite {
             .select(models::TestRun::as_select())
             .load(&mut self.conn)?;
 
-        let mut test_artifacts: std::collections::VecDeque<_> = schema::TestArtifacts::table
+        let mut test_artifacts: HashMap<String, Vec<models::TestArtifact>> = HashMap::new();
+        schema::TestArtifacts::table
             .select(models::TestArtifact::as_select())
             .filter(schema::TestArtifacts::dsl::invocation_id.eq(id))
             .load(&mut self.conn)?
-            .grouped_by(&test_runs)
-            .into();
+            .into_iter()
+            .for_each(|a: models::TestArtifact| {
+                let v = test_artifacts.entry(a.test_run_id.clone()).or_default();
+                v.push(a);
+            });
         let test_runs = test_runs.grouped_by(&tests);
         tests.into_iter().zip(test_runs).for_each(|(test, trs)| {
             ret.tests.insert(
@@ -195,9 +199,9 @@ impl state::DB for Sqlite {
                             details: tr.details,
                             duration: std::time::Duration::from_secs_f64(tr.duration_s),
                             files: test_artifacts
-                                .pop_front()
+                                .get_mut(&tr.id)
                                 .map(|v| {
-                                    v.into_iter()
+                                    v.drain(..)
                                         .map(|ta| {
                                             (
                                                 ta.name,
@@ -371,6 +375,17 @@ impl state::DB for Sqlite {
         )
         .execute(&mut self.conn)
         .context(format!("failed to delete invocation since {ot:#?}"))
+    }
+
+    fn update_invocation_heartbeat(&mut self, invocation_id: &str) -> anyhow::Result<()> {
+        use schema::Invocations::dsl::*;
+        let now: time::OffsetDateTime = std::time::SystemTime::now().into();
+
+        diesel::update(Invocations.find(invocation_id))
+            .set(last_heartbeat.eq(Some(now)))
+            .execute(&mut self.conn)
+            .map(|_| ())
+            .context("failed to update invocation heartbeat")
     }
 
     fn insert_options(
@@ -915,6 +930,7 @@ mod tests {
             start: std::time::SystemTime::now(),
             end: None,
             pattern: vec!["//...".to_string()],
+            last_heartbeat: None,
             targets: HashMap::from([
                 (
                     "//target1".to_string(),

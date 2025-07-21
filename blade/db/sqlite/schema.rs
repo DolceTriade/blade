@@ -8,6 +8,7 @@ diesel::table! {
         end -> Nullable<TimestamptzSqlite>,
         command -> Text,
         pattern -> Nullable<Text>,
+        last_heartbeat -> Nullable<TimestamptzSqlite>,
     }
 }
 

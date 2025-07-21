@@ -60,7 +60,10 @@ pub fn Invocation() -> impl IntoView {
                 }
                 let done = matches!(
                     inv.status,
-                    state::Status::Success | state::Status::Fail | state::Status::Skip
+                    state::Status::Success
+                        | state::Status::Fail
+                        | state::Status::Skip
+                        | state::Status::Unknown
                 );
                 invocation.set(inv.clone());
                 if done {

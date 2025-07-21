@@ -4,11 +4,89 @@ use state::{Status, TestHistory};
 
 use crate::summaryheader::format_time;
 
+#[derive(Debug, Clone)]
+struct RuntimeStats {
+    min: f64,
+    max: f64,
+    avg: f64,
+    std_dev: f64,
+}
+
+fn calculate_runtime_stats(history: &TestHistory) -> Option<RuntimeStats> {
+    if history.history.is_empty() {
+        return None;
+    }
+
+    let durations: Vec<f64> = history
+        .history
+        .iter()
+        .map(|point| point.test.duration.as_secs_f64())
+        .collect();
+
+    let count = durations.len();
+    let min = durations.iter().fold(f64::INFINITY, |a, &b| a.min(b));
+    let max = durations.iter().fold(f64::NEG_INFINITY, |a, &b| a.max(b));
+    let sum: f64 = durations.iter().sum();
+    let avg = sum / count as f64;
+
+    // Calculate standard deviation
+    let variance: f64 = durations.iter().map(|&x| (x - avg).powi(2)).sum::<f64>() / count as f64;
+    let std_dev = variance.sqrt();
+
+    Some(RuntimeStats {
+        min,
+        max,
+        avg,
+        std_dev,
+    })
+}
+
+#[allow(non_snake_case)]
+#[component]
+fn RuntimeStatsCard(stats: RuntimeStats) -> impl IntoView {
+    view! {
+        <div class="mb-6 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">
+                "Runtime Statistics"
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        {format!("{:.3}s", stats.min)}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">"Min Runtime"</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-red-600 dark:text-red-400">
+                        {format!("{:.3}s", stats.max)}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">"Max Runtime"</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {format!("{:.3}s", stats.avg)}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">"Avg Runtime"</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {format!("{:.3}s", stats.std_dev)}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">"Std Deviation"</div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
+    let stats = calculate_runtime_stats(&history);
+
     view! {
         <div class="mt-8">
+            {stats.map(|s| view! { <RuntimeStatsCard stats=s /> })}
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-bold">"Raw Test Results"</h2>
                 <div class="text-sm text-gray-600 dark:text-gray-400">
@@ -30,7 +108,6 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                     }}
                 </div>
             </div>
-
             {if history.was_truncated {
                 Some(
                     view! {
@@ -43,8 +120,7 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                 )
             } else {
                 None
-            }}
-            <div class="overflow-x-auto">
+            }} <div class="overflow-x-auto">
                 <table class="min-w-full bg-white dark:bg-gray-700 rounded-lg shadow-md">
                     <thead>
                         <tr class="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 uppercase text-sm leading-normal">

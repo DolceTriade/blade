@@ -9,7 +9,7 @@ struct TestInsightsData {
     pass_fail_distribution: Vec<(String, f64)>,
     duration_distribution: Vec<(String, f64)>, // (test_name, percentage)
     duration_mapping: HashMap<String, f64>,    // (test_name, actual_duration) for tooltips
-    test_performance: Vec<(String, f64)>,      // (test_name, duration)
+    test_performance: Vec<(String, f64, bool)>, // (test_name, duration, is_success)
 }
 
 fn analyze_test_cases(cases: &[junit_parser::TestCase]) -> TestInsightsData {
@@ -17,7 +17,7 @@ fn analyze_test_cases(cases: &[junit_parser::TestCase]) -> TestInsightsData {
     let mut fail_count = 0;
     let mut duration_buckets = HashMap::new();
     let mut duration_mapping = HashMap::new();
-    let mut test_performance: Vec<(String, f64)> = Vec::new();
+    let mut test_performance: Vec<(String, f64, bool)> = Vec::new();
 
     // Handle empty case list
     if cases.is_empty() {
@@ -56,8 +56,9 @@ fn analyze_test_cases(cases: &[junit_parser::TestCase]) -> TestInsightsData {
         duration_buckets.insert(case.name.clone(), final_proportion);
         duration_mapping.insert(case.name.clone(), case.time); // Keep original time for display
 
-        // Test performance (name -> duration)
-        test_performance.push((case.name.clone(), case.time));
+        // Test performance (name -> duration -> success status)
+        let is_success = matches!(case.status, junit_parser::TestStatus::Success);
+        test_performance.push((case.name.clone(), case.time, is_success));
     }
 
     // Sort test performance by duration for better visualization
@@ -172,23 +173,23 @@ pub fn TestInsights() -> impl IntoView {
                                             // Test Performance Scatter Plot (full width)
                                             {(insights.test_performance.len() > 1)
                                                 .then(|| {
-                                                    let step = (insights.test_performance.len() / 20).max(1);
-                                                    let sampled_data: Vec<(String, f64)> = insights
+                                                    let all_data: Vec<(String, f64, usize, bool)> = insights
                                                         .test_performance
                                                         .iter()
-                                                        .step_by(step)
-                                                        .take(20)
-                                                        .map(|(name, duration)| {
+                                                        .enumerate()
+                                                        .map(|(index, (name, duration, is_success))| {
                                                             let display_name = if name.len() > 30 {
                                                                 format!("{}...", &name[..27])
                                                             } else {
                                                                 name.clone()
                                                             };
-                                                            (display_name, *duration)
+                                                            (display_name, *duration, index, *is_success)
                                                         })
                                                         .collect();
-                                                    // Sample every nth test to avoid overcrowding
+                                                    // Show all tests in the scatter plot
                                                     // Truncate long test names for display
+                                                    // Include index for proper X-axis distribution
+                                                    // Include success status for color coding
 
                                                     view! {
                                                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -197,20 +198,27 @@ pub fn TestInsights() -> impl IntoView {
                                                             </h3>
                                                             <div class="overflow-x-auto">
                                                                 <LineChart
-                                                                    data=sampled_data
+                                                                    data=all_data
                                                                     width=800
                                                                     height=300
-                                                                    // Use string length as x position for now
-                                                                    x_accessor=|item: &(String, f64)| item.0.len() as f64
-                                                                    y_accessor=|item: &(String, f64)| item.1
+                                                                    // Use test index for proper X-axis distribution
+                                                                    x_accessor=|item: &(String, f64, usize, bool)| item.2 as f64
+                                                                    y_accessor=|item: &(String, f64, usize, bool)| item.1
                                                                     line_color="#3b82f6"
-                                                                    point_color_accessor=|_: &(String, f64)| {
-                                                                        "#3b82f6".to_string()
+                                                                    point_color_accessor=|item: &(String, f64, usize, bool)| {
+                                                                        if item.3 {
+                                                                            "#10b981".to_string()
+                                                                        } else {
+                                                                            "#ef4444".to_string()
+                                                                        }
                                                                     }
-                                                                    tooltip_content_accessor=|item: &(String, f64)| {
-                                                                        format!("{}: {:.2}s", item.0, item.1)
+                                                                    tooltip_content_accessor=|
+                                                                        item: &(String, f64, usize, bool)|
+                                                                    {
+                                                                        let status_text = if item.3 { "PASSED" } else { "FAILED" };
+                                                                        format!("{}: {:.2}s ({})", item.0, item.1, status_text)
                                                                     }
-                                                                    x_axis_label="Test Name"
+                                                                    x_axis_label="Test Index"
                                                                     y_axis_label="Duration (s)"
                                                                     show_y_axis_labels=true
                                                                     show_x_axis_labels=false
