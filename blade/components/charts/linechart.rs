@@ -1,6 +1,4 @@
-use leptos::{ev::MouseEvent, prelude::*};
-
-use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
+use leptos::prelude::*;
 
 #[allow(non_snake_case)]
 #[component]
@@ -31,9 +29,8 @@ where
     PC: Fn(&T) -> String + Copy + 'static + Send,
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
-    let (_hovered_index, set_hovered_index) = signal(None::<usize>);
-    let (tooltip_position, set_tooltip_position) = signal(None::<TooltipPosition>);
-    let (tooltip_content, set_tooltip_content) = signal(String::new());
+    let (hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (tooltip_position, set_tooltip_position) = signal(None::<(f64, f64)>);
 
     // Adjust margins dynamically based on what labels are shown
     let adjusted_margin = (
@@ -101,16 +98,14 @@ where
         .enumerate()
         .map(|(i, (x, y))| {
             let cloned_point = data[i].clone();
-            let cloned_data_item = data[i].clone(); // Clone for tooltip access
             let on_click_handler = move |_| {
                 if let Some(callback) = on_point_click {
                     callback(cloned_point.clone());
                 }
             };
-            let on_mouse_enter = move |event: MouseEvent| {
+            let on_mouse_enter = move |ev| {
                 set_hovered_index.set(Some(i));
-                set_tooltip_position.set(Some(get_mouse_position_from_event(&event)));
-                set_tooltip_content.set(tooltip_content_accessor(&cloned_data_item));
+                set_tooltip_position.set(Some(super::get_mouse_position_from_event(&ev)));
             };
             let on_mouse_leave = move |_| {
                 set_hovered_index.set(None);
@@ -216,68 +211,94 @@ where
         vec![].into_iter().collect_view()
     };
 
+    let tooltip = move || {
+        hovered_index
+            .get()
+            .zip(tooltip_position.get())
+            .map(|(i, (x, y))| {
+                let point = &data[i];
+                view! {
+                    <div
+                        style="
+                        position: absolute;
+                        background-color: #2d3748;
+                        border: 1px solid #4a5568;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                        color: white;
+                        font-size: 12px;
+                        text-align: center;
+                        display: inline-block;
+                        "
+                        style:top=format!("{y}px")
+                        style:left=format!("{x}px")
+                    >
+                        {tooltip_content_accessor(point)}
+                    </div>
+                }
+            })
+    };
+
     view! {
-        <div style="position: relative;">
-            <svg width="100%" height="100%" viewBox=format!("0 0 {width} {height}")>
-                // X-axis line
-                <line
-                    x1=adjusted_margin.3.to_string()
-                    y1=(adjusted_margin.0 + chart_height).to_string()
-                    x2=(adjusted_margin.3 + chart_width).to_string()
-                    y2=(adjusted_margin.0 + chart_height).to_string()
-                    stroke="#a0aec0"
-                    stroke-width="1"
-                />
-                // Y-axis line
-                <line
-                    x1=adjusted_margin.3.to_string()
-                    y1=adjusted_margin.0.to_string()
-                    x2=adjusted_margin.3.to_string()
-                    y2=(adjusted_margin.0 + chart_height).to_string()
-                    stroke="#a0aec0"
-                    stroke-width="1"
-                />
+        <svg width="100%" height="100%" viewBox=format!("0 0 {width} {height}")>
+            // X-axis line
+            <line
+                x1=adjusted_margin.3.to_string()
+                y1=(adjusted_margin.0 + chart_height).to_string()
+                x2=(adjusted_margin.3 + chart_width).to_string()
+                y2=(adjusted_margin.0 + chart_height).to_string()
+                stroke="#a0aec0"
+                stroke-width="1"
+            />
+            // Y-axis line
+            <line
+                x1=adjusted_margin.3.to_string()
+                y1=adjusted_margin.0.to_string()
+                x2=adjusted_margin.3.to_string()
+                y2=(adjusted_margin.0 + chart_height).to_string()
+                stroke="#a0aec0"
+                stroke-width="1"
+            />
 
-                {show_line
-                    .then(|| {
-                        view! {
-                            <path d=path_data fill="none" stroke=line_color stroke-width="2" />
-                        }
-                    })}
-                {circles}
-                {x_axis_tick_marks}
-                {x_axis_ticks}
-                {y_axis_ticks}
+            {show_line
+                .then(|| {
+                    view! {
+                        <path d=path_data fill="none" stroke=line_color stroke-width="2" />
+                    }
+                })}
+            {circles}
+            {x_axis_tick_marks}
+            {x_axis_ticks}
+            {y_axis_ticks}
 
-                // X-axis label
-                <text
-                    x=(adjusted_margin.3 as f64 + chart_width as f64 / 2.0).to_string()
-                    y=x_axis_label_y.to_string()
-                    style:text-anchor="middle"
-                    fill="#a0aec0"
-                    style:font-size="14"
-                >
-                    {x_axis_label}
-                </text>
+            // X-axis label
+            <text
+                x=(adjusted_margin.3 as f64 + chart_width as f64 / 2.0).to_string()
+                y=x_axis_label_y.to_string()
+                style:text-anchor="middle"
+                fill="#a0aec0"
+                style:font-size="14"
+            >
+                {x_axis_label}
+            </text>
 
-                // Y-axis label
-                <text
-                    x=y_axis_label_x.to_string()
-                    y=(adjusted_margin.0 as f64 + chart_height as f64 / 2.0).to_string()
-                    transform=format!(
-                        "rotate(-90, {}, {})",
-                        y_axis_label_x,
-                        adjusted_margin.0 as f64 + chart_height as f64 / 2.0,
-                    )
-                    style:text-anchor="middle"
-                    fill="#a0aec0"
-                    style:font-size="14"
-                >
-                    {y_axis_label}
-                </text>
-            </svg>
+            // Y-axis label
+            <text
+                x=y_axis_label_x.to_string()
+                y=(adjusted_margin.0 as f64 + chart_height as f64 / 2.0).to_string()
+                transform=format!(
+                    "rotate(-90, {}, {})",
+                    y_axis_label_x,
+                    adjusted_margin.0 as f64 + chart_height as f64 / 2.0,
+                )
+                style:text-anchor="middle"
+                fill="#a0aec0"
+                style:font-size="14"
+            >
+                {y_axis_label}
+            </text>
 
-            <Tooltip position=tooltip_position>{move || tooltip_content.get()}</Tooltip>
-        </div>
+        </svg>
+        {tooltip}
     }
 }

@@ -1,8 +1,6 @@
 use std::f64::consts::PI;
 
-use leptos::{either::Either, ev::MouseEvent, prelude::*};
-
-use super::tooltip::{Tooltip, TooltipPosition, get_mouse_position_from_event};
+use leptos::{either::Either, prelude::*};
 
 #[allow(non_snake_case)]
 #[component]
@@ -22,9 +20,8 @@ where
     C: Fn(&T) -> String + Copy + 'static + Send,
     TC: Fn(&T) -> String + Copy + 'static + Send,
 {
-    let (_hovered_index, set_hovered_index) = signal(None::<usize>);
-    let (tooltip_position, set_tooltip_position) = signal(None::<TooltipPosition>);
-    let (tooltip_content, set_tooltip_content) = signal(String::new());
+    let (hovered_index, set_hovered_index) = signal(None::<usize>);
+    let (tooltip_position, set_tooltip_position) = signal(None::<(f64, f64)>);
 
     let total_value = data
         .iter()
@@ -72,22 +69,19 @@ where
     }).collect::<Vec<_>>();
 
     let mid_angles: Vec<f64> = slices.iter().map(|v| v.1).collect();
-    let data_clone = data.clone(); // Clone data for slice views
 
     let slice_views = slices.iter().enumerate().map(|(i, (path, _mid_angle, color))| {
         let transform = move || {
-            if _hovered_index.get() == Some(i) {
+            if hovered_index.get() == Some(i) {
                 "scale(1.05)".to_string()
             } else {
                 "scale(1.0)".to_string()
             }
         };
 
-        let cloned_data_item = data_clone[i].clone(); // Clone for tooltip access
-        let on_mouse_enter = move |event: MouseEvent| {
+        let on_mouse_enter=move |ev| {
             set_hovered_index.set(Some(i));
-            set_tooltip_position.set(Some(get_mouse_position_from_event(&event)));
-            set_tooltip_content.set(tooltip_content_accessor(&cloned_data_item));
+            set_tooltip_position.set(Some(super::get_mouse_position_from_event(&ev)));
         };
         let on_mouse_leave = move |_| {
             set_hovered_index.set(None);
@@ -149,22 +143,47 @@ where
         })
         .collect_view();
 
+    let tooltip = move || {
+        hovered_index
+            .get()
+            .zip(tooltip_position.get())
+            .map(|(i, (x, y))| {
+                let point = &data[i];
+                view! {
+                    <div
+                        style="
+                        position: absolute;
+                        background-color: #2d3748;
+                        border: 1px solid #4a5568;
+                        border-radius: 5px;
+                        padding: 5px 10px;
+                        color: white;
+                        font-size: 12px;
+                        text-align: center;
+                        display: inline-block;
+                        "
+                        style:top=format!("{y}px")
+                        style:left=format!("{x}px")
+                    >
+                        {tooltip_content_accessor(point)}
+                    </div>
+                }
+            })
+    };
+
     const HOVER_SCALE: f64 = 1.05;
     let scaled_size = size as f64 * HOVER_SCALE;
     let offset = (scaled_size - size as f64) / 2.0;
 
     view! {
-        <div style="position: relative;">
-            <svg
-                width="100%"
-                height="100%"
-                viewBox=format!("{} {} {} {}", -offset, -offset, scaled_size, scaled_size)
-            >
-                <g>{slice_views}</g>
-                <g>{label_views}</g>
-            </svg>
-
-            <Tooltip position=tooltip_position>{move || tooltip_content.get()}</Tooltip>
-        </div>
+        <svg
+            width="100%"
+            height="100%"
+            viewBox=format!("{} {} {} {}", -offset, -offset, scaled_size, scaled_size)
+        >
+            <g>{slice_views}</g>
+            <g>{label_views}</g>
+        </svg>
+        {tooltip}
     }
 }
