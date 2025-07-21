@@ -17,7 +17,7 @@ pub fn format_unix(t: f64) -> String {
 pub fn DurationChart(history: TestHistory) -> impl IntoView {
     let on_point_click = |point: state::TestHistoryPoint| {
         let link = format!("/invocation/{}", point.invocation_id);
-        window().location().set_href(&link).unwrap();
+        window().open_with_url_and_target(&link, "_blank").unwrap();
     };
 
     view! {
