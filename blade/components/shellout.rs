@@ -54,7 +54,7 @@ pub fn ShellOut(#[prop(into)] text: Signal<String>) -> impl IntoView {
     };
 
     view! {
-        <div class="bg-gray-800 text-white p-4 rounded-lg overflow-y-auto overflow-x-auto h-full">
+        <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto h-full">
             <Show when=move || { truncated.get() } fallback=|| view! { <></> }>
                 <div class="bg-yellow-600 text-white p-2 mb-2 rounded">
                     "Output truncated. Showing first " {TRUNCATE_THRESHOLD} " and last "
