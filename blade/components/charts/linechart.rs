@@ -262,9 +262,7 @@ where
 
             {show_line
                 .then(|| {
-                    view! {
-                        <path d=path_data fill="none" stroke=line_color stroke-width="2" />
-                    }
+                    view! { <path d=path_data fill="none" stroke=line_color stroke-width="2" /> }
                 })}
             {circles}
             {x_axis_tick_marks}
