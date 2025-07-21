@@ -19,15 +19,31 @@ where
     let visible_tasks = tasks.clone().into_iter().filter(|_task| true).collect::<Vec<_>>(); // Placeholder for visibility logic
 
     view! {
-        <div class="gantt-chart" style=move || format!("zoom: {}%; width: {}px; height: {}px;", zoom.get() * 100.0, width, height)>
+        <svg class="gantt-chart" xmlns="http://www.w3.org/2000/svg" style=move || format!("zoom: {}%; width: {}px; height: {}px;", zoom.get() * 100.0, width, height)>
             {visible_tasks.into_iter().map(|task| view! {
-                <div class="gantt-task"
-                     style=format!("left: {}%; width: {}%; background-color: {}%;", start_accessor(&task), duration_accessor(&task), color_accessor(&task))
-                     on:mouseover=move |_| show_tooltip(&tooltip_content_accessor(&task))>
-                    {tooltip_content_accessor(&task)}
-                </div>
+                <g class="gantt-task">
+                    <rect
+                        x=format!("{}", start_accessor(&task))
+                        y="10"
+                        width=format!("{}", duration_accessor(&task))
+                        height="20"
+                        fill=color_accessor(&task)
+                        on:mouseover={
+                            let task_clone = task.clone();
+                            move |_| show_tooltip(&tooltip_content_accessor(&task_clone))
+                        }
+                    />
+                    <text
+                        x=format!("{}", start_accessor(&task) + duration_accessor(&task) / 2.0)
+                        y="25"
+                        text-anchor="middle"
+                        fill="black"
+                    >
+                        {tooltip_content_accessor(&task)}
+                    </text>
+                </g>
             }).collect::<Vec<_>>()}
-        </div>
+        </svg>
     }
 }
 
