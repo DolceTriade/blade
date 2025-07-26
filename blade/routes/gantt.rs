@@ -9,14 +9,10 @@ pub fn GanttRoute() -> impl IntoView {
         TraceEventFile::from_json(json).expect("Failed to parse command.profile");
     let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
 
-
     view! {
         <div class="gantt-container">
             <h1>Gantt Chart</h1>
-            <BazelTraceChart
-                bazel_trace=bazel_trace
-                zoom=1.0
-            />
+            <BazelTraceChart bazel_trace=bazel_trace />
         </div>
     }
 }
