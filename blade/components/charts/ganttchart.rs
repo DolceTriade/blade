@@ -9,12 +9,12 @@ const X_AXIS_HEIGHT: f64 = 30.0; // Increased for more space
 
 #[derive(Clone, Debug)]
 struct PositionedEvent {
-    id: usize,
+    id: String,
     event: Event,
     row: usize,
 }
 
-fn calculate_layout(events: &[Event]) -> (Vec<PositionedEvent>, usize) {
+fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEvent>, usize) {
     let mut positioned_events = Vec::new();
     let mut row_ends: Vec<f64> = Vec::new();
 
@@ -36,7 +36,7 @@ fn calculate_layout(events: &[Event]) -> (Vec<PositionedEvent>, usize) {
         for (j, row_end) in row_ends.iter_mut().enumerate() {
             if start_time >= *row_end {
                 positioned_events.push(PositionedEvent {
-                    id: i,
+                    id: format!("{}-{}", trace_index, i),
                     event: event.clone(),
                     row: j,
                 });
@@ -49,7 +49,7 @@ fn calculate_layout(events: &[Event]) -> (Vec<PositionedEvent>, usize) {
         if !placed {
             let new_row = row_ends.len();
             positioned_events.push(PositionedEvent {
-                id: i,
+                id: format!("{}-{}", trace_index, i),
                 event: event.clone(),
                 row: new_row,
             });
@@ -151,7 +151,8 @@ pub fn BazelTraceChart(
         bazel_trace
             .traces
             .iter()
-            .map(|trace| calculate_layout(&trace.events))
+            .enumerate()
+            .map(|(trace_index, trace)| calculate_layout(&trace.events, trace_index))
             .collect::<Vec<_>>(),
     );
 
@@ -188,7 +189,7 @@ pub fn BazelTraceChart(
 
     let timeline_width = Signal::derive(move || duration * zoom.get());
 
-    let x_axis_ticks = move || {
+    let x_axis_ticks = create_memo(move |_| {
         let timeline_w = timeline_width.get();
         if timeline_w <= 0.0 || duration <= 0.0 {
             return Vec::new();
@@ -238,12 +239,12 @@ pub fn BazelTraceChart(
                 } else {
                     format!("{:.2}{}", label_val, unit_label)
                 };
-                ticks.push((x, display_label));
+                ticks.push((x, display_label, current_tick));
             }
             current_tick += nice_tick_interval;
         }
         ticks
-    };
+    });
 
     let on_container_mousemove = move |ev: web_sys::MouseEvent| {
         if let Some(container) = container_ref.get() {
@@ -344,9 +345,9 @@ pub fn BazelTraceChart(
                                 class="stroke-slate-900 dark:stroke-slate-200"
                             />
                             <For
-                                each=x_axis_ticks
-                                key=move |(x, _)| format!("{}-{}", zoom.read(), x)
-                                children=move |(x, label)| {
+                                each=move || x_axis_ticks.get()
+                                key=move |(_, _, tick_val)| *tick_val as u64
+                                children=move |(x, label, _)| {
                                     view! {
                                         <g>
                                             <line
@@ -472,7 +473,7 @@ pub fn BazelTraceChart(
                                                 >
                                                     <For
                                                         each=move || positioned_events.clone()
-                                                        key=|p_event| p_event.id
+                                                        key=|p_event| p_event.id.clone()
                                                         children=move |p_event| {
                                                             let event = p_event.event;
                                                             let y = p_event.row as f64 * ROW_HEIGHT + V_PADDING;
