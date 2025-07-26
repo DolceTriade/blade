@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{html, prelude::*};
 use trace_event_parser::{BazelTrace, Event};
 
 const TRACE_NAME_WIDTH: f64 = 200.0;
@@ -84,6 +84,19 @@ fn format_duration(duration_us: i64) -> String {
     }
 }
 
+fn format_time(time_us: f64) -> String {
+    if time_us < 0.0 {
+        return "0µs".to_string();
+    }
+    if time_us >= 1_000_000.0 {
+        format!("{:.3}s", time_us / 1_000_000.0)
+    } else if time_us >= 1_000.0 {
+        format!("{:.3}ms", time_us / 1_000.0)
+    } else {
+        format!("{:.0}µs", time_us)
+    }
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn BazelTraceChart(
@@ -140,6 +153,9 @@ pub fn BazelTraceChart(
     let hovered_event = RwSignal::new(None::<Event>);
     let tooltip_pos = RwSignal::new((0.0, 0.0));
     let tooltip_visible = RwSignal::new(false);
+
+    let hover_time = RwSignal::new(None::<f64>);
+    let container_ref = NodeRef::<html::Div>::new();
 
     let scale = move || zoom.get();
     let timeline_width = move || duration * scale();
@@ -201,6 +217,25 @@ pub fn BazelTraceChart(
         ticks
     };
 
+    let on_container_mousemove = move |ev: web_sys::MouseEvent| {
+        if let Some(container) = container_ref.get() {
+            let rect = container.get_bounding_client_rect();
+            let x = ev.client_x() as f64 - rect.left() + container.scroll_left() as f64;
+
+            if x >= TRACE_NAME_WIDTH {
+                let timeline_x = x - TRACE_NAME_WIDTH;
+                let time_us = (timeline_x / scale()) + min_start_time as f64;
+                hover_time.set(Some(time_us));
+            } else {
+                hover_time.set(None);
+            }
+        }
+    };
+
+    let on_container_mouseleave = move |_| {
+        hover_time.set(None);
+    };
+
     view! {
         <div class="relative">
             <div>
@@ -225,12 +260,15 @@ pub fn BazelTraceChart(
                     </button>
                 </div>
                 <div
+                    node_ref=container_ref
                     style=format!(
                         "overflow: auto; width: {}px; height: {}px; border: 1px solid #ccc;",
                         width,
                         height,
                     )
                     class="rounded"
+                    on:mousemove=on_container_mousemove
+                    on:mouseleave=on_container_mouseleave
                 >
                     <svg
                         class="bazel-trace-chart"
@@ -358,15 +396,18 @@ pub fn BazelTraceChart(
                                                                     }
                                                                     height=EVENT_HEIGHT
                                                                     fill=color
+                                                                    on:mousemove=move |ev| ev.stop_propagation()
                                                                     on:mouseover={
                                                                         let event_clone = event.clone();
                                                                         move |ev: web_sys::MouseEvent| {
+                                                                            ev.stop_propagation();
                                                                             hovered_event.set(Some(event_clone.clone()));
                                                                             tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
                                                                             tooltip_visible.set(true);
                                                                         }
                                                                     }
-                                                                    on:mouseout=move |_| {
+                                                                    on:mouseout=move |ev| {
+                                                                        ev.stop_propagation();
                                                                         hovered_event.set(None);
                                                                         tooltip_visible.set(false);
                                                                     }
@@ -381,6 +422,36 @@ pub fn BazelTraceChart(
                                     .collect_view()
                             }
                         </g>
+                        <Show when=move || hover_time.get().is_some() && !tooltip_visible.get()>
+                            {
+                                move || {
+                                    let time = hover_time.get().unwrap();
+                                    let x = (time - min_start_time as f64) * scale();
+                                    view! {
+                                        <g
+                                            class="pointer-events-none"
+                                            transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
+                                        >
+                                            <line
+                                                x1=x
+                                                y1=X_AXIS_HEIGHT
+                                                x2=x
+                                                y2=total_height
+                                                class="stroke-red-500"
+                                                stroke-dasharray="4"
+                                            />
+                                            <text
+                                                x=x + 5.0
+                                                y=X_AXIS_HEIGHT + 15.0
+                                                class="fill-red-500 text-xs"
+                                            >
+                                                {format_time(time)}
+                                            </text>
+                                        </g>
+                                    }
+                                }
+                            }
+                        </Show>
                     </svg>
                 </div>
             </div>
