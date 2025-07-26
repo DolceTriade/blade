@@ -60,6 +60,26 @@ fn calculate_layout(events: &[Event]) -> (Vec<PositionedEvent>, usize) {
     (positioned_events, row_ends.len().max(1))
 }
 
+fn contrasting_text_color(hex_color: &str) -> &'static str {
+    let hex = hex_color.trim_start_matches('#');
+    if hex.len() != 6 {
+        return "#000000"; // Default to black
+    }
+
+    let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
+    let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0);
+    let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
+
+    // Using the luminance formula
+    let luminance = (0.299 * r as f32 + 0.587 * g as f32 + 0.114 * b as f32) / 255.0;
+
+    if luminance > 0.5 {
+        "#000000" // Black for light backgrounds
+    } else {
+        "#FFFFFF" // White for dark backgrounds
+    }
+}
+
 fn color_for_category(category: &str) -> String {
     let mut hash: u32 = 0;
     for char in category.chars() {
@@ -281,6 +301,32 @@ pub fn BazelTraceChart(
                             format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width(), total_height)
                         }
                     >
+                        // Definitions for clipping paths
+                        <defs>
+                            {
+                                layouts
+                                    .with_value(|l| l.clone())
+                                    .into_iter()
+                                    .flat_map(|(events, _)| events)
+                                    .map(|p_event| {
+                                        let event = p_event.event;
+                                        let event_width = (event.duration.unwrap_or(1) as f64 * scale())
+                                            .max(1.0);
+                                        view! {
+                                            <clipPath id=format!("clip-{}", p_event.id)>
+                                                <rect
+                                                    x="5"
+                                                    y="0"
+                                                    width=event_width - 10.0
+                                                    height=EVENT_HEIGHT
+                                                />
+                                            </clipPath>
+                                        }
+                                    })
+                                    .collect_view()
+                            }
+                        </defs>
+
                         // X-Axis
                         <g
                             class="x-axis"
@@ -319,6 +365,61 @@ pub fn BazelTraceChart(
                                     }
                                 }
                             />
+                        </g>
+
+                        // Trace Names Sidebar
+                        <g class="trace-names" transform=format!("translate(0, {})", X_AXIS_HEIGHT)>
+                            <rect
+                                x="0"
+                                y="0"
+                                width=TRACE_NAME_WIDTH
+                                height=total_height
+                                class="fill-slate-50 dark:fill-slate-800"
+                            />
+                            {
+                                let trace_y_offsets: Vec<f64> = layouts
+                                    .with_value(|l| {
+                                        l.iter()
+                                            .scan(
+                                                0.0,
+                                                |state, (_, num_rows)| {
+                                                    let current_y = *state;
+                                                    *state += *num_rows as f64 * ROW_HEIGHT;
+                                                    Some(current_y)
+                                                },
+                                            )
+                                            .collect()
+                                    });
+                                bazel_trace
+                                    .traces
+                                    .iter()
+                                    .zip(layouts.with_value(|l| l.clone()).into_iter())
+                                    .zip(trace_y_offsets.into_iter())
+                                    .map(|((trace, (_, num_rows)), current_y)| {
+                                        let trace_height = num_rows as f64 * ROW_HEIGHT;
+                                        view! {
+                                            <g>
+                                                <text
+                                                    x="10"
+                                                    y=current_y + trace_height / 2.0
+                                                    dominant-baseline="middle"
+                                                    font-size="12"
+                                                    class="fill-slate-900 dark:fill-slate-200"
+                                                >
+                                                    {trace.name.clone()}
+                                                </text>
+                                                <line
+                                                    x1="0"
+                                                    y1=current_y + trace_height
+                                                    x2=TRACE_NAME_WIDTH
+                                                    y2=current_y + trace_height
+                                                    class="stroke-slate-200 dark:stroke-slate-700"
+                                                />
+                                            </g>
+                                        }
+                                    })
+                                    .collect_view()
+                            }
                         </g>
 
                         // Traces
@@ -360,17 +461,6 @@ pub fn BazelTraceChart(
                                                     class="stroke-slate-200 dark:stroke-slate-700"
                                                 />
 
-                                                // Trace Name
-                                                <text
-                                                    x="10"
-                                                    y=trace_height / 2.0
-                                                    dominant-baseline="middle"
-                                                    font-size="12"
-                                                    class="fill-slate-900 dark:fill-slate-200"
-                                                >
-                                                    {trace.name}
-                                                </text>
-
                                                 // Timeline
                                                 <g
                                                     class="timeline"
@@ -388,32 +478,49 @@ pub fn BazelTraceChart(
                                                             let color = color_for_category(&event.category);
                                                             let normalized_start = (event.start - min_start_time)
                                                                 as f64;
+                                                            let event_width = move || {
+                                                                (event.duration.unwrap_or(1) as f64 * scale())
+                                                                    .max(1.0)
+                                                            };
 
                                                             view! {
-                                                                <rect
-                                                                    x=move || normalized_start * scale()
-                                                                    y=y
-                                                                    width=move || {
-                                                                        (event.duration.unwrap_or(1) as f64 * scale()).max(1.0)
-                                                                    }
-                                                                    height=EVENT_HEIGHT
-                                                                    fill=color
-                                                                    on:mousemove=move |ev| ev.stop_propagation()
-                                                                    on:mouseover={
-                                                                        let event_clone = event.clone();
-                                                                        move |ev: web_sys::MouseEvent| {
-                                                                            ev.stop_propagation();
-                                                                            hovered_event.set(Some(event_clone.clone()));
-                                                                            tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
-                                                                            tooltip_visible.set(true);
+                                                                <g transform=move || format!("translate({}, {})", normalized_start * scale(), y)>
+                                                                    <rect
+                                                                        x="0"
+                                                                        y="0"
+                                                                        width=event_width
+                                                                        height=EVENT_HEIGHT
+                                                                        fill=color.clone()
+                                                                        on:mousemove=move |ev| ev.stop_propagation()
+                                                                        on:mouseover={
+                                                                            let event_clone = event.clone();
+                                                                            move |ev: web_sys::MouseEvent| {
+                                                                                ev.stop_propagation();
+                                                                                hovered_event.set(Some(event_clone.clone()));
+                                                                                tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
+                                                                                tooltip_visible.set(true);
+                                                                            }
                                                                         }
-                                                                    }
-                                                                    on:mouseout=move |ev| {
-                                                                        ev.stop_propagation();
-                                                                        hovered_event.set(None);
-                                                                        tooltip_visible.set(false);
-                                                                    }
-                                                                />
+                                                                        on:mouseout=move |ev| {
+                                                                            ev.stop_propagation();
+                                                                            hovered_event.set(None);
+                                                                            tooltip_visible.set(false);
+                                                                        }
+                                                                    />
+                                                                    <Show when=move || { event_width() > 30.0 } >
+                                                                        <text
+                                                                            x="5"
+                                                                            y=EVENT_HEIGHT / 2.0
+                                                                            dominant-baseline="middle"
+                                                                            font-size="12"
+                                                                            fill=contrasting_text_color(&color)
+                                                                            clip-path=format!("url(#clip-{})", p_event.id)
+                                                                            class="pointer-events-none"
+                                                                        >
+                                                                            {event.name.clone()}
+                                                                        </text>
+                                                                    </Show>
+                                                                </g>
                                                             }
                                                         }
                                                     />
