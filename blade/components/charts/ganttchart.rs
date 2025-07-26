@@ -121,7 +121,6 @@ fn format_time(time_us: f64) -> String {
 #[component]
 pub fn BazelTraceChart(
     mut bazel_trace: BazelTrace,
-    #[prop(default = 1000)] width: u32,
     #[prop(default = 800)] height: u32,
 ) -> impl IntoView {
     // Sort traces by pid and tid to ensure deterministic order
@@ -163,12 +162,8 @@ pub fn BazelTraceChart(
             + X_AXIS_HEIGHT
     });
 
-    let initial_zoom = if duration > 0.0 {
-        (width as f64 - TRACE_NAME_WIDTH) / duration
-    } else {
-        1.0
-    };
-    let (zoom, set_zoom) = signal(initial_zoom);
+    let (zoom, set_zoom) = signal(1.0);
+    let initial_zoom = RwSignal::new(1.0);
 
     let hovered_event = RwSignal::new(None::<Event>);
     let tooltip_pos = RwSignal::new((0.0, 0.0));
@@ -177,6 +172,19 @@ pub fn BazelTraceChart(
     let hover_time = RwSignal::new(None::<f64>);
     let hover_line_text_pos = RwSignal::new((0.0, 0.0));
     let container_ref = NodeRef::<html::Div>::new();
+
+    Effect::new(move |_| {
+        if let Some(container) = container_ref.get() {
+            let container_width = container.client_width() as f64;
+            let new_initial_zoom = if duration > 0.0 {
+                (container_width - TRACE_NAME_WIDTH) / duration
+            } else {
+                1.0
+            };
+            initial_zoom.set(new_initial_zoom);
+            set_zoom.set(new_initial_zoom);
+        }
+    });
 
     let scale = move || zoom.get();
     let timeline_width = move || duration * scale();
@@ -276,7 +284,7 @@ pub fn BazelTraceChart(
                     </button>
                     <button
                         class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                        on:click=move |_| set_zoom.set(initial_zoom)
+                        on:click=move |_| set_zoom.set(initial_zoom.get())
                     >
                         "Reset"
                     </button>
@@ -284,8 +292,7 @@ pub fn BazelTraceChart(
                 <div
                     node_ref=container_ref
                     style=format!(
-                        "overflow: auto; width: {}px; height: {}px; border: 1px solid #ccc;",
-                        width,
+                        "overflow: auto; width: 100%; height: {}px; border: 1px solid #ccc;",
                         height,
                     )
                     class="rounded"
