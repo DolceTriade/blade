@@ -121,7 +121,7 @@ impl BazelTrace {
                         duration: event.dur,
                         args: event.args,
                     });
-                }
+                },
                 Phase::Metadata => {
                     let pid = event.pid.unwrap_or_default();
                     let tid = event.tid.unwrap_or_default();
@@ -152,8 +152,8 @@ impl BazelTrace {
                             trace.sort_index = Some(sort_index as i32);
                         }
                     }
-                }
-                Phase::Unsupported => {}
+                },
+                Phase::Unsupported => {},
                 Phase::Counter => {
                     let key = (
                         event.name.clone(),

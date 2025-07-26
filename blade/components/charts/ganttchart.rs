@@ -304,34 +304,31 @@ pub fn BazelTraceChart(
                         width=move || TRACE_NAME_WIDTH + timeline_width.get()
                         height=total_height
                         viewBox=move || {
-                            format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width.get(), total_height)
+                            format!(
+                                "0 0 {} {}",
+                                TRACE_NAME_WIDTH + timeline_width.get(),
+                                total_height,
+                            )
                         }
                     >
                         // Definitions for clipping paths
                         <defs>
-                            {
-                                layouts
-                                    .with_value(|l| l.clone())
-                                    .into_iter()
-                                    .flat_map(|(events, _)| events)
-                                    .map(|p_event| {
-                                        let event = p_event.event;
-                                        let event_width = move || {
-                                            (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
-                                        };
-                                        view! {
-                                            <clipPath id=format!("clip-{}", p_event.id)>
-                                                <rect
-                                                    x="0"
-                                                    y="0"
-                                                    width=event_width
-                                                    height=EVENT_HEIGHT
-                                                />
-                                            </clipPath>
-                                        }
-                                    })
-                                    .collect_view()
-                            }
+                            {layouts
+                                .with_value(|l| l.clone())
+                                .into_iter()
+                                .flat_map(|(events, _)| events)
+                                .map(|p_event| {
+                                    let event = p_event.event;
+                                    let event_width = Signal::derive(move || {
+                                        (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
+                                    });
+                                    view! {
+                                        <clipPath id=format!("clip-{}", p_event.id)>
+                                            <rect x="0" y="0" width=event_width height=EVENT_HEIGHT />
+                                        </clipPath>
+                                    }
+                                })
+                                .collect_view()}
                         </defs>
 
                         // X-Axis
@@ -471,10 +468,7 @@ pub fn BazelTraceChart(
                                                 // Timeline
                                                 <g
                                                     class="timeline"
-                                                    transform=format!(
-                                                        "translate({}, 0)",
-                                                        TRACE_NAME_WIDTH,
-                                                    )
+                                                    transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
                                                 >
                                                     <For
                                                         each=move || positioned_events.clone()
@@ -485,13 +479,19 @@ pub fn BazelTraceChart(
                                                             let color = color_for_category(&event.category);
                                                             let normalized_start = (event.start - min_start_time)
                                                                 as f64;
-                                                            let event_width = move || {
-                                                                (event.duration.unwrap_or(1) as f64 * zoom.get())
-                                                                    .max(1.0)
-                                                            };
+                                                            let event_width = Signal::derive(move || {
+                                                                (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
+                                                            });
+                                                            let transform = Signal::derive(move || {
+                                                                format!(
+                                                                    "translate({}, {})",
+                                                                    normalized_start * zoom.get(),
+                                                                    y,
+                                                                )
+                                                            });
 
                                                             view! {
-                                                                <g transform=move || format!("translate({}, {})", normalized_start * zoom.get(), y)>
+                                                                <g transform=transform>
                                                                     <rect
                                                                         x="0"
                                                                         y="0"
@@ -504,7 +504,8 @@ pub fn BazelTraceChart(
                                                                             move |ev: web_sys::MouseEvent| {
                                                                                 ev.stop_propagation();
                                                                                 hovered_event.set(Some(event_clone.clone()));
-                                                                                tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
+                                                                                tooltip_pos
+                                                                                    .set((ev.client_x() as f64, ev.client_y() as f64));
                                                                                 tooltip_visible.set(true);
                                                                             }
                                                                         }
@@ -514,7 +515,7 @@ pub fn BazelTraceChart(
                                                                             tooltip_visible.set(false);
                                                                         }
                                                                     />
-                                                                    <Show when=move || { event_width() > 30.0 } >
+                                                                    <Show when=move || { event_width.get() > 30.0 }>
                                                                         <text
                                                                             x="5"
                                                                             y=EVENT_HEIGHT / 2.0
@@ -538,28 +539,28 @@ pub fn BazelTraceChart(
                                     .collect_view()
                             }
                         </g>
-                        <Show when=move || hover_time.get().is_some() && !tooltip_visible.get()>
-                            {
-                                move || {
-                                    let time = hover_time.get().unwrap();
-                                    let x = (time - min_start_time as f64) * zoom.get();
-                                    view! {
-                                        <g
-                                            class="pointer-events-none"
-                                            transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
-                                        >
-                                            <line
-                                                x1=x
-                                                y1=X_AXIS_HEIGHT
-                                                x2=x
-                                                y2=total_height
-                                                class="stroke-red-500"
-                                                stroke-dasharray="4"
-                                            />
-                                        </g>
-                                    }
+                        <Show when=move || {
+                            hover_time.get().is_some() && !tooltip_visible.get()
+                        }>
+                            {move || {
+                                let time = hover_time.get().unwrap();
+                                let x = (time - min_start_time as f64) * zoom.get();
+                                view! {
+                                    <g
+                                        class="pointer-events-none"
+                                        transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
+                                    >
+                                        <line
+                                            x1=x
+                                            y1=X_AXIS_HEIGHT
+                                            x2=x
+                                            y2=total_height
+                                            class="stroke-red-500"
+                                            stroke-dasharray="4"
+                                        />
+                                    </g>
                                 }
-                            }
+                            }}
                         </Show>
                     </svg>
                 </div>
@@ -587,11 +588,7 @@ pub fn BazelTraceChart(
                 class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
                 style=move || {
                     let (x, y) = tooltip_pos.get();
-                    let display = if tooltip_visible.get() {
-                        "block"
-                    } else {
-                        "none"
-                    };
+                    let display = if tooltip_visible.get() { "block" } else { "none" };
                     format!(
                         "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
                         x,
@@ -601,39 +598,36 @@ pub fn BazelTraceChart(
                 }
             >
                 {move || {
-                    hovered_event.get().map(|event| {
-                        view! {
-                            <div class="text-sm text-slate-900 dark:text-slate-200">
-                                <div class="font-bold">{event.name}</div>
-                                <div>
-                                    <strong>"Category: "</strong>
-                                    {event.category}
-                                </div>
-                                <div>
-                                    <strong>"Duration: "</strong>
-                                    {format_duration(event.duration.unwrap_or(0))}
-                                </div>
-                                {
-                                    event
+                    hovered_event
+                        .get()
+                        .map(|event| {
+                            view! {
+                                <div class="text-sm text-slate-900 dark:text-slate-200">
+                                    <div class="font-bold">{event.name}</div>
+                                    <div>
+                                        <strong>"Category: "</strong>
+                                        {event.category}
+                                    </div>
+                                    <div>
+                                        <strong>"Duration: "</strong>
+                                        {format_duration(event.duration.unwrap_or(0))}
+                                    </div>
+                                    {event
                                         .args
                                         .map(|args| {
                                             view! {
                                                 <div>
                                                     <strong>"Args: "</strong>
-                                                    {
-                                                        format!(
-                                                            "{}",
-                                                            serde_json::to_string(&args)
-                                                                .unwrap_or_default(),
-                                                        )
-                                                    }
+                                                    {format!(
+                                                        "{}",
+                                                        serde_json::to_string(&args).unwrap_or_default(),
+                                                    )}
                                                 </div>
                                             }
-                                        })
-                                }
-                            </div>
-                        }
-                    })
+                                        })}
+                                </div>
+                            }
+                        })
                 }}
             </div>
         </div>
