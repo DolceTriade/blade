@@ -7,6 +7,7 @@ const EVENT_HEIGHT: f64 = 20.0;
 const V_PADDING: f64 = 5.0;
 const X_AXIS_HEIGHT: f64 = 30.0; // Increased for more space
 const COUNTER_CHART_HEIGHT: f64 = 50.0;
+const COUNTER_CHART_TOP_MARGIN: f64 = 10.0;
 
 #[derive(Clone, Debug)]
 struct PositionedEvent {
@@ -131,7 +132,7 @@ pub fn BazelTraceChart(
     // Sort counters by name to ensure deterministic order
     bazel_trace.counters.sort_by(|a, b| a.name.cmp(&b.name));
 
-    let (min_start_time, max_end_time) = bazel_trace
+    let (mut min_start_time, mut max_end_time) = bazel_trace
         .traces
         .iter()
         .flat_map(|trace| &trace.events)
@@ -141,6 +142,17 @@ pub fn BazelTraceChart(
                 max_e.max(event.start + event.duration.unwrap_or(1)),
             )
         });
+
+    let (min_counter_time, max_counter_time) =
+        bazel_trace.counters.iter().flat_map(|c| &c.time_series).fold(
+            (i64::MAX, 0),
+            |(min_t, max_t), point| (min_t.min(point.timestamp), max_t.max(point.timestamp)),
+        );
+
+    if min_counter_time != i64::MAX {
+        min_start_time = min_start_time.min(min_counter_time);
+    }
+    max_end_time = max_end_time.max(max_counter_time);
 
     let min_start_time = if min_start_time == i64::MAX {
         0
@@ -167,7 +179,7 @@ pub fn BazelTraceChart(
             .sum::<f64>()
     });
 
-    let total_height = traces_height + counters_height + X_AXIS_HEIGHT;
+    let total_height = traces_height + counters_height + X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN;
 
     let bazel_trace = StoredValue::new(bazel_trace);
 
@@ -388,7 +400,10 @@ pub fn BazelTraceChart(
                         // Counter Names Sidebar
                         <g
                             class="counter-names"
-                            transform=format!("translate(0, {})", X_AXIS_HEIGHT)
+                            transform=format!(
+                                "translate(0, {})",
+                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
+                            )
                         >
                             <rect
                                 x="0"
@@ -453,7 +468,11 @@ pub fn BazelTraceChart(
                         // Counter Charts
                         <g
                             class="counters"
-                            transform=format!("translate({}, {})", TRACE_NAME_WIDTH, X_AXIS_HEIGHT)
+                            transform=format!(
+                                "translate({}, {})",
+                                TRACE_NAME_WIDTH,
+                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
+                            )
                         >
                             <For
                                 each=move || {
@@ -594,7 +613,10 @@ pub fn BazelTraceChart(
                         // Trace Names Sidebar
                         <g
                             class="trace-names"
-                            transform=format!("translate(0, {})", X_AXIS_HEIGHT + counters_height)
+                            transform=format!(
+                                "translate(0, {})",
+                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
+                            )
                         >
                             <rect
                                 x="0"
@@ -654,7 +676,10 @@ pub fn BazelTraceChart(
                         // Traces
                         <g
                             class="traces"
-                            transform=format!("translate(0, {})", X_AXIS_HEIGHT + counters_height)
+                            transform=format!(
+                                "translate(0, {})",
+                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
+                            )
                         >
                             {
                                 let trace_y_offsets: Vec<f64> = layouts
