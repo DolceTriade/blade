@@ -121,8 +121,39 @@ impl BazelTrace {
                         duration: event.dur,
                         args: event.args,
                     });
-                },
-                Phase::Unsupported | Phase::Metadata => {},
+                }
+                Phase::Metadata => {
+                    let pid = event.pid.unwrap_or_default();
+                    let tid = event.tid.unwrap_or_default();
+                    let trace = traces_map.entry((pid, tid)).or_insert_with(|| Trace {
+                        name: String::new(),
+                        sort_index: None,
+                        pid,
+                        tid,
+                        events: Vec::new(),
+                    });
+
+                    if event.name == "thread_name" {
+                        if let Some(name) = event
+                            .args
+                            .as_ref()
+                            .and_then(|a| a.get("name"))
+                            .and_then(|n| n.as_str())
+                        {
+                            trace.name = name.to_string();
+                        }
+                    } else if event.name == "thread_sort_index" {
+                        if let Some(sort_index) = event
+                            .args
+                            .as_ref()
+                            .and_then(|a| a.get("sort_index"))
+                            .and_then(|i| i.as_i64())
+                        {
+                            trace.sort_index = Some(sort_index as i32);
+                        }
+                    }
+                }
+                Phase::Unsupported => {}
                 Phase::Counter => {
                     let key = (
                         event.name.clone(),
@@ -298,5 +329,41 @@ mod tests {
         );
         assert_eq!(counter2.time_series[0].timestamp, 3);
         assert_eq!(counter2.time_series[0].value, 30.0);
+    }
+
+    #[test]
+    fn test_bazel_trace_metadata_processing() {
+        let json = r#"{
+            "traceEvents": [
+                {"name": "thread_name", "ph": "M", "pid": 1, "tid": 1, "args": {"name": "MainThread"}},
+                {"name": "thread_sort_index", "ph": "M", "pid": 1, "tid": 1, "args": {"sort_index": -1}},
+                {"name": "some_event", "ph": "X", "ts": 10, "dur": 5, "pid": 1, "tid": 1},
+                {"name": "another_event", "ph": "X", "ts": 12, "dur": 3, "pid": 1, "tid": 2, "args": {}},
+                {"name": "thread_name", "ph": "M", "pid": 1, "tid": 2, "args": {"name": "WorkerThread"}}
+            ]
+        }"#;
+
+        let trace_event_file = TraceEventFile::from_json(json).unwrap();
+        let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
+
+        assert_eq!(bazel_trace.traces.len(), 2, "There should be two traces");
+
+        let main_thread_trace = bazel_trace
+            .traces
+            .iter()
+            .find(|t| t.pid == 1 && t.tid == 1)
+            .expect("MainThread trace should exist");
+        assert_eq!(main_thread_trace.name, "MainThread");
+        assert_eq!(main_thread_trace.sort_index, Some(-1));
+        assert_eq!(main_thread_trace.events.len(), 1);
+
+        let worker_thread_trace = bazel_trace
+            .traces
+            .iter()
+            .find(|t| t.pid == 1 && t.tid == 2)
+            .expect("WorkerThread trace should exist");
+        assert_eq!(worker_thread_trace.name, "WorkerThread");
+        assert_eq!(worker_thread_trace.sort_index, None);
+        assert_eq!(worker_thread_trace.events.len(), 1);
     }
 }

@@ -443,7 +443,7 @@ pub fn BazelTraceChart(
                                     .into_iter()
                                     .zip(layouts.with_value(|l| l.clone()).into_iter())
                                     .zip(trace_y_offsets.into_iter())
-                                    .map(|((trace, (positioned_events, num_rows)), current_y)| {
+                                    .map(|((_, (positioned_events, num_rows)), current_y)| {
                                         let trace_height = num_rows as f64 * ROW_HEIGHT;
 
                                         view! {
