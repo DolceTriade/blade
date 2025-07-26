@@ -9,6 +9,7 @@ use crate::{
     dashboard::Dashboard,
     details::Details,
     empty::Empty,
+    gantt::GanttRoute,
     invocation::Invocation,
     summary::Summary,
     test::Test,
@@ -50,6 +51,7 @@ pub fn App() -> impl IntoView {
                         </ParentRoute>
                         <Route path=path!("dashboard") view=Dashboard />
                         <Route path=path!("/") view=Dashboard />
+                        <Route path=path!("gantt") view=GanttRoute />
                         <Route path=path!("*any") view=Empty />
                     </Routes>
                 </main>

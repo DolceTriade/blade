@@ -1,19 +1,22 @@
-use serde::Deserialize;
 use std::collections::HashMap;
 
-/**
- * Represents a single trace event in the Trace Event Format.
- *
- * Fields:
- * - `name`: The name of the event, as displayed in Trace Viewer.
- * - `cat`: Optional. The event categories, a comma-separated list of categories for the event.
- * - `ph`: The event type (phase). A single character indicating the type of event (e.g., 'B' for begin, 'E' for end, 'X' for complete, etc.).
- * - `ts`: The tracing clock timestamp of the event, provided at microsecond granularity.
- * - `pid`: Optional. The process ID for the process that output this event.
- * - `tid`: Optional. The thread ID for the thread that output this event.
- * - `args`: Optional. Additional arguments provided for the event. These can include any custom data relevant to the event.
- */
-#[derive(Debug, Deserialize, PartialEq)]
+use serde::Deserialize;
+
+/// Represents a single trace event in the Trace Event Format.
+///
+/// Fields:
+/// - `name`: The name of the event, as displayed in Trace Viewer.
+/// - `cat`: Optional. The event categories, a comma-separated list of
+///   categories for the event.
+/// - `ph`: The event type (phase). A single character indicating the type of
+///   event (e.g., 'B' for begin, 'E' for end, 'X' for complete, etc.).
+/// - `ts`: The tracing clock timestamp of the event, provided at microsecond
+///   granularity.
+/// - `pid`: Optional. The process ID for the process that output this event.
+/// - `tid`: Optional. The thread ID for the thread that output this event.
+/// - `args`: Optional. Additional arguments provided for the event. These can
+///   include any custom data relevant to the event.
+#[derive(Debug, Deserialize, PartialEq, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum Phase {
     #[serde(rename = "X")]
@@ -28,43 +31,40 @@ pub enum Phase {
     Unsupported,
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct TraceEvent {
     pub name: String,
     pub cat: Option<String>,
     pub ph: Phase,
     #[serde(default)]
-    pub ts: f64,
+    pub ts: i64,
+    pub dur: Option<i64>,
     pub pid: Option<u32>,
     pub tid: Option<u32>,
     pub args: Option<serde_json::Value>,
 }
 
 impl TraceEvent {
-    pub fn is_supported_phase(&self) -> bool {
-        !matches!(self.ph, Phase::Unsupported)
-    }
+    pub fn is_supported_phase(&self) -> bool { !matches!(self.ph, Phase::Unsupported) }
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct TraceEventFile {
     #[serde(rename = "traceEvents")]
     pub trace_events: Vec<TraceEvent>,
 }
 
 impl TraceEventFile {
-    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
-    }
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> { serde_json::from_str(json) }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct BazelTrace {
     pub traces: Vec<Trace>,
     pub counters: Vec<Counter>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Trace {
     pub name: String,
     pub sort_index: Option<i32>,
@@ -73,7 +73,7 @@ pub struct Trace {
     pub events: Vec<Event>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Event {
     pub category: String,
     pub name: String,
@@ -82,7 +82,7 @@ pub struct Event {
     pub args: Option<serde_json::Value>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Counter {
     pub name: String,
     pub tid: u32,
@@ -90,10 +90,10 @@ pub struct Counter {
     pub time_series: Vec<TimeSeriesDataPoint>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TimeSeriesDataPoint {
     pub timestamp: i64, // Changed to i64
-    pub value: f64, // Changed to f64
+    pub value: f64,     // Changed to f64
 }
 
 impl BazelTrace {
@@ -104,25 +104,31 @@ impl BazelTrace {
         for event in events {
             match event.ph {
                 Phase::Complete | Phase::Instant => {
-                    let trace = traces_map.entry((event.pid.unwrap_or_default(), event.tid.unwrap_or_default())).or_insert_with(|| Trace {
-                        name: String::new(),
-                        sort_index: None,
-                        pid: event.pid.unwrap_or_default(),
-                        tid: event.tid.unwrap_or_default(),
-                        events: Vec::new(),
-                    });
+                    let trace = traces_map
+                        .entry((event.pid.unwrap_or_default(), event.tid.unwrap_or_default()))
+                        .or_insert_with(|| Trace {
+                            name: String::new(),
+                            sort_index: None,
+                            pid: event.pid.unwrap_or_default(),
+                            tid: event.tid.unwrap_or_default(),
+                            events: Vec::new(),
+                        });
 
                     trace.events.push(Event {
                         category: event.cat.unwrap_or_default(),
                         name: event.name,
-                        start: event.ts as i64, // Cast to i64
-                        duration: None, // Placeholder for duration extraction
+                        start: event.ts,
+                        duration: event.dur,
                         args: event.args,
                     });
-                }
-                Phase::Unsupported | Phase::Metadata => {}
+                },
+                Phase::Unsupported | Phase::Metadata => {},
                 Phase::Counter => {
-                    let key = (event.name.clone(), event.pid.unwrap_or_default(), event.tid.unwrap_or_default());
+                    let key = (
+                        event.name.clone(),
+                        event.pid.unwrap_or_default(),
+                        event.tid.unwrap_or_default(),
+                    );
                     let counter = counters_map.entry(key).or_insert_with(|| Counter {
                         name: event.name.clone(),
                         tid: event.tid.unwrap_or_default(),
@@ -131,10 +137,15 @@ impl BazelTrace {
                     });
 
                     counter.time_series.push(TimeSeriesDataPoint {
-                        timestamp: event.ts as i64, // Cast to i64
-                        value: event.args.as_ref().and_then(|args| args.get("value")).and_then(|v| v.as_f64()).unwrap_or_default(), // Extract f64 value from "value" key
+                        timestamp: event.ts,
+                        value: event
+                            .args
+                            .as_ref()
+                            .and_then(|args| args.get("value"))
+                            .and_then(|v| v.as_f64())
+                            .unwrap_or_default(), // Extract f64 value from "value" key
                     });
-                }
+                },
             }
         }
 
@@ -158,8 +169,8 @@ mod tests {
     fn test_parse_trace_event_file() {
         let json = r#"{
             "traceEvents": [
-                {"name": "A", "ph": "B", "ts": 1.0, "pid": 1, "tid": 1},
-                {"name": "A", "ph": "E", "ts": 2.0, "pid": 1, "tid": 1}
+                {"name": "A", "ph": "B", "ts": 1, "pid": 1, "tid": 1},
+                {"name": "A", "ph": "E", "ts": 2, "pid": 1, "tid": 1}
             ]
         }"#;
 
@@ -190,21 +201,30 @@ mod tests {
         // Example validation: Check the first trace event's name
         assert_eq!(parsed.trace_events[0].name, "thread_name");
         parsed.trace_events.iter().for_each(|event| {
-            assert!(event.is_supported_phase(), "Event phase should be supported");
+            assert!(
+                event.is_supported_phase(),
+                "Event phase should be supported"
+            );
         });
 
         let bazel_trace = BazelTrace::from_trace_events(parsed.trace_events);
 
         // Ensure no counters have only one item
         for counter in &bazel_trace.counters {
-            assert!(counter.time_series.len() > 1, "Counter {} should have more than one data point", counter.name);
+            assert!(
+                counter.time_series.len() > 1,
+                "Counter {} should have more than one data point",
+                counter.name
+            );
         }
+        println!("{bazel_trace:#?}");
     }
 
     #[test]
     fn test_bazel_trace_from_trace_events() {
         let json = include_str!("./testdata/command.profile");
-        let trace_event_file = TraceEventFile::from_json(json).expect("Failed to parse command.profile");
+        let trace_event_file =
+            TraceEventFile::from_json(json).expect("Failed to parse command.profile");
 
         let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
 
@@ -212,13 +232,22 @@ mod tests {
         assert!(!bazel_trace.traces.is_empty(), "Traces should not be empty");
         for trace in &bazel_trace.traces {
             assert!(!trace.events.is_empty(), "Each trace should have events");
-            assert!(trace.events.windows(2).all(|w| w[0].start <= w[1].start), "Events should be sorted by start time");
+            assert!(
+                trace.events.windows(2).all(|w| w[0].start <= w[1].start),
+                "Events should be sorted by start time"
+            );
         }
 
         // Validate counters
-        assert!(!bazel_trace.counters.is_empty(), "Counters should not be empty");
+        assert!(
+            !bazel_trace.counters.is_empty(),
+            "Counters should not be empty"
+        );
         for counter in &bazel_trace.counters {
-            assert!(!counter.time_series.is_empty(), "Each counter should have time series data");
+            assert!(
+                !counter.time_series.is_empty(),
+                "Each counter should have time series data"
+            );
         }
     }
 
@@ -226,9 +255,9 @@ mod tests {
     fn test_bazel_trace_counters_merge() {
         let json = r#"{
             "traceEvents": [
-                {"name": "counter1", "ph": "C", "ts": 1.0, "pid": 1, "tid": 1, "args": {"value": 10}},
-                {"name": "counter1", "ph": "C", "ts": 2.0, "pid": 1, "tid": 1, "args": {"value": 20}},
-                {"name": "counter2", "ph": "C", "ts": 3.0, "pid": 2, "tid": 2, "args": {"value": 30}}
+                {"name": "counter1", "ph": "C", "ts": 1, "pid": 1, "tid": 1, "args": {"value": 10}},
+                {"name": "counter1", "ph": "C", "ts": 2, "pid": 1, "tid": 1, "args": {"value": 20}},
+                {"name": "counter2", "ph": "C", "ts": 3, "pid": 2, "tid": 2, "args": {"value": 30}}
             ]
         }"#;
 
@@ -236,17 +265,37 @@ mod tests {
         let bazel_trace = BazelTrace::from_trace_events(trace_event_file.trace_events);
 
         // Validate counters
-        assert_eq!(bazel_trace.counters.len(), 2, "There should be two unique counters");
+        assert_eq!(
+            bazel_trace.counters.len(),
+            2,
+            "There should be two unique counters"
+        );
 
-        let counter1 = bazel_trace.counters.iter().find(|c| c.name == "counter1" && c.tid == 1).expect("Counter1 should exist");
-        assert_eq!(counter1.time_series.len(), 2, "Counter1 should have two data points");
+        let counter1 = bazel_trace
+            .counters
+            .iter()
+            .find(|c| c.name == "counter1" && c.tid == 1)
+            .expect("Counter1 should exist");
+        assert_eq!(
+            counter1.time_series.len(),
+            2,
+            "Counter1 should have two data points"
+        );
         assert_eq!(counter1.time_series[0].timestamp, 1);
         assert_eq!(counter1.time_series[0].value, 10.0);
         assert_eq!(counter1.time_series[1].timestamp, 2);
         assert_eq!(counter1.time_series[1].value, 20.0);
 
-        let counter2 = bazel_trace.counters.iter().find(|c| c.name == "counter2" && c.tid == 2).expect("Counter2 should exist");
-        assert_eq!(counter2.time_series.len(), 1, "Counter2 should have one data point");
+        let counter2 = bazel_trace
+            .counters
+            .iter()
+            .find(|c| c.name == "counter2" && c.tid == 2)
+            .expect("Counter2 should exist");
+        assert_eq!(
+            counter2.time_series.len(),
+            1,
+            "Counter2 should have one data point"
+        );
         assert_eq!(counter2.time_series[0].timestamp, 3);
         assert_eq!(counter2.time_series[0].value, 30.0);
     }
