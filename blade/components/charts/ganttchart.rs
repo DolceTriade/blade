@@ -186,11 +186,10 @@ pub fn BazelTraceChart(
         }
     });
 
-    let scale = move || zoom.get();
-    let timeline_width = move || duration * scale();
+    let timeline_width = Signal::derive(move || duration * zoom.get());
 
     let x_axis_ticks = move || {
-        let timeline_w = timeline_width();
+        let timeline_w = timeline_width.get();
         if timeline_w <= 0.0 || duration <= 0.0 {
             return Vec::new();
         }
@@ -231,7 +230,7 @@ pub fn BazelTraceChart(
         while current_tick <= max_end_time as f64 {
             let normalized_tick = current_tick - min_start_time as f64;
             if normalized_tick >= 0.0 {
-                let x = normalized_tick * scale();
+                let x = normalized_tick * zoom.get();
                 let label_val = current_tick / divisor;
 
                 let display_label = if (label_val.fract().abs() * divisor) < 1.0 {
@@ -253,7 +252,7 @@ pub fn BazelTraceChart(
 
             if x >= TRACE_NAME_WIDTH {
                 let timeline_x = x - TRACE_NAME_WIDTH;
-                let time_us = (timeline_x / scale()) + min_start_time as f64;
+                let time_us = (timeline_x / zoom.get()) + min_start_time as f64;
                 hover_time.set(Some(time_us));
                 hover_line_text_pos.set((ev.client_x() as f64, rect.top()));
             } else {
@@ -302,10 +301,10 @@ pub fn BazelTraceChart(
                     <svg
                         class="bazel-trace-chart"
                         xmlns="http://www.w3.org/2000/svg"
-                        width=move || TRACE_NAME_WIDTH + timeline_width()
+                        width=move || TRACE_NAME_WIDTH + timeline_width.get()
                         height=total_height
                         viewBox=move || {
-                            format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width(), total_height)
+                            format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width.get(), total_height)
                         }
                     >
                         // Definitions for clipping paths
@@ -317,14 +316,15 @@ pub fn BazelTraceChart(
                                     .flat_map(|(events, _)| events)
                                     .map(|p_event| {
                                         let event = p_event.event;
-                                        let event_width = (event.duration.unwrap_or(1) as f64 * scale())
-                                            .max(1.0);
+                                        let event_width = move || {
+                                            (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
+                                        };
                                         view! {
                                             <clipPath id=format!("clip-{}", p_event.id)>
                                                 <rect
-                                                    x="5"
+                                                    x="0"
                                                     y="0"
-                                                    width=event_width - 10.0
+                                                    width=event_width
                                                     height=EVENT_HEIGHT
                                                 />
                                             </clipPath>
@@ -462,7 +462,7 @@ pub fn BazelTraceChart(
                                                 <rect
                                                     x="0"
                                                     y="0"
-                                                    width=move || TRACE_NAME_WIDTH + timeline_width()
+                                                    width=move || TRACE_NAME_WIDTH + timeline_width.get()
                                                     height=trace_height
                                                     fill="none"
                                                     class="stroke-slate-200 dark:stroke-slate-700"
@@ -486,12 +486,12 @@ pub fn BazelTraceChart(
                                                             let normalized_start = (event.start - min_start_time)
                                                                 as f64;
                                                             let event_width = move || {
-                                                                (event.duration.unwrap_or(1) as f64 * scale())
+                                                                (event.duration.unwrap_or(1) as f64 * zoom.get())
                                                                     .max(1.0)
                                                             };
 
                                                             view! {
-                                                                <g transform=move || format!("translate({}, {})", normalized_start * scale(), y)>
+                                                                <g transform=move || format!("translate({}, {})", normalized_start * zoom.get(), y)>
                                                                     <rect
                                                                         x="0"
                                                                         y="0"
@@ -542,7 +542,7 @@ pub fn BazelTraceChart(
                             {
                                 move || {
                                     let time = hover_time.get().unwrap();
-                                    let x = (time - min_start_time as f64) * scale();
+                                    let x = (time - min_start_time as f64) * zoom.get();
                                     view! {
                                         <g
                                             class="pointer-events-none"
