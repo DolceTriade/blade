@@ -178,6 +178,10 @@ pub fn BazelTraceChart(
     let tooltip_pos = RwSignal::new((0.0, 0.0));
     let tooltip_visible = RwSignal::new(false);
 
+    let hovered_counter_info = RwSignal::new(None::<(String, f64)>);
+    let counter_tooltip_pos = RwSignal::new((0.0, 0.0));
+    let counter_tooltip_visible = RwSignal::new(false);
+
     let hover_time = RwSignal::new(None::<f64>);
     let hover_line_text_pos = RwSignal::new((0.0, 0.0));
     let container_ref = NodeRef::<html::Div>::new();
@@ -272,6 +276,7 @@ pub fn BazelTraceChart(
 
     let on_container_mouseleave = move |_| {
         hover_time.set(None);
+        counter_tooltip_visible.set(false);
     };
 
     view! {
@@ -399,6 +404,13 @@ pub fn BazelTraceChart(
                                 key=|(_, counter)| counter.name.clone()
                                 children=move |(i, counter)| {
                                     let y = i as f64 * COUNTER_CHART_HEIGHT;
+                                    let (_, max_val) = counter
+                                        .time_series
+                                        .iter()
+                                        .fold((f64::MAX, f64::MIN), |(min, max), point| {
+                                            (min.min(point.value), max.max(point.value))
+                                        });
+
                                     view! {
                                         <g>
                                             <text
@@ -409,6 +421,15 @@ pub fn BazelTraceChart(
                                                 class="fill-slate-900 dark:fill-slate-200"
                                             >
                                                 {counter.name}
+                                            </text>
+                                            <text
+                                                x=TRACE_NAME_WIDTH - 10.0
+                                                y=y + 15.0
+                                                text-anchor="end"
+                                                font-size="10"
+                                                class="fill-slate-500 dark:fill-slate-400"
+                                            >
+                                                {format!("{:.2}", max_val)}
                                             </text>
                                             <line
                                                 x1="0"
@@ -442,37 +463,115 @@ pub fn BazelTraceChart(
                                             (min.min(point.value), max.max(point.value))
                                         });
 
+                                    let time_series_for_path = counter.time_series.clone();
                                     let path_data = Signal::derive(move || {
-                                        if counter.time_series.is_empty() {
+                                        if time_series_for_path.is_empty() {
                                             return "M 0 0".to_string();
                                         }
 
-                                        let mut d = format!(
-                                            "M {} {}",
-                                            (counter.time_series[0].timestamp - min_start_time) as f64
-                                                * zoom.get(),
+                                        let first_point = &time_series_for_path[0];
+                                        let first_x =
+                                            (first_point.timestamp - min_start_time) as f64 * zoom.get();
+                                        let first_y = if max_val > min_val {
                                             COUNTER_CHART_HEIGHT
+                                                - ((first_point.value - min_val) / (max_val - min_val))
+                                                    * COUNTER_CHART_HEIGHT
+                                        } else {
+                                            COUNTER_CHART_HEIGHT / 2.0
+                                        };
+
+                                        let mut d = format!(
+                                            "M {} {} L {} {}",
+                                            first_x, COUNTER_CHART_HEIGHT, first_x, first_y
                                         );
 
-                                        for point in &counter.time_series {
-                                            let x = (point.timestamp - min_start_time) as f64 * zoom.get();
-                                            let y = if max_val > min_val {
+                                        for i in 1..time_series_for_path.len() {
+                                            let prev_point = &time_series_for_path[i - 1];
+                                            let curr_point = &time_series_for_path[i];
+
+                                            let prev_y = if max_val > min_val {
                                                 COUNTER_CHART_HEIGHT
-                                                    - ((point.value - min_val) / (max_val - min_val))
+                                                    - ((prev_point.value - min_val)
+                                                        / (max_val - min_val))
                                                         * COUNTER_CHART_HEIGHT
                                             } else {
                                                 COUNTER_CHART_HEIGHT / 2.0
                                             };
-                                            d.push_str(&format!(" L {} {}", x, y));
+
+                                            let curr_x = (curr_point.timestamp - min_start_time) as f64
+                                                * zoom.get();
+                                            let curr_y = if max_val > min_val {
+                                                COUNTER_CHART_HEIGHT
+                                                    - ((curr_point.value - min_val)
+                                                        / (max_val - min_val))
+                                                        * COUNTER_CHART_HEIGHT
+                                            } else {
+                                                COUNTER_CHART_HEIGHT / 2.0
+                                            };
+
+                                            d.push_str(&format!(" L {} {}", curr_x, prev_y));
+                                            d.push_str(&format!(" L {} {}", curr_x, curr_y));
                                         }
 
                                         let last_x =
-                                            (counter.time_series.last().unwrap().timestamp - min_start_time)
+                                            (time_series_for_path.last().unwrap().timestamp - min_start_time)
                                                 as f64 * zoom.get();
                                         d.push_str(&format!(" L {} {}", last_x, COUNTER_CHART_HEIGHT));
                                         d.push('Z');
                                         d
                                     });
+
+                                    let on_counter_mousemove = {
+                                        let counter_name = counter.name.clone();
+                                        let time_series = counter.time_series;
+                                        move |ev: web_sys::MouseEvent| {
+                                            ev.stop_propagation();
+                                            if let Some(container) = container_ref.get() {
+                                                let rect = container.get_bounding_client_rect();
+                                                let x = ev.client_x() as f64 - rect.left()
+                                                    + container.scroll_left() as f64;
+                                                let timeline_x = x - TRACE_NAME_WIDTH;
+
+                                                if timeline_x < 0.0 {
+                                                    return;
+                                                }
+
+                                                let time_us = (timeline_x / zoom.get())
+                                                    + min_start_time as f64;
+
+                                                let value = match time_series.binary_search_by(|p| {
+                                                    (p.timestamp as f64).total_cmp(&time_us)
+                                                }) {
+                                                    Ok(i) => time_series[i].value,
+                                                    Err(i) => {
+                                                        if i == 0 {
+                                                            // Hovering before the first data point
+                                                            0.0
+                                                        } else if i >= time_series.len() {
+                                                            // Hovering after the last data point
+                                                            time_series.last().unwrap().value
+                                                        } else {
+                                                            // Hovering between two data points
+                                                            time_series[i - 1].value
+                                                        }
+                                                    },
+                                                };
+
+                                                hovered_counter_info
+                                                    .set(Some((counter_name.clone(), value)));
+                                                counter_tooltip_pos.set((
+                                                    ev.client_x() as f64,
+                                                    ev.client_y() as f64,
+                                                ));
+                                                counter_tooltip_visible.set(true);
+                                            }
+                                        }
+                                    };
+
+                                    let on_counter_mouseout = move |ev: web_sys::MouseEvent| {
+                                        ev.stop_propagation();
+                                        counter_tooltip_visible.set(false);
+                                    };
 
                                     view! {
                                         <g transform=format!("translate(0, {})", y_offset)>
@@ -482,6 +581,8 @@ pub fn BazelTraceChart(
                                                 fill-opacity="0.5"
                                                 class="stroke-slate-200 dark:stroke-slate-700"
                                                 stroke-width="1"
+                                                on:mousemove=on_counter_mousemove
+                                                on:mouseout=on_counter_mouseout
                                             />
                                         </g>
                                     }
@@ -755,6 +856,39 @@ pub fn BazelTraceChart(
                 }
             >
                 {move || hover_time.get().map(format_time)}
+            </div>
+            <div
+                class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
+                style=move || {
+                    let (x, y) = counter_tooltip_pos.get();
+                    let display = if counter_tooltip_visible.get() {
+                        "block"
+                    } else {
+                        "none"
+                    };
+                    format!(
+                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
+                        x,
+                        y,
+                        display,
+                    )
+                }
+            >
+                {move || {
+                    hovered_counter_info
+                        .get()
+                        .map(|(name, value)| {
+                            view! {
+                                <div class="text-sm text-slate-900 dark:text-slate-200">
+                                    <div class="font-bold">{name}</div>
+                                    <div>
+                                        <strong>"Value: "</strong>
+                                        {format!("{:.2}", value)}
+                                    </div>
+                                </div>
+                            }
+                        })
+                }}
             </div>
             <div
                 class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"

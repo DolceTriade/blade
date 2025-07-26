@@ -172,9 +172,10 @@ impl BazelTrace {
                         value: event
                             .args
                             .as_ref()
-                            .and_then(|args| args.get("value"))
+                            .and_then(|args| args.as_object())
+                            .and_then(|map| map.values().next())
                             .and_then(|v| v.as_f64())
-                            .unwrap_or_default(), // Extract f64 value from "value" key
+                            .unwrap_or_default(),
                     });
                 },
             }
@@ -186,7 +187,10 @@ impl BazelTrace {
             trace.events.sort_by(|a, b| a.start.cmp(&b.start));
         }
 
-        let counters: Vec<Counter> = counters_map.into_values().collect();
+        let mut counters: Vec<Counter> = counters_map.into_values().collect();
+        for counter in &mut counters {
+            counter.time_series.sort_by_key(|p| p.timestamp);
+        }
 
         BazelTrace { traces, counters }
     }
@@ -240,11 +244,16 @@ mod tests {
 
         let bazel_trace = BazelTrace::from_trace_events(parsed.trace_events);
 
-        // Ensure no counters have only one item
+        // Ensure no counters have only one item and have meaningful data
         for counter in &bazel_trace.counters {
             assert!(
                 counter.time_series.len() > 1,
                 "Counter {} should have more than one data point",
+                counter.name
+            );
+            assert!(
+                counter.time_series.iter().any(|p| p.value != 0.0),
+                "Counter {} should have at least one non-zero value",
                 counter.name
             );
         }
