@@ -371,7 +371,7 @@ pub fn BazelTraceChart(
                             />
                             <For
                                 each=move || x_axis_ticks.get()
-                                key=move |(_, _, tick_val)| *tick_val as u64
+                                key=move |(_, _, tick_val)| format!("{}-{}", zoom.get(), tick_val.to_bits())
                                 children=move |(x, label, _)| {
                                     view! {
                                         <g>
