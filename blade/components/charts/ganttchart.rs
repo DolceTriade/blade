@@ -155,6 +155,7 @@ pub fn BazelTraceChart(
     let tooltip_visible = RwSignal::new(false);
 
     let hover_time = RwSignal::new(None::<f64>);
+    let hover_line_text_pos = RwSignal::new((0.0, 0.0));
     let container_ref = NodeRef::<html::Div>::new();
 
     let scale = move || zoom.get();
@@ -226,6 +227,7 @@ pub fn BazelTraceChart(
                 let timeline_x = x - TRACE_NAME_WIDTH;
                 let time_us = (timeline_x / scale()) + min_start_time as f64;
                 hover_time.set(Some(time_us));
+                hover_line_text_pos.set((ev.client_x() as f64, rect.top()));
             } else {
                 hover_time.set(None);
             }
@@ -440,13 +442,6 @@ pub fn BazelTraceChart(
                                                 class="stroke-red-500"
                                                 stroke-dasharray="4"
                                             />
-                                            <text
-                                                x=x + 5.0
-                                                y=X_AXIS_HEIGHT + 15.0
-                                                class="fill-red-500 text-xs"
-                                            >
-                                                {format_time(time)}
-                                            </text>
                                         </g>
                                     }
                                 }
@@ -454,6 +449,25 @@ pub fn BazelTraceChart(
                         </Show>
                     </svg>
                 </div>
+            </div>
+            <div
+                class="absolute z-10 p-1 bg-red-500 text-white text-xs rounded pointer-events-none"
+                style=move || {
+                    let (x, y) = hover_line_text_pos.get();
+                    let display = if hover_time.get().is_some() && !tooltip_visible.get() {
+                        "block"
+                    } else {
+                        "none"
+                    };
+                    format!(
+                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
+                        x,
+                        y,
+                        display,
+                    )
+                }
+            >
+                {move || hover_time.get().map(format_time)}
             </div>
             <div
                 class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
@@ -485,12 +499,24 @@ pub fn BazelTraceChart(
                                     <strong>"Duration: "</strong>
                                     {format_duration(event.duration.unwrap_or(0))}
                                 </div>
-                                {event.args.map(|args| view! {
-                                    <div>
-                                        <strong>"Args: "</strong>
-                                        {format!("{}", serde_json::to_string(&args).unwrap_or_default())}
-                                    </div>
-                                })}
+                                {
+                                    event
+                                        .args
+                                        .map(|args| {
+                                            view! {
+                                                <div>
+                                                    <strong>"Args: "</strong>
+                                                    {
+                                                        format!(
+                                                            "{}",
+                                                            serde_json::to_string(&args)
+                                                                .unwrap_or_default(),
+                                                        )
+                                                    }
+                                                </div>
+                                            }
+                                        })
+                                }
                             </div>
                         }
                     })
