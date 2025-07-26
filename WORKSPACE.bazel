@@ -69,6 +69,7 @@ nixpkgs_rust_configure(
     },
     target_constraints = [
         "@platforms//cpu:wasm32",
+        "@platforms//os:none",
     ],
 )
 

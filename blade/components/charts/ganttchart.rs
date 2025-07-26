@@ -71,6 +71,19 @@ fn color_for_category(category: &str) -> String {
     format!("#{:02x}{:02x}{:02x}", r, g, b)
 }
 
+fn format_duration(duration_us: i64) -> String {
+    if duration_us < 0 {
+        return "0µs".to_string();
+    }
+    if duration_us >= 1_000_000 {
+        format!("{:.3}s", duration_us as f64 / 1_000_000.0)
+    } else if duration_us >= 1_000 {
+        format!("{:.3}ms", duration_us as f64 / 1_000.0)
+    } else {
+        format!("{}µs", duration_us)
+    }
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn BazelTraceChart(
@@ -100,7 +113,7 @@ pub fn BazelTraceChart(
         min_start_time
     };
 
-    let duration = (max_end_time - min_start_time) as f64;
+    let duration = (max_end_time - min_start_time).max(0) as f64;
 
     let layouts = StoredValue::new(
         bazel_trace
@@ -124,12 +137,16 @@ pub fn BazelTraceChart(
     };
     let (zoom, set_zoom) = signal(initial_zoom);
 
+    let hovered_event = RwSignal::new(None::<Event>);
+    let tooltip_pos = RwSignal::new((0.0, 0.0));
+    let tooltip_visible = RwSignal::new(false);
+
     let scale = move || zoom.get();
     let timeline_width = move || duration * scale();
 
     let x_axis_ticks = move || {
         let timeline_w = timeline_width();
-        if timeline_w <= 0.0 {
+        if timeline_w <= 0.0 || duration <= 0.0 {
             return Vec::new();
         }
 
@@ -142,236 +159,272 @@ pub fn BazelTraceChart(
             ("µs", 1.0)
         };
 
-        // 2. Calculate a "nice" time interval for ticks
+        // 2. Calculate a "nice" tick interval.
         let target_tick_spacing_px = 150.0;
-        let rough_tick_interval_us = (target_tick_spacing_px / timeline_w) * duration;
+        let min_tick_count = (timeline_w / target_tick_spacing_px).floor() as u32;
+        let tick_range_us = duration;
 
-        if rough_tick_interval_us <= 0.0 {
-            return Vec::new();
-        }
+        let rough_tick_interval = tick_range_us / (min_tick_count.max(1) as f64);
+        let exponent = 10.0_f64.powf(rough_tick_interval.log10().floor());
+        let nice_fractions = [1.0, 2.0, 5.0, 10.0];
+        let fraction = rough_tick_interval / exponent;
+        let nice_fraction = nice_fractions
+            .iter()
+            .find(|&f| *f >= fraction)
+            .unwrap_or(&10.0);
+        let nice_tick_interval = nice_fraction * exponent;
 
-        let exponent = 10.0_f64.powf(rough_tick_interval_us.log10().floor());
-        let fraction = rough_tick_interval_us / exponent;
-
-        let nice_fraction = if fraction <= 1.0 {
-            1.0
-        } else if fraction <= 2.0 {
-            2.0
-        } else if fraction <= 5.0 {
-            5.0
-        } else {
-            10.0
-        };
-
-        let nice_tick_interval_us = nice_fraction * exponent;
-
-        // 3. Generate the ticks
+        // 3. Generate the ticks based on the nice interval.
         let mut ticks = Vec::new();
-        if nice_tick_interval_us == 0.0 {
+        if nice_tick_interval == 0.0 {
             return ticks;
         }
-        let num_ticks = (duration / nice_tick_interval_us).ceil() as i32;
 
-        for i in 0..=num_ticks {
-            let tick_duration = i as f64 * nice_tick_interval_us;
-            if tick_duration > duration * 1.001 {
-                break;
+        let first_tick = (min_start_time as f64 / nice_tick_interval).floor() * nice_tick_interval;
+
+        let mut current_tick = first_tick;
+        while current_tick <= max_end_time as f64 {
+            let normalized_tick = current_tick - min_start_time as f64;
+            if normalized_tick >= 0.0 {
+                let x = normalized_tick * scale();
+                let label_val = current_tick / divisor;
+
+                let display_label = if (label_val.fract().abs() * divisor) < 1.0 {
+                    format!("{:.0}{}", label_val.round(), unit_label)
+                } else {
+                    format!("{:.2}{}", label_val, unit_label)
+                };
+                ticks.push((x, display_label));
             }
-            let x = tick_duration * scale();
-            let original_time = tick_duration + min_start_time as f64;
-            let label_val = original_time / divisor;
-
-            // Avoid floating point precision issues in label (e.g., "5.00s" -> "5s")
-            let label = if label_val.fract().abs() < 1e-9 {
-                format!("{:.0}{}", label_val, unit_label)
-            } else {
-                format!("{:.2}{}", label_val, unit_label)
-            };
-
-            ticks.push((x, label));
+            current_tick += nice_tick_interval;
         }
         ticks
     };
 
     view! {
-        <div>
-            <div class="flex space-x-2 mb-2">
-                <button
-                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                    on:click=move |_| set_zoom.update(|z| *z *= 1.5)
-                >
-                    "Zoom In"
-                </button>
-                <button
-                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                    on:click=move |_| set_zoom.update(|z| *z /= 1.5)
-                >
-                    "Zoom Out"
-                </button>
-                <button
-                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                    on:click=move |_| set_zoom.set(initial_zoom)
-                >
-                    "Reset"
-                </button>
-            </div>
-            <div
-                style=format!(
-                    "overflow: auto; width: {}px; height: {}px; border: 1px solid #ccc;",
-                    width,
-                    height,
-                )
-                class="rounded"
-            >
-                <svg
-                    class="bazel-trace-chart"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width=move || TRACE_NAME_WIDTH + timeline_width()
-                    height=total_height
-                    viewBox=move || {
-                        format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width(), total_height)
-                    }
-                >
-                    // X-Axis
-                    <g
-                        class="x-axis"
-                        transform=format!("translate({}, {})", TRACE_NAME_WIDTH, X_AXIS_HEIGHT)
+        <div class="relative">
+            <div>
+                <div class="flex space-x-2 mb-2">
+                    <button
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        on:click=move |_| set_zoom.update(|z| *z *= 1.5)
                     >
-                        <line
-                            x1="0"
-                            y1="0"
-                            x2=timeline_width
-                            y2="0"
-                            class="stroke-slate-900 dark:stroke-slate-200"
-                        />
-                        <For
-                            each=x_axis_ticks
-                            key=|(_, label)| label.clone()
-                            children=move |(x, label)| {
-                                view! {
-                                    <g>
-                                        <line
-                                            x1=x
-                                            y1="-5"
-                                            x2=x
-                                            y2="0"
-                                            class="stroke-slate-900 dark:stroke-slate-200"
-                                        />
-                                        <text
-                                            x=x
-                                            y="-8"
-                                            text-anchor="middle"
-                                            font-size="10"
-                                            class="fill-slate-900 dark:fill-slate-200"
-                                        >
-                                            {label}
-                                        </text>
-                                    </g>
-                                }
-                            }
-                        />
-                    </g>
-
-                    // Traces
-                    <g class="traces" transform=format!("translate(0, {})", X_AXIS_HEIGHT)>
-                        {
-                            let trace_y_offsets: Vec<f64> = layouts
-                                .with_value(|l| {
-                                    l.iter()
-                                        .scan(
-                                            0.0,
-                                            |state, (_, num_rows)| {
-                                                let current_y = *state;
-                                                *state += *num_rows as f64 * ROW_HEIGHT;
-                                                Some(current_y)
-                                            },
-                                        )
-                                        .collect()
-                                });
-                            bazel_trace
-                                .traces
-                                .into_iter()
-                                .zip(layouts.with_value(|l| l.clone()).into_iter())
-                                .zip(trace_y_offsets.into_iter())
-                                .map(|((trace, (positioned_events, num_rows)), current_y)| {
-                                    let trace_height = num_rows as f64 * ROW_HEIGHT;
-
+                        "Zoom In"
+                    </button>
+                    <button
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        on:click=move |_| set_zoom.update(|z| *z /= 1.5)
+                    >
+                        "Zoom Out"
+                    </button>
+                    <button
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        on:click=move |_| set_zoom.set(initial_zoom)
+                    >
+                        "Reset"
+                    </button>
+                </div>
+                <div
+                    style=format!(
+                        "overflow: auto; width: {}px; height: {}px; border: 1px solid #ccc;",
+                        width,
+                        height,
+                    )
+                    class="rounded"
+                >
+                    <svg
+                        class="bazel-trace-chart"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width=move || TRACE_NAME_WIDTH + timeline_width()
+                        height=total_height
+                        viewBox=move || {
+                            format!("0 0 {} {}", TRACE_NAME_WIDTH + timeline_width(), total_height)
+                        }
+                    >
+                        // X-Axis
+                        <g
+                            class="x-axis"
+                            transform=format!("translate({}, {})", TRACE_NAME_WIDTH, X_AXIS_HEIGHT)
+                        >
+                            <line
+                                x1="0"
+                                y1="0"
+                                x2=timeline_width
+                                y2="0"
+                                class="stroke-slate-900 dark:stroke-slate-200"
+                            />
+                            <For
+                                each=x_axis_ticks
+                                key=move |(x, _)| format!("{}-{}", zoom.read(), x)
+                                children=move |(x, label)| {
                                     view! {
-                                        <g
-                                            class="trace-group"
-                                            transform=format!("translate(0, {})", current_y)
-                                        >
-                                            // Trace Border
-                                            <rect
-                                                x="0"
-                                                y="0"
-                                                width=move || TRACE_NAME_WIDTH + timeline_width()
-                                                height=trace_height
-                                                fill="none"
-                                                class="stroke-slate-200 dark:stroke-slate-700"
+                                        <g>
+                                            <line
+                                                x1=x
+                                                y1="-5"
+                                                x2=x
+                                                y2="0"
+                                                class="stroke-slate-900 dark:stroke-slate-200"
                                             />
-
-                                            // Trace Name
                                             <text
-                                                x="10"
-                                                y=trace_height / 2.0
-                                                dominant-baseline="middle"
-                                                font-size="12"
+                                                x=x
+                                                y="-8"
+                                                text-anchor="middle"
+                                                font-size="10"
                                                 class="fill-slate-900 dark:fill-slate-200"
                                             >
-                                                {trace.name}
+                                                {label}
                                             </text>
-
-                                            // Timeline
-                                            <g
-                                                class="timeline"
-                                                transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
-                                            >
-                                                <For
-                                                    each=move || positioned_events.clone()
-                                                    key=|p_event| p_event.id
-                                                    children=move |p_event| {
-                                                        let event = p_event.event;
-                                                        let y = p_event.row as f64 * ROW_HEIGHT + V_PADDING;
-                                                        let color = color_for_category(&event.category);
-                                                        let normalized_start =
-                                                            (event.start - min_start_time) as f64;
-
-                                                        view! {
-                                                            <rect
-                                                                x=move || normalized_start * scale()
-                                                                y=y
-                                                                width=move || {
-                                                                    (event.duration.unwrap_or(1) as f64 * scale()).max(1.0)
-                                                                }
-                                                                height=EVENT_HEIGHT
-                                                                fill=color
-                                                                on:mouseover={
-                                                                    let event_clone = event.clone();
-                                                                    move |_| show_tooltip(&format!("{:?}", event_clone))
-                                                                }
-                                                                on:mouseout=move |_| hide_tooltip()
-                                                            />
-                                                        }
-                                                    }
-                                                />
-                                            </g>
                                         </g>
                                     }
-                                })
-                                .collect_view()
+                                }
+                            />
+                        </g>
+
+                        // Traces
+                        <g class="traces" transform=format!("translate(0, {})", X_AXIS_HEIGHT)>
+                            {
+                                let trace_y_offsets: Vec<f64> = layouts
+                                    .with_value(|l| {
+                                        l.iter()
+                                            .scan(
+                                                0.0,
+                                                |state, (_, num_rows)| {
+                                                    let current_y = *state;
+                                                    *state += *num_rows as f64 * ROW_HEIGHT;
+                                                    Some(current_y)
+                                                },
+                                            )
+                                            .collect()
+                                    });
+                                bazel_trace
+                                    .traces
+                                    .into_iter()
+                                    .zip(layouts.with_value(|l| l.clone()).into_iter())
+                                    .zip(trace_y_offsets.into_iter())
+                                    .map(|((trace, (positioned_events, num_rows)), current_y)| {
+                                        let trace_height = num_rows as f64 * ROW_HEIGHT;
+
+                                        view! {
+                                            <g
+                                                class="trace-group"
+                                                transform=format!("translate(0, {})", current_y)
+                                            >
+                                                // Trace Border
+                                                <rect
+                                                    x="0"
+                                                    y="0"
+                                                    width=move || TRACE_NAME_WIDTH + timeline_width()
+                                                    height=trace_height
+                                                    fill="none"
+                                                    class="stroke-slate-200 dark:stroke-slate-700"
+                                                />
+
+                                                // Trace Name
+                                                <text
+                                                    x="10"
+                                                    y=trace_height / 2.0
+                                                    dominant-baseline="middle"
+                                                    font-size="12"
+                                                    class="fill-slate-900 dark:fill-slate-200"
+                                                >
+                                                    {trace.name}
+                                                </text>
+
+                                                // Timeline
+                                                <g
+                                                    class="timeline"
+                                                    transform=format!(
+                                                        "translate({}, 0)",
+                                                        TRACE_NAME_WIDTH,
+                                                    )
+                                                >
+                                                    <For
+                                                        each=move || positioned_events.clone()
+                                                        key=|p_event| p_event.id
+                                                        children=move |p_event| {
+                                                            let event = p_event.event;
+                                                            let y = p_event.row as f64 * ROW_HEIGHT + V_PADDING;
+                                                            let color = color_for_category(&event.category);
+                                                            let normalized_start = (event.start - min_start_time)
+                                                                as f64;
+
+                                                            view! {
+                                                                <rect
+                                                                    x=move || normalized_start * scale()
+                                                                    y=y
+                                                                    width=move || {
+                                                                        (event.duration.unwrap_or(1) as f64 * scale()).max(1.0)
+                                                                    }
+                                                                    height=EVENT_HEIGHT
+                                                                    fill=color
+                                                                    on:mouseover={
+                                                                        let event_clone = event.clone();
+                                                                        move |ev: web_sys::MouseEvent| {
+                                                                            hovered_event.set(Some(event_clone.clone()));
+                                                                            tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
+                                                                            tooltip_visible.set(true);
+                                                                        }
+                                                                    }
+                                                                    on:mouseout=move |_| {
+                                                                        hovered_event.set(None);
+                                                                        tooltip_visible.set(false);
+                                                                    }
+                                                                />
+                                                            }
+                                                        }
+                                                    />
+                                                </g>
+                                            </g>
+                                        }
+                                    })
+                                    .collect_view()
+                            }
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div
+                class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
+                style=move || {
+                    let (x, y) = tooltip_pos.get();
+                    let display = if tooltip_visible.get() {
+                        "block"
+                    } else {
+                        "none"
+                    };
+                    format!(
+                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
+                        x,
+                        y,
+                        display,
+                    )
+                }
+            >
+                {move || {
+                    hovered_event.get().map(|event| {
+                        view! {
+                            <div class="text-sm text-slate-900 dark:text-slate-200">
+                                <div class="font-bold">{event.name}</div>
+                                <div>
+                                    <strong>"Category: "</strong>
+                                    {event.category}
+                                </div>
+                                <div>
+                                    <strong>"Duration: "</strong>
+                                    {format_duration(event.duration.unwrap_or(0))}
+                                </div>
+                                {event.args.map(|args| view! {
+                                    <div>
+                                        <strong>"Args: "</strong>
+                                        {format!("{}", serde_json::to_string(&args).unwrap_or_default())}
+                                    </div>
+                                })}
+                            </div>
                         }
-                    </g>
-                </svg>
+                    })
+                }}
             </div>
         </div>
     }
-}
-
-fn show_tooltip(details: &str) {
-    tracing::info!("Tooltip: {}", details);
-}
-
-fn hide_tooltip() {
-    tracing::info!("Tooltip hidden");
 }
