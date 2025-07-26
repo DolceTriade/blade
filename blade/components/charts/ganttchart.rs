@@ -71,16 +71,6 @@ fn color_for_category(category: &str) -> String {
     format!("#{:02x}{:02x}{:02x}", r, g, b)
 }
 
-fn format_time_with_units(time_us: f64) -> String {
-    if time_us >= 1_000_000.0 {
-        format!("{:.2}s", time_us / 1_000_000.0)
-    } else if time_us >= 1_000.0 {
-        format!("{:.2}ms", time_us / 1_000.0)
-    } else {
-        format!("{:.2}µs", time_us)
-    }
-}
-
 #[allow(non_snake_case)]
 #[component]
 pub fn BazelTraceChart(
@@ -93,17 +83,24 @@ pub fn BazelTraceChart(
         .traces
         .sort_by(|a, b| a.pid.cmp(&b.pid).then(a.tid.cmp(&b.tid)));
 
-    let max_end_time = bazel_trace
+    let (min_start_time, max_end_time) = bazel_trace
         .traces
         .iter()
-        .flat_map(|trace| {
-            trace
-                .events
-                .iter()
-                .map(|event| event.start + event.duration.unwrap_or(1))
-        })
-        .max()
-        .unwrap_or(0) as f64;
+        .flat_map(|trace| &trace.events)
+        .fold((i64::MAX, 0), |(min_s, max_e), event| {
+            (
+                min_s.min(event.start),
+                max_e.max(event.start + event.duration.unwrap_or(1)),
+            )
+        });
+
+    let min_start_time = if min_start_time == i64::MAX {
+        0
+    } else {
+        min_start_time
+    };
+
+    let duration = (max_end_time - min_start_time) as f64;
 
     let layouts = StoredValue::new(
         bazel_trace
@@ -120,26 +117,80 @@ pub fn BazelTraceChart(
             + X_AXIS_HEIGHT
     });
 
-    let initial_zoom = if max_end_time > 0.0 {
-        (width as f64 - TRACE_NAME_WIDTH) / max_end_time
+    let initial_zoom = if duration > 0.0 {
+        (width as f64 - TRACE_NAME_WIDTH) / duration
     } else {
         1.0
     };
     let (zoom, set_zoom) = signal(initial_zoom);
 
     let scale = move || zoom.get();
-    let timeline_width = move || max_end_time * scale();
+    let timeline_width = move || duration * scale();
 
     let x_axis_ticks = move || {
-        let num_ticks = (timeline_width() / 150.0).ceil() as usize; // Aim for a tick every 150px
-        let tick_duration = max_end_time / num_ticks as f64;
-        (0..=num_ticks)
-            .map(|i| {
-                let time = tick_duration * i as f64;
-                let x = time * scale();
-                (x, format_time_with_units(time))
-            })
-            .collect::<Vec<_>>()
+        let timeline_w = timeline_width();
+        if timeline_w <= 0.0 {
+            return Vec::new();
+        }
+
+        // 1. Determine the time unit for the whole axis based on duration
+        let (unit_label, divisor) = if duration >= 1_000_000.0 {
+            ("s", 1_000_000.0)
+        } else if duration >= 1_000.0 {
+            ("ms", 1_000.0)
+        } else {
+            ("µs", 1.0)
+        };
+
+        // 2. Calculate a "nice" time interval for ticks
+        let target_tick_spacing_px = 150.0;
+        let rough_tick_interval_us = (target_tick_spacing_px / timeline_w) * duration;
+
+        if rough_tick_interval_us <= 0.0 {
+            return Vec::new();
+        }
+
+        let exponent = 10.0_f64.powf(rough_tick_interval_us.log10().floor());
+        let fraction = rough_tick_interval_us / exponent;
+
+        let nice_fraction = if fraction <= 1.0 {
+            1.0
+        } else if fraction <= 2.0 {
+            2.0
+        } else if fraction <= 5.0 {
+            5.0
+        } else {
+            10.0
+        };
+
+        let nice_tick_interval_us = nice_fraction * exponent;
+
+        // 3. Generate the ticks
+        let mut ticks = Vec::new();
+        if nice_tick_interval_us == 0.0 {
+            return ticks;
+        }
+        let num_ticks = (duration / nice_tick_interval_us).ceil() as i32;
+
+        for i in 0..=num_ticks {
+            let tick_duration = i as f64 * nice_tick_interval_us;
+            if tick_duration > duration * 1.001 {
+                break;
+            }
+            let x = tick_duration * scale();
+            let original_time = tick_duration + min_start_time as f64;
+            let label_val = original_time / divisor;
+
+            // Avoid floating point precision issues in label (e.g., "5.00s" -> "5s")
+            let label = if label_val.fract().abs() < 1e-9 {
+                format!("{:.0}{}", label_val, unit_label)
+            } else {
+                format!("{:.2}{}", label_val, unit_label)
+            };
+
+            ticks.push((x, label));
+        }
+        ticks
     };
 
     view! {
@@ -281,16 +332,18 @@ pub fn BazelTraceChart(
                                                     key=|p_event| p_event.id
                                                     children=move |p_event| {
                                                         let event = p_event.event;
-                                                        let start = event.start as f64 * scale();
-                                                        let duration = event.duration.unwrap_or(1) as f64 * scale();
                                                         let y = p_event.row as f64 * ROW_HEIGHT + V_PADDING;
                                                         let color = color_for_category(&event.category);
+                                                        let normalized_start =
+                                                            (event.start - min_start_time) as f64;
 
                                                         view! {
                                                             <rect
-                                                                x=start
+                                                                x=move || normalized_start * scale()
                                                                 y=y
-                                                                width=duration
+                                                                width=move || {
+                                                                    (event.duration.unwrap_or(1) as f64 * scale()).max(1.0)
+                                                                }
                                                                 height=EVENT_HEIGHT
                                                                 fill=color
                                                                 on:mouseover={
