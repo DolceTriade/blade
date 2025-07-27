@@ -1,5 +1,6 @@
 use leptos::{html, prelude::*};
 use trace_event_parser::{BazelTrace, Counter, Event};
+use wasm_bindgen::JsCast;
 
 const TRACE_NAME_WIDTH: f64 = 200.0;
 const ROW_HEIGHT: f64 = 30.0;
@@ -160,7 +161,7 @@ pub fn BazelTraceChart(
         min_start_time
     };
 
-    let duration = (max_end_time - min_start_time).max(0) as f64;
+    let duration = (max_end_time - min_start_time).max(1) as f64;
 
     let layouts = StoredValue::new(
         bazel_trace
@@ -201,13 +202,40 @@ pub fn BazelTraceChart(
     Effect::new(move |_| {
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
-            let new_initial_zoom = if duration > 0.0 {
-                (container_width - TRACE_NAME_WIDTH) / duration
+
+            if container_width > 0.0 {
+                let new_initial_zoom = if duration > 0.0 {
+                    (container_width - TRACE_NAME_WIDTH) / duration
+                } else {
+                    1.0
+                };
+                tracing::info!("Setting initial_zoom: {new_initial_zoom}, was {}, container_width: {container_width}", zoom.get_untracked());
+                initial_zoom.set(new_initial_zoom);
+                set_zoom.set(new_initial_zoom);
             } else {
-                1.0
-            };
-            initial_zoom.set(new_initial_zoom);
-            set_zoom.set(new_initial_zoom);
+                // Container width is 0, defer measurement using requestAnimationFrame
+                let container_clone = container.clone();
+                let callback = wasm_bindgen::closure::Closure::wrap(Box::new(move || {
+                    let container_width = container_clone.client_width() as f64;
+                    tracing::info!("RAF: container_width: {container_width}");
+
+                    if container_width > 0.0 {
+                        let new_initial_zoom = if duration > 0.0 {
+                            (container_width - TRACE_NAME_WIDTH) / duration
+                        } else {
+                            1.0
+                        };
+                        tracing::info!("RAF: Setting initial_zoom: {new_initial_zoom}, container_width: {container_width}");
+                        initial_zoom.set(new_initial_zoom);
+                        set_zoom.set(new_initial_zoom);
+                    }
+                }) as Box<dyn FnMut()>);
+
+                if let Some(window) = web_sys::window() {
+                    let _ = window.request_animation_frame(callback.as_ref().unchecked_ref());
+                }
+                callback.forget(); // Prevent cleanup since this is one-time use
+            }
         }
     });
 
@@ -317,10 +345,9 @@ pub fn BazelTraceChart(
                 <div
                     node_ref=container_ref
                     style=format!(
-                        "overflow: auto; width: 100%; height: {}px; border: 1px solid #ccc;",
-                        height,
+                        "height: {height}px;",
                     )
-                    class="rounded"
+                    class="rounded overflow-auto max-w-full w-full"
                     on:mousemove=on_container_mousemove
                     on:mouseleave=on_container_mouseleave
                 >

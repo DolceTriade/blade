@@ -3,6 +3,7 @@ use leptos::prelude::*;
 use leptos_router::components::A;
 use leptos_router::hooks::use_params;
 use leptos_router::params::Params;
+use leptos::either::Either;
 use std::io::Read;
 use trace_event_parser::{BazelTrace, TraceEventFile};
 
@@ -71,18 +72,17 @@ pub fn ProfilePage() -> impl IntoView {
                 {move || Suspend::new(async move {
                     match profile_data.await {
                         Ok(bazel_trace) => {
-                            tracing::info!("{:#?}", bazel_trace);
-                            view! {
+                            Either::Left(view! {
                                 <BazelTraceChart bazel_trace=bazel_trace />
-                            }.into_any()
+                            })
                         }
                         Err(error) => {
-                            view! {
+                            Either::Right(view! {
                                 <div class="text-center py-8 text-red-500">
                                     <p class="font-semibold">"Error loading profile:"</p>
                                     <p class="text-sm mt-2">{error}</p>
                                 </div>
-                            }.into_any()
+                            })
                         }
                     }
                 })}
