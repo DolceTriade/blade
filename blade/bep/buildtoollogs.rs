@@ -26,7 +26,6 @@ impl EventHandler for Handler {
                             Ok(())
                         }),
                     )?;
-                    tracing::info!("Updated invocation {} with profile URI: {}", invocation_id, uri);
                     break;
                 }
             }
