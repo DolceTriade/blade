@@ -25,6 +25,7 @@ pub struct Invocation {
     pub command: String,
     pub pattern: Option<String>,
     pub last_heartbeat: Option<time::OffsetDateTime>,
+    pub profile_uri: Option<String>,
 }
 
 impl Invocation {
@@ -37,6 +38,7 @@ impl Invocation {
             command: ir.command.clone(),
             pattern: Some(ir.pattern.join(",")),
             last_heartbeat: ir.last_heartbeat.map(core::convert::Into::into),
+            profile_uri: ir.profile_uri.clone(),
         })
     }
 
@@ -58,6 +60,7 @@ impl Invocation {
             last_heartbeat: self.last_heartbeat.map(|h| {
                 crate::time::to_systemtime(&h).unwrap_or_else(|_| std::time::SystemTime::now())
             }),
+            profile_uri: self.profile_uri,
             ..Default::default()
         };
 

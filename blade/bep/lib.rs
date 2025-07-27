@@ -23,6 +23,7 @@ use tonic::{Response, Status, transport::Server};
 use tracing::{Instrument, Level, instrument, span};
 
 mod buildinfo;
+mod buildtoollogs;
 mod options;
 mod print_event;
 mod progress;
@@ -180,6 +181,7 @@ pub async fn run_bes_grpc(
         Box::new(progress::Handler {}),
         Box::new(target::Handler {}),
         Box::new(buildinfo::Handler {}),
+        Box::new(buildtoollogs::Handler {}),
         Box::new(options::Handler {}),
         Box::new(print_event::Handler {
             message_re: print_message_re,

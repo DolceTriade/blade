@@ -136,6 +136,9 @@ def rust_dependencies():
             "futures-core": crate.spec(
                 version = "0.3.29",
             ),
+            "flate2": crate.spec(
+                version = "1.0",
+            ),
             "cfg-if": crate.spec(
                 version = "1",
             ),
@@ -384,6 +387,9 @@ def rust_dependencies():
             ),
             "futures-core": crate.spec(
                 version = "0.3.29",
+            ),
+            "flate2": crate.spec(
+                version = "1.0",
             ),
             "junit-parser": crate.spec(
                 version = "1.4.0",

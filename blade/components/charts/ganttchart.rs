@@ -38,7 +38,7 @@ fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEven
         for (j, row_end) in row_ends.iter_mut().enumerate() {
             if start_time >= *row_end {
                 positioned_events.push(PositionedEvent {
-                    id: format!("{}-{}", trace_index, i),
+                    id: format!("{trace_index}-{i}"),
                     event: event.clone(),
                     row: j,
                 });
@@ -51,7 +51,7 @@ fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEven
         if !placed {
             let new_row = row_ends.len();
             positioned_events.push(PositionedEvent {
-                id: format!("{}-{}", trace_index, i),
+                id: format!("{trace_index}-{i}"),
                 event: event.clone(),
                 row: new_row,
             });
@@ -90,7 +90,7 @@ fn color_for_category(category: &str) -> String {
     let r = (hash & 0xFF0000) >> 16;
     let g = (hash & 0x00FF00) >> 8;
     let b = hash & 0x0000FF;
-    format!("#{:02x}{:02x}{:02x}", r, g, b)
+    format!("#{r:02x}{g:02x}{b:02x}")
 }
 
 fn format_duration(duration_us: i64) -> String {
@@ -102,7 +102,7 @@ fn format_duration(duration_us: i64) -> String {
     } else if duration_us >= 1_000 {
         format!("{:.3}ms", duration_us as f64 / 1_000.0)
     } else {
-        format!("{}µs", duration_us)
+        format!("{duration_us}µs")
     }
 }
 
@@ -115,7 +115,7 @@ fn format_time(time_us: f64) -> String {
     } else if time_us >= 1_000.0 {
         format!("{:.3}ms", time_us / 1_000.0)
     } else {
-        format!("{:.0}µs", time_us)
+        format!("{time_us:.0}µs")
     }
 }
 
@@ -261,7 +261,7 @@ pub fn BazelTraceChart(
                 let display_label = if (label_val.fract().abs() * divisor) < 1.0 {
                     format!("{:.0}{}", label_val.round(), unit_label)
                 } else {
-                    format!("{:.2}{}", label_val, unit_label)
+                    format!("{label_val:.2}{unit_label}")
                 };
                 ticks.push((x, display_label, current_tick));
             }
@@ -450,7 +450,7 @@ pub fn BazelTraceChart(
                                                 font-size="10"
                                                 class="fill-slate-500 dark:fill-slate-400"
                                             >
-                                                {format!("{:.2}", max_val)}
+                                                {format!("{max_val:.2}")}
                                             </text>
                                             <line
                                                 x1="0"
@@ -509,11 +509,7 @@ pub fn BazelTraceChart(
                                             COUNTER_CHART_HEIGHT / 2.0
                                         };
                                         let mut d = format!(
-                                            "M {} {} L {} {}",
-                                            first_x,
-                                            COUNTER_CHART_HEIGHT,
-                                            first_x,
-                                            first_y,
+                                            "M {first_x} {COUNTER_CHART_HEIGHT} L {first_x} {first_y}",
                                         );
                                         for i in 1..time_series_for_path.len() {
                                             let prev_point = &time_series_for_path[i - 1];
@@ -534,13 +530,13 @@ pub fn BazelTraceChart(
                                             } else {
                                                 COUNTER_CHART_HEIGHT / 2.0
                                             };
-                                            d.push_str(&format!(" L {} {}", curr_x, prev_y));
-                                            d.push_str(&format!(" L {} {}", curr_x, curr_y));
+                                            d.push_str(&format!(" L {curr_x} {prev_y}"));
+                                            d.push_str(&format!(" L {curr_x} {curr_y}"));
                                         }
                                         let last_x = (time_series_for_path.last().unwrap().timestamp
                                             - min_start_time) as f64 * zoom.get();
                                         d.push_str(
-                                            &format!(" L {} {}", last_x, COUNTER_CHART_HEIGHT),
+                                            &format!(" L {last_x} {COUNTER_CHART_HEIGHT}"),
                                         );
                                         d.push('Z');
                                         d
@@ -831,10 +827,7 @@ pub fn BazelTraceChart(
                         "none"
                     };
                     format!(
-                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
-                        x,
-                        y,
-                        display,
+                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
                     )
                 }
             >
@@ -846,10 +839,7 @@ pub fn BazelTraceChart(
                     let (x, y) = counter_tooltip_pos.get();
                     let display = if counter_tooltip_visible.get() { "block" } else { "none" };
                     format!(
-                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
-                        x,
-                        y,
-                        display,
+                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
                     )
                 }
             >
@@ -862,7 +852,7 @@ pub fn BazelTraceChart(
                                     <div class="font-bold">{name}</div>
                                     <div>
                                         <strong>"Value: "</strong>
-                                        {format!("{:.2}", value)}
+                                        {format!("{value:.2}")}
                                     </div>
                                 </div>
                             }
@@ -875,10 +865,7 @@ pub fn BazelTraceChart(
                     let (x, y) = tooltip_pos.get();
                     let display = if tooltip_visible.get() { "block" } else { "none" };
                     format!(
-                        "position: fixed; left: {}px; top: {}px; transform: translate(10px, 10px); display: {};",
-                        x,
-                        y,
-                        display,
+                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
                     )
                 }
             >
@@ -903,10 +890,7 @@ pub fn BazelTraceChart(
                                             view! {
                                                 <div>
                                                     <strong>"Args: "</strong>
-                                                    {format!(
-                                                        "{}",
-                                                        serde_json::to_string(&args).unwrap_or_default(),
-                                                    )}
+                                                    {serde_json::to_string(&args).unwrap_or_default()}
                                                 </div>
                                             }
                                         })}

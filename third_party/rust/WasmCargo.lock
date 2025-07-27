@@ -367,6 +367,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "const_format_proc_macros",
+ "flate2",
  "futures",
  "futures-core",
  "futures-util",

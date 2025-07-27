@@ -124,6 +124,8 @@ impl state::DB for Postgres {
                         .map(|s| s.to_string())
                         .collect::<Vec<_>>(),
                     is_live: false,
+                    last_heartbeat: res.last_heartbeat.map(|t| t.into()),
+                    profile_uri: res.profile_uri,
                     ..Default::default()
                 })
             })?
@@ -917,6 +919,7 @@ mod tests {
             pattern: vec!["//...".to_string()],
             last_heartbeat: None,
             is_live: false,
+            profile_uri: None,
             targets: HashMap::from([
                 (
                     "//target1".to_string(),

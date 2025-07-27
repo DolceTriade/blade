@@ -1,5 +1,5 @@
 {
-  "checksum": "fb1824c921f468a987c1efee28f96db3a37a667caa4df647968957ee5feeafa5",
+  "checksum": "db3b9d93e64ba9fb1e49ad7923eb21cd72e472a96bff2b0fc0e16e686a78a822",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -2299,6 +2299,10 @@
               "target": "console_log"
             },
             {
+              "id": "flate2 1.0.28",
+              "target": "flate2"
+            },
+            {
               "id": "futures 0.3.31",
               "target": "futures"
             },
@@ -2821,6 +2825,7 @@
         "crate_features": {
           "common": [
             "any_impl",
+            "default",
             "miniz_oxide",
             "rust_backend"
           ],
@@ -15696,6 +15701,7 @@
     "console_error_panic_hook 0.1.7",
     "console_log 1.0.0",
     "const_format_proc_macros 0.2.33",
+    "flate2 1.0.28",
     "futures 0.3.31",
     "futures-core 0.3.31",
     "futures-util 0.3.31",

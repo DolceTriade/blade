@@ -1,5 +1,5 @@
 {
-  "checksum": "385c70bdaefa9b9d57e73ab8d045253367c2ef6aed94158b9bf4cd3f825ddaa1",
+  "checksum": "94ea5894bae94de94a0ca551def4f7bbe7904ce1e3dd0ec0f42f6d3dd0ffde64",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -6262,6 +6262,10 @@
             {
               "id": "diesel_migrations 2.2.0",
               "target": "diesel_migrations"
+            },
+            {
+              "id": "flate2 1.0.26",
+              "target": "flate2"
             },
             {
               "id": "futures 0.3.31",
@@ -28863,6 +28867,7 @@
     "diesel 2.2.11",
     "diesel-tracing 0.3.1",
     "diesel_migrations 2.2.0",
+    "flate2 1.0.26",
     "futures 0.3.31",
     "futures-core 0.3.31",
     "humantime 2.1.0",
