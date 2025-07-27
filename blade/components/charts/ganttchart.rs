@@ -1,12 +1,13 @@
 use leptos::{html, prelude::*};
-use trace_event_parser::{BazelTrace, Counter, Event};
+use trace_event_parser::{BazelTrace, Event};
 use wasm_bindgen::JsCast;
+use web_sys::{HtmlCanvasElement, CanvasRenderingContext2d};
 
 const TRACE_NAME_WIDTH: f64 = 200.0;
 const ROW_HEIGHT: f64 = 30.0;
 const EVENT_HEIGHT: f64 = 20.0;
 const V_PADDING: f64 = 5.0;
-const X_AXIS_HEIGHT: f64 = 30.0; // Increased for more space
+const X_AXIS_HEIGHT: f64 = 30.0;
 const COUNTER_CHART_HEIGHT: f64 = 50.0;
 const COUNTER_CHART_TOP_MARGIN: f64 = 10.0;
 
@@ -14,10 +15,28 @@ const COUNTER_CHART_TOP_MARGIN: f64 = 10.0;
 struct PositionedEvent {
     id: String,
     event: Event,
-    row: usize,
+    // Pre-computed positioning data
+    normalized_start: f64,
+    y_position: f64,
+    color: String,
 }
 
-fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEvent>, usize) {
+#[derive(Clone, Debug, PartialEq)]
+struct ComputedEventLayout {
+    id: String,
+    event: Event,
+    x: f64,
+    y: f64,
+    width: f64,
+    color: String,
+    show_text: bool,
+}
+
+fn calculate_layout(
+    events: &[Event],
+    trace_index: usize,
+    min_start_time: i64,
+) -> (Vec<PositionedEvent>, usize) {
     let mut positioned_events = Vec::new();
     let mut row_ends: Vec<f64> = Vec::new();
 
@@ -40,8 +59,10 @@ fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEven
             if start_time >= *row_end {
                 positioned_events.push(PositionedEvent {
                     id: format!("{trace_index}-{i}"),
+                    normalized_start: (event.start - min_start_time) as f64,
+                    y_position: j as f64 * ROW_HEIGHT + V_PADDING,
+                    color: color_for_category(&event.category),
                     event: event.clone(),
-                    row: j,
                 });
                 *row_end = end_time;
                 placed = true;
@@ -53,8 +74,10 @@ fn calculate_layout(events: &[Event], trace_index: usize) -> (Vec<PositionedEven
             let new_row = row_ends.len();
             positioned_events.push(PositionedEvent {
                 id: format!("{trace_index}-{i}"),
+                normalized_start: (event.start - min_start_time) as f64,
+                y_position: new_row as f64 * ROW_HEIGHT + V_PADDING,
+                color: color_for_category(&event.category),
                 event: event.clone(),
-                row: new_row,
             });
             row_ends.push(end_time);
         }
@@ -120,20 +143,188 @@ fn format_time(time_us: f64) -> String {
     }
 }
 
-#[allow(non_snake_case)]
+fn find_event_at_position(
+    events: &[ComputedEventLayout],
+    x: f64,
+    y: f64,
+    viewport_left: f64,
+) -> Option<&ComputedEventLayout> {
+    let canvas_x = x + viewport_left;
+
+    for event in events {
+        if canvas_x >= event.x
+            && canvas_x <= event.x + event.width
+            && y >= event.y
+            && y <= event.y + EVENT_HEIGHT
+        {
+            return Some(event);
+        }
+    }
+    None
+}
+
+fn render_gantt_chart_viewport(
+    ctx: &CanvasRenderingContext2d,
+    trace_data: &BazelTrace,
+    layout_data: &[(Vec<PositionedEvent>, usize)],
+    zoom: f64,
+    min_start_time: i64,
+    total_height: f64,
+    viewport_width: f64,
+    traces_height: f64,
+    counters_height: f64,
+    scroll_offset: f64,
+) {
+    // Draw sidebar background (always visible)
+    ctx.set_fill_style_str("#f8fafc"); // slate-50
+    ctx.fill_rect(0.0, 0.0, TRACE_NAME_WIDTH, total_height);
+
+    // Draw timeline background
+    ctx.set_fill_style_str("#ffffff");
+    ctx.fill_rect(TRACE_NAME_WIDTH, 0.0, viewport_width, total_height);
+
+    // Calculate viewport bounds in timeline coordinates
+    let viewport_start = scroll_offset;
+    let viewport_end = scroll_offset + viewport_width;
+
+    // Draw x-axis
+    let axis_y = X_AXIS_HEIGHT;
+    ctx.set_stroke_style_str("#1f2937"); // gray-800
+    ctx.set_line_width(1.0);
+    ctx.begin_path();
+    ctx.move_to(TRACE_NAME_WIDTH, axis_y);
+    ctx.line_to(TRACE_NAME_WIDTH + viewport_width, axis_y);
+    ctx.stroke();
+
+    // Draw counter section
+    let counter_start_y = X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN;
+    for (i, counter) in trace_data.counters.iter().enumerate() {
+        let counter_y = counter_start_y + i as f64 * COUNTER_CHART_HEIGHT;
+
+        // Draw counter name (always visible)
+        ctx.set_fill_style_str("#1f2937");
+        ctx.set_font("12px sans-serif");
+        let _ = ctx.fill_text(&counter.name, 10.0, counter_y + COUNTER_CHART_HEIGHT / 2.0);
+
+        // Draw counter chart if has data and intersects viewport
+        if !counter.time_series.is_empty() {
+            let (min_val, max_val) = counter.time_series.iter().fold(
+                (f64::MAX, f64::MIN),
+                |(min, max), point| (min.min(point.value), max.max(point.value))
+            );
+
+            ctx.set_fill_style_str(&color_for_category(&counter.name));
+            ctx.set_global_alpha(0.5);
+            ctx.begin_path();
+
+            // Only draw points that are visible in viewport
+            let mut path_started = false;
+            for point in &counter.time_series {
+                let point_x = (point.timestamp - min_start_time) as f64 * zoom;
+
+                // Skip points that are way outside viewport (with some buffer)
+                if point_x < viewport_start - 100.0 || point_x > viewport_end + 100.0 {
+                    continue;
+                }
+
+                let canvas_x = TRACE_NAME_WIDTH + point_x - scroll_offset;
+                let point_y = if max_val > min_val {
+                    counter_y + COUNTER_CHART_HEIGHT - ((point.value - min_val) / (max_val - min_val)) * COUNTER_CHART_HEIGHT
+                } else {
+                    counter_y + COUNTER_CHART_HEIGHT / 2.0
+                };
+
+                if !path_started {
+                    ctx.move_to(canvas_x, counter_y + COUNTER_CHART_HEIGHT);
+                    ctx.line_to(canvas_x, point_y);
+                    path_started = true;
+                } else {
+                    ctx.line_to(canvas_x, point_y);
+                }
+            }
+
+            if path_started {
+                // Close to bottom - use the last drawn x position
+                ctx.line_to(TRACE_NAME_WIDTH + viewport_width - scroll_offset, counter_y + COUNTER_CHART_HEIGHT);
+                ctx.close_path();
+                ctx.fill();
+            }
+            ctx.set_global_alpha(1.0);
+        }
+
+        // Draw counter separator
+        ctx.set_stroke_style_str("#e5e7eb");
+        ctx.begin_path();
+        ctx.move_to(0.0, counter_y + COUNTER_CHART_HEIGHT);
+        ctx.line_to(TRACE_NAME_WIDTH + viewport_width, counter_y + COUNTER_CHART_HEIGHT);
+        ctx.stroke();
+    }
+
+    // Draw traces section
+    let traces_start_y = X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN;
+    let mut current_trace_y = traces_start_y;
+
+    for (trace_idx, trace) in trace_data.traces.iter().enumerate() {
+        if let Some((positioned_events, num_rows)) = layout_data.get(trace_idx) {
+            let trace_height = *num_rows as f64 * ROW_HEIGHT;
+
+            // Draw trace name (always visible)
+            ctx.set_fill_style_str("#1f2937");
+            ctx.set_font("12px sans-serif");
+            let trace_name = format!("{} (tid: {})", trace.name, trace.tid);
+            let _ = ctx.fill_text(&trace_name, 10.0, current_trace_y + trace_height / 2.0);
+
+            // Draw trace background
+            ctx.set_fill_style_str("rgba(248, 250, 252, 0.5)");
+            ctx.fill_rect(TRACE_NAME_WIDTH, current_trace_y, viewport_width, trace_height);
+
+            // Draw events that intersect with viewport
+            for p_event in positioned_events {
+                let event_x = p_event.normalized_start * zoom;
+                let event_width = (p_event.event.duration.unwrap_or(1) as f64 * zoom).max(1.0);
+
+                // Skip events outside viewport
+                if event_x + event_width < viewport_start || event_x > viewport_end {
+                    continue;
+                }
+
+                let canvas_x = TRACE_NAME_WIDTH + event_x - scroll_offset;
+                let event_y = current_trace_y + p_event.y_position;
+
+                // Draw event rectangle
+                ctx.set_fill_style_str(&p_event.color);
+                ctx.fill_rect(canvas_x, event_y, event_width, EVENT_HEIGHT);
+
+                // Draw event text if wide enough
+                if event_width > 50.0 {
+                    ctx.set_fill_style_str(contrasting_text_color(&p_event.color));
+                    ctx.set_font("10px sans-serif");
+                    let _ = ctx.fill_text(&p_event.event.name, canvas_x + 2.0, event_y + EVENT_HEIGHT / 2.0 + 3.0);
+                }
+            }
+
+            // Draw trace separator
+            ctx.set_stroke_style_str("#e5e7eb");
+            ctx.begin_path();
+            ctx.move_to(0.0, current_trace_y + trace_height);
+            ctx.line_to(TRACE_NAME_WIDTH + viewport_width, current_trace_y + trace_height);
+            ctx.stroke();
+
+            current_trace_y += trace_height;
+        }
+    }
+}#[allow(non_snake_case)]
 #[component]
 pub fn BazelTraceChart(
-    mut bazel_trace: BazelTrace,
+    bazel_trace: BazelTrace,
     #[prop(default = 800)] height: u32,
 ) -> impl IntoView {
-    // Sort traces by pid and tid to ensure deterministic order
-    bazel_trace
-        .traces
-        .sort_by(|a, b| a.pid.cmp(&b.pid).then(a.tid.cmp(&b.tid)));
-    // Sort counters by name to ensure deterministic order
-    bazel_trace.counters.sort_by(|a, b| a.name.cmp(&b.name));
+    // Pre-process data once
+    let mut sorted_trace = bazel_trace.clone();
+    sorted_trace.traces.sort_by(|a, b| a.pid.cmp(&b.pid).then(a.tid.cmp(&b.tid)));
+    sorted_trace.counters.sort_by(|a, b| a.name.cmp(&b.name));
 
-    let (mut min_start_time, mut max_end_time) = bazel_trace
+    let (mut min_start_time, mut max_end_time) = sorted_trace
         .traces
         .iter()
         .flat_map(|trace| &trace.events)
@@ -144,715 +335,203 @@ pub fn BazelTraceChart(
             )
         });
 
-    let (min_counter_time, max_counter_time) =
-        bazel_trace.counters.iter().flat_map(|c| &c.time_series).fold(
-            (i64::MAX, 0),
-            |(min_t, max_t), point| (min_t.min(point.timestamp), max_t.max(point.timestamp)),
-        );
+    let (min_counter_time, max_counter_time) = sorted_trace
+        .counters
+        .iter()
+        .flat_map(|c| &c.time_series)
+        .fold((i64::MAX, 0), |(min_t, max_t), point| {
+            (min_t.min(point.timestamp), max_t.max(point.timestamp))
+        });
 
     if min_counter_time != i64::MAX {
         min_start_time = min_start_time.min(min_counter_time);
     }
     max_end_time = max_end_time.max(max_counter_time);
 
-    let min_start_time = if min_start_time == i64::MAX {
-        0
-    } else {
-        min_start_time
-    };
-
+    let min_start_time = if min_start_time == i64::MAX { 0 } else { min_start_time };
     let duration = (max_end_time - min_start_time).max(1) as f64;
 
-    let layouts = StoredValue::new(
-        bazel_trace
-            .traces
-            .iter()
-            .enumerate()
-            .map(|(trace_index, trace)| calculate_layout(&trace.events, trace_index))
-            .collect::<Vec<_>>(),
-    );
+    // Pre-compute layouts once
+    let computed_layouts = sorted_trace
+        .traces
+        .iter()
+        .enumerate()
+        .map(|(trace_index, trace)| {
+            calculate_layout(&trace.events, trace_index, min_start_time)
+        })
+        .collect::<Vec<_>>();
 
-    let counters_height = bazel_trace.counters.len() as f64 * COUNTER_CHART_HEIGHT;
-
-    let traces_height = layouts.with_value(|l| {
-        l.iter()
-            .map(|(_, num_rows)| *num_rows as f64 * ROW_HEIGHT)
-            .sum::<f64>()
-    });
-
+    let counters_height = sorted_trace.counters.len() as f64 * COUNTER_CHART_HEIGHT;
+    let traces_height = computed_layouts
+        .iter()
+        .map(|(_, num_rows)| *num_rows as f64 * ROW_HEIGHT)
+        .sum::<f64>();
     let total_height = traces_height + counters_height + X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN;
 
-    let bazel_trace = StoredValue::new(bazel_trace);
+    // Store immutable data
+    let trace_data = StoredValue::new(sorted_trace);
+    let layout_data = StoredValue::new(computed_layouts);
 
+    // Reactive state
     let (zoom, set_zoom) = signal(1.0);
     let initial_zoom = RwSignal::new(1.0);
-
     let hovered_event = RwSignal::new(None::<Event>);
     let tooltip_pos = RwSignal::new((0.0, 0.0));
     let tooltip_visible = RwSignal::new(false);
-
-    let hovered_counter_info = RwSignal::new(None::<(String, f64)>);
-    let counter_tooltip_pos = RwSignal::new((0.0, 0.0));
-    let counter_tooltip_visible = RwSignal::new(false);
-
     let hover_time = RwSignal::new(None::<f64>);
     let hover_line_text_pos = RwSignal::new((0.0, 0.0));
-    let container_ref = NodeRef::<html::Div>::new();
 
+    // Canvas refs
+    let container_ref = NodeRef::<html::Div>::new();
+    let main_canvas_ref = NodeRef::<html::Canvas>::new();
+
+    // Track scroll and viewport
+    let scroll_left = RwSignal::new(0.0);
+    let viewport_width = RwSignal::new(800.0);
+
+    // Initialize zoom based on container size
     Effect::new(move |_| {
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
-
             if container_width > 0.0 {
                 let new_initial_zoom = if duration > 0.0 {
-                    (container_width - TRACE_NAME_WIDTH) / duration
+                    let duration_ms = duration / 1000.0; // Convert microseconds to milliseconds
+                    let available_width = container_width - TRACE_NAME_WIDTH;
+                    let target_width = duration_ms.max(available_width); // Ensure reasonable scale
+                    available_width / target_width * 1000.0 // Convert back to microseconds scale
                 } else {
                     1.0
                 };
-                tracing::info!("Setting initial_zoom: {new_initial_zoom}, was {}, container_width: {container_width}", zoom.get_untracked());
                 initial_zoom.set(new_initial_zoom);
                 set_zoom.set(new_initial_zoom);
-            } else {
-                // Container width is 0, defer measurement using requestAnimationFrame
-                let container_clone = container.clone();
-                let callback = wasm_bindgen::closure::Closure::wrap(Box::new(move || {
-                    let container_width = container_clone.client_width() as f64;
-                    tracing::info!("RAF: container_width: {container_width}");
+                viewport_width.set(container_width);
+            }
+        }
+    });
 
-                    if container_width > 0.0 {
-                        let new_initial_zoom = if duration > 0.0 {
-                            (container_width - TRACE_NAME_WIDTH) / duration
-                        } else {
-                            1.0
-                        };
-                        tracing::info!("RAF: Setting initial_zoom: {new_initial_zoom}, container_width: {container_width}");
-                        initial_zoom.set(new_initial_zoom);
-                        set_zoom.set(new_initial_zoom);
-                    }
-                }) as Box<dyn FnMut()>);
+    // Main canvas rendering effect
+    Effect::new(move |_| {
+        let current_zoom = zoom.get();
+        let viewport_w = viewport_width.get();
+        let scroll_offset = scroll_left.get();
 
-                if let Some(window) = web_sys::window() {
-                    let _ = window.request_animation_frame(callback.as_ref().unchecked_ref());
+        if let Some(canvas) = main_canvas_ref.get() {
+            let canvas: HtmlCanvasElement = canvas.unchecked_into();
+
+            // Calculate timeline width at current zoom
+            let timeline_width_val = duration * current_zoom;
+
+            // Limit canvas size to viewport width + sidebar for performance
+            let canvas_width = TRACE_NAME_WIDTH + viewport_w;
+            canvas.set_width(canvas_width as u32);
+            canvas.set_height(total_height as u32);
+
+            // Set CSS size to full timeline width for proper scrolling
+            let canvas_element: &web_sys::Element = canvas.as_ref();
+            if let Some(html_element) = canvas_element.dyn_ref::<web_sys::HtmlElement>() {
+                let style = html_element.style();
+                let _ = style.set_property("width", &format!("{}px", TRACE_NAME_WIDTH + timeline_width_val));
+                let _ = style.set_property("height", &format!("{}px", total_height));
+            }
+
+            if let Ok(ctx) = canvas.get_context("2d") {
+                if let Some(ctx) = ctx {
+                    let ctx: CanvasRenderingContext2d = ctx.unchecked_into();
+
+                    // Clear entire canvas
+                    ctx.clear_rect(0.0, 0.0, canvas_width, total_height);
+
+                    // Render with current zoom level and scroll offset
+                    trace_data.with_value(|bt| {
+                        layout_data.with_value(|layouts| {
+                            render_gantt_chart_viewport(&ctx, bt, layouts, current_zoom, min_start_time, total_height, viewport_w, traces_height, counters_height, scroll_offset);
+                        });
+                    });
                 }
-                callback.forget(); // Prevent cleanup since this is one-time use
             }
         }
     });
 
-    let timeline_width = Signal::derive(move || duration * zoom.get());
-
-    let x_axis_ticks = Memo::new(move |_| {
-        let timeline_w = timeline_width.get();
-        if timeline_w <= 0.0 || duration <= 0.0 {
-            return Vec::new();
-        }
-
-        // 1. Determine the time unit for the whole axis based on duration
-        let (unit_label, divisor) = if duration >= 1_000_000.0 {
-            ("s", 1_000_000.0)
-        } else if duration >= 1_000.0 {
-            ("ms", 1_000.0)
-        } else {
-            ("µs", 1.0)
-        };
-
-        // 2. Calculate a "nice" tick interval.
-        let target_tick_spacing_px = 150.0;
-        let min_tick_count = (timeline_w / target_tick_spacing_px).floor() as u32;
-        let tick_range_us = duration;
-
-        let rough_tick_interval = tick_range_us / (min_tick_count.max(1) as f64);
-        let exponent = 10.0_f64.powf(rough_tick_interval.log10().floor());
-        let nice_fractions = [1.0, 2.0, 5.0, 10.0];
-        let fraction = rough_tick_interval / exponent;
-        let nice_fraction = nice_fractions
-            .iter()
-            .find(|&f| *f >= fraction)
-            .unwrap_or(&10.0);
-        let nice_tick_interval = nice_fraction * exponent;
-
-        // 3. Generate the ticks based on the nice interval.
-        let mut ticks = Vec::new();
-        if nice_tick_interval == 0.0 {
-            return ticks;
-        }
-
-        let first_tick = (min_start_time as f64 / nice_tick_interval).floor() * nice_tick_interval;
-
-        let mut current_tick = first_tick;
-        while current_tick <= max_end_time as f64 {
-            let normalized_tick = current_tick - min_start_time as f64;
-            if normalized_tick >= 0.0 {
-                let x = normalized_tick * zoom.get();
-                let label_val = current_tick / divisor;
-
-                let display_label = if (label_val.fract().abs() * divisor) < 1.0 {
-                    format!("{:.0}{}", label_val.round(), unit_label)
-                } else {
-                    format!("{label_val:.2}{unit_label}")
-                };
-                ticks.push((x, display_label, current_tick));
-            }
-            current_tick += nice_tick_interval;
-        }
-        ticks
-    });
-
-    let on_container_mousemove = move |ev: web_sys::MouseEvent| {
+    // Simplified event handlers
+    let on_container_scroll = move |_| {
         if let Some(container) = container_ref.get() {
-            let rect = container.get_bounding_client_rect();
-            let x = ev.client_x() as f64 - rect.left() + container.scroll_left() as f64;
+            scroll_left.set(container.scroll_left() as f64);
+            viewport_width.set(container.client_width() as f64);
+        }
+    };
 
-            if x >= TRACE_NAME_WIDTH {
-                let timeline_x = x - TRACE_NAME_WIDTH;
+    let on_canvas_mousemove = move |ev: web_sys::MouseEvent| {
+        if let Some(canvas) = main_canvas_ref.get() {
+            let rect = canvas.get_bounding_client_rect();
+            let canvas_x = ev.client_x() as f64 - rect.left();
+            let canvas_y = ev.client_y() as f64 - rect.top();
+
+            // Check if in timeline area
+            if canvas_x >= TRACE_NAME_WIDTH {
+                let timeline_x = canvas_x - TRACE_NAME_WIDTH + scroll_left.get();
                 let time_us = (timeline_x / zoom.get()) + min_start_time as f64;
                 hover_time.set(Some(time_us));
                 hover_line_text_pos.set((ev.client_x() as f64, rect.top()));
+
+                // TODO: Implement proper event detection for tooltips
+                // This would require checking which event is under the mouse cursor
+                // taking into account the current zoom level and scroll position
+                tooltip_visible.set(false);
             } else {
                 hover_time.set(None);
+                tooltip_visible.set(false);
             }
         }
     };
 
-    let on_container_mouseleave = move |_| {
+    let on_canvas_mouseleave = move |_| {
+        hovered_event.set(None);
+        tooltip_visible.set(false);
         hover_time.set(None);
-        counter_tooltip_visible.set(false);
     };
 
     view! {
         <div class="relative">
-            <div>
-                <div class="flex space-x-2 mb-2">
-                    <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                        on:click=move |_| set_zoom.update(|z| *z *= 1.5)
-                    >
-                        "Zoom In"
-                    </button>
-                    <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                        on:click=move |_| set_zoom.update(|z| *z /= 1.5)
-                    >
-                        "Zoom Out"
-                    </button>
-                    <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                        on:click=move |_| set_zoom.set(initial_zoom.get())
-                    >
-                        "Reset"
-                    </button>
-                </div>
-                <div
-                    node_ref=container_ref
-                    style=format!(
-                        "height: {height}px;",
-                    )
-                    class="rounded overflow-auto max-w-full w-full"
-                    on:mousemove=on_container_mousemove
-                    on:mouseleave=on_container_mouseleave
+            <div class="flex space-x-2 mb-2">
+                <button
+                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                    on:click=move |_| set_zoom.update(|z| *z *= 1.5)
                 >
-                    <svg
-                        class="bazel-trace-chart"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width=move || TRACE_NAME_WIDTH + timeline_width.get()
-                        height=total_height
-                        viewBox=move || {
-                            format!(
-                                "0 0 {} {}",
-                                TRACE_NAME_WIDTH + timeline_width.get(),
-                                total_height,
-                            )
-                        }
-                    >
-                        // Definitions for clipping paths
-                        <defs>
-                            {layouts
-                                .with_value(|l| l.clone())
-                                .into_iter()
-                                .flat_map(|(events, _)| events)
-                                .map(|p_event| {
-                                    let event = p_event.event;
-                                    let event_width = Signal::derive(move || {
-                                        (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
-                                    });
-                                    view! {
-                                        <clipPath id=format!("clip-{}", p_event.id)>
-                                            <rect x="0" y="0" width=event_width height=EVENT_HEIGHT />
-                                        </clipPath>
-                                    }
-                                })
-                                .collect_view()}
-                        </defs>
-
-                        // X-Axis
-                        <g
-                            class="x-axis"
-                            transform=format!("translate({}, {})", TRACE_NAME_WIDTH, X_AXIS_HEIGHT)
-                        >
-                            <line
-                                x1="0"
-                                y1="0"
-                                x2=timeline_width
-                                y2="0"
-                                class="stroke-slate-900 dark:stroke-slate-200"
-                            />
-                            <For
-                                each=move || x_axis_ticks.get()
-                                key=move |(_, _, tick_val)| format!("{}-{}", zoom.get(), tick_val.to_bits())
-                                children=move |(x, label, _)| {
-                                    view! {
-                                        <g>
-                                            <line
-                                                x1=x
-                                                y1="-5"
-                                                x2=x
-                                                y2="0"
-                                                class="stroke-slate-900 dark:stroke-slate-200"
-                                            />
-                                            <text
-                                                x=x
-                                                y="-8"
-                                                text-anchor="middle"
-                                                font-size="10"
-                                                class="fill-slate-900 dark:fill-slate-200"
-                                            >
-                                                {label}
-                                            </text>
-                                        </g>
-                                    }
-                                }
-                            />
-                        </g>
-
-                        // Counter Names Sidebar
-                        <g
-                            class="counter-names"
-                            transform=format!(
-                                "translate(0, {})",
-                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
-                            )
-                        >
-                            <rect
-                                x="0"
-                                y="0"
-                                width=TRACE_NAME_WIDTH
-                                height=counters_height
-                                class="fill-slate-50 dark:fill-slate-800"
-                            />
-                            <For
-                                each=move || {
-                                    bazel_trace
-                                        .with_value(|bt| bt.counters.clone())
-                                        .into_iter()
-                                        .enumerate()
-                                }
-                                key=|(_, counter)| counter.name.clone()
-                                children=move |(i, counter)| {
-                                    let y = i as f64 * COUNTER_CHART_HEIGHT;
-                                    let (_, max_val) = counter
-                                        .time_series
-                                        .iter()
-                                        .fold(
-                                            (f64::MAX, f64::MIN),
-                                            |(min, max), point| {
-                                                (min.min(point.value), max.max(point.value))
-                                            },
-                                        );
-
-                                    view! {
-                                        <g>
-                                            <text
-                                                x="10"
-                                                y=y + COUNTER_CHART_HEIGHT / 2.0
-                                                dominant-baseline="middle"
-                                                font-size="12"
-                                                class="fill-slate-900 dark:fill-slate-200"
-                                            >
-                                                {counter.name}
-                                            </text>
-                                            <text
-                                                x=TRACE_NAME_WIDTH - 10.0
-                                                y=y + 15.0
-                                                text-anchor="end"
-                                                font-size="10"
-                                                class="fill-slate-500 dark:fill-slate-400"
-                                            >
-                                                {format!("{max_val:.2}")}
-                                            </text>
-                                            <line
-                                                x1="0"
-                                                y1=y + COUNTER_CHART_HEIGHT
-                                                x2=TRACE_NAME_WIDTH
-                                                y2=y + COUNTER_CHART_HEIGHT
-                                                class="stroke-slate-200 dark:stroke-slate-700"
-                                            />
-                                        </g>
-                                    }
-                                }
-                            />
-                        </g>
-
-                        // Counter Charts
-                        <g
-                            class="counters"
-                            transform=format!(
-                                "translate({}, {})",
-                                TRACE_NAME_WIDTH,
-                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
-                            )
-                        >
-                            <For
-                                each=move || {
-                                    bazel_trace
-                                        .with_value(|bt| bt.counters.clone())
-                                        .into_iter()
-                                        .enumerate()
-                                }
-                                key=|(_, counter)| counter.name.clone()
-                                children=move |(i, counter): (usize, Counter)| {
-                                    let y_offset = i as f64 * COUNTER_CHART_HEIGHT;
-                                    let (min_val, max_val) = counter
-                                        .time_series
-                                        .iter()
-                                        .fold(
-                                            (f64::MAX, f64::MIN),
-                                            |(min, max), point| {
-                                                (min.min(point.value), max.max(point.value))
-                                            },
-                                        );
-                                    let time_series_for_path = counter.time_series.clone();
-                                    let path_data = Signal::derive(move || {
-                                        if time_series_for_path.is_empty() {
-                                            return "M 0 0".to_string();
-                                        }
-                                        let first_point = &time_series_for_path[0];
-                                        let first_x = (first_point.timestamp - min_start_time)
-                                            as f64 * zoom.get();
-                                        let first_y = if max_val > min_val {
-                                            COUNTER_CHART_HEIGHT
-                                                - ((first_point.value - min_val) / (max_val - min_val))
-                                                    * COUNTER_CHART_HEIGHT
-                                        } else {
-                                            COUNTER_CHART_HEIGHT / 2.0
-                                        };
-                                        let mut d = format!(
-                                            "M {first_x} {COUNTER_CHART_HEIGHT} L {first_x} {first_y}",
-                                        );
-                                        for i in 1..time_series_for_path.len() {
-                                            let prev_point = &time_series_for_path[i - 1];
-                                            let curr_point = &time_series_for_path[i];
-                                            let prev_y = if max_val > min_val {
-                                                COUNTER_CHART_HEIGHT
-                                                    - ((prev_point.value - min_val) / (max_val - min_val))
-                                                        * COUNTER_CHART_HEIGHT
-                                            } else {
-                                                COUNTER_CHART_HEIGHT / 2.0
-                                            };
-                                            let curr_x = (curr_point.timestamp - min_start_time) as f64
-                                                * zoom.get();
-                                            let curr_y = if max_val > min_val {
-                                                COUNTER_CHART_HEIGHT
-                                                    - ((curr_point.value - min_val) / (max_val - min_val))
-                                                        * COUNTER_CHART_HEIGHT
-                                            } else {
-                                                COUNTER_CHART_HEIGHT / 2.0
-                                            };
-                                            d.push_str(&format!(" L {curr_x} {prev_y}"));
-                                            d.push_str(&format!(" L {curr_x} {curr_y}"));
-                                        }
-                                        let last_x = (time_series_for_path.last().unwrap().timestamp
-                                            - min_start_time) as f64 * zoom.get();
-                                        d.push_str(
-                                            &format!(" L {last_x} {COUNTER_CHART_HEIGHT}"),
-                                        );
-                                        d.push('Z');
-                                        d
-                                    });
-                                    let on_counter_mousemove = {
-                                        let counter_name = counter.name.clone();
-                                        let time_series = counter.time_series;
-                                        move |ev: web_sys::MouseEvent| {
-                                            ev.stop_propagation();
-                                            if let Some(container) = container_ref.get() {
-                                                let rect = container.get_bounding_client_rect();
-                                                let x = ev.client_x() as f64 - rect.left()
-                                                    + container.scroll_left() as f64;
-                                                let timeline_x = x - TRACE_NAME_WIDTH;
-                                                if timeline_x < 0.0 {
-                                                    return;
-                                                }
-                                                let time_us = (timeline_x / zoom.get())
-                                                    + min_start_time as f64;
-                                                let value = match time_series
-                                                    .binary_search_by(|p| {
-                                                        (p.timestamp as f64).total_cmp(&time_us)
-                                                    })
-                                                {
-                                                    Ok(i) => time_series[i].value,
-                                                    Err(i) => {
-                                                        if i == 0 {
-                                                            0.0
-                                                        } else if i >= time_series.len() {
-                                                            time_series.last().unwrap().value
-                                                        } else {
-                                                            time_series[i - 1].value
-                                                        }
-                                                    }
-                                                };
-                                                hovered_counter_info
-                                                    .set(Some((counter_name.clone(), value)));
-                                                counter_tooltip_pos
-                                                    .set((ev.client_x() as f64, ev.client_y() as f64));
-                                                counter_tooltip_visible.set(true);
-                                            }
-                                        }
-                                    };
-                                    let on_counter_mouseout = move |ev: web_sys::MouseEvent| {
-                                        ev.stop_propagation();
-                                        counter_tooltip_visible.set(false);
-                                    };
-
-                                    // Hovering before the first data point
-                                    // Hovering after the last data point
-                                    // Hovering between two data points
-
-                                    view! {
-                                        <g transform=format!("translate(0, {})", y_offset)>
-                                            <path
-                                                d=path_data
-                                                fill=color_for_category(&counter.name)
-                                                fill-opacity="0.5"
-                                                class="stroke-slate-200 dark:stroke-slate-700"
-                                                stroke-width="1"
-                                                on:mousemove=on_counter_mousemove
-                                                on:mouseout=on_counter_mouseout
-                                            />
-                                        </g>
-                                    }
-                                }
-                            />
-                        </g>
-
-                        // Trace Names Sidebar
-                        <g
-                            class="trace-names"
-                            transform=format!(
-                                "translate(0, {})",
-                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
-                            )
-                        >
-                            <rect
-                                x="0"
-                                y="0"
-                                width=TRACE_NAME_WIDTH
-                                height=traces_height
-                                class="fill-slate-50 dark:fill-slate-800"
-                            />
-                            {
-                                let trace_y_offsets: Vec<f64> = layouts
-                                    .with_value(|l| {
-                                        l.iter()
-                                            .scan(
-                                                0.0,
-                                                |state, (_, num_rows)| {
-                                                    let current_y = *state;
-                                                    *state += *num_rows as f64 * ROW_HEIGHT;
-                                                    Some(current_y)
-                                                },
-                                            )
-                                            .collect()
-                                    });
-                                bazel_trace
-                                    .with_value(|bt| {
-                                        bt.traces
-                                            .iter()
-                                            .zip(layouts.with_value(|l| l.clone()).into_iter())
-                                            .zip(trace_y_offsets.into_iter())
-                                            .map(|((trace, (_, num_rows)), current_y)| {
-                                                let trace_height = num_rows as f64 * ROW_HEIGHT;
-                                                view! {
-                                                    <g>
-                                                        <text
-                                                            x="10"
-                                                            y=current_y + trace_height / 2.0
-                                                            dominant-baseline="middle"
-                                                            font-size="12"
-                                                            class="fill-slate-900 dark:fill-slate-200"
-                                                        >
-                                                            {format!("{} (tid: {})", trace.name, trace.tid)}
-                                                        </text>
-                                                        <line
-                                                            x1="0"
-                                                            y1=current_y + trace_height
-                                                            x2=TRACE_NAME_WIDTH
-                                                            y2=current_y + trace_height
-                                                            class="stroke-slate-200 dark:stroke-slate-700"
-                                                        />
-                                                    </g>
-                                                }
-                                            })
-                                            .collect_view()
-                                    })
-                            }
-                        </g>
-
-                        // Traces
-                        <g
-                            class="traces"
-                            transform=format!(
-                                "translate(0, {})",
-                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
-                            )
-                        >
-                            {
-                                let trace_y_offsets: Vec<f64> = layouts
-                                    .with_value(|l| {
-                                        l.iter()
-                                            .scan(
-                                                0.0,
-                                                |state, (_, num_rows)| {
-                                                    let current_y = *state;
-                                                    *state += *num_rows as f64 * ROW_HEIGHT;
-                                                    Some(current_y)
-                                                },
-                                            )
-                                            .collect()
-                                    });
-                                bazel_trace
-                                    .with_value(|bt| {
-                                        bt.traces
-                                            .clone()
-                                            .into_iter()
-                                            .zip(layouts.with_value(|l| l.clone()).into_iter())
-                                            .zip(trace_y_offsets.into_iter())
-                                            .map(|((_, (positioned_events, num_rows)), current_y)| {
-                                                let trace_height = num_rows as f64 * ROW_HEIGHT;
-
-                                                view! {
-                                                    <g
-                                                        class="trace-group"
-                                                        transform=format!("translate(0, {})", current_y)
-                                                    >
-                                                        // Trace Border
-                                                        <rect
-                                                            x="0"
-                                                            y="0"
-                                                            width=move || { TRACE_NAME_WIDTH + timeline_width.get() }
-                                                            height=trace_height
-                                                            fill="none"
-                                                            class="stroke-slate-200 dark:stroke-slate-700"
-                                                        />
-
-                                                        // Timeline
-                                                        <g
-                                                            class="timeline"
-                                                            transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
-                                                        >
-                                                            <For
-                                                                each=move || positioned_events.clone()
-                                                                key=|p_event| p_event.id.clone()
-                                                                children=move |p_event| {
-                                                                    let event = p_event.event;
-                                                                    let y = p_event.row as f64 * ROW_HEIGHT + V_PADDING;
-                                                                    let color = color_for_category(&event.category);
-                                                                    let normalized_start = (event.start - min_start_time)
-                                                                        as f64;
-                                                                    let event_width = Signal::derive(move || {
-                                                                        (event.duration.unwrap_or(1) as f64 * zoom.get()).max(1.0)
-                                                                    });
-                                                                    let transform = Signal::derive(move || {
-                                                                        format!(
-                                                                            "translate({}, {})",
-                                                                            normalized_start * zoom.get(),
-                                                                            y,
-                                                                        )
-                                                                    });
-
-                                                                    view! {
-                                                                        <g transform=transform>
-                                                                            <rect
-                                                                                x="0"
-                                                                                y="0"
-                                                                                width=event_width
-                                                                                height=EVENT_HEIGHT
-                                                                                fill=color.clone()
-                                                                                on:mousemove=move |ev| { ev.stop_propagation() }
-                                                                                on:mouseover={
-                                                                                    let event_clone = event.clone();
-                                                                                    move |ev: web_sys::MouseEvent| {
-                                                                                        ev.stop_propagation();
-                                                                                        hovered_event.set(Some(event_clone.clone()));
-                                                                                        tooltip_pos
-                                                                                            .set((ev.client_x() as f64, ev.client_y() as f64));
-                                                                                        tooltip_visible.set(true);
-                                                                                    }
-                                                                                }
-                                                                                on:mouseout=move |ev| {
-                                                                                    ev.stop_propagation();
-                                                                                    hovered_event.set(None);
-                                                                                    tooltip_visible.set(false);
-                                                                                }
-                                                                            />
-                                                                            <Show when=move || { event_width.get() > 30.0 }>
-                                                                                <text
-                                                                                    x="5"
-                                                                                    y=EVENT_HEIGHT / 2.0
-                                                                                    dominant-baseline="middle"
-                                                                                    font-size="12"
-                                                                                    fill=contrasting_text_color(&color)
-                                                                                    clip-path=format!("url(#clip-{})", p_event.id)
-                                                                                    class="pointer-events-none"
-                                                                                >
-                                                                                    {event.name.clone()}
-                                                                                </text>
-                                                                            </Show>
-                                                                        </g>
-                                                                    }
-                                                                }
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                }
-                                            })
-                                            .collect_view()
-                                    })
-                            }
-                        </g>
-                        <Show when=move || {
-                            hover_time.get().is_some() && !tooltip_visible.get()
-                        }>
-                            {move || {
-                                let time = hover_time.get().unwrap();
-                                let x = (time - min_start_time as f64) * zoom.get();
-                                view! {
-                                    <g
-                                        class="pointer-events-none"
-                                        transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
-                                    >
-                                        <line
-                                            x1=x
-                                            y1=X_AXIS_HEIGHT
-                                            x2=x
-                                            y2=total_height
-                                            class="stroke-red-500"
-                                            stroke-dasharray="4"
-                                        />
-                                    </g>
-                                }
-                            }}
-                        </Show>
-                    </svg>
-                </div>
+                    "Zoom In"
+                </button>
+                <button
+                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                    on:click=move |_| set_zoom.update(|z| *z /= 1.5)
+                >
+                    "Zoom Out"
+                </button>
+                <button
+                    class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                    on:click=move |_| set_zoom.set(initial_zoom.get())
+                >
+                    "Reset"
+                </button>
             </div>
+            <div
+                node_ref=container_ref
+                style=format!("height: {height}px;")
+                class="rounded overflow-auto max-w-full w-full border"
+                on:scroll=on_container_scroll
+            >
+                <canvas
+                    node_ref=main_canvas_ref
+                    style="display: block; cursor: crosshair;"
+                    on:mousemove=on_canvas_mousemove
+                    on:mouseleave=on_canvas_mouseleave
+                />
+            </div>
+
+            // Time tooltip
             <div
                 class="absolute z-10 p-1 bg-red-500 text-white text-xs rounded pointer-events-none"
                 style=move || {
                     let (x, y) = hover_line_text_pos.get();
-                    let display = if hover_time.get().is_some() && !tooltip_visible.get() {
-                        "block"
-                    } else {
-                        "none"
-                    };
+                    let display = if hover_time.get().is_some() { "block" } else { "none" };
                     format!(
                         "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
                     )
@@ -860,32 +539,8 @@ pub fn BazelTraceChart(
             >
                 {move || hover_time.get().map(format_time)}
             </div>
-            <div
-                class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
-                style=move || {
-                    let (x, y) = counter_tooltip_pos.get();
-                    let display = if counter_tooltip_visible.get() { "block" } else { "none" };
-                    format!(
-                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
-                    )
-                }
-            >
-                {move || {
-                    hovered_counter_info
-                        .get()
-                        .map(|(name, value)| {
-                            view! {
-                                <div class="text-sm text-slate-900 dark:text-slate-200">
-                                    <div class="font-bold">{name}</div>
-                                    <div>
-                                        <strong>"Value: "</strong>
-                                        {format!("{value:.2}")}
-                                    </div>
-                                </div>
-                            }
-                        })
-                }}
-            </div>
+
+            // Event tooltip
             <div
                 class="absolute z-10 p-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded shadow-lg pointer-events-none"
                 style=move || {
@@ -897,33 +552,21 @@ pub fn BazelTraceChart(
                 }
             >
                 {move || {
-                    hovered_event
-                        .get()
-                        .map(|event| {
-                            view! {
-                                <div class="text-sm text-slate-900 dark:text-slate-200">
-                                    <div class="font-bold">{event.name}</div>
-                                    <div>
-                                        <strong>"Category: "</strong>
-                                        {event.category}
-                                    </div>
-                                    <div>
-                                        <strong>"Duration: "</strong>
-                                        {format_duration(event.duration.unwrap_or(0))}
-                                    </div>
-                                    {event
-                                        .args
-                                        .map(|args| {
-                                            view! {
-                                                <div>
-                                                    <strong>"Args: "</strong>
-                                                    {serde_json::to_string(&args).unwrap_or_default()}
-                                                </div>
-                                            }
-                                        })}
+                    hovered_event.get().map(|event| {
+                        view! {
+                            <div class="text-sm text-slate-900 dark:text-slate-200">
+                                <div class="font-bold">{event.name}</div>
+                                <div>
+                                    <strong>"Category: "</strong>
+                                    {event.category}
                                 </div>
-                            }
-                        })
+                                <div>
+                                    <strong>"Duration: "</strong>
+                                    {format_duration(event.duration.unwrap_or(0))}
+                                </div>
+                            </div>
+                        }
+                    })
                 }}
             </div>
         </div>

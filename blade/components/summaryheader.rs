@@ -162,20 +162,24 @@ pub fn SummaryHeader() -> impl IntoView {
                                 <span class="text-blue-500 underline">(details)</span>
                             </A>
                             {move || {
-                                invocation.read().profile_uri.as_ref().map(|_| {
-                                    view! {
-                                        <A href=move || {
-                                            let pathname = location.pathname.read();
-                                            let base = pathname
-                                                .strip_suffix("/details")
-                                                .or_else(|| pathname.strip_suffix("/profile"))
-                                                .unwrap_or(&pathname);
-                                            format!("{base}/profile")
-                                        }>
-                                            <span class="text-blue-500 underline">(profile)</span>
-                                        </A>
-                                    }
-                                })
+                                invocation
+                                    .read()
+                                    .profile_uri
+                                    .as_ref()
+                                    .map(|_| {
+                                        view! {
+                                            <A href=move || {
+                                                let pathname = location.pathname.read();
+                                                let base = pathname
+                                                    .strip_suffix("/details")
+                                                    .or_else(|| pathname.strip_suffix("/profile"))
+                                                    .unwrap_or(&pathname);
+                                                format!("{base}/profile")
+                                            }>
+                                                <span class="text-blue-500 underline">(profile)</span>
+                                            </A>
+                                        }
+                                    })
                             }}
                         </div>
                     </div>
