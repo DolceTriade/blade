@@ -64,7 +64,7 @@ pub fn Invocation() -> impl IntoView {
                         | state::Status::Fail
                         | state::Status::Skip
                         | state::Status::Unknown
-                );
+                ) || !inv.is_live;
                 invocation.set(inv.clone());
                 if done {
                     return;
