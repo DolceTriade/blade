@@ -862,25 +862,36 @@ pub fn BazelTraceChart(
     view! {
         <div class="relative">
             <div>
-                // Zoom controls (same as original)
+                // Zoom controls with SVG icons
                 <div class="flex space-x-2 mb-2">
                     <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600 flex items-center justify-center"
                         on:click=move |_| set_zoom.update(|z| *z *= 1.5)
+                        title="Zoom In"
                     >
-                        "Zoom In"
+                        <img src="/assets/zoom-in.svg" alt="Zoom In" class="w-4 h-4 dark:invert" />
                     </button>
                     <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600 flex items-center justify-center"
                         on:click=move |_| set_zoom.update(|z| *z /= 1.5)
+                        title="Zoom Out"
                     >
-                        "Zoom Out"
+                        <img
+                            src="/assets/zoom-out.svg"
+                            alt="Zoom Out"
+                            class="w-4 h-4 dark:invert"
+                        />
                     </button>
                     <button
-                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+                        class="px-2 py-1 border rounded bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-200 border-slate-300 dark:border-slate-600 flex items-center justify-center"
                         on:click=move |_| set_zoom.set(initial_zoom.get())
+                        title="Reset Zoom"
                     >
-                        "Reset"
+                        <img
+                            src="/assets/zoom-reset.svg"
+                            alt="Reset Zoom"
+                            class="w-4 h-4 dark:invert"
+                        />
                     </button>
                 </div>
                 <div
