@@ -1,5 +1,4 @@
 pub mod ganttchart;
-pub mod ganttchart_canvas_hybrid;
 pub mod linechart;
 pub mod piechart;
 

@@ -1,9 +1,6 @@
 use std::io::Read;
 
-use components::charts::{
-    ganttchart::BazelTraceChart,
-    ganttchart_canvas_hybrid::BazelTraceChartCanvasHybrid,
-};
+use components::charts::ganttchart::BazelTraceChart;
 use leptos::{either::Either, prelude::*};
 use leptos_router::{components::A, hooks::use_params, params::Params};
 use trace_event_parser::{BazelTrace, TraceEventFile};
@@ -83,7 +80,7 @@ pub fn ProfilePage() -> impl IntoView {
                                         <h2 class="text-lg font-semibold mb-4">
                                             "Profile Timeline"
                                         </h2>
-                                        <BazelTraceChartCanvasHybrid bazel_trace=bazel_trace />
+                                        <BazelTraceChart bazel_trace=bazel_trace />
                                     </div>
                                 },
                             )
