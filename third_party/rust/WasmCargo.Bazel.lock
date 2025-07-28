@@ -1,5 +1,5 @@
 {
-  "checksum": "db3b9d93e64ba9fb1e49ad7923eb21cd72e472a96bff2b0fc0e16e686a78a822",
+  "checksum": "0b24c6b1ab4c6451a4f470da732c894c57e037e89b448993bde028e9ec2cfb57",
   "crates": {
     "addr2line 0.20.0": {
       "name": "addr2line",
@@ -14013,6 +14013,7 @@
             "BinaryType",
             "Blob",
             "BlobPropertyBag",
+            "CanvasRenderingContext2d",
             "CharacterData",
             "Clipboard",
             "ClipboardEvent",

@@ -1,4 +1,5 @@
 use components::charts::ganttchart::BazelTraceChart;
+use components::charts::ganttchart_canvas_hybrid::BazelTraceChartCanvasHybrid;
 use leptos::prelude::*;
 use leptos_router::components::A;
 use leptos_router::hooks::use_params;
@@ -73,7 +74,10 @@ pub fn ProfilePage() -> impl IntoView {
                     match profile_data.await {
                         Ok(bazel_trace) => {
                             Either::Left(view! {
-                                <BazelTraceChart bazel_trace=bazel_trace />
+                                <div>
+                                    <h2 class="text-lg font-semibold mb-4">"Canvas Hybrid Version (New)"</h2>
+                                    <BazelTraceChartCanvasHybrid bazel_trace=bazel_trace.clone() />
+                                </div>
                             })
                         }
                         Err(error) => {

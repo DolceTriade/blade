@@ -1,5 +1,5 @@
 {
-  "checksum": "94ea5894bae94de94a0ca551def4f7bbe7904ce1e3dd0ec0f42f6d3dd0ffde64",
+  "checksum": "2f9b427b0195fd0afda40e82cbdcabed5ea083155a7e5629e6ce5550c1ddf7cc",
   "crates": {
     "actix-codec 0.5.1": {
       "name": "actix-codec",
@@ -25954,6 +25954,7 @@
             "BinaryType",
             "Blob",
             "BlobPropertyBag",
+            "CanvasRenderingContext2d",
             "CharacterData",
             "Clipboard",
             "ClipboardEvent",
