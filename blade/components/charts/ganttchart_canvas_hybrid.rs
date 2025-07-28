@@ -200,6 +200,39 @@ fn format_time(time_us: f64) -> String {
     }
 }
 
+fn wrap_text(text: &str, max_width_chars: usize) -> Vec<String> {
+    if text.len() <= max_width_chars {
+        return vec![text.to_string()];
+    }
+
+    let mut lines = Vec::new();
+    let mut current_line = String::new();
+
+    for word in text.split(' ') {
+        if current_line.is_empty() {
+            current_line = word.to_string();
+        } else if current_line.len() + 1 + word.len() <= max_width_chars {
+            current_line.push(' ');
+            current_line.push_str(word);
+        } else {
+            lines.push(current_line);
+            current_line = word.to_string();
+        }
+    }
+    if !current_line.is_empty() {
+        lines.push(current_line);
+    }
+
+    // If we still have lines that are too long, truncate them
+    lines.into_iter().map(|line| {
+        if line.len() > max_width_chars {
+            format!("{}...", &line[..max_width_chars.saturating_sub(3)])
+        } else {
+            line
+        }
+    }).collect()
+}
+
 #[derive(Clone)]
 struct CanvasRendererState {
     spatial_index: SpatialIndex,
@@ -213,14 +246,12 @@ struct CanvasRendererState {
 
 #[derive(Clone)]
 struct CanvasRenderer {
-    canvas_ref: NodeRef<html::Canvas>,
     state: CanvasRendererState,
 }
 
 impl CanvasRenderer {
-    fn new(canvas_ref: NodeRef<html::Canvas>) -> Self {
+    fn new() -> Self {
         Self {
-            canvas_ref,
             state: CanvasRendererState {
                 spatial_index: SpatialIndex::new(),
                 canvas_width: 0.0,
@@ -233,8 +264,8 @@ impl CanvasRenderer {
         }
     }
 
-    fn get_canvas_and_ctx(&self) -> Result<(HtmlCanvasElement, CanvasRenderingContext2d), String> {
-        let canvas = self.canvas_ref.get().ok_or("Canvas not available")?;
+    fn get_canvas_and_context(&self, canvas_ref: NodeRef<html::Canvas>) -> Result<(HtmlCanvasElement, CanvasRenderingContext2d), String> {
+        let canvas = canvas_ref.get().ok_or("Canvas not available")?;
         let ctx = canvas
             .get_context("2d")
             .map_err(|_| "Failed to get 2d context")?
@@ -244,12 +275,12 @@ impl CanvasRenderer {
         Ok((canvas, ctx))
     }
 
-    fn update_viewport(&mut self, width: f64, height: f64, zoom: f64) -> Result<(), String> {
+    fn update_viewport(&mut self, canvas_ref: NodeRef<html::Canvas>, width: f64, height: f64, zoom: f64) -> Result<(), String> {
         self.state.canvas_width = width;
         self.state.canvas_height = height;
         self.state.zoom = zoom;
 
-        let (canvas, _) = self.get_canvas_and_ctx()?;
+        let (canvas, _ctx) = self.get_canvas_and_context(canvas_ref)?;
 
         // Update canvas size
         canvas.set_width(width as u32);
@@ -266,18 +297,33 @@ impl CanvasRenderer {
         Ok(())
     }
 
-    fn clear(&self) -> Result<(), String> {
-        let (_, ctx) = self.get_canvas_and_ctx()?;
+    fn clear(&self, canvas_ref: NodeRef<html::Canvas>) -> Result<(), String> {
+        let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         ctx.clear_rect(0.0, 0.0, self.state.canvas_width, self.state.canvas_height);
         Ok(())
     }
 
-    fn render_events(&mut self, layouts: &[(Vec<PositionedEvent>, usize)], trace_y_offsets: &[f64]) -> Result<(), String> {
-        let (_, ctx) = self.get_canvas_and_ctx()?;
+    fn render_events(&mut self, canvas_ref: NodeRef<html::Canvas>, layouts: &[(Vec<PositionedEvent>, usize)], trace_y_offsets: &[f64]) -> Result<(), String> {
+        let start_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.events.clear();
+
+        let context_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(ctx_time)) = (start_time, context_time) {
+            web_sys::console::log_1(&format!("Canvas context creation: {:.2}ms", ctx_time - start).into());
+        }
+
+        let mut event_count = 0;
 
         for ((positioned_events, _), &trace_y_offset) in layouts.iter().zip(trace_y_offsets.iter()) {
             for positioned_event in positioned_events {
+                event_count += 1;
                 let normalized_start = (positioned_event.event.start - self.state.min_start_time) as f64;
                 let event_x = TRACE_NAME_WIDTH + (normalized_start * self.state.zoom);
                 let event_width = ((positioned_event.event.duration.unwrap_or(1) as f64) * self.state.zoom).max(1.0);
@@ -292,15 +338,32 @@ impl CanvasRenderer {
                 ctx.set_fill_style_str(&positioned_event.color);
                 ctx.fill_rect(event_x, event_y, event_width, EVENT_HEIGHT);
 
-                // Render text if event is wide enough
+                // Render text if event is wide enough and clip text to event bounds
                 if event_width > 30.0 {
                     let text_color = contrasting_text_color(&positioned_event.color);
                     ctx.set_fill_style_str(text_color);
                     ctx.set_font("12px sans-serif");
-                    let _ = ctx.fill_text(&positioned_event.event.name, event_x + 5.0, event_y + EVENT_HEIGHT / 2.0 + 4.0);
-                }
+                    ctx.set_text_baseline("middle"); // Ensure consistent text baseline
+                    ctx.set_text_align("start"); // Ensure text starts at the specified position
 
-                // Add to spatial index
+                    // Estimate text width (roughly 7px per character for 12px font)
+                    let estimated_text_width = positioned_event.event.name.len() as f64 * 7.0;
+                    let available_width = event_width - 10.0; // 5px padding on each side
+                    let text_x = event_x + 5.0; // 5px padding from left edge of event
+                    let text_y = event_y + EVENT_HEIGHT / 2.0; // Center vertically in event
+
+                    if estimated_text_width <= available_width {
+                        // Text fits, render normally
+                        let _ = ctx.fill_text(&positioned_event.event.name, text_x, text_y);
+                    } else {
+                        // Text doesn't fit, truncate with ellipsis
+                        let max_chars = ((available_width / 7.0) as usize).saturating_sub(3); // Account for "..."
+                        if max_chars > 0 {
+                            let truncated = format!("{}...", &positioned_event.event.name[..max_chars.min(positioned_event.event.name.len())]);
+                            let _ = ctx.fill_text(&truncated, text_x, text_y);
+                        }
+                    }
+                }                // Add to spatial index
                 let mut indexed_event = positioned_event.clone();
                 indexed_event.x = event_x;
                 indexed_event.y = event_y;
@@ -308,12 +371,26 @@ impl CanvasRenderer {
                 self.state.spatial_index.events.push(indexed_event);
             }
         }
+
+        let end_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(end)) = (start_time, end_time) {
+            web_sys::console::log_1(&format!("Rendered {} events in {:.2}ms", event_count, end - start).into());
+        }
         Ok(())
     }
 
-    fn render_counters(&mut self, counters: &[Counter]) -> Result<(), String> {
-        let (_, ctx) = self.get_canvas_and_ctx()?;
+    fn render_counters(&mut self, canvas_ref: NodeRef<html::Canvas>, counters: &[Counter]) -> Result<(), String> {
+        let start_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.counters.clear();
+
+        web_sys::console::log_1(&format!("Rendering {} counters", counters.len()).into());
 
         for (i, counter) in counters.iter().enumerate() {
             let y_offset = X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + (i as f64 * COUNTER_CHART_HEIGHT);
@@ -393,10 +470,69 @@ impl CanvasRenderer {
                 time_series: counter.time_series.clone(),
             });
         }
+
+        let end_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(end)) = (start_time, end_time) {
+            web_sys::console::log_1(&format!("Rendered counters in {:.2}ms", end - start).into());
+        }
+
         Ok(())
     }
 
-    fn find_event_at(&self, x: f64, y: f64) -> Option<&Event> {
+    fn render_axis_ticks(&self, canvas_ref: NodeRef<html::Canvas>, ticks: &[(f64, String, f64)]) -> Result<(), String> {
+        let start_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
+
+        // Render X-axis line
+        ctx.set_stroke_style_str("#374151"); // gray-700 - more visible
+        ctx.set_line_width(2.0);
+        ctx.begin_path();
+        ctx.move_to(TRACE_NAME_WIDTH, X_AXIS_HEIGHT);
+        ctx.line_to(TRACE_NAME_WIDTH + (self.state.canvas_width - TRACE_NAME_WIDTH), X_AXIS_HEIGHT);
+        ctx.stroke();
+
+        // Render ticks
+        ctx.set_font("10px sans-serif");
+        ctx.set_stroke_style_str("#374151"); // gray-700
+        ctx.set_fill_style_str("#374151"); // gray-700
+        ctx.set_line_width(1.0);
+        ctx.set_text_baseline("top"); // Position text above the tick
+        ctx.set_text_align("center"); // Center text on tick
+
+        for (x, label, _) in ticks {
+            let tick_x = TRACE_NAME_WIDTH + x;
+
+            // Skip ticks outside viewport
+            if tick_x < TRACE_NAME_WIDTH || tick_x > self.state.canvas_width {
+                continue;
+            }
+
+            // Render tick line
+            ctx.begin_path();
+            ctx.move_to(tick_x, X_AXIS_HEIGHT - 5.0);
+            ctx.line_to(tick_x, X_AXIS_HEIGHT);
+            ctx.stroke();
+
+            // Render tick label
+            let _ = ctx.fill_text(label, tick_x, X_AXIS_HEIGHT - 8.0);
+        }
+
+        let end_time = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(end)) = (start_time, end_time) {
+            web_sys::console::log_1(&format!("Rendered {} axis ticks in {:.2}ms", ticks.len(), end - start).into());
+        }
+
+        Ok(())
+    }    fn find_event_at(&self, x: f64, y: f64) -> Option<&Event> {
         self.state.spatial_index.find_event_at(x, y)
     }
 
@@ -411,6 +547,13 @@ pub fn BazelTraceChartCanvasHybrid(
     mut bazel_trace: BazelTrace,
     #[prop(default = 800)] height: u32,
 ) -> impl IntoView {
+    let component_start = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now());
+
+    web_sys::console::log_1(&format!("Component starting with {} traces, {} counters",
+        bazel_trace.traces.len(), bazel_trace.counters.len()).into());
+
     // Sort traces and counters for deterministic order (same as original)
     bazel_trace.traces.sort_by(|a, b| a.pid.cmp(&b.pid).then(a.tid.cmp(&b.tid)));
     bazel_trace.counters.sort_by(|a, b| a.name.cmp(&b.name));
@@ -442,6 +585,10 @@ pub fn BazelTraceChartCanvasHybrid(
     let duration = (max_end_time - min_start_time).max(1) as f64;
 
     // Calculate layouts (same as original)
+    let layout_start = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now());
+
     let layouts = StoredValue::new(
         bazel_trace
             .traces
@@ -451,11 +598,20 @@ pub fn BazelTraceChartCanvasHybrid(
             .collect::<Vec<_>>(),
     );
 
+    let layout_end = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now());
+
+    if let (Some(start), Some(end)) = (layout_start, layout_end) {
+        web_sys::console::log_1(&format!("Layout calculation took: {:.2}ms", end - start).into());
+    }
+
     let counters_height = bazel_trace.counters.len() as f64 * COUNTER_CHART_HEIGHT;
     let traces_height = layouts.with_value(|l| {
         l.iter().map(|(_, num_rows)| *num_rows as f64 * ROW_HEIGHT).sum::<f64>()
     });
-    let total_height = traces_height + counters_height + X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN;
+    // Account for the bottom padding + event height to prevent clipping of the last event
+    let total_height = traces_height + counters_height + X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + V_PADDING + EVENT_HEIGHT;
 
     let bazel_trace = StoredValue::new(bazel_trace);
 
@@ -519,7 +675,7 @@ pub fn BazelTraceChartCanvasHybrid(
     // Initialize canvas renderer
     Effect::new(move |_| {
         if let Some(_canvas) = canvas_ref.get() {
-            let mut canvas_renderer = CanvasRenderer::new(canvas_ref);
+            let mut canvas_renderer = CanvasRenderer::new();
             canvas_renderer.state.min_start_time = min_start_time;
             canvas_renderer.state.counters_height = counters_height;
             canvas_renderer.state.traces_height = traces_height;
@@ -531,6 +687,10 @@ pub fn BazelTraceChartCanvasHybrid(
 
     // Calculate axis ticks (same as original)
     let x_axis_ticks = Memo::new(move |_| {
+        let tick_start = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
         let timeline_w = timeline_width.get();
         if timeline_w <= 0.0 || duration <= 0.0 {
             return Vec::new();
@@ -581,6 +741,15 @@ pub fn BazelTraceChartCanvasHybrid(
             }
             current_tick += nice_tick_interval;
         }
+
+        let tick_end = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(end)) = (tick_start, tick_end) {
+            web_sys::console::log_1(&format!("Tick calculation took: {:.2}ms", end - start).into());
+        }
+
         ticks
     });
 
@@ -597,9 +766,18 @@ pub fn BazelTraceChartCanvasHybrid(
         })
     );
 
-    // Main render effect
+    // Main render effect - simplified for performance
     Effect::new(move |_| {
-        let _ = zoom.get(); // Track zoom changes
+        let effect_start = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        let render_start = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        let zoom_value = zoom.get(); // Track zoom changes
+        web_sys::console::log_1(&format!("Render effect triggered, zoom: {}", zoom_value).into());
 
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
@@ -608,26 +786,47 @@ pub fn BazelTraceChartCanvasHybrid(
                 renderer.update(|r| {
                     if let Some(canvas_renderer) = r
                         && let Ok(()) = canvas_renderer.update_viewport(
-                            TRACE_NAME_WIDTH + timeline_width.get(),
+                            canvas_ref,
+                            TRACE_NAME_WIDTH + (duration * zoom_value),
                             total_height,
-                            zoom.get()
+                            zoom_value
                         ) {
-                        let _ = canvas_renderer.clear();
+                        let _ = canvas_renderer.clear(canvas_ref);
+
+                        // Render axis ticks first
+                        let ticks = x_axis_ticks.get();
+                        let _ = canvas_renderer.render_axis_ticks(canvas_ref, &ticks);
 
                         // Render counters
                         bazel_trace.with_value(|bt| {
-                            let _ = canvas_renderer.render_counters(&bt.counters);
+                            let _ = canvas_renderer.render_counters(canvas_ref, &bt.counters);
                         });
 
                         // Render events
                         layouts.with_value(|l| {
                             trace_y_offsets.with_value(|offsets| {
-                                let _ = canvas_renderer.render_events(l, offsets);
+                                let _ = canvas_renderer.render_events(canvas_ref, l, offsets);
                             });
                         });
                     }
                 });
+
+                let render_end = web_sys::window()
+                    .and_then(|w| w.performance())
+                    .map(|p| p.now());
+
+                if let (Some(start), Some(end)) = (render_start, render_end) {
+                    web_sys::console::log_1(&format!("Total render time: {:.2}ms", end - start).into());
+                }
             }
+        }
+
+        let effect_end = web_sys::window()
+            .and_then(|w| w.performance())
+            .map(|p| p.now());
+
+        if let (Some(start), Some(end)) = (effect_start, effect_end) {
+            web_sys::console::log_1(&format!("Effect total time: {:.2}ms", end - start).into());
         }
     });
 
@@ -675,6 +874,15 @@ pub fn BazelTraceChartCanvasHybrid(
         tooltip_visible.set(false);
         counter_tooltip_visible.set(false);
     };
+
+    // Log component setup completion time
+    let view_start = web_sys::window()
+        .and_then(|w| w.performance())
+        .map(|p| p.now());
+
+    if let (Some(start), Some(view)) = (component_start, view_start) {
+        web_sys::console::log_1(&format!("Component setup took: {:.2}ms", view - start).into());
+    }
 
     view! {
         <div class="relative">
@@ -728,45 +936,7 @@ pub fn BazelTraceChartCanvasHybrid(
                             )
                         }
                     >
-                        // X-Axis (same as original)
-                        <g
-                            class="x-axis"
-                            transform=format!("translate({}, {})", TRACE_NAME_WIDTH, X_AXIS_HEIGHT)
-                        >
-                            <line
-                                x1="0"
-                                y1="0"
-                                x2=timeline_width
-                                y2="0"
-                                class="stroke-slate-900 dark:stroke-slate-200"
-                            />
-                            <For
-                                each=move || x_axis_ticks.get()
-                                key=move |(_, _, tick_val)| format!("{}-{}", zoom.get(), tick_val.to_bits())
-                                children=move |(x, label, _)| {
-                                    view! {
-                                        <g>
-                                            <line
-                                                x1=x
-                                                y1="-5"
-                                                x2=x
-                                                y2="0"
-                                                class="stroke-slate-900 dark:stroke-slate-200"
-                                            />
-                                            <text
-                                                x=x
-                                                y="-8"
-                                                text-anchor="middle"
-                                                font-size="10"
-                                                class="fill-slate-900 dark:fill-slate-200"
-                                            >
-                                                {label}
-                                            </text>
-                                        </g>
-                                    }
-                                }
-                            />
-                        </g>
+                        // X-Axis rendered on canvas, no SVG needed
 
                         // Counter Names Sidebar (same as original)
                         <g
@@ -803,17 +973,26 @@ pub fn BazelTraceChartCanvasHybrid(
                                             },
                                         );
 
+                                    // Wrap counter name to fit in sidebar
+                                    let wrapped_lines = wrap_text(&counter.name, 25);
+                                    let line_height = 12.0;
+                                    let total_text_height = wrapped_lines.len() as f64 * line_height;
+                                    let start_y = y + (COUNTER_CHART_HEIGHT - total_text_height) / 2.0 + line_height;
+
                                     view! {
                                         <g>
-                                            <text
-                                                x="10"
-                                                y=y + COUNTER_CHART_HEIGHT / 2.0
-                                                dominant-baseline="middle"
-                                                font-size="12"
-                                                class="fill-slate-900 dark:fill-slate-200"
-                                            >
-                                                {counter.name}
-                                            </text>
+                                            {wrapped_lines.into_iter().enumerate().map(|(line_idx, line)| {
+                                                view! {
+                                                    <text
+                                                        x="10"
+                                                        y=start_y + (line_idx as f64 * line_height)
+                                                        font-size="10"
+                                                        class="fill-slate-900 dark:fill-slate-200"
+                                                    >
+                                                        {line}
+                                                    </text>
+                                                }
+                                            }).collect_view()}
                                             <text
                                                 x=TRACE_NAME_WIDTH - 10.0
                                                 y=y + 15.0
@@ -860,17 +1039,28 @@ pub fn BazelTraceChartCanvasHybrid(
                                             .zip(trace_y_offsets.with_value(|offsets| offsets.clone()).into_iter())
                                             .map(|((trace, (_, num_rows)), current_y)| {
                                                 let trace_height = num_rows as f64 * ROW_HEIGHT;
+                                                let trace_label = format!("{} (tid: {})", trace.name, trace.tid);
+
+                                                // Wrap trace name to fit in sidebar
+                                                let wrapped_lines = wrap_text(&trace_label, 25);
+                                                let line_height = 12.0;
+                                                let total_text_height = wrapped_lines.len() as f64 * line_height;
+                                                let start_y = current_y + (trace_height - total_text_height) / 2.0 + line_height;
+
                                                 view! {
                                                     <g>
-                                                        <text
-                                                            x="10"
-                                                            y=current_y + trace_height / 2.0
-                                                            dominant-baseline="middle"
-                                                            font-size="12"
-                                                            class="fill-slate-900 dark:fill-slate-200"
-                                                        >
-                                                            {format!("{} (tid: {})", trace.name, trace.tid)}
-                                                        </text>
+                                                        {wrapped_lines.into_iter().enumerate().map(|(line_idx, line)| {
+                                                            view! {
+                                                                <text
+                                                                    x="10"
+                                                                    y=start_y + (line_idx as f64 * line_height)
+                                                                    font-size="10"
+                                                                    class="fill-slate-900 dark:fill-slate-200"
+                                                                >
+                                                                    {line}
+                                                                </text>
+                                                            }
+                                                        }).collect_view()}
                                                         <line
                                                             x1="0"
                                                             y1=current_y + trace_height
@@ -904,7 +1094,7 @@ pub fn BazelTraceChartCanvasHybrid(
                                             x2=x
                                             y2=total_height
                                             class="stroke-red-500"
-                                            attr:stroke-dasharray="4"
+                                            stroke-dasharray="4"
                                         />
                                     </g>
                                 }

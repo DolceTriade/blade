@@ -75,8 +75,8 @@ pub fn ProfilePage() -> impl IntoView {
                         Ok(bazel_trace) => {
                             Either::Left(view! {
                                 <div>
-                                    <h2 class="text-lg font-semibold mb-4">"Canvas Hybrid Version (New)"</h2>
-                                    <BazelTraceChartCanvasHybrid bazel_trace=bazel_trace.clone() />
+                                    <h2 class="text-lg font-semibold mb-4">"Profile Timeline"</h2>
+                                    <BazelTraceChartCanvasHybrid bazel_trace=bazel_trace />
                                 </div>
                             })
                         }
