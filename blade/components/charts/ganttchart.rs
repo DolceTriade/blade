@@ -569,7 +569,6 @@ impl CanvasRenderer {
 #[component]
 pub fn BazelTraceChart(
     mut bazel_trace: BazelTrace,
-    #[prop(default = 800)] height: u32,
 ) -> impl IntoView {
     // Sort traces and counters for deterministic order (same as original)
     bazel_trace
@@ -896,8 +895,7 @@ pub fn BazelTraceChart(
                 </div>
                 <div
                     node_ref=container_ref
-                    style=format!("height: {height}px;")
-                    class="rounded overflow-auto max-w-full w-full relative"
+                    class="rounded max-w-full w-full relative h-full"
                     on:mouseleave=on_canvas_mouseleave
                 >
                     // Canvas for rendering
