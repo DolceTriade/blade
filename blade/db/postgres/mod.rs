@@ -108,26 +108,7 @@ impl state::DB for Postgres {
             .find(id)
             .get_result(&mut self.conn)
             .map(|res| -> anyhow::Result<state::InvocationResults> {
-                Ok(state::InvocationResults {
-                    id: res.id.to_string(),
-                    status: state::Status::parse(&res.status),
-                    start: crate::time::to_systemtime(&res.start)?,
-                    end: res
-                        .end
-                        .as_ref()
-                        .and_then(|t| crate::time::to_systemtime(t).ok()),
-                    command: res.command,
-                    pattern: res
-                        .pattern
-                        .unwrap_or_default()
-                        .split(',')
-                        .map(|s| s.to_string())
-                        .collect::<Vec<_>>(),
-                    is_live: false,
-                    last_heartbeat: res.last_heartbeat.map(|t| t.into()),
-                    profile_uri: res.profile_uri,
-                    ..Default::default()
-                })
+                Ok(res.into_state())
             })?
             .context("failed to get invocation")?;
         let targets = schema::targets::table
