@@ -304,26 +304,11 @@ impl CanvasRenderer {
     }
 
     fn render_events(&mut self, canvas_ref: NodeRef<html::Canvas>, layouts: &[(Vec<PositionedEvent>, usize)], trace_y_offsets: &[f64]) -> Result<(), String> {
-        let start_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.events.clear();
 
-        let context_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(ctx_time)) = (start_time, context_time) {
-            web_sys::console::log_1(&format!("Canvas context creation: {:.2}ms", ctx_time - start).into());
-        }
-
-        let mut event_count = 0;
-
         for ((positioned_events, _), &trace_y_offset) in layouts.iter().zip(trace_y_offsets.iter()) {
             for positioned_event in positioned_events {
-                event_count += 1;
                 let normalized_start = (positioned_event.event.start - self.state.min_start_time) as f64;
                 let event_x = TRACE_NAME_WIDTH + (normalized_start * self.state.zoom);
                 let event_width = ((positioned_event.event.duration.unwrap_or(1) as f64) * self.state.zoom).max(1.0);
@@ -371,26 +356,12 @@ impl CanvasRenderer {
                 self.state.spatial_index.events.push(indexed_event);
             }
         }
-
-        let end_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(end)) = (start_time, end_time) {
-            web_sys::console::log_1(&format!("Rendered {} events in {:.2}ms", event_count, end - start).into());
-        }
         Ok(())
     }
 
     fn render_counters(&mut self, canvas_ref: NodeRef<html::Canvas>, counters: &[Counter]) -> Result<(), String> {
-        let start_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.counters.clear();
-
-        web_sys::console::log_1(&format!("Rendering {} counters", counters.len()).into());
 
         for (i, counter) in counters.iter().enumerate() {
             let y_offset = X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + (i as f64 * COUNTER_CHART_HEIGHT);
@@ -471,22 +442,10 @@ impl CanvasRenderer {
             });
         }
 
-        let end_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(end)) = (start_time, end_time) {
-            web_sys::console::log_1(&format!("Rendered counters in {:.2}ms", end - start).into());
-        }
-
         Ok(())
     }
 
     fn render_axis_ticks(&self, canvas_ref: NodeRef<html::Canvas>, ticks: &[(f64, String, f64)]) -> Result<(), String> {
-        let start_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
 
         // Render X-axis line
@@ -523,14 +482,6 @@ impl CanvasRenderer {
             let _ = ctx.fill_text(label, tick_x, X_AXIS_HEIGHT - 8.0);
         }
 
-        let end_time = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(end)) = (start_time, end_time) {
-            web_sys::console::log_1(&format!("Rendered {} axis ticks in {:.2}ms", ticks.len(), end - start).into());
-        }
-
         Ok(())
     }    fn find_event_at(&self, x: f64, y: f64) -> Option<&Event> {
         self.state.spatial_index.find_event_at(x, y)
@@ -547,13 +498,6 @@ pub fn BazelTraceChartCanvasHybrid(
     mut bazel_trace: BazelTrace,
     #[prop(default = 800)] height: u32,
 ) -> impl IntoView {
-    let component_start = web_sys::window()
-        .and_then(|w| w.performance())
-        .map(|p| p.now());
-
-    web_sys::console::log_1(&format!("Component starting with {} traces, {} counters",
-        bazel_trace.traces.len(), bazel_trace.counters.len()).into());
-
     // Sort traces and counters for deterministic order (same as original)
     bazel_trace.traces.sort_by(|a, b| a.pid.cmp(&b.pid).then(a.tid.cmp(&b.tid)));
     bazel_trace.counters.sort_by(|a, b| a.name.cmp(&b.name));
@@ -584,11 +528,7 @@ pub fn BazelTraceChartCanvasHybrid(
     let min_start_time = if min_start_time == i64::MAX { 0 } else { min_start_time };
     let duration = (max_end_time - min_start_time).max(1) as f64;
 
-    // Calculate layouts (same as original)
-    let layout_start = web_sys::window()
-        .and_then(|w| w.performance())
-        .map(|p| p.now());
-
+    // Calculate layouts
     let layouts = StoredValue::new(
         bazel_trace
             .traces
@@ -597,14 +537,6 @@ pub fn BazelTraceChartCanvasHybrid(
             .map(|(trace_index, trace)| calculate_layout(&trace.events, trace_index))
             .collect::<Vec<_>>(),
     );
-
-    let layout_end = web_sys::window()
-        .and_then(|w| w.performance())
-        .map(|p| p.now());
-
-    if let (Some(start), Some(end)) = (layout_start, layout_end) {
-        web_sys::console::log_1(&format!("Layout calculation took: {:.2}ms", end - start).into());
-    }
 
     let counters_height = bazel_trace.counters.len() as f64 * COUNTER_CHART_HEIGHT;
     let traces_height = layouts.with_value(|l| {
@@ -684,12 +616,8 @@ pub fn BazelTraceChartCanvasHybrid(
 
     let timeline_width = Signal::derive(move || duration * zoom.get());
 
-    // Calculate axis ticks (same as original)
+    // Calculate axis ticks
     let x_axis_ticks = Memo::new(move |_| {
-        let tick_start = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
         let timeline_w = timeline_width.get();
         if timeline_w <= 0.0 || duration <= 0.0 {
             return Vec::new();
@@ -741,14 +669,6 @@ pub fn BazelTraceChartCanvasHybrid(
             current_tick += nice_tick_interval;
         }
 
-        let tick_end = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(end)) = (tick_start, tick_end) {
-            web_sys::console::log_1(&format!("Tick calculation took: {:.2}ms", end - start).into());
-        }
-
         ticks
     });
 
@@ -765,18 +685,9 @@ pub fn BazelTraceChartCanvasHybrid(
         })
     );
 
-    // Main render effect - simplified for performance
+    // Main render effect
     Effect::new(move |_| {
-        let effect_start = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        let render_start = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
         let zoom_value = zoom.get(); // Track zoom changes
-        web_sys::console::log_1(&format!("Render effect triggered, zoom: {}", zoom_value).into());
 
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
@@ -809,23 +720,7 @@ pub fn BazelTraceChartCanvasHybrid(
                         });
                     }
                 });
-
-                let render_end = web_sys::window()
-                    .and_then(|w| w.performance())
-                    .map(|p| p.now());
-
-                if let (Some(start), Some(end)) = (render_start, render_end) {
-                    web_sys::console::log_1(&format!("Total render time: {:.2}ms", end - start).into());
-                }
             }
-        }
-
-        let effect_end = web_sys::window()
-            .and_then(|w| w.performance())
-            .map(|p| p.now());
-
-        if let (Some(start), Some(end)) = (effect_start, effect_end) {
-            web_sys::console::log_1(&format!("Effect total time: {:.2}ms", end - start).into());
         }
     });
 
@@ -873,15 +768,6 @@ pub fn BazelTraceChartCanvasHybrid(
         tooltip_visible.set(false);
         counter_tooltip_visible.set(false);
     };
-
-    // Log component setup completion time
-    let view_start = web_sys::window()
-        .and_then(|w| w.performance())
-        .map(|p| p.now());
-
-    if let (Some(start), Some(view)) = (component_start, view_start) {
-        web_sys::console::log_1(&format!("Component setup took: {:.2}ms", view - start).into());
-    }
 
     view! {
         <div class="relative">
