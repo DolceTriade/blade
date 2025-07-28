@@ -48,7 +48,7 @@ fn ucfirst(s: &str) -> String {
 }
 
 fn toggle_page_url(current_path: &str, page: &str) -> String {
-    let page_suffix = format!("/{}", page);
+    let page_suffix = format!("/{page}");
 
     if current_path.ends_with(&page_suffix) {
         // If currently on this page, go back to base invocation
