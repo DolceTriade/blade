@@ -107,9 +107,7 @@ impl state::DB for Postgres {
             .select(models::Invocation::as_select())
             .find(id)
             .get_result(&mut self.conn)
-            .map(|res| -> anyhow::Result<state::InvocationResults> {
-                Ok(res.into_state())
-            })?
+            .map(|res| -> anyhow::Result<state::InvocationResults> { Ok(res.into_state()) })?
             .context("failed to get invocation")?;
         let targets = schema::targets::table
             .select(models::Target::as_select())

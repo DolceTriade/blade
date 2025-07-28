@@ -567,9 +567,7 @@ impl CanvasRenderer {
 
 #[allow(non_snake_case)]
 #[component]
-pub fn BazelTraceChart(
-    mut bazel_trace: BazelTrace,
-) -> impl IntoView {
+pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
     // Sort traces and counters for deterministic order (same as original)
     bazel_trace
         .traces
