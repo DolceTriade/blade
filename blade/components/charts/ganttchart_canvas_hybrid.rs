@@ -1127,7 +1127,12 @@ pub fn BazelTraceChartCanvasHybrid(
                     let (x, y) = counter_tooltip_pos.get();
                     let display = if counter_tooltip_visible.get() { "block" } else { "none" };
                     format!(
-                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
+                        "position: fixed; left: {x}px; top: {y}px;
+                         transform: translate(10px, 10px);
+                         display: {display};
+                         max-width: min(300px, calc(100vw - {x}px - 30px));
+                         max-height: calc(100vh - {y}px - 30px);
+                         overflow: auto;",
                     )
                 }
             >
@@ -1154,7 +1159,12 @@ pub fn BazelTraceChartCanvasHybrid(
                     let (x, y) = tooltip_pos.get();
                     let display = if tooltip_visible.get() { "block" } else { "none" };
                     format!(
-                        "position: fixed; left: {x}px; top: {y}px; transform: translate(10px, 10px); display: {display};",
+                        "position: fixed; left: {x}px; top: {y}px;
+                         transform: translate(10px, 10px);
+                         display: {display};
+                         max-width: min(300px, calc(100vw - {x}px - 30px));
+                         max-height: calc(100vh - {y}px - 30px);
+                         overflow: auto;",
                     )
                 }
             >
