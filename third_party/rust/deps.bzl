@@ -136,6 +136,9 @@ def rust_dependencies():
             "futures-core": crate.spec(
                 version = "0.3.29",
             ),
+            "flate2": crate.spec(
+                version = "1.0",
+            ),
             "cfg-if": crate.spec(
                 version = "1",
             ),
@@ -271,7 +274,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance", "HtmlCanvasElement", "CanvasRenderingContext2d", "Element", "HtmlElement", "CssStyleDeclaration"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",
@@ -350,6 +353,9 @@ def rust_dependencies():
                 version = "1.0.186",
                 features = ["derive"],
             ),
+            "serde_json": crate.spec(
+                version = "1.0.108",
+            ),
             "log": crate.spec(
                 version = "0.4",
             ),
@@ -381,6 +387,9 @@ def rust_dependencies():
             ),
             "futures-core": crate.spec(
                 version = "0.3.29",
+            ),
+            "flate2": crate.spec(
+                version = "1.0",
             ),
             "junit-parser": crate.spec(
                 version = "1.4.0",
@@ -417,7 +426,7 @@ def rust_dependencies():
             ),
             "web-sys": crate.spec(
                 version = "0.3.77",
-                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance"],
+                features = ["Clipboard", "DomRectList", "DomRect", "DomRectReadOnly", "DomQuad", "File", "Url", "Blob", "BlobPropertyBag", "MediaQueryList", "Navigator", "Storage", "Window", "Performance", "HtmlCanvasElement", "CanvasRenderingContext2d", "Element", "HtmlElement", "CssStyleDeclaration"],
             ),
             "zip": crate.spec(
                 version = "0.6.6",

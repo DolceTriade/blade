@@ -107,26 +107,7 @@ impl state::DB for Postgres {
             .select(models::Invocation::as_select())
             .find(id)
             .get_result(&mut self.conn)
-            .map(|res| -> anyhow::Result<state::InvocationResults> {
-                Ok(state::InvocationResults {
-                    id: res.id.to_string(),
-                    status: state::Status::parse(&res.status),
-                    start: crate::time::to_systemtime(&res.start)?,
-                    end: res
-                        .end
-                        .as_ref()
-                        .and_then(|t| crate::time::to_systemtime(t).ok()),
-                    command: res.command,
-                    pattern: res
-                        .pattern
-                        .unwrap_or_default()
-                        .split(',')
-                        .map(|s| s.to_string())
-                        .collect::<Vec<_>>(),
-                    is_live: false,
-                    ..Default::default()
-                })
-            })?
+            .map(|res| -> anyhow::Result<state::InvocationResults> { Ok(res.into_state()) })?
             .context("failed to get invocation")?;
         let targets = schema::targets::table
             .select(models::Target::as_select())
@@ -917,6 +898,7 @@ mod tests {
             pattern: vec!["//...".to_string()],
             last_heartbeat: None,
             is_live: false,
+            profile_uri: None,
             targets: HashMap::from([
                 (
                     "//target1".to_string(),

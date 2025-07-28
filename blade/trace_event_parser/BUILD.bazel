@@ -1,0 +1,26 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "trace_event_parser",
+    srcs = ["lib.rs"],
+    edition = "2021",
+    deps = select({
+        "@platforms//cpu:wasm32": [
+            "@wasm_crate//:serde",
+            "@wasm_crate//:serde_json",
+        ],
+        "//conditions:default": [
+            "@crate//:serde",
+            "@crate//:serde_json",
+        ],
+    }),
+)
+
+rust_test(
+    name = "trace_event_parser_test",
+    size = "small",
+    compile_data = glob(["testdata/**"]),
+    crate = ":trace_event_parser",
+)

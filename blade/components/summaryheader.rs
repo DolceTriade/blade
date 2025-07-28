@@ -47,6 +47,30 @@ fn ucfirst(s: &str) -> String {
     new
 }
 
+fn toggle_page_url(current_path: &str, page: &str) -> String {
+    let page_suffix = format!("/{page}");
+
+    if current_path.ends_with(&page_suffix) {
+        // If currently on this page, go back to base invocation
+        // Split by '/' and take the first 3 parts (empty, "invocation", id)
+        let parts: Vec<&str> = current_path.split('/').collect();
+        if parts.len() >= 3 {
+            format!("/{}/{}", parts[1], parts[2])
+        } else {
+            current_path.to_string()
+        }
+    } else {
+        // If not on this page, go to this page
+        // Split by '/' and take the first 3 parts, then append the desired page
+        let parts: Vec<&str> = current_path.split('/').collect();
+        if parts.len() >= 3 {
+            format!("/{}/{}{}", parts[1], parts[2], page_suffix)
+        } else {
+            format!("{}{}", current_path.trim_end_matches('/'), page_suffix)
+        }
+    }
+}
+
 #[allow(non_snake_case)]
 #[component]
 pub fn SummaryHeader() -> impl IntoView {
@@ -152,15 +176,27 @@ pub fn SummaryHeader() -> impl IntoView {
                         <div class="flex gap-2 items-center">
                             {duration}
                             <A href=move || {
-                                location
-                                    .pathname
-                                    .read()
-                                    .strip_suffix("/details")
-                                    .unwrap_or("details")
-                                    .to_string()
+                                let current_path = location.pathname.read();
+                                toggle_page_url(&current_path, "details")
                             }>
                                 <span class="text-blue-500 underline">(details)</span>
                             </A>
+                            {move || {
+                                invocation
+                                    .read()
+                                    .profile_uri
+                                    .as_ref()
+                                    .map(|_| {
+                                        view! {
+                                            <A href=move || {
+                                                let current_path = location.pathname.read();
+                                                toggle_page_url(&current_path, "profile")
+                                            }>
+                                                <span class="text-blue-500 underline">(profile)</span>
+                                            </A>
+                                        }
+                                    })
+                            }}
                         </div>
                     </div>
                 </div>

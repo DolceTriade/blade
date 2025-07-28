@@ -14,18 +14,20 @@ impl crate::EventHandler for Handler {
         match &event.payload {
             Some(build_event_stream::build_event::Payload::Started(p)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;
-                let invocation = state::InvocationResults {
-                    id: p.uuid.clone(),
-                    start: p
-                        .start_time
-                        .as_ref()
-                        .and_then(|s| prototime::timestamp::from_proto(s).ok())
-                        .unwrap_or_else(std::time::SystemTime::now),
-                    command: p.command.clone(),
-                    ..Default::default()
-                };
-                db.upsert_shallow_invocation(&invocation)
-                    .context("failed to insert invocation")?;
+                let start = p.start_time.clone();
+                let command = p.command.clone();
+                db.update_shallow_invocation(
+                    invocation_id,
+                    Box::new(move |i: &mut state::InvocationResults| {
+                        i.start = start
+                            .as_ref()
+                            .and_then(|s| prototime::timestamp::from_proto(s).ok())
+                            .unwrap_or_else(std::time::SystemTime::now);
+                        i.command = command;
+                        Ok(())
+                    }),
+                )
+                .context("failed to insert invocation")?;
             },
             Some(build_event_stream::build_event::Payload::Expanded(_)) => {
                 let mut db = db_mgr.get().context("failed to get db handle")?;

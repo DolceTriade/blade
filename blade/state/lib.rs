@@ -76,6 +76,7 @@ pub struct InvocationResults {
     pub pattern: Vec<String>,
     pub last_heartbeat: Option<std::time::SystemTime>,
     pub is_live: bool,
+    pub profile_uri: Option<String>,
 }
 
 impl Default for InvocationResults {
@@ -91,6 +92,7 @@ impl Default for InvocationResults {
             end: None,
             last_heartbeat: None,
             is_live: false,
+            profile_uri: None,
         }
     }
 }

@@ -4,5 +4,6 @@ pub mod dashboard;
 pub mod details;
 pub mod empty;
 pub mod invocation;
+pub mod profile;
 pub mod summary;
 pub mod test;

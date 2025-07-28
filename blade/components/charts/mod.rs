@@ -1,3 +1,4 @@
+pub mod ganttchart;
 pub mod linechart;
 pub mod piechart;
 

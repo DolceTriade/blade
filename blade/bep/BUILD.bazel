@@ -4,6 +4,7 @@ rust_library(
     name = "bep",
     srcs = [
         "buildinfo.rs",
+        "buildtoollogs.rs",
         "lib.rs",
         "options.rs",
         "print_event.rs",
