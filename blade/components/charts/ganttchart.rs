@@ -144,11 +144,13 @@ pub fn BazelTraceChart(
             )
         });
 
-    let (min_counter_time, max_counter_time) =
-        bazel_trace.counters.iter().flat_map(|c| &c.time_series).fold(
-            (i64::MAX, 0),
-            |(min_t, max_t), point| (min_t.min(point.timestamp), max_t.max(point.timestamp)),
-        );
+    let (min_counter_time, max_counter_time) = bazel_trace
+        .counters
+        .iter()
+        .flat_map(|c| &c.time_series)
+        .fold((i64::MAX, 0), |(min_t, max_t), point| {
+            (min_t.min(point.timestamp), max_t.max(point.timestamp))
+        });
 
     if min_counter_time != i64::MAX {
         min_start_time = min_start_time.min(min_counter_time);
@@ -209,7 +211,10 @@ pub fn BazelTraceChart(
                 } else {
                     1.0
                 };
-                tracing::info!("Setting initial_zoom: {new_initial_zoom}, was {}, container_width: {container_width}", zoom.get_untracked());
+                tracing::info!(
+                    "Setting initial_zoom: {new_initial_zoom}, was {}, container_width: {container_width}",
+                    zoom.get_untracked()
+                );
                 initial_zoom.set(new_initial_zoom);
                 set_zoom.set(new_initial_zoom);
             } else {
@@ -225,11 +230,14 @@ pub fn BazelTraceChart(
                         } else {
                             1.0
                         };
-                        tracing::info!("RAF: Setting initial_zoom: {new_initial_zoom}, container_width: {container_width}");
+                        tracing::info!(
+                            "RAF: Setting initial_zoom: {new_initial_zoom}, container_width: {container_width}"
+                        );
                         initial_zoom.set(new_initial_zoom);
                         set_zoom.set(new_initial_zoom);
                     }
-                }) as Box<dyn FnMut()>);
+                })
+                    as Box<dyn FnMut()>);
 
                 if let Some(window) = web_sys::window() {
                     let _ = window.request_animation_frame(callback.as_ref().unchecked_ref());
@@ -344,9 +352,7 @@ pub fn BazelTraceChart(
                 </div>
                 <div
                     node_ref=container_ref
-                    style=format!(
-                        "height: {height}px;",
-                    )
+                    style=format!("height: {height}px;")
                     class="rounded overflow-auto max-w-full w-full"
                     on:mousemove=on_container_mousemove
                     on:mouseleave=on_container_mouseleave
@@ -398,7 +404,9 @@ pub fn BazelTraceChart(
                             />
                             <For
                                 each=move || x_axis_ticks.get()
-                                key=move |(_, _, tick_val)| format!("{}-{}", zoom.get(), tick_val.to_bits())
+                                key=move |(_, _, tick_val)| {
+                                    format!("{}-{}", zoom.get(), tick_val.to_bits())
+                                }
                                 children=move |(x, label, _)| {
                                     view! {
                                         <g>
@@ -429,7 +437,7 @@ pub fn BazelTraceChart(
                             class="counter-names"
                             transform=format!(
                                 "translate(0, {})",
-                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
+                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN,
                             )
                         >
                             <rect
@@ -498,7 +506,7 @@ pub fn BazelTraceChart(
                             transform=format!(
                                 "translate({}, {})",
                                 TRACE_NAME_WIDTH,
-                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN
+                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN,
                             )
                         >
                             <For
@@ -562,9 +570,7 @@ pub fn BazelTraceChart(
                                         }
                                         let last_x = (time_series_for_path.last().unwrap().timestamp
                                             - min_start_time) as f64 * zoom.get();
-                                        d.push_str(
-                                            &format!(" L {last_x} {COUNTER_CHART_HEIGHT}"),
-                                        );
+                                        d.push_str(&format!(" L {last_x} {COUNTER_CHART_HEIGHT}"));
                                         d.push('Z');
                                         d
                                     });
@@ -638,7 +644,7 @@ pub fn BazelTraceChart(
                             class="trace-names"
                             transform=format!(
                                 "translate(0, {})",
-                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
+                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN,
                             )
                         >
                             <rect
@@ -701,7 +707,7 @@ pub fn BazelTraceChart(
                             class="traces"
                             transform=format!(
                                 "translate(0, {})",
-                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN
+                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN,
                             )
                         >
                             {

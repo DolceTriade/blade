@@ -1,4 +1,5 @@
 use build_event_stream_proto::build_event_stream;
+
 use crate::EventHandler;
 
 pub struct Handler {}
@@ -10,7 +11,8 @@ impl EventHandler for Handler {
         invocation_id: &str,
         event: &build_event_stream::BuildEvent,
     ) -> anyhow::Result<()> {
-        if let Some(build_event_stream::build_event::Payload::BuildToolLogs(logs)) = &event.payload {
+        if let Some(build_event_stream::build_event::Payload::BuildToolLogs(logs)) = &event.payload
+        {
             // Look for command.profile.gz in the log files
             for log in &logs.log {
                 if log.name == "command.profile.gz"
