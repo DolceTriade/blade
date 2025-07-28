@@ -3,7 +3,6 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 rust_library(
     name = "routes",
     srcs = glob(["**/*.rs"]),
-    compile_data = ["command.profile"],
     crate_features = select({
         "@platforms//cpu:wasm32": ["hydrate"],
         "//conditions:default": ["ssr"],
