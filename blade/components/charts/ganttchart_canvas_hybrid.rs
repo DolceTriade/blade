@@ -608,9 +608,8 @@ pub fn BazelTraceChartCanvasHybrid(
 
     let counters_height = bazel_trace.counters.len() as f64 * COUNTER_CHART_HEIGHT;
     let traces_height = layouts.with_value(|l| {
-        l.iter().map(|(_, num_rows)| *num_rows as f64 * ROW_HEIGHT).sum::<f64>()
+        l.iter().map(|(_, num_rows)| (*num_rows as f64) * ROW_HEIGHT + ((*num_rows as f64 - 1.0) * V_PADDING)).sum::<f64>()
     });
-    // Account for the bottom padding + event height to prevent clipping of the last event
     let total_height = traces_height + counters_height + X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + V_PADDING + EVENT_HEIGHT;
 
     let bazel_trace = StoredValue::new(bazel_trace);
