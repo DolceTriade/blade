@@ -860,7 +860,7 @@ pub fn BazelTraceChart(
     };
 
     view! {
-        <div class="relative">
+        <div class="h-full max-h-full">
             <div>
                 // Zoom controls with SVG icons
                 <div class="flex space-x-2 mb-2">

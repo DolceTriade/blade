@@ -10,7 +10,7 @@ use crate::{
     details::Details,
     empty::Empty,
     invocation::Invocation,
-    profile::ProfilePage,
+    profile::BazelProfile,
     summary::Summary,
     test::Test,
 };
@@ -47,7 +47,7 @@ pub fn App() -> impl IntoView {
                             <Route path=path!("test") view=Test />
                             <Route path=path!("details") view=Details />
                             <Route path=path!("artifact") view=Artifact />
-                            <Route path=path!("profile") view=ProfilePage />
+                            <Route path=path!("profile") view=BazelProfile />
                             <Route path=path!("*any") view=Summary />
                         </ParentRoute>
                         <Route path=path!("dashboard") view=Dashboard />

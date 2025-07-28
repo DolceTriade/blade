@@ -1,26 +1,11 @@
 use std::io::Read;
 
-use components::charts::ganttchart::BazelTraceChart;
+use components::{card::Card, charts::ganttchart::BazelTraceChart, summaryheader::SummaryHeader};
 use leptos::{either::Either, prelude::*};
-use leptos_router::{components::A, hooks::use_params, params::Params};
 use trace_event_parser::{BazelTrace, TraceEventFile};
 
-#[derive(PartialEq, Params)]
-struct ProfileParams {
-    id: Option<String>,
-}
-
 #[component]
-pub fn ProfilePage() -> impl IntoView {
-    let params = use_params::<ProfileParams>();
-    let id = move || {
-        params.with(|p| {
-            p.as_ref()
-                .ok()
-                .and_then(|p| p.id.clone())
-                .unwrap_or_default()
-        })
-    };
+pub fn BazelProfile() -> impl IntoView {
     let invocation = expect_context::<RwSignal<state::InvocationResults>>();
 
     // Resource to fetch and parse the profile data
@@ -63,10 +48,10 @@ pub fn ProfilePage() -> impl IntoView {
     });
 
     view! {
-        <div class="p-4">
-            <div class="mb-4">
-                <A href=move || format!("/invocation/{}", id())>"← Back to Summary"</A>
-            </div>
+        <div class="flex flex-col m-1 p-1 dark:bg-gray-800">
+            <Card class="p-3 m-2">
+                <SummaryHeader />
+            </Card>
 
             <Suspense fallback=move || {
                 view! { <div class="text-center py-8">"Loading profile data..."</div> }
@@ -76,7 +61,7 @@ pub fn ProfilePage() -> impl IntoView {
                         Ok(bazel_trace) => {
                             Either::Left(
                                 view! {
-                                    <div>
+                                    <div class="h-[73dvh] overflow-auto">
                                         <h2 class="text-lg font-semibold mb-4">
                                             "Profile Timeline"
                                         </h2>
