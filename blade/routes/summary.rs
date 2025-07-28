@@ -60,7 +60,7 @@ pub fn Summary() -> impl IntoView {
                 | state::Status::Fail
                 | state::Status::Skip
                 | state::Status::Unknown
-        );
+        ) || !invocation.read_untracked().is_live;
         if !done {
             set_timeout(
                 move || output_res.refetch(),
