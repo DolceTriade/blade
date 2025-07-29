@@ -15,6 +15,7 @@ rust_binary(
         "leptos.toml",
         "//blade/static",
     ],
+    compile_data = [":tags"],
     rustc_env = {
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },

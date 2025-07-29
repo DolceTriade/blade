@@ -20,6 +20,8 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
+static VERSION: &str = include_str!("tags.txt");
+
 // boilerplate to run in different modes
 cfg_if! {
     // server-only stuff
@@ -121,6 +123,9 @@ cfg_if! {
             flame_path: Option<String>,
             #[arg(long="json", value_name="JSON", default_value="false")]
             json: bool,
+
+            #[arg(long="version", default_value="false")]
+            version: bool,
         }
 
         fn fmt_layer<S>(show_spans: bool, json: bool) -> Box<dyn Layer<S> + Sync + Send>
@@ -168,6 +173,13 @@ cfg_if! {
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
             let args = Args::parse();
+
+
+            if args.version {
+                println!("Blade {VERSION}");
+                return Ok(());
+            }
+
             // install global subscriber configured based on RUST_LOG envvar.
             let (filter_handle, span_handle, _guard) = init_logging(args.flame_path.clone(), args.json);
 
@@ -294,7 +306,7 @@ cfg_if! {
 
         #[get("/healthz")]
         async fn healthz() -> HttpResponse {
-            HttpResponse::Ok().body("OK")
+            HttpResponse::Ok().body(VERSION)
         }
 
         #[instrument]
