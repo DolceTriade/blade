@@ -243,6 +243,7 @@ cfg_if! {
                     .service(Files::new("/assets", assets.clone()))
                     // serve the favicon from /favicon.ico
                     .service(favicon)
+                    .service(healthz)
                     .leptos_routes_with_context(
                         routes,
                         move|| provide_context(rt_state.clone()),
@@ -289,6 +290,11 @@ cfg_if! {
         async fn favicon() -> actix_web::Result<actix_files::NamedFile> {
             let r = Runfiles::create().expect("Must run using bazel with runfiles");
             Ok(actix_files::NamedFile::open(r.rlocation("_main/blade/static/static/favicon.ico").unwrap())?)
+        }
+
+        #[get("/healthz")]
+        async fn healthz() -> HttpResponse {
+            HttpResponse::Ok().body("OK")
         }
 
         #[instrument]
