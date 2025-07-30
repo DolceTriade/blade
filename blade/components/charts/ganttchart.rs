@@ -67,7 +67,9 @@ impl ViewportState {
     }
 
     fn update_scroll(&mut self, scroll_top: f64) {
-        self.scroll_top = scroll_top.max(0.0).min(self.total_logical_height - self.viewport_height);
+        self.scroll_top = scroll_top
+            .max(0.0)
+            .min(self.total_logical_height - self.viewport_height);
 
         // Calculate canvas positioning
         let buffer_start = (self.scroll_top - VIEWPORT_BUFFER).max(0.0);
@@ -86,9 +88,7 @@ impl ViewportState {
         (start, end)
     }
 
-    fn logical_to_canvas_y(&self, logical_y: f64) -> f64 {
-        logical_y - self.canvas_top_offset
-    }
+    fn logical_to_canvas_y(&self, logical_y: f64) -> f64 { logical_y - self.canvas_top_offset }
 }
 
 impl SpatialIndex {
@@ -374,8 +374,14 @@ impl CanvasRenderer {
         if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
             let style = html_element.style();
             let _ = style.set_property("width", &format!("{width}px"));
-            let _ = style.set_property("height", &format!("{}px", self.state.viewport.canvas_height));
-            let _ = style.set_property("top", &format!("{}px", self.state.viewport.canvas_top_offset));
+            let _ = style.set_property(
+                "height",
+                &format!("{}px", self.state.viewport.canvas_height),
+            );
+            let _ = style.set_property(
+                "top",
+                &format!("{}px", self.state.viewport.canvas_top_offset),
+            );
         }
 
         Ok(())
@@ -416,13 +422,15 @@ impl CanvasRenderer {
                 let event_width = ((positioned_event.event.duration.unwrap_or(1) as f64)
                     * self.state.zoom)
                     .max(1.0);
-                let logical_event_y = trace_logical_y
-                    + (positioned_event.row as f64 * ROW_HEIGHT)
-                    + V_PADDING;
+                let logical_event_y =
+                    trace_logical_y + (positioned_event.row as f64 * ROW_HEIGHT) + V_PADDING;
 
                 // Skip events outside viewport (both horizontal and vertical culling)
-                if event_x + event_width < 0.0 || event_x > self.state.canvas_width
-                    || logical_event_y < visible_start || logical_event_y > visible_end {
+                if event_x + event_width < 0.0
+                    || event_x > self.state.canvas_width
+                    || logical_event_y < visible_start
+                    || logical_event_y > visible_end
+                {
                     continue;
                 }
 
@@ -490,7 +498,9 @@ impl CanvasRenderer {
                 X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + (i as f64 * COUNTER_CHART_HEIGHT);
 
             // Skip counter if not visible
-            if logical_y_offset + COUNTER_CHART_HEIGHT < visible_start || logical_y_offset > visible_end {
+            if logical_y_offset + COUNTER_CHART_HEIGHT < visible_start
+                || logical_y_offset > visible_end
+            {
                 continue;
             }
 
@@ -958,7 +968,8 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                         tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
                         tooltip_visible.set(true);
                         counter_tooltip_visible.set(false);
-                    } else if let Some((name, value)) = canvas_renderer.find_counter_at(x, canvas_y) {
+                    } else if let Some((name, value)) = canvas_renderer.find_counter_at(x, canvas_y)
+                    {
                         hovered_counter_info.set(Some((name, value)));
                         counter_tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
                         counter_tooltip_visible.set(true);
@@ -1032,14 +1043,17 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                             <canvas
                                 node_ref=canvas_ref
                                 class="absolute left-0"
-                                style=move || format!(
-                                    "cursor: crosshair; top: {}px;",
-                                    renderer.with(|r| {
-                                        r.as_ref()
-                                            .map(|cr| cr.state.viewport.canvas_top_offset)
-                                            .unwrap_or(0.0)
-                                    })
-                                )
+                                style=move || {
+                                    format!(
+                                        "cursor: crosshair; top: {}px;",
+                                        renderer
+                                            .with(|r| {
+                                                r.as_ref()
+                                                    .map(|cr| cr.state.viewport.canvas_top_offset)
+                                                    .unwrap_or(0.0)
+                                            }),
+                                    )
+                                }
                                 on:mousemove=on_canvas_mousemove
                             />
 
@@ -1058,132 +1072,51 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                                     )
                                 }
                             >
-                        // X-Axis rendered on canvas, no SVG needed
+                                // X-Axis rendered on canvas, no SVG needed
 
-                        // Counter Names Sidebar (same as original)
-                        <g
-                            class="counter-names"
-                            transform=format!(
-                                "translate(0, {})",
-                                X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN,
-                            )
-                        >
-                            <rect
-                                x="0"
-                                y="0"
-                                width=TRACE_NAME_WIDTH
-                                height=counters_height
-                                class="fill-slate-50 dark:fill-slate-800"
-                            />
-                            <For
-                                each=move || {
-                                    bazel_trace
-                                        .with_value(|bt| bt.counters.clone())
-                                        .into_iter()
-                                        .enumerate()
-                                }
-                                key=|(_, counter)| counter.name.clone()
-                                children=move |(i, counter)| {
-                                    let y = i as f64 * COUNTER_CHART_HEIGHT;
-                                    let (_, max_val) = counter
-                                        .time_series
-                                        .iter()
-                                        .fold(
-                                            (f64::MAX, f64::MIN),
-                                            |(min, max), point| {
-                                                (min.min(point.value), max.max(point.value))
-                                            },
-                                        );
-                                    let wrapped_lines = wrap_text(&counter.name, 25);
-                                    let line_height = 12.0;
-                                    let total_text_height = wrapped_lines.len() as f64
-                                        * line_height;
-                                    let start_y = y
-                                        + (COUNTER_CHART_HEIGHT - total_text_height) / 2.0
-                                        + line_height;
-
-                                    // Wrap counter name to fit in sidebar
-
-                                    view! {
-                                        <g>
-                                            {wrapped_lines
+                                // Counter Names Sidebar (same as original)
+                                <g
+                                    class="counter-names"
+                                    transform=format!(
+                                        "translate(0, {})",
+                                        X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN,
+                                    )
+                                >
+                                    <rect
+                                        x="0"
+                                        y="0"
+                                        width=TRACE_NAME_WIDTH
+                                        height=counters_height
+                                        class="fill-slate-50 dark:fill-slate-800"
+                                    />
+                                    <For
+                                        each=move || {
+                                            bazel_trace
+                                                .with_value(|bt| bt.counters.clone())
                                                 .into_iter()
                                                 .enumerate()
-                                                .map(|(line_idx, line)| {
-                                                    view! {
-                                                        <text
-                                                            x="10"
-                                                            y=start_y + (line_idx as f64 * line_height)
-                                                            font-size="10"
-                                                            class="fill-slate-900 dark:fill-slate-200"
-                                                        >
-                                                            {line}
-                                                        </text>
-                                                    }
-                                                })
-                                                .collect_view()}
-                                            <text
-                                                x=TRACE_NAME_WIDTH - 10.0
-                                                y=y + 15.0
-                                                text-anchor="end"
-                                                font-size="10"
-                                                class="fill-slate-500 dark:fill-slate-400"
-                                            >
-                                                {format!("{max_val:.2}")}
-                                            </text>
-                                            <line
-                                                x1="0"
-                                                y1=y + COUNTER_CHART_HEIGHT
-                                                x2=TRACE_NAME_WIDTH
-                                                y2=y + COUNTER_CHART_HEIGHT
-                                                class="stroke-slate-200 dark:stroke-slate-700"
-                                            />
-                                        </g>
-                                    }
-                                }
-                            />
-                        </g>
-
-                        // Trace Names Sidebar (same as original)
-                        <g
-                            class="trace-names"
-                            transform=format!(
-                                "translate(0, {})",
-                                X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN,
-                            )
-                        >
-                            <rect
-                                x="0"
-                                y="0"
-                                width=TRACE_NAME_WIDTH
-                                height=traces_height
-                                class="fill-slate-50 dark:fill-slate-800"
-                            />
-                            {bazel_trace
-                                .with_value(|bt| {
-                                    bt.traces
-                                        .iter()
-                                        .zip(layouts.with_value(|l| l.clone()).into_iter())
-                                        .zip(
-                                            trace_y_offsets
-                                                .with_value(|offsets| offsets.clone())
-                                                .into_iter(),
-                                        )
-                                        .map(|((trace, (_, num_rows)), current_y)| {
-                                            let trace_height = num_rows as f64 * ROW_HEIGHT;
-                                            let trace_label = format!(
-                                                "{} (tid: {})",
-                                                trace.name,
-                                                trace.tid,
-                                            );
-                                            let wrapped_lines = wrap_text(&trace_label, 25);
+                                        }
+                                        key=|(_, counter)| counter.name.clone()
+                                        children=move |(i, counter)| {
+                                            let y = i as f64 * COUNTER_CHART_HEIGHT;
+                                            let (_, max_val) = counter
+                                                .time_series
+                                                .iter()
+                                                .fold(
+                                                    (f64::MAX, f64::MIN),
+                                                    |(min, max), point| {
+                                                        (min.min(point.value), max.max(point.value))
+                                                    },
+                                                );
+                                            let wrapped_lines = wrap_text(&counter.name, 25);
                                             let line_height = 12.0;
                                             let total_text_height = wrapped_lines.len() as f64
                                                 * line_height;
-                                            let start_y = current_y
-                                                + (trace_height - total_text_height) / 2.0 + line_height;
+                                            let start_y = y
+                                                + (COUNTER_CHART_HEIGHT - total_text_height) / 2.0
+                                                + line_height;
 
-                                            // Wrap trace name to fit in sidebar
+                                            // Wrap counter name to fit in sidebar
 
                                             view! {
                                                 <g>
@@ -1203,45 +1136,126 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                                                             }
                                                         })
                                                         .collect_view()}
+                                                    <text
+                                                        x=TRACE_NAME_WIDTH - 10.0
+                                                        y=y + 15.0
+                                                        text-anchor="end"
+                                                        font-size="10"
+                                                        class="fill-slate-500 dark:fill-slate-400"
+                                                    >
+                                                        {format!("{max_val:.2}")}
+                                                    </text>
                                                     <line
                                                         x1="0"
-                                                        y1=current_y + trace_height
+                                                        y1=y + COUNTER_CHART_HEIGHT
                                                         x2=TRACE_NAME_WIDTH
-                                                        y2=current_y + trace_height
+                                                        y2=y + COUNTER_CHART_HEIGHT
                                                         class="stroke-slate-200 dark:stroke-slate-700"
                                                     />
                                                 </g>
                                             }
-                                        })
-                                        .collect_view()
-                                })}
-                        </g>
+                                        }
+                                    />
+                                </g>
 
-                        // Hover time line
-                        <Show when=move || {
-                            hover_time.get().is_some() && !tooltip_visible.get()
-                        }>
-                            {move || {
-                                let time = hover_time.get().unwrap();
-                                let x = (time - min_start_time as f64) * zoom.get();
-                                view! {
-                                    <g
-                                        class="pointer-events-none"
-                                        transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
-                                    >
-                                        <line
-                                            x1=x
-                                            y1=X_AXIS_HEIGHT
-                                            x2=x
-                                            y2=total_height
-                                            class="stroke-red-500"
-                                            stroke-dasharray="4"
-                                        />
-                                    </g>
-                                }
-                            }}
-                        </Show>
-                    </svg>
+                                // Trace Names Sidebar (same as original)
+                                <g
+                                    class="trace-names"
+                                    transform=format!(
+                                        "translate(0, {})",
+                                        X_AXIS_HEIGHT + counters_height + COUNTER_CHART_TOP_MARGIN,
+                                    )
+                                >
+                                    <rect
+                                        x="0"
+                                        y="0"
+                                        width=TRACE_NAME_WIDTH
+                                        height=traces_height
+                                        class="fill-slate-50 dark:fill-slate-800"
+                                    />
+                                    {bazel_trace
+                                        .with_value(|bt| {
+                                            bt.traces
+                                                .iter()
+                                                .zip(layouts.with_value(|l| l.clone()).into_iter())
+                                                .zip(
+                                                    trace_y_offsets
+                                                        .with_value(|offsets| offsets.clone())
+                                                        .into_iter(),
+                                                )
+                                                .map(|((trace, (_, num_rows)), current_y)| {
+                                                    let trace_height = num_rows as f64 * ROW_HEIGHT;
+                                                    let trace_label = format!(
+                                                        "{} (tid: {})",
+                                                        trace.name,
+                                                        trace.tid,
+                                                    );
+                                                    let wrapped_lines = wrap_text(&trace_label, 25);
+                                                    let line_height = 12.0;
+                                                    let total_text_height = wrapped_lines.len() as f64
+                                                        * line_height;
+                                                    let start_y = current_y
+                                                        + (trace_height - total_text_height) / 2.0 + line_height;
+
+                                                    // Wrap trace name to fit in sidebar
+
+                                                    view! {
+                                                        <g>
+                                                            {wrapped_lines
+                                                                .into_iter()
+                                                                .enumerate()
+                                                                .map(|(line_idx, line)| {
+                                                                    view! {
+                                                                        <text
+                                                                            x="10"
+                                                                            y=start_y + (line_idx as f64 * line_height)
+                                                                            font-size="10"
+                                                                            class="fill-slate-900 dark:fill-slate-200"
+                                                                        >
+                                                                            {line}
+                                                                        </text>
+                                                                    }
+                                                                })
+                                                                .collect_view()}
+                                                            <line
+                                                                x1="0"
+                                                                y1=current_y + trace_height
+                                                                x2=TRACE_NAME_WIDTH
+                                                                y2=current_y + trace_height
+                                                                class="stroke-slate-200 dark:stroke-slate-700"
+                                                            />
+                                                        </g>
+                                                    }
+                                                })
+                                                .collect_view()
+                                        })}
+                                </g>
+
+                                // Hover time line
+                                <Show when=move || {
+                                    hover_time.get().is_some() && !tooltip_visible.get()
+                                }>
+                                    {move || {
+                                        let time = hover_time.get().unwrap();
+                                        let x = (time - min_start_time as f64) * zoom.get();
+                                        view! {
+                                            <g
+                                                class="pointer-events-none"
+                                                transform=format!("translate({}, 0)", TRACE_NAME_WIDTH)
+                                            >
+                                                <line
+                                                    x1=x
+                                                    y1=X_AXIS_HEIGHT
+                                                    x2=x
+                                                    y2=total_height
+                                                    class="stroke-red-500"
+                                                    stroke-dasharray="4"
+                                                />
+                                            </g>
+                                        }
+                                    }}
+                                </Show>
+                            </svg>
                         </div>
                     </div>
                 </div>
