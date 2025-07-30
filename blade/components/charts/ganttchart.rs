@@ -11,6 +11,10 @@ const X_AXIS_HEIGHT: f64 = 30.0;
 const COUNTER_CHART_HEIGHT: f64 = 50.0;
 const COUNTER_CHART_TOP_MARGIN: f64 = 10.0;
 
+// Viewport virtualization constants
+const MAX_CANVAS_HEIGHT: f64 = 4096.0;
+const VIEWPORT_BUFFER: f64 = 500.0;
+
 #[derive(Clone, Debug)]
 #[allow(dead_code)]
 struct PositionedEvent {
@@ -41,6 +45,52 @@ struct SpatialIndex {
     counters: Vec<RenderedCounter>,
 }
 
+#[derive(Clone, Debug)]
+struct ViewportState {
+    scroll_top: f64,
+    viewport_height: f64,
+    total_logical_height: f64,
+    canvas_height: f64,
+    canvas_top_offset: f64,
+}
+
+impl ViewportState {
+    fn new(total_logical_height: f64, viewport_height: f64) -> Self {
+        let canvas_height = MAX_CANVAS_HEIGHT.min(total_logical_height);
+        Self {
+            scroll_top: 0.0,
+            viewport_height,
+            total_logical_height,
+            canvas_height,
+            canvas_top_offset: 0.0,
+        }
+    }
+
+    fn update_scroll(&mut self, scroll_top: f64) {
+        self.scroll_top = scroll_top.max(0.0).min(self.total_logical_height - self.viewport_height);
+
+        // Calculate canvas positioning
+        let buffer_start = (self.scroll_top - VIEWPORT_BUFFER).max(0.0);
+        let buffer_end = (self.scroll_top + self.viewport_height + VIEWPORT_BUFFER)
+            .min(self.total_logical_height);
+
+        let needed_height = buffer_end - buffer_start;
+        self.canvas_height = needed_height.min(MAX_CANVAS_HEIGHT);
+        self.canvas_top_offset = buffer_start;
+    }
+
+    fn visible_range(&self) -> (f64, f64) {
+        let start = (self.scroll_top - VIEWPORT_BUFFER).max(0.0);
+        let end = (self.scroll_top + self.viewport_height + VIEWPORT_BUFFER)
+            .min(self.total_logical_height);
+        (start, end)
+    }
+
+    fn logical_to_canvas_y(&self, logical_y: f64) -> f64 {
+        logical_y - self.canvas_top_offset
+    }
+}
+
 impl SpatialIndex {
     fn new() -> Self {
         Self {
@@ -50,11 +100,14 @@ impl SpatialIndex {
     }
 
     fn find_event_at(&self, x: f64, y: f64) -> Option<&Event> {
+        // Convert screen y to canvas y (account for scroll)
+        let canvas_y = y; // y is already in canvas coordinates from mouse event
+
         for event in &self.events {
             if x >= event.x
                 && x <= event.x + event.width
-                && y >= event.y
-                && y <= event.y + event.height
+                && canvas_y >= event.y
+                && canvas_y <= event.y + event.height
             {
                 return Some(&event.event);
             }
@@ -69,8 +122,11 @@ impl SpatialIndex {
         zoom: f64,
         min_start_time: i64,
     ) -> Option<(String, f64)> {
+        // Convert screen y to canvas y
+        let canvas_y = y;
+
         for counter in &self.counters {
-            if y >= counter.y_offset && y <= counter.y_offset + COUNTER_CHART_HEIGHT {
+            if canvas_y >= counter.y_offset && canvas_y <= counter.y_offset + COUNTER_CHART_HEIGHT {
                 let timeline_x = x - TRACE_NAME_WIDTH;
                 if timeline_x < 0.0 {
                     continue;
@@ -256,6 +312,7 @@ struct CanvasRendererState {
     min_start_time: i64,
     traces_height: f64,
     counters_height: f64,
+    viewport: ViewportState,
 }
 
 #[derive(Clone)]
@@ -274,6 +331,7 @@ impl CanvasRenderer {
                 min_start_time: 0,
                 traces_height: 0.0,
                 counters_height: 0.0,
+                viewport: ViewportState::new(0.0, 0.0),
             },
         }
     }
@@ -292,29 +350,36 @@ impl CanvasRenderer {
         Ok((canvas, ctx))
     }
 
-    fn update_viewport(
+    fn update_viewport_with_virtualization(
         &mut self,
         canvas_ref: NodeRef<html::Canvas>,
         width: f64,
-        height: f64,
+        total_logical_height: f64,
+        viewport_height: f64,
+        scroll_top: f64,
         zoom: f64,
     ) -> Result<(), String> {
         self.state.canvas_width = width;
-        self.state.canvas_height = height;
         self.state.zoom = zoom;
+
+        // Update viewport state
+        self.state.viewport = ViewportState::new(total_logical_height, viewport_height);
+        self.state.viewport.update_scroll(scroll_top);
+        self.state.canvas_height = self.state.viewport.canvas_height;
 
         let (canvas, _ctx) = self.get_canvas_and_context(canvas_ref)?;
 
-        // Update canvas size
+        // Update canvas size to viewport canvas height
         canvas.set_width(width as u32);
-        canvas.set_height(height as u32);
+        canvas.set_height(self.state.viewport.canvas_height as u32);
 
-        // Set canvas style size to prevent blurring
+        // Set canvas style size and position
         let element: &web_sys::Element = canvas.as_ref();
         if let Some(html_element) = element.dyn_ref::<web_sys::HtmlElement>() {
             let style = html_element.style();
             let _ = style.set_property("width", &format!("{width}px"));
-            let _ = style.set_property("height", &format!("{height}px"));
+            let _ = style.set_property("height", &format!("{}px", self.state.viewport.canvas_height));
+            let _ = style.set_property("top", &format!("{}px", self.state.viewport.canvas_top_offset));
         }
 
         Ok(())
@@ -335,8 +400,19 @@ impl CanvasRenderer {
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.events.clear();
 
+        let (visible_start, visible_end) = self.state.viewport.visible_range();
+        let traces_start_y = X_AXIS_HEIGHT + self.state.counters_height + COUNTER_CHART_TOP_MARGIN;
+
         for ((positioned_events, _), &trace_y_offset) in layouts.iter().zip(trace_y_offsets.iter())
         {
+            let trace_logical_y = traces_start_y + trace_y_offset;
+            let trace_end_y = trace_logical_y + (positioned_events.len() as f64 * ROW_HEIGHT);
+
+            // Skip entire trace if not visible
+            if trace_end_y < visible_start || trace_logical_y > visible_end {
+                continue;
+            }
+
             for positioned_event in positioned_events {
                 let normalized_start =
                     (positioned_event.event.start - self.state.min_start_time) as f64;
@@ -344,21 +420,22 @@ impl CanvasRenderer {
                 let event_width = ((positioned_event.event.duration.unwrap_or(1) as f64)
                     * self.state.zoom)
                     .max(1.0);
-                let event_y = X_AXIS_HEIGHT
-                    + self.state.counters_height
-                    + COUNTER_CHART_TOP_MARGIN
-                    + trace_y_offset
+                let logical_event_y = trace_logical_y
                     + (positioned_event.row as f64 * ROW_HEIGHT)
                     + V_PADDING;
 
-                // Skip events outside viewport (viewport culling)
-                if event_x + event_width < 0.0 || event_x > self.state.canvas_width {
+                // Skip events outside viewport (both horizontal and vertical culling)
+                if event_x + event_width < 0.0 || event_x > self.state.canvas_width
+                    || logical_event_y < visible_start || logical_event_y > visible_end {
                     continue;
                 }
 
+                // Convert to canvas coordinates
+                let canvas_event_y = self.state.viewport.logical_to_canvas_y(logical_event_y);
+
                 // Render the event rectangle
                 ctx.set_fill_style_str(&positioned_event.color);
-                ctx.fill_rect(event_x, event_y, event_width, EVENT_HEIGHT);
+                ctx.fill_rect(event_x, canvas_event_y, event_width, EVENT_HEIGHT);
 
                 // Render text if event is wide enough and clip text to event bounds
                 if event_width > 30.0 {
@@ -372,7 +449,7 @@ impl CanvasRenderer {
                     let estimated_text_width = positioned_event.event.name.len() as f64 * 7.0;
                     let available_width = event_width - 10.0; // 5px padding on each side
                     let text_x = event_x + 5.0; // 5px padding from left edge of event
-                    let text_y = event_y + EVENT_HEIGHT / 2.0; // Center vertically in event
+                    let text_y = canvas_event_y + EVENT_HEIGHT / 2.0; // Center vertically in event
 
                     if estimated_text_width <= available_width {
                         // Text fits, render normally
@@ -389,10 +466,12 @@ impl CanvasRenderer {
                             let _ = ctx.fill_text(&truncated, text_x, text_y);
                         }
                     }
-                } // Add to spatial index
+                }
+
+                // Add to spatial index (using canvas coordinates for hit testing)
                 let mut indexed_event = positioned_event.clone();
                 indexed_event.x = event_x;
-                indexed_event.y = event_y;
+                indexed_event.y = canvas_event_y;
                 indexed_event.width = event_width;
                 self.state.spatial_index.events.push(indexed_event);
             }
@@ -408,9 +487,19 @@ impl CanvasRenderer {
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
         self.state.spatial_index.counters.clear();
 
+        let (visible_start, visible_end) = self.state.viewport.visible_range();
+
         for (i, counter) in counters.iter().enumerate() {
-            let y_offset =
+            let logical_y_offset =
                 X_AXIS_HEIGHT + COUNTER_CHART_TOP_MARGIN + (i as f64 * COUNTER_CHART_HEIGHT);
+
+            // Skip counter if not visible
+            if logical_y_offset + COUNTER_CHART_HEIGHT < visible_start || logical_y_offset > visible_end {
+                continue;
+            }
+
+            // Convert to canvas coordinates
+            let canvas_y_offset = self.state.viewport.logical_to_canvas_y(logical_y_offset);
 
             let (min_val, max_val) = counter
                 .time_series
@@ -428,7 +517,7 @@ impl CanvasRenderer {
             let first_point = &counter.time_series[0];
             let first_x = TRACE_NAME_WIDTH
                 + ((first_point.timestamp - self.state.min_start_time) as f64 * self.state.zoom);
-            let first_y = y_offset
+            let first_y = canvas_y_offset
                 + if max_val > min_val {
                     COUNTER_CHART_HEIGHT
                         - ((first_point.value - min_val) / (max_val - min_val))
@@ -439,7 +528,7 @@ impl CanvasRenderer {
 
             // Start path at bottom
             ctx.begin_path();
-            ctx.move_to(first_x, y_offset + COUNTER_CHART_HEIGHT);
+            ctx.move_to(first_x, canvas_y_offset + COUNTER_CHART_HEIGHT);
             ctx.line_to(first_x, first_y);
             points.push((first_x, first_y));
 
@@ -448,7 +537,7 @@ impl CanvasRenderer {
                 let prev_point = &counter.time_series[j - 1];
                 let curr_point = &counter.time_series[j];
 
-                let prev_y = y_offset
+                let prev_y = canvas_y_offset
                     + if max_val > min_val {
                         COUNTER_CHART_HEIGHT
                             - ((prev_point.value - min_val) / (max_val - min_val))
@@ -459,7 +548,7 @@ impl CanvasRenderer {
 
                 let curr_x = TRACE_NAME_WIDTH
                     + ((curr_point.timestamp - self.state.min_start_time) as f64 * self.state.zoom);
-                let curr_y = y_offset
+                let curr_y = canvas_y_offset
                     + if max_val > min_val {
                         COUNTER_CHART_HEIGHT
                             - ((curr_point.value - min_val) / (max_val - min_val))
@@ -478,7 +567,7 @@ impl CanvasRenderer {
                 + ((counter.time_series.last().unwrap().timestamp - self.state.min_start_time)
                     as f64
                     * self.state.zoom);
-            ctx.line_to(last_x, y_offset + COUNTER_CHART_HEIGHT);
+            ctx.line_to(last_x, canvas_y_offset + COUNTER_CHART_HEIGHT);
             ctx.close_path();
 
             // Fill with color
@@ -493,10 +582,10 @@ impl CanvasRenderer {
             ctx.set_line_width(1.0);
             ctx.stroke();
 
-            // Add to spatial index
+            // Add to spatial index (using canvas coordinates)
             self.state.spatial_index.counters.push(RenderedCounter {
                 name: counter.name.clone(),
-                y_offset,
+                y_offset: canvas_y_offset,
                 points,
                 min_val,
                 max_val,
@@ -514,14 +603,24 @@ impl CanvasRenderer {
     ) -> Result<(), String> {
         let (_canvas, ctx) = self.get_canvas_and_context(canvas_ref)?;
 
+        let logical_axis_y = X_AXIS_HEIGHT;
+        let (visible_start, visible_end) = self.state.viewport.visible_range();
+
+        // Skip if axis is not visible
+        if logical_axis_y < visible_start || logical_axis_y > visible_end {
+            return Ok(());
+        }
+
+        let canvas_axis_y = self.state.viewport.logical_to_canvas_y(logical_axis_y);
+
         // Render X-axis line
         ctx.set_stroke_style_str("#374151"); // gray-700 - more visible
         ctx.set_line_width(2.0);
         ctx.begin_path();
-        ctx.move_to(TRACE_NAME_WIDTH, X_AXIS_HEIGHT);
+        ctx.move_to(TRACE_NAME_WIDTH, canvas_axis_y);
         ctx.line_to(
             TRACE_NAME_WIDTH + (self.state.canvas_width - TRACE_NAME_WIDTH),
-            X_AXIS_HEIGHT,
+            canvas_axis_y,
         );
         ctx.stroke();
 
@@ -543,12 +642,12 @@ impl CanvasRenderer {
 
             // Render tick line
             ctx.begin_path();
-            ctx.move_to(tick_x, X_AXIS_HEIGHT - 5.0);
-            ctx.line_to(tick_x, X_AXIS_HEIGHT);
+            ctx.move_to(tick_x, canvas_axis_y - 5.0);
+            ctx.line_to(tick_x, canvas_axis_y);
             ctx.stroke();
 
             // Render tick label
-            let _ = ctx.fill_text(label, tick_x, X_AXIS_HEIGHT - 8.0);
+            let _ = ctx.fill_text(label, tick_x, canvas_axis_y - 8.0);
         }
 
         Ok(())
@@ -637,6 +736,10 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
     let (zoom, set_zoom) = signal(1.0);
     let initial_zoom = RwSignal::new(1.0);
 
+    // Viewport state for virtualization
+    let scroll_top = RwSignal::new(0.0);
+    let viewport_height = RwSignal::new(600.0); // Default viewport height
+
     let hovered_event = RwSignal::new(None::<Event>);
     let tooltip_pos = RwSignal::new((0.0, 0.0));
     let tooltip_visible = RwSignal::new(false);
@@ -650,15 +753,18 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
 
     // Refs
     let container_ref = NodeRef::<html::Div>::new();
+    let scroll_container_ref = NodeRef::<html::Div>::new();
     let canvas_ref = NodeRef::<html::Canvas>::new();
     let renderer = RwSignal::new(None::<CanvasRenderer>);
 
-    // Initialize zoom based on container width (same as original)
+    // Initialize zoom and viewport based on container size
     Effect::new(move |_| {
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
+            let container_height = container.client_height() as f64;
 
-            if container_width > 0.0 {
+            if container_width > 0.0 && container_height > 0.0 {
+                viewport_height.set(container_height);
                 let new_initial_zoom = if duration > 0.0 {
                     (container_width - TRACE_NAME_WIDTH) / duration
                 } else {
@@ -667,11 +773,13 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                 initial_zoom.set(new_initial_zoom);
                 set_zoom.set(new_initial_zoom);
             } else {
-                // Defer measurement using requestAnimationFrame (same as original)
+                // Defer measurement using requestAnimationFrame
                 let container_clone = container.clone();
                 let callback = wasm_bindgen::closure::Closure::wrap(Box::new(move || {
                     let container_width = container_clone.client_width() as f64;
-                    if container_width > 0.0 {
+                    let container_height = container_clone.client_height() as f64;
+                    if container_width > 0.0 && container_height > 0.0 {
+                        viewport_height.set(container_height);
                         let new_initial_zoom = if duration > 0.0 {
                             (container_width - TRACE_NAME_WIDTH) / duration
                         } else {
@@ -771,20 +879,24 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
             .collect::<Vec<f64>>()
     }));
 
-    // Main render effect
+    // Main render effect with virtualization
     Effect::new(move |_| {
-        let zoom_value = zoom.get(); // Track zoom changes
+        let zoom_value = zoom.get();
+        let scroll_top_value = scroll_top.get();
+        let viewport_height_value = viewport_height.get();
 
         if let Some(container) = container_ref.get() {
             let container_width = container.client_width() as f64;
 
-            if container_width > 0.0 {
+            if container_width > 0.0 && viewport_height_value > 0.0 {
                 renderer.update(|r| {
                     if let Some(canvas_renderer) = r
-                        && let Ok(()) = canvas_renderer.update_viewport(
+                        && let Ok(()) = canvas_renderer.update_viewport_with_virtualization(
                             canvas_ref,
                             TRACE_NAME_WIDTH + (duration * zoom_value),
                             total_height,
+                            viewport_height_value,
+                            scroll_top_value,
                             zoom_value,
                         )
                     {
@@ -811,14 +923,23 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
         }
     });
 
+    // Scroll event handler
+    let on_scroll = move |_ev: web_sys::Event| {
+        if let Some(scroll_container) = scroll_container_ref.get() {
+            let new_scroll_top = scroll_container.scroll_top() as f64;
+            scroll_top.set(new_scroll_top);
+        }
+    };
+
     // Mouse interaction handlers
     let on_canvas_mousemove = move |ev: web_sys::MouseEvent| {
-        if let Some(container) = container_ref.get() {
-            let rect = container.get_bounding_client_rect();
-            let x = ev.client_x() as f64 - rect.left() + container.scroll_left() as f64;
-            let y = ev.client_y() as f64 - rect.top() + container.scroll_top() as f64;
+        if let Some(scroll_container) = scroll_container_ref.get() {
+            let rect = scroll_container.get_bounding_client_rect();
+            let x = ev.client_x() as f64 - rect.left();
+            let canvas_y = ev.client_y() as f64 - rect.top(); // Y relative to canvas
+            let _logical_y = canvas_y + scroll_top.get(); // Convert to logical coordinates
 
-            // Update global hover time (same as original)
+            // Update global hover time
             if x >= TRACE_NAME_WIDTH {
                 let timeline_x = x - TRACE_NAME_WIDTH;
                 let time_us = (timeline_x / zoom.get()) + min_start_time as f64;
@@ -828,15 +949,15 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                 hover_time.set(None);
             }
 
-            // Check for event hover
+            // Check for event hover (using canvas coordinates for spatial index)
             renderer.with(|r| {
                 if let Some(canvas_renderer) = r {
-                    if let Some(event) = canvas_renderer.find_event_at(x, y) {
+                    if let Some(event) = canvas_renderer.find_event_at(x, canvas_y) {
                         hovered_event.set(Some(event.clone()));
                         tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
                         tooltip_visible.set(true);
                         counter_tooltip_visible.set(false);
-                    } else if let Some((name, value)) = canvas_renderer.find_counter_at(x, y) {
+                    } else if let Some((name, value)) = canvas_renderer.find_counter_at(x, canvas_y) {
                         hovered_counter_info.set(Some((name, value)));
                         counter_tooltip_pos.set((ev.client_x() as f64, ev.client_y() as f64));
                         counter_tooltip_visible.set(true);
@@ -893,31 +1014,49 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                 </div>
                 <div
                     node_ref=container_ref
-                    class="rounded max-w-full w-full relative h-full"
-                    on:mouseleave=on_canvas_mouseleave
+                    class="rounded max-w-full w-full relative"
+                    style="height: 100%;"
                 >
-                    // Canvas for rendering
-                    <canvas
-                        node_ref=canvas_ref
-                        class="absolute top-0 left-0"
-                        on:mousemove=on_canvas_mousemove
-                        style="cursor: crosshair;"
-                    />
-
-                    // SVG overlay for labels and UI elements
-                    <svg
-                        class="absolute top-0 left-0 pointer-events-none"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width=move || TRACE_NAME_WIDTH + timeline_width.get()
-                        height=total_height
-                        viewBox=move || {
-                            format!(
-                                "0 0 {} {}",
-                                TRACE_NAME_WIDTH + timeline_width.get(),
-                                total_height,
-                            )
-                        }
+                    // Virtualized scroll container
+                    <div
+                        node_ref=scroll_container_ref
+                        class="relative overflow-y-auto"
+                        style=format!("height: {}px;", viewport_height.get())
+                        on:scroll=on_scroll
+                        on:mouseleave=on_canvas_mouseleave
                     >
+                        // Virtual spacer to create scrollable area
+                        <div style=format!("height: {}px; position: relative;", total_height)>
+                            // Canvas for rendering (positioned absolutely)
+                            <canvas
+                                node_ref=canvas_ref
+                                class="absolute left-0"
+                                style=move || format!(
+                                    "cursor: crosshair; top: {}px;",
+                                    renderer.with(|r| {
+                                        r.as_ref()
+                                            .map(|cr| cr.state.viewport.canvas_top_offset)
+                                            .unwrap_or(0.0)
+                                    })
+                                )
+                                on:mousemove=on_canvas_mousemove
+                            />
+
+                            // SVG overlay for labels and UI elements (positioned absolutely)
+                            <svg
+                                class="absolute left-0 pointer-events-none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                width=move || TRACE_NAME_WIDTH + timeline_width.get()
+                                height=total_height
+                                style="top: 0px;"
+                                viewBox=move || {
+                                    format!(
+                                        "0 0 {} {}",
+                                        TRACE_NAME_WIDTH + timeline_width.get(),
+                                        total_height,
+                                    )
+                                }
+                            >
                         // X-Axis rendered on canvas, no SVG needed
 
                         // Counter Names Sidebar (same as original)
@@ -1077,7 +1216,7 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                                 })}
                         </g>
 
-                        // Hover time line (same as original)
+                        // Hover time line
                         <Show when=move || {
                             hover_time.get().is_some() && !tooltip_visible.get()
                         }>
@@ -1102,6 +1241,8 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
                             }}
                         </Show>
                     </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
