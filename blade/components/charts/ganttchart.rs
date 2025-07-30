@@ -100,14 +100,12 @@ impl SpatialIndex {
     }
 
     fn find_event_at(&self, x: f64, y: f64) -> Option<&Event> {
-        // Convert screen y to canvas y (account for scroll)
-        let canvas_y = y; // y is already in canvas coordinates from mouse event
-
+        // y is already in canvas coordinates from the mouse handler
         for event in &self.events {
             if x >= event.x
                 && x <= event.x + event.width
-                && canvas_y >= event.y
-                && canvas_y <= event.y + event.height
+                && y >= event.y
+                && y <= event.y + event.height
             {
                 return Some(&event.event);
             }
@@ -122,11 +120,9 @@ impl SpatialIndex {
         zoom: f64,
         min_start_time: i64,
     ) -> Option<(String, f64)> {
-        // Convert screen y to canvas y
-        let canvas_y = y;
-
+        // y is already in canvas coordinates from the mouse handler
         for counter in &self.counters {
-            if canvas_y >= counter.y_offset && canvas_y <= counter.y_offset + COUNTER_CHART_HEIGHT {
+            if y >= counter.y_offset && y <= counter.y_offset + COUNTER_CHART_HEIGHT {
                 let timeline_x = x - TRACE_NAME_WIDTH;
                 if timeline_x < 0.0 {
                     continue;
@@ -933,18 +929,23 @@ pub fn BazelTraceChart(mut bazel_trace: BazelTrace) -> impl IntoView {
 
     // Mouse interaction handlers
     let on_canvas_mousemove = move |ev: web_sys::MouseEvent| {
-        if let Some(scroll_container) = scroll_container_ref.get() {
-            let rect = scroll_container.get_bounding_client_rect();
-            let x = ev.client_x() as f64 - rect.left();
-            let canvas_y = ev.client_y() as f64 - rect.top(); // Y relative to canvas
-            let _logical_y = canvas_y + scroll_top.get(); // Convert to logical coordinates
+        // Get mouse coordinates relative to the canvas element directly
+        if let Some(canvas) = canvas_ref.get() {
+            let canvas_rect = canvas.get_bounding_client_rect();
+            let x = ev.client_x() as f64 - canvas_rect.left();
+            let canvas_y = ev.client_y() as f64 - canvas_rect.top();
 
             // Update global hover time
             if x >= TRACE_NAME_WIDTH {
                 let timeline_x = x - TRACE_NAME_WIDTH;
                 let time_us = (timeline_x / zoom.get()) + min_start_time as f64;
                 hover_time.set(Some(time_us));
-                hover_line_text_pos.set((ev.client_x() as f64, rect.top()));
+
+                // For the time line tooltip, we need screen coordinates
+                if let Some(scroll_container) = scroll_container_ref.get() {
+                    let scroll_rect = scroll_container.get_bounding_client_rect();
+                    hover_line_text_pos.set((ev.client_x() as f64, scroll_rect.top()));
+                }
             } else {
                 hover_time.set(None);
             }
