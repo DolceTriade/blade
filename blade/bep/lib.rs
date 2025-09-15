@@ -112,7 +112,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     ) -> std::result::Result<tonic::Response<Self::PublishBuildToolEventStreamStream>, tonic::Status>
     {
         let mut in_stream = request.into_inner();
-        let (tx, rx) = mpsc::channel(128);
+        let (tx, rx) = mpsc::channel(512);
         let global = self.state.clone();
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
@@ -125,6 +125,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
             let mut session = session::BESSession::new(handlers, global.clone());
             loop {
                 let Ok(msg) = tokio::time::timeout(std::time::Duration::from_secs(60), in_stream.message()).await else {
+                    tracing::warn!("Timeout waiting for message for {}, skipping.", session.invocation_id());
                     let _ = tx.send(Err(tonic::Status::deadline_exceeded("failed to wait for timeout"))).await;
                     return;
                 };
@@ -132,11 +133,22 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                 match msg.and_then(|msg| session.process_message(msg)) {
                     Ok(out) => {
                         if out.obe.event.is_none() {
+                            if !session.is_build_over() {
+                                tracing::warn!("Received empty event for {}, skipping.", session.invocation_id());
+                                let _ = tx.send(Err(tonic::Status::invalid_argument("empty event"))).await;
+                            }
                             return;
                         }
-                        if let Err(e) = tx.send(Ok(PublishBuildToolEventStreamResponse { stream_id: out.obe.stream_id.clone(), sequence_number: out.obe.sequence_number })).await {
-                            tracing::error!("Error sending response for {}, aborting: {:#?}", session.invocation_id(), e);
-                            TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::DataLoss.into() }).inc();
+                        if let Err(e) = tx.try_send(Ok(PublishBuildToolEventStreamResponse { stream_id: out.obe.stream_id.clone(), sequence_number: out.obe.sequence_number })) {
+                            tracing::error!("Error sending response, aborting: {:#?}", e);
+                            match e {
+                                mpsc::error::TrySendError::Closed(_) => {
+                                    TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::Aborted.into() }).inc();
+                                }
+                                mpsc::error::TrySendError::Full(_) => {
+                                    TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::ResourceExhausted.into() }).inc();
+                                }
+                            }
                             return;
                         }
                     }

@@ -1,0 +1,27 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "streamstress",
+    srcs = [
+        "main.rs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//blade/bep/protos:bep_proto",
+        "//blade/bep/protos:build_event_stream_rust_proto",
+        "@crate//:anyhow",
+        "@crate//:clap",
+        "@crate//:futures",
+        "@crate//:prost",
+        "@crate//:prost-types",
+        "@crate//:prost-reflect",
+        "@crate//:tokio",
+        "@crate//:tokio-stream",
+        "@crate//:tonic",
+        "@crate//:tracing",
+        "@crate//:tracing-subscriber",
+        "@crate//:uuid",
+    ],
+)
+
+
