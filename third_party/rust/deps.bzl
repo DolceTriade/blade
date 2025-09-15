@@ -87,6 +87,17 @@ def rust_dependencies():
                     },
                 ),
             ],
+            "tokio": [
+                crate.annotation(
+                    rustc_flags = ["--cfg", "tokio_unstable"],
+                    deps = ["@crate//:tracing"],
+                ),
+            ],
+            "console-subscriber": [
+                crate.annotation(
+                    rustc_flags = ["--cfg", "tokio_unstable"],
+                ),
+            ],
         },
         packages = {
             "ahash": crate.spec(
@@ -227,10 +238,13 @@ def rust_dependencies():
             ),
             "tokio": crate.spec(
                 version = "1.32.0",
-                features = ["full"],
+                features = ["full", "tracing"],
             ),
             "tokio-stream": crate.spec(
                 version = "0.1",
+            ),
+            "console-subscriber": crate.spec(
+                version = "0.4.1",
             ),
             "tonic": crate.spec(
                 version = "0.10.2",

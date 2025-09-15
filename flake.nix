@@ -72,6 +72,7 @@
                 wabt
                 postgresql
                 flamegraph
+                tokio-console
                 (import ./nix/cc/cc.nix {inherit pkgs;})
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;

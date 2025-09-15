@@ -155,7 +155,8 @@ cfg_if! {
             let (filter, handle) = tracing_subscriber::reload::Layer::new(env_filter);
 
 
-            let reg = tracing_subscriber::registry().with(layer).with(filter);
+            let console_layer = console_subscriber::spawn();
+            let reg = tracing_subscriber::registry().with(layer).with(filter).with(console_layer);
 
             let mut guard_opt = None;
             if let Some(flame_path) = flame {
