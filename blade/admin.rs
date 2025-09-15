@@ -5,6 +5,7 @@ use std::{
 
 use actix_web::*;
 use anyhow::Context;
+use cfg_if::cfg_if;
 use futures::prelude::future::FutureExt;
 use tracing::instrument;
 
@@ -27,6 +28,7 @@ pub async fn run_admin_server(
             .service(debug_mem_stats_handler)
             .service(debug_mem_profile_handler)
             .service(debug_mem_profile_enable_handler)
+            .service(debug_stackz_handler)
             .wrap(tracing_actix_web::TracingLogger::<
                 super::BladeRootSpanBuilder,
             >::new())
@@ -133,4 +135,95 @@ async fn debug_mem_profile_enable_handler(
         error::ErrorInternalServerError(format!("error setting memdump status: {e:#?}"))
     })?;
     Ok(HttpResponse::Ok().into())
+}
+
+#[get("/admin/stackz")]
+#[instrument]
+async fn debug_stackz_handler() -> Result<HttpResponse> {
+    cfg_if! {
+        if #[cfg(not(target_os = "linux"))] {
+            return Err(error::ErrorInternalServerError("rstack-self not supported on non-Linux"));
+        } else {
+            let exe = std::env::current_exe().map_err(|e| error::ErrorInternalServerError(format!("error current bin: {e:#?}")))?.into_os_string();
+            let trace = rstack_self::trace(std::process::Command::new(exe).arg("--rstack_child")).map_err(|e| error::ErrorInternalServerError(format!("error getting stack trace: {e:#?}")))?;
+            Ok(HttpResponse::Ok().content_type("text/plain").body(format_stacktrace(&trace)))
+        }
+    }
+}
+
+cfg_if! {
+if #[cfg(target_os = "linux")] {
+use rstack_self::Trace;
+use std::fmt::Write;
+
+/// Format a stack trace into a nice string for HTTP responses
+fn format_stacktrace(trace: &Trace) -> String {
+    let mut output = String::new();
+
+    let threads = trace.threads();
+    if threads.is_empty() {
+        return "No threads found in trace".to_string();
+    }
+
+    writeln!(output, "Stack Trace ({} threads)", threads.len()).unwrap();
+    writeln!(output, "{}", "=".repeat(60)).unwrap();
+
+    for (thread_idx, thread) in threads.iter().enumerate() {
+        if thread_idx > 0 {
+            writeln!(output).unwrap(); // Blank line between threads
+        }
+
+        // Thread header
+        writeln!(output, "Thread {} ({})", thread.id(), thread.name()).unwrap();
+        writeln!(output, "{}", "-".repeat(40)).unwrap();
+
+        let frames = thread.frames();
+        if frames.is_empty() {
+            writeln!(output, "  No stack frames").unwrap();
+            continue;
+        }
+
+        for (frame_idx, frame) in frames.iter().enumerate() {
+            writeln!(output, "  #{:2} 0x{:016x}", frame_idx, frame.ip()).unwrap();
+
+            let symbols = frame.symbols();
+            if symbols.is_empty() {
+                writeln!(output, "      [unknown]").unwrap();
+                continue;
+            }
+
+            for (symbol_idx, symbol) in symbols.iter().enumerate() {
+                let indent = if symbol_idx == 0 { "      " } else { "        ↳ " };
+                let name = symbol.name().unwrap_or("[unknown]");
+
+                write!(output, "{indent}at {name}").unwrap();
+
+                match (symbol.file(), symbol.line()) {
+                    (Some(file), Some(line)) => {
+                        let file_str = file.to_string_lossy();
+                        // Truncate long file paths
+                        let display_file = if file_str.len() > 50 {
+                            format!("...{}", &file_str[file_str.len() - 47..])
+                        } else {
+                            file_str.to_string()
+                        };
+                        writeln!(output, " ({display_file}:{line})").unwrap();
+                    },
+                    (Some(file), None) => {
+                        let file_str = file.to_string_lossy();
+                        writeln!(output, " ({file_str})").unwrap();
+                    },
+                    (None, Some(line)) => {
+                        writeln!(output, " (line {line})").unwrap();
+                    },
+                    (None, None) => {
+                        writeln!(output).unwrap();
+                    }
+                }
+            }
+        }
+    }
+    output
+}
+}
 }

@@ -67,7 +67,12 @@ rust_binary(
         "@crate//:web-sys",
         "@crate//:zip",
         "@rules_rust//tools/runfiles",
-    ],
+    ] + select({
+        "//conditions:default": [],
+        "@platforms//os:linux": [
+            "@crate//:rstack-self",
+        ],
+    }),
 )
 
 rust_shared_library(
@@ -135,6 +140,7 @@ runfiles(
 pkg_tar(
     name = "blade_tar",
     srcs = [":blade_runfiles"],
+    extension = "tar.gz",
 )
 
 oci_image(
@@ -144,7 +150,7 @@ oci_image(
     tags = ["noosx"],
     tars = [
         ":blade_tar",
-        "@oci_base//:closure.tar",
+        "@oci_base//:closure.tar.gz",
     ],
     workdir = "/app/blade/blade.runfiles/blade",
 )

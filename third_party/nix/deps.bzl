@@ -54,7 +54,7 @@ def third_party_nix_deps():
     )
     nixpkgs_package(
         name = "oci_base",
-        build_file_content = """exports_files(["closure.tar"])""",
+        build_file_content = """exports_files(["closure.tar.gz"])""",
         repository = "@nixpkgs",
         nix_file = "//third_party/nix/oci_base:default.nix",
         nixopts = ["--show-trace"],
@@ -85,4 +85,28 @@ def third_party_nix_deps():
         attribute_path = "protobuf",
         repository = "@nixpkgs",
         build_file = "//third_party/nix:BUILD.protobuf",
+    )
+    nixpkgs_package(
+        name = "libunwind",
+        nix_file_content = """{ pkgs ? import <nixpkgs> {} }:
+        pkgs.buildEnv {
+        name = "libunwind-combined";
+        paths = [
+            pkgs.libunwind.out
+            pkgs.libunwind.dev
+        ];
+
+        # Optional: avoid conflicts if files overlap
+        ignoreCollisions = false;
+
+        # Optional: create symlinks instead of copying
+        pathsToLink = [ "/" ];
+        }
+""",
+        repository = "@nixpkgs",
+        build_file = "//third_party/nix:BUILD.libunwind",
+    )
+    nixpkgs_package(
+        name = "pkg-config",
+        repository = "@nixpkgs",
     )

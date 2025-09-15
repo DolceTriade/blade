@@ -123,6 +123,8 @@ cfg_if! {
             flame_path: Option<String>,
             #[arg(long="json", value_name="JSON", default_value="false")]
             json: bool,
+            #[arg(long="rstack_child", value_name="RSTACK_CHILD", default_value="false")]
+            rstack_child: bool,
 
             #[arg(long="version", default_value="false")]
             version: bool,
@@ -174,6 +176,17 @@ cfg_if! {
         #[actix_web::main]
         async fn main() -> anyhow::Result<()> {
             let args = Args::parse();
+
+            if args.rstack_child {
+                cfg_if! {
+                    if #[cfg(target_os = "linux")] {
+                        let _ = rstack_self::child();
+                    } else {
+                        tracing::error!("rstack-self is only supported on Linux");
+                    }
+                }
+                return Ok(());
+            }
 
 
             if args.version {

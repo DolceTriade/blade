@@ -13,8 +13,8 @@ rust_binary(
         "@crate//:clap",
         "@crate//:futures",
         "@crate//:prost",
-        "@crate//:prost-types",
         "@crate//:prost-reflect",
+        "@crate//:prost-types",
         "@crate//:tokio",
         "@crate//:tokio-stream",
         "@crate//:tonic",
@@ -23,5 +23,3 @@ rust_binary(
         "@crate//:uuid",
     ],
 )
-
-

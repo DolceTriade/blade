@@ -98,6 +98,15 @@ def rust_dependencies():
                     rustc_flags = ["--cfg", "tokio_unstable"],
                 ),
             ],
+            "unwind-sys": [
+                crate.annotation(
+                    build_script_data = ["@libunwind//:pkgconfig", "@pkg-config//:bin/pkg-config"],
+                    build_script_env = {
+                        "PKG_CONFIG": "$(location @pkg-config//:bin/pkg-config)",
+                        "PKG_CONFIG_PATH": "$(location @libunwind//:pkgconfig)",
+                    },
+                ),
+            ],
         },
         packages = {
             "ahash": crate.spec(
@@ -217,6 +226,9 @@ def rust_dependencies():
             ),
             "regex": crate.spec(
                 version = "1.11.1",
+            ),
+            "rstack-self": crate.spec(
+                version = "0.3.0",
             ),
             "scopeguard": crate.spec(
                 version = "1.2.0",
