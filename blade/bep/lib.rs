@@ -71,7 +71,10 @@ pub struct BuildEventService {
     handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
-async fn unexpected_cleanup_session(db_mgr: std::sync::Arc<dyn state::DBManager>, invocation_id: &str) -> anyhow::Result<()> {
+async fn unexpected_cleanup_session(
+    db_mgr: std::sync::Arc<dyn state::DBManager>,
+    invocation_id: &str,
+) -> anyhow::Result<()> {
     let inv_id = invocation_id.to_string();
     db::run_group(db_mgr, move |db| {
         db.update_shallow_invocation(
@@ -164,15 +167,12 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                             tracing::error!("Error: {}", err);
                             TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: err.code().into() }).inc();
                         }
-                        if !session.invocation_id().is_empty() {
-                            if let Err(e) = unexpected_cleanup_session(
+                        if !session.invocation_id().is_empty()
+                            && let Err(e) = unexpected_cleanup_session(
                                 global.db_manager.clone(),
                                 session.invocation_id(),
-                            )
-                            .await
-                            {
-                                tracing::error!("error closing stream: {e:#?}")
-                            }
+                            ).await {
+                            tracing::error!("error closing stream: {e:#?}")
                         }
                         return;
                     }

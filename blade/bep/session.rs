@@ -61,17 +61,15 @@ impl BESSession {
         // Update heartbeat for liveness tracking
         let mgr = self.global.db_manager.clone();
         let inv_id = self.invocation_id.to_string();
-        let _ = db::run(mgr, move |db| {
-            db.update_invocation_heartbeat(&inv_id)
-        })
-        .await
-        .inspect_err(|e| {
-            tracing::warn!(
-                "Failed to update heartbeat for {}: {:#?}",
-                self.invocation_id,
-                e
-            );
-        });
+        let _ = db::run(mgr, move |db| db.update_invocation_heartbeat(&inv_id))
+            .await
+            .inspect_err(|e| {
+                tracing::warn!(
+                    "Failed to update heartbeat for {}: {:#?}",
+                    self.invocation_id,
+                    e
+                );
+            });
 
         let Some(obe) = msg.ordered_build_event else {
             return Err(tonic::Status::invalid_argument("Empty OBE"));
@@ -155,16 +153,18 @@ fn extract_session_id(
     Ok(id)
 }
 
-async fn validate_stream(global: Arc<state::Global>, session_uuid: &str) -> Result<(), tonic::Status> {
+async fn validate_stream(
+    global: Arc<state::Global>,
+    session_uuid: &str,
+) -> Result<(), tonic::Status> {
     let mgr = global.db_manager.clone();
     let session_id = session_uuid.to_string();
     let session_lock_time = global.session_lock_time;
 
-    let inv = db::run(mgr, move |db| {
-        db.get_shallow_invocation(&session_id)
-    })
-    .await
-    .map_err(|e| tonic::Status::not_found(format!("{e:#?}")))?;
+    let inv = match db::run(mgr, move |db| db.get_shallow_invocation(&session_id)).await {
+        Ok(inv) => inv,
+        Err(_) => return Ok(()), // Invocation doesn't exist yet, allow creation
+    };
 
     if let Some(end) = inv.end
         && std::time::SystemTime::now()
@@ -199,7 +199,10 @@ async fn write_session_result(
     .await
 }
 
-async fn create_invocation(db_mgr: std::sync::Arc<dyn state::DBManager>, invocation_id: &str) -> anyhow::Result<()> {
+async fn create_invocation(
+    db_mgr: std::sync::Arc<dyn state::DBManager>,
+    invocation_id: &str,
+) -> anyhow::Result<()> {
     let inv_id = invocation_id.to_string();
     db::run_group(db_mgr, move |db| {
         db.upsert_shallow_invocation(&state::InvocationResults {

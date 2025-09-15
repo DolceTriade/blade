@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::sync::{Arc, atomic::AtomicU32};
+
 use anyhow::Result;
 use lazy_static::lazy_static;
 use prometheus_client::metrics::{counter::Counter, gauge::Gauge, histogram::Histogram};
-use std::sync::atomic::AtomicU32;
 use tracing::instrument;
 
 lazy_static! {
@@ -22,11 +22,13 @@ lazy_static! {
         Gauge::default()
     );
     static ref DB_EXEC_DURATION: Histogram = {
-        let buckets = [0.001, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 1.0, 2.5, 5.0, 10.0];
+        let buckets = [
+            0.001, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 1.0, 2.5, 5.0, 10.0,
+        ];
         metrics::register_metric(
             "blade_db_exec_duration_seconds",
             "Duration of DB operations in spawn_blocking",
-            Histogram::new(buckets.into_iter())
+            Histogram::new(buckets.into_iter()),
         )
     };
 }
