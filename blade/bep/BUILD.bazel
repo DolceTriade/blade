@@ -22,6 +22,7 @@ rust_library(
         "//blade/bep/protos:bep_proto",
         "//blade/bep/protos:build_event_stream_rust_proto",
         "//blade/bep/protos:empty_proto",
+        "//blade/db",
         "//blade/metrics",
         "//blade/prototime",
         "//blade/prototime:duration_proto",

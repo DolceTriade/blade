@@ -5,7 +5,6 @@ use build_proto::google::devtools::build::v1::*;
 use lazy_static::lazy_static;
 use prometheus_client::metrics::counter::Counter;
 use prost_reflect::prost::Message;
-use state::DBManager;
 
 use crate::{BuildState, EventHandler, ProccessedEvent};
 
@@ -39,7 +38,7 @@ impl BESSession {
 
     pub fn invocation_id(&self) -> &str { &self.invocation_id }
 
-    pub fn process_message(
+    pub async fn process_message(
         &mut self,
         msg: Option<PublishBuildToolEventStreamRequest>,
     ) -> Result<crate::ProccessedEvent, tonic::Status> {
@@ -53,35 +52,38 @@ impl BESSession {
             let span = tracing::span::Span::current();
             span.record("session_uuid", &self.invocation_id);
             tracing::info!("Stream started");
-            validate_stream(self.global.clone(), &self.invocation_id)?;
-            create_invocation(&*self.global.db_manager, &self.invocation_id)
+            validate_stream(self.global.clone(), &self.invocation_id).await?;
+            create_invocation(self.global.db_manager.clone(), &self.invocation_id)
+                .await
                 .map_err(|e| tonic::Status::internal(format!("{e:#?}")))?;
         }
 
         // Update heartbeat for liveness tracking
-        if let Ok(mut db) = self.global.db_manager.get() {
-            let _ = db
-                .update_invocation_heartbeat(&self.invocation_id)
-                .inspect_err(|e| {
-                    tracing::warn!(
-                        "Failed to update heartbeat for {}: {:#?}",
-                        self.invocation_id,
-                        e
-                    );
-                });
-        }
+        let mgr = self.global.db_manager.clone();
+        let inv_id = self.invocation_id.to_string();
+        let _ = db::run(mgr, move |db| {
+            db.update_invocation_heartbeat(&inv_id)
+        })
+        .await
+        .inspect_err(|e| {
+            tracing::warn!(
+                "Failed to update heartbeat for {}: {:#?}",
+                self.invocation_id,
+                e
+            );
+        });
 
         let Some(obe) = msg.ordered_build_event else {
             return Err(tonic::Status::invalid_argument("Empty OBE"));
         };
-        let state = self.handle_ordered_build_event(&obe)?;
+        let state = self.handle_ordered_build_event(&obe).await?;
         matches!(state, BuildState::BuildFinished).then(|| {
             self.build_over = true;
         });
         Ok(crate::ProccessedEvent { obe })
     }
 
-    fn handle_ordered_build_event(
+    async fn handle_ordered_build_event(
         &self,
         obe: &OrderedBuildEvent,
     ) -> Result<BuildState, tonic::Status> {
@@ -110,10 +112,11 @@ impl BESSession {
                             .code
                             == 0;
                         write_session_result(
-                            &*self.global.db_manager,
+                            self.global.db_manager.clone(),
                             &self.invocation_id,
                             success,
                         )
+                        .await
                         .map_err(|e| tonic::Status::internal(format!("{e:#?}")))?;
                     },
                     Some(_) => {
@@ -152,56 +155,59 @@ fn extract_session_id(
     Ok(id)
 }
 
-fn validate_stream(global: Arc<state::Global>, session_uuid: &str) -> Result<(), tonic::Status> {
-    let mut db = global
-        .db_manager
-        .as_ref()
-        .get()
-        .map_err(|e| tonic::Status::internal(format!("{e:#?}")))?;
-    let Ok(inv) = db
-        .get_shallow_invocation(session_uuid)
-        .map_err(|e| tonic::Status::not_found(format!("{e:#?}")))
-    else {
-        return Ok(());
-    };
+async fn validate_stream(global: Arc<state::Global>, session_uuid: &str) -> Result<(), tonic::Status> {
+    let mgr = global.db_manager.clone();
+    let session_id = session_uuid.to_string();
+    let session_lock_time = global.session_lock_time;
+
+    let inv = db::run(mgr, move |db| {
+        db.get_shallow_invocation(&session_id)
+    })
+    .await
+    .map_err(|e| tonic::Status::not_found(format!("{e:#?}")))?;
+
     if let Some(end) = inv.end
         && std::time::SystemTime::now()
             .duration_since(end)
             .unwrap_or(std::time::Duration::from_secs(0))
-            > global.session_lock_time
+            > session_lock_time
     {
         return Err(tonic::Status::failed_precondition("session already ended"));
     }
     Ok(())
 }
 
-fn write_session_result(
-    db_mgr: &dyn DBManager,
+async fn write_session_result(
+    db_mgr: std::sync::Arc<dyn state::DBManager>,
     invocation_id: &str,
     success: bool,
 ) -> anyhow::Result<()> {
-    let mut db = db_mgr.get()?;
-    db.update_shallow_invocation(
-        invocation_id,
-        Box::new(move |i: &mut state::InvocationResults| {
-            match success {
-                true => i.status = state::Status::Success,
-                false => i.status = state::Status::Fail,
-            }
-            i.end = Some(std::time::SystemTime::now());
-            Ok(())
-        }),
-    )?;
-    Ok(())
+    let inv_id = invocation_id.to_string();
+    db::run_group(db_mgr, move |db| {
+        db.update_shallow_invocation(
+            &inv_id,
+            Box::new(move |i: &mut state::InvocationResults| {
+                match success {
+                    true => i.status = state::Status::Success,
+                    false => i.status = state::Status::Fail,
+                }
+                i.end = Some(std::time::SystemTime::now());
+                Ok(())
+            }),
+        )
+    })
+    .await
 }
 
-fn create_invocation(db_mgr: &dyn DBManager, invocation_id: &str) -> anyhow::Result<()> {
-    let mut db = db_mgr.get()?;
-    db.upsert_shallow_invocation(&state::InvocationResults {
-        id: invocation_id.to_string(),
-        status: state::Status::InProgress,
-        start: std::time::SystemTime::now(),
-        ..Default::default()
-    })?;
-    Ok(())
+async fn create_invocation(db_mgr: std::sync::Arc<dyn state::DBManager>, invocation_id: &str) -> anyhow::Result<()> {
+    let inv_id = invocation_id.to_string();
+    db::run_group(db_mgr, move |db| {
+        db.upsert_shallow_invocation(&state::InvocationResults {
+            id: inv_id,
+            status: state::Status::InProgress,
+            start: std::time::SystemTime::now(),
+            ..Default::default()
+        })
+    })
+    .await
 }
