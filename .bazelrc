@@ -7,7 +7,10 @@ import %workspace%/.bazel-lib/bazelrc/clippy.bazelrc
 import %workspace%/.bazel-lib/bazelrc/osx.bazelrc
 import %workspace%/.bazel-lib/bazelrc/release.bazelrc
 
-try-import %workspace%/.bazelenvrc
-try-import %workspace%/user.bazelrc
 
 common --incompatible_enable_proto_toolchain_resolution
+# Enable tracking of source directories to silence warnings about libunwind.
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
+try-import %workspace%/.bazelenvrc
+try-import %workspace%/user.bazelrc

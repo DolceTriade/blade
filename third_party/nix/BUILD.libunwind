@@ -1,0 +1,6 @@
+filegroup(
+    name = "pkgconfig",
+    # HACK: Use the pkgconfig dir so we can pass it to rust.
+    srcs = ["lib/pkgconfig"],
+    visibility = ["//visibility:public"],
+)
