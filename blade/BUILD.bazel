@@ -10,12 +10,12 @@ rust_binary(
         "lib.rs",
         "main.rs",
     ],
+    compile_data = [":tags"],
     crate_features = ["ssr"],
     data = [
         "leptos.toml",
         "//blade/static",
     ],
-    compile_data = [":tags"],
     rustc_env = {
         "SERVER_FN_OVERRIDE_KEY": "bazel",
     },
@@ -38,6 +38,7 @@ rust_binary(
         "@crate//:broadcaster",
         "@crate//:cfg-if",
         "@crate//:clap",
+        "@crate//:console-subscriber",
         "@crate//:diesel",
         "@crate//:futures",
         "@crate//:humantime",

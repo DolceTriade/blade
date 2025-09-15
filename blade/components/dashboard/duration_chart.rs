@@ -21,12 +21,14 @@ pub fn DurationChart(history: TestHistory) -> impl IntoView {
     };
 
     // Sort data so that successful tests are rendered first and failed tests last
-    // This ensures failed points (red) appear on top of successful points (green) when they overlap
+    // This ensures failed points (red) appear on top of successful points (green)
+    // when they overlap
     let mut sorted_history = history.history;
     sorted_history.sort_by(|a, b| {
         // Put failures last (so they render on top)
         // Success = false, Failure = true, so failures come after successes
-        matches!(a.test.status, state::Status::Fail).cmp(&matches!(b.test.status, state::Status::Fail))
+        matches!(a.test.status, state::Status::Fail)
+            .cmp(&matches!(b.test.status, state::Status::Fail))
     });
 
     view! {
