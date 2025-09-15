@@ -136,6 +136,8 @@ impl BESSession {
         }
         Ok(build_state)
     }
+
+    pub fn is_build_over(&self) -> bool { self.build_over }
 }
 
 fn extract_session_id(
