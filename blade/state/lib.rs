@@ -229,7 +229,7 @@ pub trait DBManager: std::marker::Send + std::marker::Sync {
 #[derivative(Debug)]
 pub struct Global {
     #[derivative(Debug="ignore")]
-    pub db_manager: Box<dyn DBManager>,
+    pub db_manager: std::sync::Arc<dyn DBManager>,
     #[derivative(Debug="ignore")]
     pub bytestream_client: bytestream::Client,
     pub allow_local: bool,

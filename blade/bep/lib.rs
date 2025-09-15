@@ -71,22 +71,27 @@ pub struct BuildEventService {
     handlers: Arc<Vec<Box<dyn EventHandler + Sync + Send>>>,
 }
 
-fn unexpected_cleanup_session(db_mgr: &dyn DBManager, invocation_id: &str) -> anyhow::Result<()> {
-    let mut db = db_mgr.get()?;
-    db.update_shallow_invocation(
-        invocation_id,
-        Box::new(move |i: &mut state::InvocationResults| {
-            match i.status {
-                state::Status::InProgress | state::Status::Unknown => {
-                    i.status = state::Status::Fail
-                },
-                _ => {},
-            }
-            i.end = Some(std::time::SystemTime::now());
-            Ok(())
-        }),
-    )?;
-    Ok(())
+async fn unexpected_cleanup_session(
+    db_mgr: std::sync::Arc<dyn state::DBManager>,
+    invocation_id: &str,
+) -> anyhow::Result<()> {
+    let inv_id = invocation_id.to_string();
+    db::run_group(db_mgr, move |db| {
+        db.update_shallow_invocation(
+            &inv_id,
+            Box::new(move |i: &mut state::InvocationResults| {
+                match i.status {
+                    state::Status::InProgress | state::Status::Unknown => {
+                        i.status = state::Status::Fail
+                    },
+                    _ => {},
+                }
+                i.end = Some(std::time::SystemTime::now());
+                Ok(())
+            }),
+        )
+    })
+    .await
 }
 
 #[tonic::async_trait]
@@ -112,7 +117,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
     ) -> std::result::Result<tonic::Response<Self::PublishBuildToolEventStreamStream>, tonic::Status>
     {
         let mut in_stream = request.into_inner();
-        let (tx, rx) = mpsc::channel(512);
+        let (tx, rx) = mpsc::channel(128);
         let global = self.state.clone();
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
@@ -130,7 +135,15 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                     return;
                 };
 
-                match msg.and_then(|msg| session.process_message(msg)) {
+                let msg = match msg {
+                    Ok(msg) => msg,
+                    Err(err) => {
+                        tracing::error!("Error receiving message: {:#?}", err);
+                        return;
+                    }
+                };
+
+                match session.process_message(msg).await {
                     Ok(out) => {
                         if out.obe.event.is_none() {
                             if !session.is_build_over() {
@@ -139,16 +152,9 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                             }
                             return;
                         }
-                        if let Err(e) = tx.try_send(Ok(PublishBuildToolEventStreamResponse { stream_id: out.obe.stream_id.clone(), sequence_number: out.obe.sequence_number })) {
+                        if let Err(e) = tx.send(Ok(PublishBuildToolEventStreamResponse { stream_id: out.obe.stream_id.clone(), sequence_number: out.obe.sequence_number })).await {
                             tracing::error!("Error sending response, aborting: {:#?}", e);
-                            match e {
-                                mpsc::error::TrySendError::Closed(_) => {
                                     TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::Aborted.into() }).inc();
-                                }
-                                mpsc::error::TrySendError::Full(_) => {
-                                    TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: tonic::Code::ResourceExhausted.into() }).inc();
-                                }
-                            }
                             return;
                         }
                     }
@@ -161,14 +167,12 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
                             tracing::error!("Error: {}", err);
                             TOTAL_STREAMS_ERRORS.get_or_create(&ErrorLabels { code: err.code().into() }).inc();
                         }
-                        if !session.invocation_id().is_empty() {
-                            let _ = unexpected_cleanup_session(
-                                global.db_manager.as_ref(),
+                        if !session.invocation_id().is_empty()
+                            && let Err(e) = unexpected_cleanup_session(
+                                global.db_manager.clone(),
                                 session.invocation_id(),
-                            )
-                            .map_err(|e| {
-                                tracing::error!("error closing stream: {e:#?}")
-                            });
+                            ).await {
+                            tracing::error!("error closing stream: {e:#?}")
                         }
                         return;
                     }
