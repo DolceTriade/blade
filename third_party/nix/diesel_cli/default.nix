@@ -50,13 +50,12 @@ assert lib.assertMsg (lib.elem true [
       ];
 
     verbose = true;
-    RUSTFLAGS = "-Zlinker-features=-lld";
 
     buildNoDefaultFeatures = true;
     buildFeatures =
       lib.optional sqliteSupport "sqlite"
       ++ lib.optional postgresqlSupport "postgres"
-      ++ (lib.trace mysqlSupport lib.optional mysqlSupport "mysql");
+      ++ lib.optional mysqlSupport "mysql";
 
     checkFlags = [
       # all of these require a live database to be running

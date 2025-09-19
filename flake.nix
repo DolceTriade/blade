@@ -4,10 +4,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     devenv.url = "github:cachix/devenv/latest";
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    fenix.url = "github:nix-community/fenix";
   };
   outputs = {
     self,
@@ -76,11 +73,16 @@
                 (import ./nix/cc/cc.nix {inherit pkgs;})
               ]
               ++ pkgs.lib.optional pkgs.stdenv.isDarwin pkgs.darwin.cctools;
-            enterShell = ''
-              echo "BLADE Shell"
-              echo "build --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
-              echo "build --host_action_env=PATH=${bazelEnv}/bin" >> .bazelenvrc
-            '';
+            enterShell =
+              ''
+                echo "BLADE Shell"
+                echo "build --action_env=PATH=${bazelEnv}/bin" > .bazelenvrc
+                echo "build --host_action_env=PATH=${bazelEnv}/bin" >> .bazelenvrc
+              ''
+              + pkgs.lib.optionalString (pkgs.stdenv.isDarwin) ''
+                echo "build --action_env=DEVELOPER_DIR=${pkgs.apple-sdk}" >> .bazelenvrc
+                echo "build --host_action_env=DEVELOPER_DIR=${pkgs.apple-sdk}" >> .bazelenvrc
+              '';
           })
         ];
       };

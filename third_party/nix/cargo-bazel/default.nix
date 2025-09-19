@@ -21,8 +21,6 @@ rustPlatform.buildRustPackage rec {
 
   doCheck = false;
 
-  RUSTFLAGS = "-Zlinker-features=-lld";
-
   buildNoDefaultFeatures = true;
 
   buildFeatures = ["cargo"];

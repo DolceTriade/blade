@@ -10,18 +10,13 @@
     pkgs.wrapCCWith rec {
       cc = clang;
       bintools = pkgs.stdenv.cc.bintools;
-      extraBuildCommands = with pkgs.darwin.apple_sdk.frameworks; ''
+      extraBuildCommands = ''
         echo "-Wno-unused-command-line-argument" >> $out/nix-support/cc-cflags
         echo "-Wno-elaborated-enum-base" >> $out/nix-support/cc-cflags
         echo "-isystem ${pkgs.llvmPackages.libcxx.dev}/include/c++/v1" >> $out/nix-support/cc-cflags
         echo "-isystem ${pkgs.llvmPackages.clang-unwrapped.lib}/lib/clang/${cc.version}/include" >> $out/nix-support/cc-cflags
-        echo "-F${CoreFoundation}/Library/Frameworks" >> $out/nix-support/cc-cflags
-        echo "-F${CoreServices}/Library/Frameworks" >> $out/nix-support/cc-cflags
-        echo "-F${Security}/Library/Frameworks" >> $out/nix-support/cc-cflags
-        echo "-F${Foundation}/Library/Frameworks" >> $out/nix-support/cc-cflags
         echo "-L${pkgs.llvmPackages.libcxx}/lib" >> $out/nix-support/cc-cflags
         echo "-L${pkgs.libiconv}/lib" >> $out/nix-support/cc-cflags
-        echo "-L${pkgs.darwin.libobjc}/lib" >> $out/nix-support/cc-cflags
         echo "-resource-dir=${pkgs.stdenv.cc}/resource-root" >> $out/nix-support/cc-cflags
       '';
     };
