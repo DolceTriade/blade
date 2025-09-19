@@ -11,8 +11,8 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "bazelbuild";
     repo = "rules_rust";
-    rev = "0.61.0";
-    hash = "sha256-2ggTytznXKUPoKWosj6glqEIwPXR6v2ceER68wYZziw=";
+    rev = "0.65.0";
+    hash = "sha256-Q1FenqIxp2Qy++cSu5RFdGzrQmqbCfKRZB1VR97v77Q=";
   };
 
   cargoHash = "sha256-beOFmmeAK2cNANxacv4GfJqEptvqD1/CNJ+Mmunb7/Y=";

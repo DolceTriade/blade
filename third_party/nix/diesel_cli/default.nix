@@ -57,6 +57,8 @@ assert lib.assertMsg (lib.elem true [
       ++ lib.optional postgresqlSupport "postgres"
       ++ lib.optional mysqlSupport "mysql";
 
+    RUSTFLAGS = "-C linker-features=-lld";
+
     checkFlags = [
       # all of these require a live database to be running
       # `DATABASE_URL must be set in order to run tests: NotPresent`

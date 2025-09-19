@@ -17,6 +17,8 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-ihhEeOLNTHi0C8rGIvwiXJRiqIjWGTRRr7JLn6fMtNU=";
 
+  RUSTFLAGS = "-C linker-features=-lld";
+
   meta = with lib; {
     description = "Formatter for the leptos view! macro";
     mainProgram = "leptosfmt";
