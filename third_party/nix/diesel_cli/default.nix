@@ -57,7 +57,7 @@ assert lib.assertMsg (lib.elem true [
       ++ lib.optional postgresqlSupport "postgres"
       ++ lib.optional mysqlSupport "mysql";
 
-    RUSTFLAGS = "-C linker-features=-lld";
+    RUSTFLAGS = lib.optionalString stdenv.isLinux "-C linker-features=-lld";
 
     checkFlags = [
       # all of these require a live database to be running
