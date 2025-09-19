@@ -44,7 +44,7 @@
       };
       jemalloc' = pkgs.callPackage ./third_party/nix/jemalloc {};
       ibazel = pkgs.writeShellScriptBin "ibazel" ''
-        ${pkgs.bazel-watcher}/bin/ibazel -bazel_path ${pkgs.bazel_7}/bin/bazel "$@"
+        ${pkgs.bazel-watcher}/bin/ibazel -bazel_path ${pkgs.bazel_8}/bin/bazel "$@"
       '';
     in {
       packages.rust = rust;
@@ -56,7 +56,7 @@
             packages = with pkgs;
               [
                 alejandra
-                bazel_7
+                bazel_8
                 ibazel
                 bazel-buildtools
                 pkg-config
