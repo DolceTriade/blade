@@ -5,17 +5,18 @@ module(
     repo_name = "blade",
 )
 
-bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.15.3")
-bazel_dep(name = "aspect_rules_js", version = "2.3.7")
-bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.21.1")
+bazel_dep(name = "aspect_rules_js", version = "2.6.0")
+bazel_dep(name = "rules_cc", version = "0.2.8")
+bazel_dep(name = "rules_java", version = "8.15.2")
 
 #
 # rules_rust setup
 #
-bazel_dep(name = "rules_rust", version = "0.61.0")
+bazel_dep(name = "rules_rust", version = "0.65.0")
 single_version_override(
     module_name = "rules_rust",
     patch_strip = 1,
@@ -23,8 +24,8 @@ single_version_override(
     patches = ["//third_party/rust/patches/rules_rust:0001-Revert-Update-runfiles-to-work-with-directory-embedd.patch"],
 )
 
-bazel_dep(name = "rules_rust_prost", version = "0.61.0")
-bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.61.0")
+bazel_dep(name = "rules_rust_prost", version = "0.65.0")
+bazel_dep(name = "rules_rust_wasm_bindgen", version = "0.65.0")
 
 register_toolchains("@rules_rust//rust/private/dummy_cc_toolchain:dummy_cc_wasm32_toolchain")
 # Third party crates setup is still in the WORKSPACE.bazel file...

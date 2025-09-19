@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   rustPlatform,
   fetchFromGitHub,
 }:
@@ -16,6 +17,8 @@ rustPlatform.buildRustPackage rec {
   };
 
   cargoHash = "sha256-ihhEeOLNTHi0C8rGIvwiXJRiqIjWGTRRr7JLn6fMtNU=";
+
+  RUSTFLAGS = lib.optionalString stdenv.isLinux "-C linker-features=-lld";
 
   meta = with lib; {
     description = "Formatter for the leptos view! macro";

@@ -190,7 +190,7 @@ cfg_if! {
 
 
             if args.version {
-                println!("Blade {VERSION}");
+                println!("Blade {VERSION}-gi");
                 return Ok(());
             }
 
