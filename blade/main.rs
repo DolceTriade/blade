@@ -117,7 +117,7 @@ cfg_if! {
             bytestream_overrides: Vec<String>,
             #[arg(short='r', long="retention", value_name = "RETENTION", value_parser = humantime::parse_duration)]
             retention: Option<std::time::Duration>,
-            #[arg(short='s', long="session_lock_time", value_name = "LOCK_TIME", value_parser = humantime::parse_duration, default_value="5m")]
+            #[arg(short='s', long="session_lock_time", value_name = "LOCK_TIME", value_parser = humantime::parse_duration, default_value="1h")]
             session_lock_time: std::time::Duration,
             #[arg(long="flame", value_name = "FLAME")]
             flame_path: Option<String>,
