@@ -129,7 +129,7 @@ impl publish_build_event_server::PublishBuildEvent for BuildEventService {
             }
             let mut session = session::BESSession::new(handlers, global.clone());
             loop {
-                let Ok(msg) = tokio::time::timeout(std::time::Duration::from_secs(60), in_stream.message()).await else {
+                let Ok(msg) = tokio::time::timeout(global.session_lock_time, in_stream.message()).await else {
                     tracing::warn!("Timeout waiting for message for {}, skipping.", session.invocation_id());
                     let _ = tx.send(Err(tonic::Status::deadline_exceeded("failed to wait for timeout"))).await;
                     return;
