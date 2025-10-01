@@ -260,6 +260,17 @@ cfg_if! {
             let actix_state = state.clone();
             let cleanup_state = state.clone();
             tracing::info!("Starting blade server at: {}", addr.to_string());
+            // NOTE: Ensure we have at least 2 workers so that a single long-running
+            // request (e.g. expensive HTML render / large artifact fetch) on a
+            // single-core or constrained container doesn't starve lightweight
+            // endpoints like /healthz. In some deployment environments (k8s with
+            // a cpuset of 1) Actix would otherwise create only 1 worker and all
+            // other requests would queue behind the long task.
+            let workers = std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(1)
+                .max(2);
+
             let fut1 = HttpServer::new(move || {
                 let leptos_options = conf.leptos_options.clone();
                 let rt_state = actix_state.clone();
@@ -292,6 +303,7 @@ cfg_if! {
                     .app_data(web::Data::new(conf.leptos_options.to_owned()))
                     .wrap(TracingLogger::<BladeRootSpanBuilder>::new())
             })
+            .workers(workers)
             .bind(&addr)?
             .run();
             let re_handle = Arc::new(Mutex::new(regex::Regex::new(&args.debug_message_pattern)?));
