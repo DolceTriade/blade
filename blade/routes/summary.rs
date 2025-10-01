@@ -20,8 +20,10 @@ pub(crate) fn internal_err<T: std::fmt::Display>(e: T) -> ServerFnError {
 #[server]
 pub async fn get_output(uuid: String) -> Result<String, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
-    let mut db = global.db_manager.get().map_err(internal_err)?;
-    db.get_progress(&uuid).map_err(internal_err)
+    let id = uuid.clone();
+    db::run_group(global.db_manager.clone(), move |db| db.get_progress(&id))
+        .await
+        .map_err(internal_err)
 }
 
 #[allow(non_snake_case)]
