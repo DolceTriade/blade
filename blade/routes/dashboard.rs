@@ -22,17 +22,18 @@ pub async fn get_test_history(
     default_days: Option<u32>,
 ) -> Result<TestHistory, ServerFnError> {
     let global: Arc<state::Global> = use_context::<Arc<state::Global>>().unwrap();
-    let mut db = global
-        .db_manager
-        .get()
-        .map_err(crate::invocation::internal_err)?;
-    db.get_test_history(
-        &test_name,
-        &filters.unwrap_or_default(),
-        max_results.unwrap_or(1000),
-        default_days.or(Some(30)),
-    )
-    .map_err(|e| ServerFnError::ServerError(e.to_string()))
+    let test_name_cl = test_name.clone();
+    let filt = filters.clone();
+    db::run_group(global.db_manager.clone(), move |db| {
+        db.get_test_history(
+            &test_name_cl,
+            &filt.unwrap_or_default(),
+            max_results.unwrap_or(1000),
+            default_days.or(Some(30)),
+        )
+    })
+    .await
+    .map_err(|e| ServerFnError::ServerError(format!("{e:#?}")))
 }
 
 #[derive(PartialEq, Params)]
