@@ -345,15 +345,15 @@ cfg_if! {
                 if global.retention.is_none() {
                     continue;
                 }
-                let Ok(mut db) = global.db_manager.get() else {
-                    tracing::warn!("Failed to get DB handle for cleanup");
-                    continue;
-                };
                 let Some(since) = std::time::SystemTime::now().checked_sub(interval) else {
                     tracing::warn!("Overflow when clean up time");
                     continue;
                 };
-                tracing::info!("Cleanup result: {:#?}", db.delete_invocations_since(&since));
+                db::run(global.db_manager.clone(), move |db_mgr| db_mgr.delete_invocations_since(&since)).await.inspect_err(|e| {
+                    tracing::warn!("Failed to mark old invocations for deletion: {e:#?}");
+                }).ok().inspect(|count| {
+                    tracing::info!("Marked {} invocations for deletion", count);
+                });
             }
         }
 
