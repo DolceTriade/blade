@@ -78,6 +78,12 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    unique_test_names (name) {
+        name -> Text,
+    }
+}
+
 diesel::joinable!(Options -> Invocations (invocation_id));
 diesel::joinable!(Targets -> Invocations (invocation_id));
 diesel::joinable!(TestArtifacts -> Invocations (invocation_id));
@@ -94,4 +100,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     TestArtifacts,
     TestRuns,
     Tests,
+    unique_test_names,
 );
