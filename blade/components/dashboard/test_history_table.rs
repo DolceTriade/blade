@@ -1,8 +1,7 @@
 use leptos::prelude::*;
-use leptos_router::hooks::use_navigate;
 use state::{Status, TestHistory};
 
-use crate::summaryheader::format_time;
+use crate::{navigation::open_in_new_tab, summaryheader::format_time};
 
 #[derive(Debug, Clone)]
 struct RuntimeStats {
@@ -140,9 +139,8 @@ pub fn TestHistoryTable(history: TestHistory) -> impl IntoView {
                                     <tr
                                         class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                                         on:click=move |_| {
-                                            let navigate = use_navigate();
                                             let url = format!("/invocation/{}", &point.invocation_id);
-                                            navigate(&url, Default::default());
+                                            open_in_new_tab(&url);
                                         }
                                     >
                                         <td class="py-3 px-6 text-left whitespace-nowrap">

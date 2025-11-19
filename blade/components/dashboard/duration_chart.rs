@@ -1,8 +1,11 @@
 use leptos::prelude::*;
-use leptos_dom::helpers::window;
 use state::TestHistory;
 
-use crate::{charts::linechart::LineChart, summaryheader::format_time};
+use crate::{
+    charts::linechart::LineChart,
+    navigation::open_in_new_tab,
+    summaryheader::format_time,
+};
 
 pub fn format_unix(t: f64) -> String {
     let d = std::time::Duration::from_secs_f64(t);
@@ -17,7 +20,7 @@ pub fn format_unix(t: f64) -> String {
 pub fn DurationChart(history: TestHistory) -> impl IntoView {
     let on_point_click = |point: state::TestHistoryPoint| {
         let link = format!("/invocation/{}", point.invocation_id);
-        window().open_with_url_and_target(&link, "_blank").unwrap();
+        open_in_new_tab(&link);
     };
 
     // Sort data so that successful tests are rendered first and failed tests last
