@@ -6,6 +6,7 @@ pub mod dashboard;
 pub mod list;
 pub mod measuretime;
 pub mod nav;
+pub mod navigation;
 pub mod searchbar;
 pub mod shellout;
 pub mod statusicon;

@@ -1,15 +1,18 @@
 use leptos::prelude::*;
-use leptos_dom::helpers::window;
 use state::{Status, TestHistory};
 
-use crate::{charts::scatterplot::ScatterPlot, summaryheader::format_time};
+use crate::{
+    charts::scatterplot::ScatterPlot,
+    navigation::open_in_new_tab,
+    summaryheader::format_time,
+};
 
 #[allow(non_snake_case)]
 #[component]
 pub fn PassFailScatterPlot(history: TestHistory) -> impl IntoView {
     let on_point_click = |point: state::TestHistoryPoint| {
         let link = format!("/invocation/{}", point.invocation_id);
-        window().location().set_href(&link).unwrap();
+        open_in_new_tab(&link);
     };
 
     view! {
