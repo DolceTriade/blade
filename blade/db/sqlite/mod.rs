@@ -708,14 +708,13 @@ impl state::DB for Sqlite {
     }
 
     fn search_test_names(&mut self, pattern: &str, limit: usize) -> anyhow::Result<Vec<String>> {
-        use schema::Tests::dsl::*;
+        use schema::unique_test_names::dsl::*;
 
         let limit_i64: i64 = limit.try_into().context("failed to convert limit to i64")?;
 
-        let results = Tests
+        let results = unique_test_names
             .select(name)
             .filter(name.like(format!("%{pattern}%")))
-            .distinct()
             .order_by(name.asc())
             .limit(limit_i64)
             .load::<String>(&mut self.conn)
@@ -1340,5 +1339,88 @@ mod tests {
         let history = db.get_test_history(test_name, &[], 1, None).unwrap();
         assert_eq!(history.history.len(), 1);
         assert_eq!(history.history[0].invocation_id, "inv1");
+    }
+
+    #[test]
+    fn test_search_test_names_trigger() {
+        let tmp = tempdir::TempDir::new("test_search_test_names").unwrap();
+        let db_path = tmp.path().join("test.db");
+        super::init_db(db_path.to_str().unwrap()).unwrap();
+        let mgr = crate::manager::SqliteManager::new(db_path.to_str().unwrap()).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        // Create invocation
+        let inv = state::InvocationResults {
+            id: "inv1".to_string(),
+            command: "test".to_string(),
+            status: state::Status::Success,
+            start: std::time::SystemTime::now(),
+            is_live: false,
+            ..Default::default()
+        };
+        db.upsert_shallow_invocation(&inv).unwrap();
+
+        // Test 1: Insert first test name
+        let test1 = state::Test {
+            name: "//path/to/test:one".to_string(),
+            status: state::Status::Success,
+            duration: std::time::Duration::from_secs(1),
+            end: std::time::SystemTime::now(),
+            num_runs: 1,
+            runs: vec![],
+        };
+        db.upsert_test("inv1", &test1).unwrap();
+
+        let results = db.search_test_names("test:one", 10).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0], "//path/to/test:one");
+
+        // Test 2: Insert second test name
+        let test2 = state::Test {
+            name: "//path/to/test:two".to_string(),
+            status: state::Status::Success,
+            duration: std::time::Duration::from_secs(2),
+            end: std::time::SystemTime::now(),
+            num_runs: 1,
+            runs: vec![],
+        };
+        db.upsert_test("inv1", &test2).unwrap();
+
+        let results = db.search_test_names("test:", 10).unwrap();
+        assert_eq!(results.len(), 2);
+        assert!(results.contains(&"//path/to/test:one".to_string()));
+        assert!(results.contains(&"//path/to/test:two".to_string()));
+
+        // Test 3: Update existing test (should not create duplicate in
+        // unique_test_names)
+        let test1_updated = state::Test {
+            name: "//path/to/test:one".to_string(),
+            status: state::Status::Fail,
+            duration: std::time::Duration::from_secs(5),
+            end: std::time::SystemTime::now(),
+            num_runs: 2,
+            runs: vec![],
+        };
+        db.upsert_test("inv1", &test1_updated).unwrap();
+
+        let results = db.search_test_names("test:one", 10).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0], "//path/to/test:one");
+
+        // Test 4: Search with different patterns
+        let results = db.search_test_names("two", 10).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0], "//path/to/test:two");
+
+        let results = db.search_test_names("path", 10).unwrap();
+        assert_eq!(results.len(), 2);
+
+        // Test 5: Search with limit
+        let results = db.search_test_names("test:", 1).unwrap();
+        assert_eq!(results.len(), 1);
+
+        // Test 6: Search with no matches
+        let results = db.search_test_names("nonexistent", 10).unwrap();
+        assert_eq!(results.len(), 0);
     }
 }
