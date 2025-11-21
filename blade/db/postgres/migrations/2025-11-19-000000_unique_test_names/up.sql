@@ -6,11 +6,6 @@ CREATE TABLE IF NOT EXISTS unique_test_names (
 -- Create GIN index on name for LIKE '%pattern%' searches
 CREATE INDEX IF NOT EXISTS unique_test_names_trgm_idx ON unique_test_names USING GIN (name gin_trgm_ops);
 
--- Seed the table with existing test names from tests table
-INSERT INTO unique_test_names (name)
-SELECT DISTINCT name FROM tests
-ON CONFLICT (name) DO NOTHING;
-
 -- Create trigger function to maintain unique_test_names when tests table changes
 CREATE OR REPLACE FUNCTION maintain_unique_test_names()
 RETURNS TRIGGER AS $$

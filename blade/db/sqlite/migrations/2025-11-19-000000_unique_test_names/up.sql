@@ -6,10 +6,6 @@ CREATE TABLE IF NOT EXISTS unique_test_names (
 -- Create index on name for LIKE '%pattern%' searches
 CREATE INDEX IF NOT EXISTS unique_test_names_idx ON unique_test_names (name);
 
--- Seed the table with existing test names from tests table
-INSERT OR IGNORE INTO unique_test_names (name)
-SELECT DISTINCT name FROM tests;
-
 -- Create trigger function to maintain unique_test_names when tests table changes
 -- SQLite uses INSTEAD OF triggers for insert/update/delete, but since we're triggering AFTER,
 -- we need separate triggers for each operation.
