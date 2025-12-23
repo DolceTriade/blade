@@ -340,6 +340,9 @@ cfg_if! {
             let day = std::time::Duration::from_secs(60 * 60 * 24);
             let interval = global.retention.unwrap_or(day);
             let check_interval = std::cmp::min(day, interval/7);
+            const BATCH_SIZE: i64 = 10;
+            const BATCH_DELAY: std::time::Duration = std::time::Duration::from_millis(100);
+
             loop {
                 tokio::time::sleep(check_interval).await;
                 if global.retention.is_none() {
@@ -349,11 +352,32 @@ cfg_if! {
                     tracing::warn!("Overflow when clean up time");
                     continue;
                 };
-                db::run(global.db_manager.clone(), move |db_mgr| db_mgr.delete_invocations_since(&since)).await.inspect_err(|e| {
-                    tracing::warn!("Failed to mark old invocations for deletion: {e:#?}");
-                }).ok().inspect(|count| {
-                    tracing::info!("Marked {} invocations for deletion", count);
-                });
+
+                let mut total_deleted = 0;
+                loop {
+                    let deleted = db::run(global.db_manager.clone(), move |db_mgr| {
+                        db_mgr.delete_invocations_batch(&since, BATCH_SIZE)
+                    }).await;
+
+                    match deleted {
+                        Ok(count) => {
+                            if count == 0 {
+                                break;
+                            }
+                            total_deleted += count;
+                            tracing::debug!("Deleted batch of {} invocations", count);
+                            tokio::time::sleep(BATCH_DELAY).await;
+                        },
+                        Err(e) => {
+                            tracing::warn!("Failed to delete invocation batch: {e:#?}");
+                            break;
+                        }
+                    }
+                }
+
+                if total_deleted > 0 {
+                    tracing::info!("Deleted {} total invocations during cleanup", total_deleted);
+                }
             }
         }
 

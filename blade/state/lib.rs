@@ -212,6 +212,7 @@ pub trait DB {
     fn get_shallow_invocation(&mut self, id: &str) -> anyhow::Result<InvocationResults>;
     fn delete_invocation(&mut self, id: &str) -> anyhow::Result<()>;
     fn delete_invocations_since(&mut self, ts: &std::time::SystemTime) -> anyhow::Result<usize>;
+    fn delete_invocations_batch(&mut self, ts: &std::time::SystemTime, limit: i64) -> anyhow::Result<usize>;
     fn update_invocation_heartbeat(&mut self, invocation_id: &str) -> anyhow::Result<()>;
     fn insert_options(&mut self, id: &str, options: &BuildOptions) -> anyhow::Result<()>;
     fn get_options(&mut self, id: &str) -> anyhow::Result<BuildOptions>;
