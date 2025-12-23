@@ -344,6 +344,30 @@ impl state::DB for Postgres {
             .context(format!("failed to delete invocation since {ot:#?}"))
     }
 
+    fn delete_invocations_batch(
+        &mut self,
+        ts: &std::time::SystemTime,
+        limit: i64,
+    ) -> anyhow::Result<usize> {
+        let ot: time::OffsetDateTime = (*ts).into();
+        let ids_to_delete: Vec<String> = schema::invocations::table
+            .select(schema::invocations::id)
+            .filter(schema::invocations::start.le(ot))
+            .limit(limit)
+            .load(&mut self.conn)
+            .context("failed to query invocations for batch deletion")?;
+
+        if ids_to_delete.is_empty() {
+            return Ok(0);
+        }
+
+        diesel::delete(
+            schema::invocations::table.filter(schema::invocations::id.eq_any(&ids_to_delete)),
+        )
+        .execute(&mut self.conn)
+        .context("failed to delete invocation batch")
+    }
+
     fn update_invocation_heartbeat(&mut self, invocation_id: &str) -> anyhow::Result<()> {
         use schema::invocations::dsl::*;
         let now: time::OffsetDateTime = std::time::SystemTime::now().into();
@@ -1045,6 +1069,99 @@ mod tests {
                 .unwrap();
             assert_eq!(res.len(), 5 - i);
             curr += day;
+        }
+    }
+
+    #[test]
+    fn test_delete_batch() {
+        let tmp = tempdir::TempDir::new("test_delete_batch").unwrap();
+        let harness = harness::new(tmp.path().to_str().unwrap()).unwrap();
+        let uri = harness.uri();
+        super::init_db(&uri).unwrap();
+        let mgr = crate::manager::PostgresManager::new(&uri).unwrap();
+        let mut conn = PgConnection::establish(&uri).unwrap();
+        let mut db = mgr.get().unwrap();
+
+        let start = UNIX_EPOCH;
+        let mut curr = start;
+        let day = Duration::from_secs(60 * 60 * 24);
+
+        // Create 15 invocations
+        for i in 0..15 {
+            db.upsert_shallow_invocation(&state::InvocationResults {
+                id: format!("id{i}"),
+                start: curr.checked_add(day).unwrap(),
+                ..Default::default()
+            })
+            .unwrap();
+            curr += day;
+        }
+
+        // Verify all 15 exist
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 15);
+        }
+
+        // Delete in batches of 3, targeting first 10 invocations
+        let cutoff = start.checked_add(day * 10).unwrap();
+
+        // First batch: should delete 3
+        let deleted = db.delete_invocations_batch(&cutoff, 3).unwrap();
+        assert_eq!(deleted, 3);
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 12);
+        }
+
+        // Second batch: should delete 3 more
+        let deleted = db.delete_invocations_batch(&cutoff, 3).unwrap();
+        assert_eq!(deleted, 3);
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 9);
+        }
+
+        // Third batch: should delete 3 more
+        let deleted = db.delete_invocations_batch(&cutoff, 3).unwrap();
+        assert_eq!(deleted, 3);
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 6);
+        }
+
+        // Fourth batch: should delete 1 more (only 1 left before cutoff)
+        let deleted = db.delete_invocations_batch(&cutoff, 3).unwrap();
+        assert_eq!(deleted, 1);
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5);
+        }
+
+        // Fifth batch: should delete 0 (none left before cutoff)
+        let deleted = db.delete_invocations_batch(&cutoff, 3).unwrap();
+        assert_eq!(deleted, 0);
+        {
+            let res = super::schema::invocations::table
+                .select(super::models::Invocation::as_select())
+                .get_results(&mut conn)
+                .unwrap();
+            assert_eq!(res.len(), 5);
         }
     }
 
